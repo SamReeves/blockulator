@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="WhalGames.net - Play blockchain-based games and use mathematical tools on-chain">
+    <title>WhaleGames.net</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <h1 class="app-title">🐋 WhaleGames</h1>
+            <button id="connect-wallet" class="btn-connect">Connect Wallet</button>
+            <div id="wallet-info" class="wallet-info hidden">
+                <span id="wallet-address"></span>
+                <span id="wallet-balance"></span>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="app-nav">
+            <button class="nav-btn active" data-section="games">Games</button>
+            <button class="nav-btn" data-section="tools">Tools</button>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="content" class="content">
+            <!-- Games Section -->
+            <section id="games-section" class="section active">
+                <div class="game-list">
+                    <button class="game-card" data-game="pissing-contest">
+                        <h3>💦 Pissing Contest</h3>
+                        <p>Compete to make the biggest splash</p>
+                    </button>
+                    <button class="game-card" data-game="median-whale">
+                        <h3>🐋 Median Whale</h3>
+                        <p>Play the middle ground</p>
+                    </button>
+                    <button class="game-card" data-game="mean-whale">
+                        <h3>🐳 Mean Whale</h3>
+                        <p>Calculate the average</p>
+                    </button>
+                </div>
+                
+                <!-- Game Detail View -->
+                <div id="game-detail" class="game-detail hidden">
+                    <button id="back-to-games" class="btn-back">← Back</button>
+                    <div id="game-container"></div>
+                </div>
+            </section>
+
+            <!-- Tools Section -->
+            <section id="tools-section" class="section hidden">
+                <div class="tool-list">
+                    <button class="tool-card" data-tool="exp-estimator">
+                        <h3>📈 e^x Estimator</h3>
+                        <p>On-chain exponential calculation</p>
+                    </button>
+                    <button class="tool-card" data-tool="factorial">
+                        <h3>🔢 Factorial Lookup</h3>
+                        <p>On-chain factorial computation</p>
+                    </button>
+                </div>
+                
+                <!-- Tool Detail View -->
+                <div id="tool-detail" class="tool-detail hidden">
+                    <button id="back-to-tools" class="btn-back">← Back</button>
+                    <div id="tool-container"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Toast notifications -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Canvas for animations/effects -->
+        <canvas id="effects-canvas" class="effects-canvas"></canvas>
+    </div>
+
+    <!-- Web3 Libraries (CDN for now, can be replaced) -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
+
