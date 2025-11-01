@@ -15,8 +15,8 @@ COPY styles.css /usr/share/nginx/html/
 COPY js /usr/share/nginx/html/js
 COPY contracts /usr/share/nginx/html/contracts
 
-# Expose port 80
-EXPOSE 80
+# Expose port 8080 (for DigitalOcean App Platform)
+EXPOSE 8080
 
 # Start nginx
 CMD ["nginx", "-g", "daemon off;"]
