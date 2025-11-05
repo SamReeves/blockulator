@@ -12,6 +12,7 @@ import { PissingContest } from './games/pissing-contest.js';
 import { PayItForward } from './games/pay-it-forward.js';
 import { PayItBackward } from './games/pay-it-backward.js';
 import { MessageBoard } from './games/message-board.js';
+import { KingOfTheHill } from './games/king-of-the-hill.js';
 
 // Import tool modules
 import { ECalculator } from './tools/e.js';
@@ -29,7 +30,8 @@ class App {
                 ['pissing-contest', PissingContest],
                 ['pay-it-forward', PayItForward],
                 ['pay-it-backward', PayItBackward],
-                ['message-board', MessageBoard]
+                ['message-board', MessageBoard],
+                ['king-of-the-hill', KingOfTheHill]
             ]);
             this.tools = new Map([
                 ['e-calculator', ECalculator],
