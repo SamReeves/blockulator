@@ -45,6 +45,73 @@ class Web3Provider {
             const network = await this.provider.getNetwork();
             this.chainId = network.chainId;
             
+            console.log('🔗 Connected to network:', {
+                chainId: this.chainId,
+                chainIdHex: '0x' + this.chainId.toString(16),
+                address: this.address
+            });
+            
+            // Check if on Sepolia testnet (chain ID 11155111)
+            const SEPOLIA_CHAIN_ID = 11155111;
+            if (this.chainId !== SEPOLIA_CHAIN_ID) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `⚠️ Please switch to Sepolia Testnet! Currently on chain ID: ${this.chainId}`,
+                    type: 'error'
+                });
+                
+                // Try to switch to Sepolia
+                try {
+                    await window.ethereum.request({
+                        method: 'wallet_switchEthereumChain',
+                        params: [{ chainId: '0xaa36a7' }], // Sepolia chain ID in hex
+                    });
+                    
+                    // Re-get network after switch
+                    const newNetwork = await this.provider.getNetwork();
+                    this.chainId = newNetwork.chainId;
+                    
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: '✅ Switched to Sepolia Testnet',
+                        type: 'success'
+                    });
+                } catch (switchError) {
+                    console.error('Failed to switch network:', switchError);
+                    if (switchError.code === 4902) {
+                        // Network not added to MetaMask, try to add it
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0xaa36a7',
+                                    chainName: 'Sepolia Testnet',
+                                    nativeCurrency: {
+                                        name: 'Sepolia ETH',
+                                        symbol: 'ETH',
+                                        decimals: 18
+                                    },
+                                    rpcUrls: ['https://rpc.sepolia.org'],
+                                    blockExplorerUrls: ['https://sepolia.etherscan.io']
+                                }]
+                            });
+                            
+                            // Re-get network after adding
+                            const newNetwork = await this.provider.getNetwork();
+                            this.chainId = newNetwork.chainId;
+                            
+                            eventBus.emit(EVENTS.TOAST, {
+                                message: '✅ Added and switched to Sepolia Testnet',
+                                type: 'success'
+                            });
+                        } catch (addError) {
+                            console.error('Failed to add network:', addError);
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            
             // Setup listeners
             this.setupListeners();
             
@@ -151,6 +218,13 @@ class Web3Provider {
      */
     isConnected() {
         return this.provider !== null && this.address !== null;
+    }
+
+    /**
+     * Get current address (alias for backward compatibility)
+     */
+    get currentAddress() {
+        return this.address;
     }
 }
 

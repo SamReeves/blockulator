@@ -1,0 +1,22 @@
+name: whalegames
+
+static_sites:
+  - name: whalegames-frontend
+    github:
+      branch: master
+      deploy_on_push: true
+    
+    # No build phase needed - just serve the files
+    build_command: ""
+    
+    # Serve from root directory
+    output_dir: /
+    
+    # Routes and error pages
+    routes:
+      - path: /
+    error_document: index.html
+    
+    # Environment (client-side only)
+    envs: []
+

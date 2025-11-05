@@ -464,6 +464,314 @@ body {
     margin-top: var(--spacing-lg);
 }
 
+/* Contest Info Panel */
+.contest-info-panel {
+    background: var(--bg-secondary);
+    border: 2px solid var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+}
+
+.contest-info-panel h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.info-item {
+    background: var(--bg-tertiary);
+    padding: var(--spacing-md);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.info-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.info-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+/* Donation History Table */
+.donation-history-container {
+    background: var(--bg-secondary);
+    border: 2px solid var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+}
+
+.donation-history-container h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.donation-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.donation-table thead {
+    background: var(--bg-card);
+}
+
+.donation-table th {
+    padding: var(--spacing-md);
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.donation-table td {
+    padding: var(--spacing-md);
+    border-top: 1px solid var(--bg-card);
+    color: var(--text-primary);
+}
+
+.donation-table tbody tr:hover {
+    background: var(--bg-card);
+}
+
+.donation-table .your-donation {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+.donation-table .your-donation:hover {
+    background: rgba(37, 99, 235, 0.15);
+}
+
+.donor-cell {
+    font-family: 'Courier New', monospace;
+}
+
+.address-hint {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.amount-cell {
+    font-weight: 600;
+}
+
+.time-cell {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.leader-badge {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #000;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* Donation Statistics */
+.donation-stats-container {
+    background: var(--bg-secondary);
+    border: 2px solid var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+}
+
+.donation-stats-container h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.stat-card {
+    background: var(--bg-tertiary);
+    padding: var(--spacing-md);
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--bg-card);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.stat-emoji {
+    font-size: 1.25rem;
+}
+
+/* Donation Chart */
+.donation-chart-container {
+    background: var(--bg-secondary);
+    border: 2px solid var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+}
+
+.donation-chart-container h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.donation-chart {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.bar-container {
+    width: 100%;
+}
+
+.bar {
+    background: linear-gradient(90deg, #4b5563, #6b7280);
+    border-radius: 4px;
+    padding: var(--spacing-sm);
+    transition: all 0.3s ease;
+    position: relative;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+}
+
+.bar:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.bar-leader {
+    background: linear-gradient(90deg, #fbbf24, #fcd34d);
+    color: #000;
+}
+
+.bar-you {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.bar-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.bar-label {
+    font-weight: 700;
+    min-width: 30px;
+}
+
+.bar-amount {
+    font-weight: 600;
+}
+
+.bar-donor {
+    font-family: 'Courier New', monospace;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+.bar-leader .bar-donor {
+    color: #000;
+}
+
+.chart-legend {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--bg-card);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.legend-color {
+    width: 24px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.legend-color.bar-leader {
+    background: linear-gradient(90deg, #fbbf24, #fcd34d);
+}
+
+.legend-color.bar-you {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+.legend-color.bar {
+    background: linear-gradient(90deg, #4b5563, #6b7280);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .donation-table {
+        font-size: 0.875rem;
+    }
+    
+    .donation-table th,
+    .donation-table td {
+        padding: var(--spacing-sm);
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    }
+    
+    .stat-value {
+        font-size: 1.25rem;
+    }
+    
+    .bar-content {
+        font-size: 0.75rem;
+    }
+}
+
 /* Game Header */
 .game-header {
     margin-bottom: var(--spacing-lg);

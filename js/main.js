@@ -9,25 +9,29 @@ import { GameRenderer } from './ui/game-renderer.js';
 
 // Import game modules
 import { PissingContest } from './games/pissing-contest.js';
-import { MedianWhale } from './games/median-whale.js';
-import { MeanWhale } from './games/mean-whale.js';
+// Coming soon - not deployed yet
+// import { MedianWhale } from './games/median-whale.js';
+// import { MeanWhale } from './games/mean-whale.js';
 
 // Import tool modules
-import { ExpEstimator } from './tools/exp-estimator.js';
-import { Factorial } from './tools/factorial.js';
+// Coming soon - not deployed yet
+// import { ExpEstimator } from './tools/exp-estimator.js';
+// import { Factorial } from './tools/factorial.js';
 
 class App {
     constructor() {
         this.currentGame = null;
         this.currentTool = null;
         this.games = new Map([
-            ['pissing-contest', PissingContest],
-            ['median-whale', MedianWhale],
-            ['mean-whale', MeanWhale]
+            ['pissing-contest', PissingContest]
+            // Coming soon - not deployed yet
+            // ['median-whale', MedianWhale],
+            // ['mean-whale', MeanWhale]
         ]);
         this.tools = new Map([
-            ['exp-estimator', ExpEstimator],
-            ['factorial', Factorial]
+            // Coming soon - not deployed yet
+            // ['exp-estimator', ExpEstimator],
+            // ['factorial', Factorial]
         ]);
         
         this.init();
@@ -201,7 +205,7 @@ class App {
     /**
      * Load a game
      */
-    loadGame(gameId) {
+    async loadGame(gameId) {
         if (!web3Provider.isConnected()) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please connect your wallet first',
@@ -209,6 +213,22 @@ class App {
             });
             return;
         }
+        
+        // Extra check: ensure address is available
+        if (!web3Provider.currentAddress) {
+            console.warn('Wallet connected but address not available, retrying...');
+            // Try to reconnect
+            const success = await web3Provider.connect();
+            if (!success || !web3Provider.currentAddress) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: 'Please reconnect your wallet',
+                    type: 'error'
+                });
+                return;
+            }
+        }
+        
+        console.log('🎮 Loading game:', gameId, 'for address:', web3Provider.currentAddress);
         
         const GameClass = this.games.get(gameId);
         if (!GameClass) {
@@ -230,7 +250,7 @@ class App {
         container.innerHTML = '';
         
         this.currentGame = new GameClass();
-        this.currentGame.init(container, web3Provider);
+        await this.currentGame.init(container, web3Provider);
         
         eventBus.emit(EVENTS.GAME_LOADED, { gameId });
     }
