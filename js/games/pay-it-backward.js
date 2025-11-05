@@ -129,17 +129,9 @@ export class PayItBackward {
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'game-sections';
         
-        // Game info panel
-        const gamePanel = this.renderGameInfo();
-        sectionsContainer.appendChild(gamePanel);
-        
-        // Next recipient panel
-        const recipientPanel = this.renderNextRecipient();
-        sectionsContainer.appendChild(recipientPanel);
-        
-        // User stats panel
-        const userStatsPanel = this.renderUserStats();
-        sectionsContainer.appendChild(userStatsPanel);
+        // Current state panel
+        const statePanel = this.renderStatePanel();
+        sectionsContainer.appendChild(statePanel);
         
         // How it works panel
         const howItWorksPanel = this.renderHowItWorks();
@@ -149,97 +141,31 @@ export class PayItBackward {
     }
 
     /**
-     * Render game info panel
+     * Render state panel - shows actual contract data
      */
-    renderGameInfo() {
+    renderStatePanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        panel.id = 'game-info-panel';
+        panel.id = 'state-panel';
         
         panel.innerHTML = `
-            <h3>🎮 Game Status</h3>
+            <h3>🎮 Current State</h3>
             <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Total Donations</div>
-                    <div class="info-value" id="total-donations">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Donation Count</div>
-                    <div class="info-value" id="donation-count">0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Minimum Donation</div>
-                    <div class="info-value" id="minimum-donation">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value" id="game-status">Active</div>
-                </div>
                 <div class="info-item">
                     <div class="info-label">Last Donor</div>
-                    <div class="info-value" id="last-donor">None</div>
+                    <div class="info-value" id="last-donor">Loading...</div>
                 </div>
-            </div>
-        `;
-        
-        return panel;
-    }
-
-    /**
-     * Render next recipient panel
-     */
-    renderNextRecipient() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'recipient-info-panel';
-        
-        panel.innerHTML = `
-            <h3>🎯 Next Recipient</h3>
-            <div class="info-grid">
                 <div class="info-item">
-                    <div class="info-label">Will Receive</div>
-                    <div class="info-value" id="next-recipient">-</div>
+                    <div class="info-label">Next Recipient</div>
+                    <div class="info-value" id="next-recipient">Loading...</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Your Status</div>
                     <div class="info-value" id="your-status">-</div>
                 </div>
             </div>
-            <div class="info-description">
-                💡 When you donate, the <strong>previous donor</strong> (or contract owner if first) receives your donation immediately!
-            </div>
-        `;
-        
-        return panel;
-    }
-
-    /**
-     * Render user statistics panel
-     */
-    renderUserStats() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'user-stats-panel';
-        
-        panel.innerHTML = `
-            <h3>👤 Your Statistics</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Total Donated</div>
-                    <div class="info-value" id="user-total-donated">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Total Received</div>
-                    <div class="info-value" id="user-total-received">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Donation Count</div>
-                    <div class="info-value" id="user-donation-count">0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Net Position</div>
-                    <div class="info-value" id="user-net-position">0 wei</div>
-                </div>
+            <div class="info-description" id="state-message">
+                💡 Loading contract state...
             </div>
         `;
         
@@ -266,10 +192,6 @@ export class PayItBackward {
                 <p class="note">
                     ✅ <strong>No Waiting:</strong> Unlike Pay It Forward, all donations are distributed immediately. 
                     Become the last donor to receive the next donation!
-                </p>
-                <p class="note">
-                    🎯 <strong>Simplified Version:</strong> This contract has no admin controls, no minimum donation, 
-                    and no on-chain statistics tracking. Pure game logic only!
                 </p>
             </div>
         `;
@@ -465,157 +387,70 @@ export class PayItBackward {
      * Update all UI panels
      */
     updateAllPanels() {
-        this.updateGameInfo();
-        this.updateNextRecipient();
-        this.updateUserStatsPanel();
+        this.updateStatePanel();
     }
 
     /**
-     * Update game info panel
+     * Update state panel with actual contract data
      */
-    updateGameInfo() {
+    updateStatePanel() {
         const state = this.gameState;
-        
-        // Total donations
-        const totalEl = document.getElementById('total-donations');
-        if (totalEl) {
-            const total = parseFloat(ethers.utils.formatEther(state.totalDonations));
-            totalEl.textContent = total >= 0.01 
-                ? `${total.toFixed(4)} ETH` 
-                : `${state.totalDonations.toString()} wei`;
-        }
-        
-        // Donation count
-        const countEl = document.getElementById('donation-count');
-        if (countEl) {
-            countEl.textContent = state.donationCount.toString();
-        }
-        
-        // Minimum donation
-        const minEl = document.getElementById('minimum-donation');
-        if (minEl) {
-            const min = parseFloat(ethers.utils.formatEther(state.minimumDonation));
-            minEl.textContent = min >= 0.01 
-                ? `${min.toFixed(4)} ETH` 
-                : `${state.minimumDonation.toString()} wei`;
-        }
-        
-        // Status
-        const statusEl = document.getElementById('game-status');
-        if (statusEl) {
-            if (state.paused) {
-                statusEl.textContent = '⏸️ Paused';
-                statusEl.style.color = 'var(--warning)';
-            } else {
-                statusEl.textContent = '✅ Active';
-                statusEl.style.color = 'var(--success)';
-            }
-        }
         
         // Last donor
         const lastDonorEl = document.getElementById('last-donor');
         if (lastDonorEl) {
             if (state.lastDonor === '0x0000000000000000000000000000000000000000') {
-                lastDonorEl.textContent = 'None (be the first!)';
-                lastDonorEl.style.color = '';
+                lastDonorEl.textContent = '🌟 None (be the first!)';
+                lastDonorEl.style.color = 'var(--primary)';
             } else if (state.lastDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                 lastDonorEl.textContent = '🎯 YOU!';
                 lastDonorEl.style.color = 'var(--success)';
             } else {
-                lastDonorEl.textContent = `${state.lastDonor.slice(0, 8)}...${state.lastDonor.slice(-6)}`;
+                lastDonorEl.textContent = `${state.lastDonor.slice(0, 10)}...${state.lastDonor.slice(-8)}`;
                 lastDonorEl.style.color = '';
             }
         }
-    }
-
-    /**
-     * Update next recipient panel
-     */
-    updateNextRecipient() {
-        const state = this.gameState;
         
         // Next recipient
         const recipientEl = document.getElementById('next-recipient');
         if (recipientEl) {
-            if (state.nextRecipient === '0x0000000000000000000000000000000000000000') {
-                recipientEl.textContent = 'Contract Owner (first donation)';
-                recipientEl.style.color = '';
-            } else if (state.nextRecipient.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+            if (state.nextRecipient.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                 recipientEl.textContent = '🎯 YOU!';
                 recipientEl.style.color = 'var(--success)';
             } else {
-                recipientEl.textContent = `${state.nextRecipient.slice(0, 8)}...${state.nextRecipient.slice(-6)}`;
+                recipientEl.textContent = `${state.nextRecipient.slice(0, 10)}...${state.nextRecipient.slice(-8)}`;
                 recipientEl.style.color = '';
             }
         }
         
-        // Your status
+        // Your status and message
         const statusEl = document.getElementById('your-status');
-        if (statusEl) {
-            if (state.lastDonor === '0x0000000000000000000000000000000000000000') {
-                statusEl.textContent = 'No donations yet';
-                statusEl.style.color = '';
-            } else if (state.lastDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                statusEl.textContent = '🎯 Last Donor (will receive next)';
-                statusEl.style.color = 'var(--success)';
-            } else {
-                statusEl.textContent = 'Not last donor';
-                statusEl.style.color = '';
+        const messageEl = document.getElementById('state-message');
+        
+        if (state.lastDonor === '0x0000000000000000000000000000000000000000') {
+            if (statusEl) {
+                statusEl.textContent = '🌟 Ready to Start';
+                statusEl.style.color = 'var(--primary)';
             }
-        }
-    }
-
-    /**
-     * Update user statistics panel
-     */
-    updateUserStatsPanel() {
-        const stats = this.userStats;
-        
-        // Total donated
-        const donatedEl = document.getElementById('user-total-donated');
-        if (donatedEl) {
-            const donated = parseFloat(ethers.utils.formatEther(stats.totalDonated));
-            donatedEl.textContent = donated >= 0.01 
-                ? `${donated.toFixed(4)} ETH` 
-                : `${stats.totalDonated.toString()} wei`;
-        }
-        
-        // Total received
-        const receivedEl = document.getElementById('user-total-received');
-        if (receivedEl) {
-            const received = parseFloat(ethers.utils.formatEther(stats.totalReceived));
-            receivedEl.textContent = received >= 0.01 
-                ? `${received.toFixed(4)} ETH` 
-                : `${stats.totalReceived.toString()} wei`;
-        }
-        
-        // Donation count
-        const countEl = document.getElementById('user-donation-count');
-        if (countEl) {
-            countEl.textContent = stats.donationCount.toString();
-        }
-        
-        // Net position
-        const netEl = document.getElementById('user-net-position');
-        if (netEl) {
-            const donated = ethers.BigNumber.from(stats.totalDonated);
-            const received = ethers.BigNumber.from(stats.totalReceived);
-            const net = received.sub(donated);
-            const netValue = parseFloat(ethers.utils.formatEther(net.abs()));
-            
-            if (net.isZero()) {
-                netEl.textContent = 'Even';
-                netEl.style.color = '';
-            } else if (net.gt(0)) {
-                netEl.textContent = netValue >= 0.01 
-                    ? `+${netValue.toFixed(4)} ETH` 
-                    : `+${net.toString()} wei`;
-                netEl.style.color = 'var(--success)';
-            } else {
-                netEl.textContent = netValue >= 0.01 
-                    ? `-${netValue.toFixed(4)} ETH` 
-                    : `${net.toString()} wei`;
-                netEl.style.color = 'var(--danger)';
+            if (messageEl) {
+                messageEl.innerHTML = '💡 <strong>Be the first!</strong> Your donation will go to the contract owner, and you\'ll become the recipient of the next donation.';
+            }
+        } else if (state.lastDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+            if (statusEl) {
+                statusEl.textContent = '🎯 Last Donor';
+                statusEl.style.color = 'var(--success)';
+            }
+            if (messageEl) {
+                messageEl.innerHTML = '🎯 <strong>You\'re the last donor!</strong> You will receive the next donation automatically.';
+            }
+        } else {
+            if (statusEl) {
+                statusEl.textContent = '💚 Ready to Donate';
+                statusEl.style.color = 'var(--success)';
+            }
+            if (messageEl) {
+                const recipientText = recipientEl ? recipientEl.textContent : 'the last donor';
+                messageEl.innerHTML = `💚 <strong>Donate now!</strong> Your donation will go to <strong>${recipientText}</strong> immediately, and you become the new recipient.`;
             }
         }
     }

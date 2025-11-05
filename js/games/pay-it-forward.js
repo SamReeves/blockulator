@@ -129,17 +129,9 @@ export class PayItForward {
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'game-sections';
         
-        // Game info panel
-        const gamePanel = this.renderGameInfo();
-        sectionsContainer.appendChild(gamePanel);
-        
-        // Pending donation panel
-        const pendingPanel = this.renderPendingInfo();
-        sectionsContainer.appendChild(pendingPanel);
-        
-        // User stats panel
-        const userStatsPanel = this.renderUserStats();
-        sectionsContainer.appendChild(userStatsPanel);
+        // Current state panel
+        const statePanel = this.renderStatePanel();
+        sectionsContainer.appendChild(statePanel);
         
         // How it works panel
         const howItWorksPanel = this.renderHowItWorks();
@@ -149,101 +141,35 @@ export class PayItForward {
     }
 
     /**
-     * Render game info panel
+     * Render state panel - shows actual contract data
      */
-    renderGameInfo() {
+    renderStatePanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        panel.id = 'game-info-panel';
+        panel.id = 'state-panel';
         
         panel.innerHTML = `
-            <h3>🎮 Game Status</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Total Donations</div>
-                    <div class="info-value" id="total-donations">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Donation Count</div>
-                    <div class="info-value" id="donation-count">0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Minimum Donation</div>
-                    <div class="info-value" id="minimum-donation">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value" id="game-status">Active</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Contract Balance</div>
-                    <div class="info-value" id="contract-balance">0 wei</div>
-                </div>
-            </div>
-        `;
-        
-        return panel;
-    }
-
-    /**
-     * Render pending donation info panel
-     */
-    renderPendingInfo() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'pending-info-panel';
-        
-        panel.innerHTML = `
-            <h3>⏳ Pending Donation</h3>
+            <h3>🎮 Current State</h3>
             <div class="info-grid">
                 <div class="info-item">
                     <div class="info-label">Pending Donor</div>
-                    <div class="info-value" id="pending-donor">None</div>
+                    <div class="info-value" id="pending-donor">Loading...</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Pending Amount</div>
-                    <div class="info-value" id="pending-amount">0 wei</div>
+                    <div class="info-value" id="pending-amount">Loading...</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">You Are</div>
-                    <div class="info-value" id="your-position">-</div>
+                    <div class="info-label">Contract Balance</div>
+                    <div class="info-value" id="contract-balance">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Your Status</div>
+                    <div class="info-value" id="your-status">-</div>
                 </div>
             </div>
-            <div class="info-description">
-                💡 The next donor will receive this pending amount and become the new pending donor!
-            </div>
-        `;
-        
-        return panel;
-    }
-
-    /**
-     * Render user statistics panel
-     */
-    renderUserStats() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'user-stats-panel';
-        
-        panel.innerHTML = `
-            <h3>👤 Your Statistics</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Total Donated</div>
-                    <div class="info-value" id="user-total-donated">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Total Received</div>
-                    <div class="info-value" id="user-total-received">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Donation Count</div>
-                    <div class="info-value" id="user-donation-count">0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Net Position</div>
-                    <div class="info-value" id="user-net-position">0 wei</div>
-                </div>
+            <div class="info-description" id="state-message">
+                💡 Loading contract state...
             </div>
         `;
         
@@ -256,7 +182,6 @@ export class PayItForward {
     renderHowItWorks() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        panel.id = 'how-it-works-panel';
         
         panel.innerHTML = `
             <h3>📖 How It Works</h3>
@@ -268,12 +193,7 @@ export class PayItForward {
                     <li><strong>Pay It Forward:</strong> Your donation awaits the next generous soul!</li>
                 </ol>
                 <p class="note">
-                    ⚠️ <strong>Important:</strong> Your donation is pending until someone else donates. 
-                    The last donor in the chain holds the pending amount.
-                </p>
-                <p class="note">
-                    🎯 <strong>Simplified Version:</strong> This contract has no admin controls, no minimum donation, 
-                    and no on-chain statistics tracking. Pure game logic only!
+                    ⚠️ <strong>Important:</strong> Your donation is pending until someone else donates.
                 </p>
             </div>
         `;
@@ -465,80 +385,26 @@ export class PayItForward {
      * Update all UI panels
      */
     updateAllPanels() {
-        this.updateGameInfo();
-        this.updatePendingInfo();
-        this.updateUserStatsPanel();
+        this.updateStatePanel();
     }
 
     /**
-     * Update game info panel
+     * Update state panel with actual contract data
      */
-    updateGameInfo() {
-        const state = this.gameState;
-        
-        // Total donations
-        const totalEl = document.getElementById('total-donations');
-        if (totalEl) {
-            const total = parseFloat(ethers.utils.formatEther(state.totalDonations));
-            totalEl.textContent = total >= 0.01 
-                ? `${total.toFixed(4)} ETH` 
-                : `${state.totalDonations.toString()} wei`;
-        }
-        
-        // Donation count
-        const countEl = document.getElementById('donation-count');
-        if (countEl) {
-            countEl.textContent = state.donationCount.toString();
-        }
-        
-        // Minimum donation
-        const minEl = document.getElementById('minimum-donation');
-        if (minEl) {
-            const min = parseFloat(ethers.utils.formatEther(state.minimumDonation));
-            minEl.textContent = min >= 0.01 
-                ? `${min.toFixed(4)} ETH` 
-                : `${state.minimumDonation.toString()} wei`;
-        }
-        
-        // Status
-        const statusEl = document.getElementById('game-status');
-        if (statusEl) {
-            if (state.paused) {
-                statusEl.textContent = '⏸️ Paused';
-                statusEl.style.color = 'var(--warning)';
-            } else {
-                statusEl.textContent = '✅ Active';
-                statusEl.style.color = 'var(--success)';
-            }
-        }
-        
-        // Contract balance
-        const balanceEl = document.getElementById('contract-balance');
-        if (balanceEl) {
-            const balance = parseFloat(ethers.utils.formatEther(state.balance));
-            balanceEl.textContent = balance >= 0.01 
-                ? `${balance.toFixed(4)} ETH` 
-                : `${state.balance.toString()} wei`;
-        }
-    }
-
-    /**
-     * Update pending info panel
-     */
-    updatePendingInfo() {
+    updateStatePanel() {
         const state = this.gameState;
         
         // Pending donor
         const donorEl = document.getElementById('pending-donor');
         if (donorEl) {
             if (state.pendingDonor === '0x0000000000000000000000000000000000000000') {
-                donorEl.textContent = 'None (be the first!)';
-                donorEl.style.color = '';
+                donorEl.textContent = '🌟 None (be the first!)';
+                donorEl.style.color = 'var(--primary)';
             } else if (state.pendingDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                 donorEl.textContent = '🎯 YOU!';
                 donorEl.style.color = 'var(--success)';
             } else {
-                donorEl.textContent = `${state.pendingDonor.slice(0, 8)}...${state.pendingDonor.slice(-6)}`;
+                donorEl.textContent = `${state.pendingDonor.slice(0, 10)}...${state.pendingDonor.slice(-8)}`;
                 donorEl.style.color = '';
             }
         }
@@ -552,73 +418,44 @@ export class PayItForward {
                 : `${state.pendingAmount.toString()} wei`;
         }
         
-        // Your position
-        const positionEl = document.getElementById('your-position');
-        if (positionEl) {
-            if (state.pendingDonor === '0x0000000000000000000000000000000000000000') {
-                positionEl.textContent = 'No one pending';
-                positionEl.style.color = '';
-            } else if (state.pendingDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                positionEl.textContent = '⏳ Pending (waiting for next donor)';
-                positionEl.style.color = 'var(--warning)';
-            } else {
-                positionEl.textContent = 'Not pending';
-                positionEl.style.color = '';
+        // Contract balance
+        const balanceEl = document.getElementById('contract-balance');
+        if (balanceEl) {
+            const balance = parseFloat(ethers.utils.formatEther(state.balance));
+            balanceEl.textContent = balance >= 0.01 
+                ? `${balance.toFixed(4)} ETH` 
+                : `${state.balance.toString()} wei`;
+        }
+        
+        // Your status and message
+        const statusEl = document.getElementById('your-status');
+        const messageEl = document.getElementById('state-message');
+        
+        if (state.pendingDonor === '0x0000000000000000000000000000000000000000') {
+            if (statusEl) {
+                statusEl.textContent = '🌟 Ready to Start';
+                statusEl.style.color = 'var(--primary)';
             }
-        }
-    }
-
-    /**
-     * Update user statistics panel
-     */
-    updateUserStatsPanel() {
-        const stats = this.userStats;
-        
-        // Total donated
-        const donatedEl = document.getElementById('user-total-donated');
-        if (donatedEl) {
-            const donated = parseFloat(ethers.utils.formatEther(stats.totalDonated));
-            donatedEl.textContent = donated >= 0.01 
-                ? `${donated.toFixed(4)} ETH` 
-                : `${stats.totalDonated.toString()} wei`;
-        }
-        
-        // Total received
-        const receivedEl = document.getElementById('user-total-received');
-        if (receivedEl) {
-            const received = parseFloat(ethers.utils.formatEther(stats.totalReceived));
-            receivedEl.textContent = received >= 0.01 
-                ? `${received.toFixed(4)} ETH` 
-                : `${stats.totalReceived.toString()} wei`;
-        }
-        
-        // Donation count
-        const countEl = document.getElementById('user-donation-count');
-        if (countEl) {
-            countEl.textContent = stats.donationCount.toString();
-        }
-        
-        // Net position
-        const netEl = document.getElementById('user-net-position');
-        if (netEl) {
-            const donated = ethers.BigNumber.from(stats.totalDonated);
-            const received = ethers.BigNumber.from(stats.totalReceived);
-            const net = received.sub(donated);
-            const netValue = parseFloat(ethers.utils.formatEther(net.abs()));
-            
-            if (net.isZero()) {
-                netEl.textContent = 'Even';
-                netEl.style.color = '';
-            } else if (net.gt(0)) {
-                netEl.textContent = netValue >= 0.01 
-                    ? `+${netValue.toFixed(4)} ETH` 
-                    : `+${net.toString()} wei`;
-                netEl.style.color = 'var(--success)';
-            } else {
-                netEl.textContent = netValue >= 0.01 
-                    ? `-${netValue.toFixed(4)} ETH` 
-                    : `${net.toString()} wei`;
-                netEl.style.color = 'var(--danger)';
+            if (messageEl) {
+                messageEl.innerHTML = '💡 <strong>Be the first!</strong> Your donation will be pending until someone else donates.';
+            }
+        } else if (state.pendingDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+            if (statusEl) {
+                statusEl.textContent = '⏳ Pending';
+                statusEl.style.color = 'var(--warning)';
+            }
+            if (messageEl) {
+                const pendingAmount = amountEl ? amountEl.textContent : state.pendingAmount.toString() + ' wei';
+                messageEl.innerHTML = `⏳ <strong>You're waiting!</strong> When the next person donates, you'll receive <strong>${pendingAmount}</strong> and they become the new pending donor.`;
+            }
+        } else {
+            if (statusEl) {
+                statusEl.textContent = '💚 Ready to Donate';
+                statusEl.style.color = 'var(--success)';
+            }
+            if (messageEl) {
+                const pendingAmount = amountEl ? amountEl.textContent : state.pendingAmount.toString() + ' wei';
+                messageEl.innerHTML = `💚 <strong>Donate now!</strong> You'll receive <strong>${pendingAmount}</strong> immediately and become the new pending donor.`;
             }
         }
     }
