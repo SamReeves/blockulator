@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="WhalGames.net - Play blockchain-based games and use mathematical tools on-chain">
+    <meta name="description" content="WhaleGames.net - Play blockchain-based games and use mathematical tools on-chain">
     <title>WhaleGames.net</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=4">
 </head>
+<!-- Version: 4.0 - Fixed custom UI for tools too -->
 <body>
     <div id="app">
+        <!-- Testing Banner -->
+        <div class="testing-banner">
+            <span class="banner-icon">🚧</span>
+            <span class="banner-text">
+                <strong>TESTNET ONLY</strong> - Currently running on Sepolia Test Network. Mainnet coming soon!
+            </span>
+            <span class="banner-icon">🚧</span>
+        </div>
+        
         <!-- Header -->
         <header class="app-header">
             <h1 class="app-title">🐋 WhaleGames</h1>
@@ -34,16 +44,19 @@
                         <h3>💦 Pissing Contest</h3>
                         <p>Compete to make the biggest splash</p>
                     </button>
-                    <!-- Coming soon - contracts not deployed yet
-                    <button class="game-card" data-game="median-whale">
-                        <h3>🐋 Median Whale</h3>
-                        <p>Play the middle ground</p>
+                    <button class="game-card" data-game="pay-it-forward">
+                        <h3>⏩ Pay It Forward</h3>
+                        <p>Donate and receive the previous donation</p>
                     </button>
-                    <button class="game-card" data-game="mean-whale">
-                        <h3>🐳 Mean Whale</h3>
-                        <p>Calculate the average</p>
+                    <button class="game-card" data-game="pay-it-backward">
+                        <h3>⏪ Pay It Backward</h3>
+                        <p>Reward the previous donor immediately</p>
                     </button>
-                    --></div>
+                    <button class="game-card" data-game="message-board">
+                        <h3>💬 Message Board</h3>
+                        <p>Post messages on-chain with anti-spam protection</p>
+                    </button>
+                </div>
                 
                 <!-- Game Detail View -->
                 <div id="game-detail" class="game-detail hidden">
@@ -55,19 +68,18 @@
             <!-- Tools Section -->
             <section id="tools-section" class="section hidden">
                 <div class="tool-list">
-                    <!-- Coming soon - contracts not deployed yet
-                    <button class="tool-card" data-tool="exp-estimator">
-                        <h3>📈 e^x Estimator</h3>
-                        <p>On-chain exponential calculation</p>
+                    <button class="tool-card" data-tool="e-calculator">
+                        <h3>🔢 e Calculator</h3>
+                        <p>Calculate e^x on-chain</p>
                     </button>
-                    <button class="tool-card" data-tool="factorial">
-                        <h3>🔢 Factorial Lookup</h3>
-                        <p>On-chain factorial computation</p>
+                    <button class="tool-card" data-tool="pi-calculator">
+                        <h3>🥧 π Calculator</h3>
+                        <p>Calculate π^x on-chain</p>
                     </button>
-                    -->
-                    <p style="padding: 2rem; text-align: center; color: var(--text-secondary);">
-                        🚧 Tools coming soon!
-                    </p>
+                    <button class="tool-card" data-tool="tau-calculator">
+                        <h3>⭕ τ Calculator</h3>
+                        <p>Calculate τ^x on-chain</p>
+                    </button>
                 </div>
                 
                 <!-- Tool Detail View -->
@@ -89,7 +101,7 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     
     <!-- App Scripts -->
-    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/main.js?v=4"></script>
 </body>
 </html>
 

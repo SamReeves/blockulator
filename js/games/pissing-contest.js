@@ -94,7 +94,7 @@ export class PissingContest {
         // Main game interface
         const ui = GameRenderer.createGameInterface({
             title: '💦 Pissing Contest',
-            description: 'Send the HIGHEST donation to win! Winner gets 99% of the pot when contest ends at 10 donations.'
+            description: 'Send the HIGHEST donation to win! Winner takes the pot when max donations reached.'
         });
         this.container.appendChild(ui);
         
@@ -102,17 +102,21 @@ export class PissingContest {
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'game-sections';
         
-        // Current contest info panel
-        const infoPanel = this.renderContestInfo();
-        sectionsContainer.appendChild(infoPanel);
+        // Current round info panel
+        const roundPanel = this.renderRoundInfo();
+        sectionsContainer.appendChild(roundPanel);
         
-        // Donation statistics
-        const statsPanel = DonationStats.render(
-            this.donations,
-            this.web3Provider.currentAddress,
-            this.contestInfo
-        );
-        sectionsContainer.appendChild(statsPanel);
+        // User stats panel
+        const userStatsPanel = this.renderUserStats();
+        sectionsContainer.appendChild(userStatsPanel);
+        
+        // Global stats and leaderboard
+        const globalPanel = this.renderGlobalStats();
+        sectionsContainer.appendChild(globalPanel);
+        
+        // Recent winners
+        const winnersPanel = this.renderRecentWinners();
+        sectionsContainer.appendChild(winnersPanel);
         
         // Donation chart
         const chartPanel = DonationChart.render(
@@ -134,32 +138,148 @@ export class PissingContest {
     }
 
     /**
-     * Render contest information panel
+     * Render current round information panel
      */
-    renderContestInfo() {
+    renderRoundInfo() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        panel.id = 'contest-info-panel';
+        panel.id = 'round-info-panel';
         
         panel.innerHTML = `
-            <h3>📊 Current Contest Status</h3>
+            <h3>🎯 Current Round</h3>
             <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Round Number</div>
+                    <div class="info-value" id="round-number">Loading...</div>
+                </div>
                 <div class="info-item">
                     <div class="info-label">Current Leader</div>
                     <div class="info-value" id="current-leader">Loading...</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Donations</div>
+                    <div class="info-value" id="donations-count">0 / 0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Prize Pool</div>
+                    <div class="info-value" id="prize-pool">0 wei</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">Your Donation</div>
                     <div class="info-value" id="your-donation">0 wei</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Potential Prize</div>
-                    <div class="info-value" id="potential-prize">0 wei</div>
+                    <div class="info-label">Winner Gets</div>
+                    <div class="info-value" id="winner-amount">0 wei</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Contest Status</div>
-                    <div class="info-value" id="contest-status">Active</div>
+                    <div class="info-label">Time Est.</div>
+                    <div class="info-value" id="time-remaining">-</div>
                 </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div class="info-value" id="round-status">Active</div>
+                </div>
+            </div>
+        `;
+        
+        return panel;
+    }
+
+    /**
+     * Render user statistics panel
+     */
+    renderUserStats() {
+        const panel = document.createElement('div');
+        panel.className = 'contest-info-panel';
+        panel.id = 'user-stats-panel';
+        
+        panel.innerHTML = `
+            <h3>👤 Your Statistics</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Lifetime Donated</div>
+                    <div class="info-value" id="user-lifetime-donated">0 wei</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Lifetime Won</div>
+                    <div class="info-value" id="user-lifetime-won">0 wei</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Rounds Won</div>
+                    <div class="info-value" id="user-rounds-won">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Rounds Played</div>
+                    <div class="info-value" id="user-rounds-participated">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Current Position</div>
+                    <div class="info-value" id="user-current-position">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Win Rate</div>
+                    <div class="info-value" id="user-win-rate">0%</div>
+                </div>
+            </div>
+        `;
+        
+        return panel;
+    }
+
+    /**
+     * Render global statistics panel
+     */
+    renderGlobalStats() {
+        const panel = document.createElement('div');
+        panel.className = 'contest-info-panel';
+        panel.id = 'global-stats-panel';
+        
+        panel.innerHTML = `
+            <h3>🌍 All-Time Records</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Total Rounds</div>
+                    <div class="info-value" id="total-rounds">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Highest Donation</div>
+                    <div class="info-value" id="highest-donation">0 wei</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Top Donor</div>
+                    <div class="info-value" id="highest-donor">-</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Contract Status</div>
+                    <div class="info-value" id="contract-status">Active</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Fee Rate</div>
+                    <div class="info-value" id="fee-rate">0%</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Min Donation</div>
+                    <div class="info-value" id="min-donation">0 wei</div>
+                </div>
+            </div>
+        `;
+        
+        return panel;
+    }
+
+    /**
+     * Render recent winners panel
+     */
+    renderRecentWinners() {
+        const panel = document.createElement('div');
+        panel.className = 'contest-info-panel';
+        panel.id = 'recent-winners-panel';
+        
+        panel.innerHTML = `
+            <h3>🏆 Recent Winners</h3>
+            <div id="recent-winners-list" class="winners-list">
+                <div class="loading">Loading winners...</div>
             </div>
         `;
         
@@ -259,91 +379,105 @@ export class PissingContest {
     }
 
     /**
-     * Refresh game state from blockchain events
-     * Pure event-driven approach - no view functions needed
+     * Refresh game state from blockchain
      */
     async refreshState() {
         try {
-            console.log('🔄 Refreshing state from contract events...');
-            console.log('Contract address:', CONTRACT_ADDRESSES.PISSING_CONTEST);
-            console.log('Wallet address:', this.web3Provider.currentAddress);
+            console.log('🔄 Refreshing state from contract...');
             
-            // Load donation history from blockchain events FIRST
-            console.log('📜 Loading donation history...');
+            // Get current round info
+            const roundInfo = await this.contract.get_current_round_info();
+            const [roundNumber, donationCount, maxDonations, totalValue, currentLeader, largestDonation, startTime, isActive] = roundInfo;
+            
+            // Get config
+            const config = await this.contract.get_config();
+            const [owner, feeBP, maxDonationsConfig, minDonation, isPaused] = config;
+            
+            // Get global stats
+            const globalStats = await this.contract.get_global_stats();
+            const [totalRounds, totalDonated, totalPaidOut, highestDonor] = globalStats;
+            
+            // Get all-time highest donation
+            const highestDonation = await this.contract.all_time_highest_donation();
+            
+            // Get user stats
+            const userStats = await this.contract.get_user_stats(this.web3Provider.currentAddress);
+            const [userLifetimeDonated, userLifetimeWon, userRoundsWon, userRoundsParticipated] = userStats;
+            
+            // Get user's current position
+            let userPosition = null;
+            let isLeading = false;
+            try {
+                const position = await this.contract.get_current_leaderboard_position(this.web3Provider.currentAddress);
+                userPosition = position[0];
+                isLeading = position[1];
+            } catch (e) {
+                // User might not have donated in this round
+            }
+            
+            // Get current round donation for user
+            const userRoundDonation = await this.contract.round_donations(roundNumber, this.web3Provider.currentAddress);
+            
+            // Calculate winner amount
+            const [winnerAmount, feeAmount] = await this.contract.calculate_current_winnings();
+            
+            // Get time remaining estimate
+            let timeRemaining = null;
+            try {
+                timeRemaining = await this.contract.get_time_remaining_estimate();
+            } catch (e) {
+                // Might not be available
+            }
+            
+            // Load donation history from events for visualization
             await this.loadDonationHistory();
             
-            // Derive all state from events (the purist way!)
-            const currentDonations = this.donations.length;
-            
-            // Calculate total pool by summing all donation amounts
-            let totalPool = ethers.BigNumber.from(0);
-            for (const donation of this.donations) {
-                totalPool = totalPool.add(ethers.BigNumber.from(Math.floor(donation.weiAmount)));
-            }
-            
-            // Current leader is the donor of the most recent (highest donation_number) donation
-            const currentLeader = this.donations.length > 0 
-                ? this.donations[this.donations.length - 1].address 
-                : '0x0000000000000000000000000000000000000000';
-            
-            // Max donations is a contract constant (10)
-            const maxDonations = 10;
-            
-            // Contest is active if we haven't reached max donations yet
-            const contestActive = currentDonations < maxDonations;
-            
-            // Calculate user's total donation in current round
-            let userDonation = ethers.BigNumber.from(0);
-            for (const donation of this.donations) {
-                if (donation.address.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                    userDonation = userDonation.add(ethers.BigNumber.from(Math.floor(donation.weiAmount)));
-                }
-            }
-            
-            // Calculate potential winnings (90% to winner, 10% fee based on description)
-            // Note: Description says 99% but typical is 90%, adjust based on actual contract logic
-            const winnerAmount = totalPool.mul(90).div(100);
-            const feeAmount = totalPool.mul(10).div(100);
-            
-            // Store derived state
+            // Store all state
             this.contestInfo = {
-                currentDonations,
-                maxDonations,
-                totalPool,
+                roundNumber: roundNumber.toNumber(),
+                currentDonations: donationCount,
+                maxDonations: maxDonations,
+                totalPool: totalValue,
                 currentLeader,
-                contestActive
+                largestDonation,
+                startTime: startTime.toNumber(),
+                isActive,
+                isPaused,
+                feeBP: feeBP,
+                minDonation,
+                userRoundDonation,
+                winnerAmount,
+                feeAmount,
+                timeRemaining: timeRemaining ? timeRemaining.toNumber() : null,
+                totalRounds: totalRounds.toNumber(),
+                highestDonation,
+                highestDonor,
+                userLifetimeDonated,
+                userLifetimeWon,
+                userRoundsWon: userRoundsWon.toNumber(),
+                userRoundsParticipated: userRoundsParticipated.toNumber(),
+                userPosition,
+                isLeading
             };
             
-            console.log('✅ Contract state derived from events:', { 
-                currentDonations,
-                maxDonations,
-                totalPool: ethers.utils.formatEther(totalPool) + ' ETH',
-                currentLeader,
-                contestActive,
-                userDonation: ethers.utils.formatEther(userDonation) + ' ETH',
-                winnerAmount: ethers.utils.formatEther(winnerAmount) + ' ETH',
-                totalDonationEvents: this.donations.length
-            });
+            console.log('✅ Contract state loaded:', this.contestInfo);
             
             // Update game state bar
             GameRenderer.updateGameStateBar({
-                playCount: currentDonations,
-                prizePool: parseFloat(ethers.utils.formatEther(totalPool)) * 1e18
+                playCount: donationCount,
+                prizePool: parseFloat(ethers.utils.formatEther(totalValue)) * 1e18
             });
             
-            // Update contest info panel
-            this.updateContestInfo(userDonation, winnerAmount, contestActive);
+            // Update all UI panels
+            this.updateAllPanels();
             
-            // Update all components with donation data
+            // Update components with donation data
             this.updateComponents();
             
             console.log('✅ State refresh complete!');
             
         } catch (error) {
             console.error('❌ Failed to refresh state:', error);
-            console.error('Error details:', error.message);
-            console.error('Error stack:', error.stack);
-            
             eventBus.emit(EVENTS.TOAST, {
                 message: `Failed to load game state: ${error.message}`,
                 type: 'error'
@@ -366,57 +500,50 @@ export class PissingContest {
             
             // Get all relevant events
             const donationFilter = this.contract.filters.DonationReceived();
-            const resetFilter = this.contract.filters.ContestReset();
-            const endedFilter = this.contract.filters.ContestEnded();
+            const startedFilter = this.contract.filters.RoundStarted();
+            const endedFilter = this.contract.filters.RoundEnded();
             
             console.log('📊 Querying DonationReceived events...');
             const donationEvents = await this.contract.queryFilter(donationFilter, fromBlock, 'latest');
             console.log(`📊 Found ${donationEvents.length} donation events`);
             
-            console.log('📊 Querying ContestReset events...');
-            const resetEvents = await this.contract.queryFilter(resetFilter, fromBlock, 'latest');
-            console.log(`📊 Found ${resetEvents.length} reset events`);
+            console.log('📊 Querying RoundStarted events...');
+            const startedEvents = await this.contract.queryFilter(startedFilter, fromBlock, 'latest');
+            console.log(`📊 Found ${startedEvents.length} started events`);
             
-            console.log('📊 Querying ContestEnded events...');
+            console.log('📊 Querying RoundEnded events...');
             const endedEvents = await this.contract.queryFilter(endedFilter, fromBlock, 'latest');
             console.log(`📊 Found ${endedEvents.length} ended events`);
             
-            console.log(`📊 Total: ${donationEvents.length} donations, ${resetEvents.length} resets, ${endedEvents.length} ended events`);
+            console.log(`📊 Total: ${donationEvents.length} donations, ${startedEvents.length} started, ${endedEvents.length} ended events`);
             
-            // Find the most recent round boundary (reset or ended event)
-            let roundStartBlock = fromBlock;
+            // Get current round number from contract to filter donations
+            const currentRoundNumber = this.contestInfo?.roundNumber;
             
-            const allBoundaryEvents = [...resetEvents, ...endedEvents].sort((a, b) => b.blockNumber - a.blockNumber);
-            if (allBoundaryEvents.length > 0) {
-                roundStartBlock = allBoundaryEvents[0].blockNumber;
-                console.log(`Current round started at block ${roundStartBlock}`);
-            }
+            // Filter donations to only those in the current round
+            let currentRoundDonations = donationEvents.filter(e => 
+                e.args.round_number && e.args.round_number.toNumber() === currentRoundNumber
+            );
             
-            // Filter donations to only those in the current round (after the last reset/end)
-            let currentRoundDonations = donationEvents.filter(e => e.blockNumber > roundStartBlock);
-            
-            // Alternative check: verify donation_numbers form a sequence starting from 1
-            // This handles the case where the round boundary wasn't captured
-            const sortedByBlock = [...currentRoundDonations].sort((a, b) => a.blockNumber - b.blockNumber);
-            
-            // Find the last "reset point" where donation_number goes back to 1 or decreases
-            let currentRoundStart = 0;
-            for (let i = 1; i < sortedByBlock.length; i++) {
-                const prevNum = sortedByBlock[i-1].args.donation_number;
-                const currNum = sortedByBlock[i].args.donation_number;
+            // If we don't have the round number yet, fall back to the old logic
+            if (!currentRoundNumber) {
+                // Find the most recent round boundary (started or ended event)
+                let roundStartBlock = fromBlock;
                 
-                // If donation number decreased or reset to 1, this is a new round
-                if (currNum <= prevNum) {
-                    currentRoundStart = i;
+                const allBoundaryEvents = [...startedEvents, ...endedEvents].sort((a, b) => b.blockNumber - a.blockNumber);
+                if (allBoundaryEvents.length > 0) {
+                    roundStartBlock = allBoundaryEvents[0].blockNumber;
+                    console.log(`Current round started at block ${roundStartBlock}`);
                 }
+                
+                // Filter donations to only those in the current round (after the last start/end)
+                currentRoundDonations = donationEvents.filter(e => e.blockNumber > roundStartBlock);
             }
             
-            const finalDonations = sortedByBlock.slice(currentRoundStart);
-            
-            console.log(`Current round has ${finalDonations.length} donations`);
+            console.log(`Current round has ${currentRoundDonations.length} donations`);
             
             // Convert events to donation format
-            this.donations = await Promise.all(finalDonations.map(async (event) => {
+            this.donations = await Promise.all(currentRoundDonations.map(async (event) => {
                 try {
                     const block = await event.getBlock();
                     return {
@@ -424,6 +551,7 @@ export class PissingContest {
                         weiAmount: parseFloat(ethers.utils.formatEther(event.args.amount)) * 1e18,
                         timestamp: block.timestamp,
                         donation_number: event.args.donation_number,
+                        isLargest: event.args.is_largest,
                         txHash: event.transactionHash
                     };
                 } catch (error) {
@@ -453,49 +581,35 @@ export class PissingContest {
         if (!this.contract) return;
         
         // Listen for new DonationReceived events
-        this.contract.on('DonationReceived', async (donor, amount, donation_number, event) => {
+        this.contract.on('DonationReceived', async (roundNumber, donor, amount, donationNumber, isLargest, timestamp) => {
             console.log('New donation received!', {
+                roundNumber: roundNumber.toString(),
                 donor,
                 amount: ethers.utils.formatEther(amount),
-                donation_number: donation_number.toString()
+                donationNumber: donationNumber.toString(),
+                isLargest
             });
             
-            // Get block timestamp
-            try {
-                const block = await event.getBlock();
-                
-                // Add to donations array
-                const newDonation = {
-                    address: donor,
-                    weiAmount: parseFloat(ethers.utils.formatEther(amount)) * 1e18,
-                    timestamp: block.timestamp,
-                    donation_number: donation_number.toNumber(),
-                    txHash: event.transactionHash
-                };
-                
-                this.donations.push(newDonation);
-                this.donations.sort((a, b) => a.donation_number - b.donation_number);
-                
+            // Only process if it's for the current round
+            if (this.contestInfo && roundNumber.toNumber() === this.contestInfo.roundNumber) {
                 // Show toast notification
                 const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                 eventBus.emit(EVENTS.TOAST, {
                     message: isYou 
                         ? '✅ Your donation was recorded!' 
-                        : `💰 New donation received from ${donor.slice(0, 6)}...`,
+                        : `💰 New donation: ${ethers.utils.formatEther(amount)} ETH`,
                     type: 'success'
                 });
                 
                 // Refresh state and UI
                 await this.refreshState();
-                
-            } catch (error) {
-                console.error('Failed to process new donation event:', error);
             }
         });
         
-        // Listen for ContestEnded event
-        this.contract.on('ContestEnded', async (winner, prize, feeCollected, totalDonations) => {
-            console.log('Contest ended!', {
+        // Listen for RoundEnded event
+        this.contract.on('RoundEnded', async (roundNumber, winner, prize, feeCollected, totalDonations, duration) => {
+            console.log('Round ended!', {
+                roundNumber: roundNumber.toString(),
                 winner,
                 prize: ethers.utils.formatEther(prize),
                 totalDonations: totalDonations.toString()
@@ -504,8 +618,8 @@ export class PissingContest {
             const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             eventBus.emit(EVENTS.TOAST, {
                 message: isYou 
-                    ? `🎉 YOU WON! Prize: ${Math.round(parseFloat(ethers.utils.formatEther(prize)) * 1e18).toLocaleString()} wei!`
-                    : `Contest ended! Winner: ${winner.slice(0, 6)}...`,
+                    ? `🎉 YOU WON Round ${roundNumber}! Prize: ${ethers.utils.formatEther(prize)} ETH!`
+                    : `Round ${roundNumber} ended! Winner: ${winner.slice(0, 6)}...`,
                 type: isYou ? 'success' : 'info'
             });
             
@@ -513,58 +627,302 @@ export class PissingContest {
             await this.refreshState();
         });
         
-        // Listen for ContestReset event
-        this.contract.on('ContestReset', async (timestamp) => {
-            console.log('Contest reset at:', new Date(timestamp.toNumber() * 1000));
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: '🔄 New contest round started!',
-                type: 'info'
+        // Listen for RoundStarted event
+        this.contract.on('RoundStarted', async (roundNumber, startTime) => {
+            console.log('Round started:', {
+                roundNumber: roundNumber.toString(),
+                startTime: new Date(startTime.toNumber() * 1000)
             });
             
-            // Clear donations for new round
-            this.donations = [];
+            eventBus.emit(EVENTS.TOAST, {
+                message: `🔄 Round ${roundNumber} started!`,
+                type: 'info'
+            });
             
             // Refresh state
             await this.refreshState();
         });
+        
+        // Listen for LeaderboardUpdate event
+        this.contract.on('LeaderboardUpdate', async (roundNumber, newLeader, amount, previousLeader) => {
+            console.log('Leaderboard updated:', {
+                roundNumber: roundNumber.toString(),
+                newLeader,
+                amount: ethers.utils.formatEther(amount)
+            });
+            
+            // Only show notification if it's the current round
+            if (this.contestInfo && roundNumber.toNumber() === this.contestInfo.roundNumber) {
+                const isYou = newLeader.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                if (isYou) {
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: '👑 You are now the leader!',
+                        type: 'success'
+                    });
+                }
+            }
+        });
     }
 
     /**
-     * Update contest info display
+     * Update all UI panels with current state
      */
-    updateContestInfo(userDonation, winnerAmount, contestActive) {
-        const leaderEl = document.getElementById('current-leader');
-        const donationEl = document.getElementById('your-donation');
-        const prizeEl = document.getElementById('potential-prize');
-        const statusEl = document.getElementById('contest-status');
+    async updateAllPanels() {
+        this.updateRoundInfo();
+        this.updateUserStatsPanel();
+        this.updateGlobalStatsPanel();
+        await this.updateRecentWinners();
+    }
+
+    /**
+     * Update round info panel
+     */
+    updateRoundInfo() {
+        const info = this.contestInfo;
         
+        // Round number
+        const roundNumEl = document.getElementById('round-number');
+        if (roundNumEl) {
+            roundNumEl.textContent = `#${info.roundNumber}`;
+        }
+        
+        // Current leader
+        const leaderEl = document.getElementById('current-leader');
         if (leaderEl) {
-            const leader = this.contestInfo.currentLeader;
+            const leader = info.currentLeader;
             if (leader === '0x0000000000000000000000000000000000000000') {
                 leaderEl.textContent = 'No donations yet';
+                leaderEl.style.color = '';
             } else if (leader.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                 leaderEl.textContent = '🏆 YOU!';
                 leaderEl.style.color = 'var(--success)';
             } else {
                 leaderEl.textContent = `${leader.slice(0, 6)}...${leader.slice(-4)}`;
-                leaderEl.style.color = 'var(--text-primary)';
+                leaderEl.style.color = '';
             }
         }
         
-        if (donationEl) {
-            const donation = parseFloat(ethers.utils.formatEther(userDonation)) * 1e18;
-            donationEl.textContent = `${Math.round(donation).toLocaleString()} wei`;
+        // Donations count
+        const countEl = document.getElementById('donations-count');
+        if (countEl) {
+            countEl.textContent = `${info.currentDonations} / ${info.maxDonations}`;
         }
         
-        if (prizeEl) {
-            const prize = parseFloat(ethers.utils.formatEther(winnerAmount)) * 1e18;
-            prizeEl.textContent = `${Math.round(prize).toLocaleString()} wei`;
+        // Prize pool
+        const poolEl = document.getElementById('prize-pool');
+        if (poolEl) {
+            const pool = parseFloat(ethers.utils.formatEther(info.totalPool));
+            poolEl.textContent = pool >= 0.01 
+                ? `${pool.toFixed(4)} ETH` 
+                : `${(pool * 1e18).toLocaleString()} wei`;
         }
         
+        // Your donation
+        const yourEl = document.getElementById('your-donation');
+        if (yourEl) {
+            const donation = parseFloat(ethers.utils.formatEther(info.userRoundDonation));
+            yourEl.textContent = donation >= 0.01 
+                ? `${donation.toFixed(4)} ETH` 
+                : `${(donation * 1e18).toLocaleString()} wei`;
+        }
+        
+        // Winner amount
+        const winnerEl = document.getElementById('winner-amount');
+        if (winnerEl) {
+            const amount = parseFloat(ethers.utils.formatEther(info.winnerAmount));
+            winnerEl.textContent = amount >= 0.01 
+                ? `${amount.toFixed(4)} ETH` 
+                : `${(amount * 1e18).toLocaleString()} wei`;
+        }
+        
+        // Time remaining
+        const timeEl = document.getElementById('time-remaining');
+        if (timeEl) {
+            if (info.timeRemaining && info.timeRemaining > 0) {
+                const hours = Math.floor(info.timeRemaining / 3600);
+                const minutes = Math.floor((info.timeRemaining % 3600) / 60);
+                timeEl.textContent = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+            } else {
+                timeEl.textContent = '-';
+            }
+        }
+        
+        // Status
+        const statusEl = document.getElementById('round-status');
         if (statusEl) {
-            statusEl.textContent = contestActive ? '🟢 Active' : '🔴 Ended';
-            statusEl.style.color = contestActive ? 'var(--success)' : 'var(--danger)';
+            if (info.isPaused) {
+                statusEl.textContent = '⏸️ Paused';
+                statusEl.style.color = 'var(--warning)';
+            } else if (info.isActive) {
+                statusEl.textContent = '🟢 Active';
+                statusEl.style.color = 'var(--success)';
+            } else {
+                statusEl.textContent = '🔴 Ended';
+                statusEl.style.color = 'var(--danger)';
+            }
+        }
+    }
+
+    /**
+     * Update user statistics panel
+     */
+    updateUserStatsPanel() {
+        const info = this.contestInfo;
+        
+        // Lifetime donated
+        const donatedEl = document.getElementById('user-lifetime-donated');
+        if (donatedEl) {
+            const donated = parseFloat(ethers.utils.formatEther(info.userLifetimeDonated));
+            donatedEl.textContent = donated >= 0.01 
+                ? `${donated.toFixed(4)} ETH` 
+                : `${(donated * 1e18).toLocaleString()} wei`;
+        }
+        
+        // Lifetime won
+        const wonEl = document.getElementById('user-lifetime-won');
+        if (wonEl) {
+            const won = parseFloat(ethers.utils.formatEther(info.userLifetimeWon));
+            wonEl.textContent = won >= 0.01 
+                ? `${won.toFixed(4)} ETH` 
+                : `${(won * 1e18).toLocaleString()} wei`;
+        }
+        
+        // Rounds won
+        const roundsWonEl = document.getElementById('user-rounds-won');
+        if (roundsWonEl) {
+            roundsWonEl.textContent = info.userRoundsWon.toString();
+        }
+        
+        // Rounds participated
+        const participatedEl = document.getElementById('user-rounds-participated');
+        if (participatedEl) {
+            participatedEl.textContent = info.userRoundsParticipated.toString();
+        }
+        
+        // Current position
+        const positionEl = document.getElementById('user-current-position');
+        if (positionEl) {
+            if (info.userPosition !== null) {
+                positionEl.textContent = info.isLeading ? '🏆 Leading!' : `#${info.userPosition}`;
+                positionEl.style.color = info.isLeading ? 'var(--success)' : '';
+            } else {
+                positionEl.textContent = 'Not participating';
+                positionEl.style.color = '';
+            }
+        }
+        
+        // Win rate
+        const winRateEl = document.getElementById('user-win-rate');
+        if (winRateEl) {
+            const rate = info.userRoundsParticipated > 0 
+                ? (info.userRoundsWon / info.userRoundsParticipated * 100).toFixed(1)
+                : '0.0';
+            winRateEl.textContent = `${rate}%`;
+        }
+    }
+
+    /**
+     * Update global statistics panel
+     */
+    updateGlobalStatsPanel() {
+        const info = this.contestInfo;
+        
+        // Total rounds
+        const roundsEl = document.getElementById('total-rounds');
+        if (roundsEl) {
+            roundsEl.textContent = info.totalRounds.toString();
+        }
+        
+        // Highest donation
+        const highestEl = document.getElementById('highest-donation');
+        if (highestEl) {
+            const highest = parseFloat(ethers.utils.formatEther(info.highestDonation));
+            highestEl.textContent = highest >= 0.01 
+                ? `${highest.toFixed(4)} ETH` 
+                : `${(highest * 1e18).toLocaleString()} wei`;
+        }
+        
+        // Highest donor
+        const donorEl = document.getElementById('highest-donor');
+        if (donorEl) {
+            const donor = info.highestDonor;
+            if (donor === '0x0000000000000000000000000000000000000000') {
+                donorEl.textContent = 'None yet';
+            } else if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+                donorEl.textContent = '🏆 YOU!';
+                donorEl.style.color = 'var(--success)';
+            } else {
+                donorEl.textContent = `${donor.slice(0, 6)}...${donor.slice(-4)}`;
+                donorEl.style.color = '';
+            }
+        }
+        
+        // Contract status
+        const contractStatusEl = document.getElementById('contract-status');
+        if (contractStatusEl) {
+            contractStatusEl.textContent = info.isPaused ? '⏸️ Paused' : '✅ Active';
+            contractStatusEl.style.color = info.isPaused ? 'var(--warning)' : 'var(--success)';
+        }
+        
+        // Fee rate
+        const feeEl = document.getElementById('fee-rate');
+        if (feeEl) {
+            const feePercent = (info.feeBP / 100).toFixed(1);
+            feeEl.textContent = `${feePercent}%`;
+        }
+        
+        // Min donation
+        const minEl = document.getElementById('min-donation');
+        if (minEl) {
+            const min = parseFloat(ethers.utils.formatEther(info.minDonation));
+            minEl.textContent = min >= 0.01 
+                ? `${min.toFixed(4)} ETH` 
+                : `${(min * 1e18).toLocaleString()} wei`;
+        }
+    }
+
+    /**
+     * Update recent winners list
+     */
+    async updateRecentWinners() {
+        try {
+            // Get recent winners (last 5)
+            const winners = await this.contract.get_recent_winners(5);
+            
+            const listEl = document.getElementById('recent-winners-list');
+            if (!listEl) return;
+            
+            if (winners.length === 0) {
+                listEl.innerHTML = '<div class="no-data">No winners yet</div>';
+                return;
+            }
+            
+            // Build winners list
+            let html = '<div class="winners-grid">';
+            for (let i = 0; i < winners.length; i++) {
+                const winner = winners[i];
+                const roundNum = this.contestInfo.totalRounds - i;
+                const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                
+                html += `
+                    <div class="winner-item">
+                        <div class="winner-round">Round ${roundNum}</div>
+                        <div class="winner-address ${isYou ? 'highlight' : ''}">
+                            ${isYou ? '🏆 YOU' : `${winner.slice(0, 8)}...${winner.slice(-6)}`}
+                        </div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            
+            listEl.innerHTML = html;
+            
+        } catch (error) {
+            console.error('Failed to load recent winners:', error);
+            const listEl = document.getElementById('recent-winners-list');
+            if (listEl) {
+                listEl.innerHTML = '<div class="error">Failed to load winners</div>';
+            }
         }
     }
 
@@ -607,8 +965,9 @@ export class PissingContest {
         // Remove contract event listeners
         if (this.contract) {
             this.contract.removeAllListeners('DonationReceived');
-            this.contract.removeAllListeners('ContestEnded');
-            this.contract.removeAllListeners('ContestReset');
+            this.contract.removeAllListeners('RoundEnded');
+            this.contract.removeAllListeners('RoundStarted');
+            this.contract.removeAllListeners('LeaderboardUpdate');
         }
         
         // Clear container

@@ -9,32 +9,42 @@ import { GameRenderer } from './ui/game-renderer.js';
 
 // Import game modules
 import { PissingContest } from './games/pissing-contest.js';
-// Coming soon - not deployed yet
-// import { MedianWhale } from './games/median-whale.js';
-// import { MeanWhale } from './games/mean-whale.js';
+import { PayItForward } from './games/pay-it-forward.js';
+import { PayItBackward } from './games/pay-it-backward.js';
+import { MessageBoard } from './games/message-board.js';
 
 // Import tool modules
-// Coming soon - not deployed yet
-// import { ExpEstimator } from './tools/exp-estimator.js';
-// import { Factorial } from './tools/factorial.js';
+import { ECalculator } from './tools/e.js';
+import { PiCalculator } from './tools/pi.js';
+import { TauCalculator } from './tools/tau.js';
 
 class App {
     constructor() {
-        this.currentGame = null;
-        this.currentTool = null;
-        this.games = new Map([
-            ['pissing-contest', PissingContest]
-            // Coming soon - not deployed yet
-            // ['median-whale', MedianWhale],
-            // ['mean-whale', MeanWhale]
-        ]);
-        this.tools = new Map([
-            // Coming soon - not deployed yet
-            // ['exp-estimator', ExpEstimator],
-            // ['factorial', Factorial]
-        ]);
+        console.log('🚀 App constructor called');
         
-        this.init();
+        try {
+            this.currentGame = null;
+            this.currentTool = null;
+            this.games = new Map([
+                ['pissing-contest', PissingContest],
+                ['pay-it-forward', PayItForward],
+                ['pay-it-backward', PayItBackward],
+                ['message-board', MessageBoard]
+            ]);
+            this.tools = new Map([
+                ['e-calculator', ECalculator],
+                ['pi-calculator', PiCalculator],
+                ['tau-calculator', TauCalculator]
+            ]);
+            
+            console.log('✅ Maps created successfully');
+            
+            this.init();
+        } catch (error) {
+            console.error('❌ Error in App constructor:', error);
+            alert('Failed to initialize app: ' + error.message);
+            throw error;
+        }
     }
 
     /**
@@ -60,14 +70,24 @@ class App {
      * Setup UI event listeners
      */
     setupUIListeners() {
+        console.log('🔧 Setting up UI listeners...');
+        
         // Connect wallet button
         const connectBtn = document.getElementById('connect-wallet');
-        connectBtn.addEventListener('click', () => this.handleConnectWallet());
+        console.log('Connect button found:', !!connectBtn);
+        if (connectBtn) {
+            connectBtn.addEventListener('click', () => {
+                console.log('Connect wallet button clicked!');
+                this.handleConnectWallet();
+            });
+        }
         
         // Navigation buttons
         const navButtons = document.querySelectorAll('.nav-btn');
+        console.log('Nav buttons found:', navButtons.length);
         navButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
+                console.log('Nav button clicked:', e.target.dataset.section);
                 const section = e.target.dataset.section;
                 this.switchSection(section);
             });
@@ -75,30 +95,46 @@ class App {
         
         // Game cards
         const gameCards = document.querySelectorAll('.game-card');
+        console.log('Game cards found:', gameCards.length);
         gameCards.forEach(card => {
             card.addEventListener('click', (e) => {
                 const gameId = e.currentTarget.dataset.game;
+                console.log('Game card clicked:', gameId);
                 this.loadGame(gameId);
             });
         });
         
         // Tool cards
         const toolCards = document.querySelectorAll('.tool-card');
+        console.log('Tool cards found:', toolCards.length);
         toolCards.forEach(card => {
             card.addEventListener('click', (e) => {
                 const toolId = e.currentTarget.dataset.tool;
+                console.log('Tool card clicked:', toolId);
                 this.loadTool(toolId);
             });
         });
         
         // Back buttons
-        document.getElementById('back-to-games').addEventListener('click', () => {
-            this.showGameList();
-        });
+        const backToGames = document.getElementById('back-to-games');
+        const backToTools = document.getElementById('back-to-tools');
+        console.log('Back buttons found:', !!backToGames, !!backToTools);
         
-        document.getElementById('back-to-tools').addEventListener('click', () => {
-            this.showToolList();
-        });
+        if (backToGames) {
+            backToGames.addEventListener('click', () => {
+                console.log('Back to games clicked');
+                this.showGameList();
+            });
+        }
+        
+        if (backToTools) {
+            backToTools.addEventListener('click', () => {
+                console.log('Back to tools clicked');
+                this.showToolList();
+            });
+        }
+        
+        console.log('✅ UI listeners setup complete');
     }
 
     /**
@@ -189,9 +225,16 @@ class App {
             btn.classList.toggle('active', btn.dataset.section === sectionName);
         });
         
-        // Update sections
+        // Update sections - need to handle both active and hidden classes
         document.querySelectorAll('.section').forEach(section => {
-            section.classList.toggle('active', section.id === `${sectionName}-section`);
+            const isTarget = section.id === `${sectionName}-section`;
+            if (isTarget) {
+                section.classList.add('active');
+                section.classList.remove('hidden');
+            } else {
+                section.classList.remove('active');
+                section.classList.add('hidden');
+            }
         });
         
         // Reset views
@@ -339,9 +382,16 @@ class App {
 }
 
 // Initialize app when DOM is loaded
+console.log('📦 Main.js loaded, document.readyState:', document.readyState);
+
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new App());
+    console.log('⏳ Waiting for DOMContentLoaded...');
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('✅ DOMContentLoaded fired, initializing App...');
+        new App();
+    });
 } else {
+    console.log('✅ DOM already ready, initializing App...');
     new App();
 }
 
