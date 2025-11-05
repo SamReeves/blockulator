@@ -65,7 +65,8 @@ export class PiCalculator {
         if (this.contract) {
             try {
                 const piValue = await this.contract.get_constant();
-                this.constantValue = parseFloat(piValue.toString());
+                // Convert from Vyper fixed-point (10 decimals) to JavaScript float
+                this.constantValue = parseFloat(ethers.utils.formatUnits(piValue, 10));
             } catch (error) {
                 console.log('Using default π value');
             }
@@ -234,21 +235,26 @@ export class PiCalculator {
             
             console.log(`Calculating π^${x}`);
             
-            // Call the view function (free calculation)
-            const result = await this.contract.calculate(x);
+            // Convert JavaScript decimal to Vyper fixed-point (10 decimal places)
+            const xFixed = ethers.utils.parseUnits(x.toString(), 10);
             
-            console.log('Result:', result.toString());
+            // Call the view function (free calculation)
+            const result = await this.contract.calculate(xFixed);
+            
+            // Convert result back from fixed-point to decimal
+            const resultDecimal = ethers.utils.formatUnits(result, 10);
+            
+            console.log('Result:', resultDecimal);
             
             // Display result
             const resultValue = document.getElementById('result-value');
             if (resultValue) {
-                const resultNum = parseFloat(result.toString());
-                resultValue.textContent = resultNum.toFixed(10);
+                resultValue.textContent = parseFloat(resultDecimal).toFixed(10);
                 resultValue.style.color = 'var(--success)';
             }
             
             eventBus.emit(EVENTS.TOAST, {
-                message: `π^${x} ≈ ${parseFloat(result.toString()).toFixed(6)}`,
+                message: `π^${x} ≈ ${parseFloat(resultDecimal).toFixed(6)}`,
                 type: 'success'
             });
             
