@@ -271,6 +271,10 @@ export class PayItForward {
                     ⚠️ <strong>Important:</strong> Your donation is pending until someone else donates. 
                     The last donor in the chain holds the pending amount.
                 </p>
+                <p class="note">
+                    🎯 <strong>Simplified Version:</strong> This contract has no admin controls, no minimum donation, 
+                    and no on-chain statistics tracking. Pure game logic only!
+                </p>
             </div>
         `;
         
@@ -311,13 +315,7 @@ export class PayItForward {
             return;
         }
         
-        if (parseFloat(weiAmount) < parseFloat(this.gameState.minimumDonation)) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: `Donation must be at least ${this.gameState.minimumDonation} wei`,
-                type: 'warning'
-            });
-            return;
-        }
+        // No minimum donation check in simplified version
         
         try {
             GameRenderer.setLoading(true);
@@ -379,35 +377,28 @@ export class PayItForward {
         try {
             console.log('🔄 Refreshing state from contract...');
             
-            // Get pending info
-            const pendingInfo = await this.contract.get_pending_info();
-            const [pendingDonor, pendingAmount] = pendingInfo;
+            // Call individual public getters
+            const pendingDonor = await this.contract.pending_donor();
+            const pendingAmount = await this.contract.pending_amount();
             
-            // Get stats
-            const stats = await this.contract.get_stats();
-            const [totalDonations, donationCount, paused, minimumDonation] = stats;
-            
-            // Get contract balance
-            const balance = await this.contract.get_contract_balance();
-            
-            // Get user stats
-            const userStats = await this.contract.get_user_stats(this.web3Provider.currentAddress);
-            const [userTotalDonated, userTotalReceived, userDonationCount] = userStats;
+            // Get contract balance directly from provider
+            const balance = await this.web3Provider.provider.getBalance(CONTRACT_ADDRESSES.PAY_IT_FORWARD);
             
             this.gameState = {
                 pendingDonor,
                 pendingAmount,
-                totalDonations,
-                donationCount: donationCount.toNumber(),
-                minimumDonation,
-                paused,
+                totalDonations: 0,  // Simplified: track via events if needed
+                donationCount: 0,   // Simplified: track via events if needed
+                minimumDonation: 0, // Simplified: no minimum
+                paused: false,
                 balance
             };
             
+            // Simplified: no per-user tracking on-chain
             this.userStats = {
-                totalDonated: userTotalDonated,
-                totalReceived: userTotalReceived,
-                donationCount: userDonationCount.toNumber()
+                totalDonated: ethers.BigNumber.from(0),
+                totalReceived: ethers.BigNumber.from(0),
+                donationCount: 0
             };
             
             console.log('✅ Contract state loaded:', this.gameState);
@@ -432,48 +423,35 @@ export class PayItForward {
     setupContractEventListeners() {
         if (!this.contract) return;
         
-        // Listen for Donated events
-        this.contract.on('Donated', async (donor, amount, receivedFrom, receivedAmount, timestamp) => {
+        // Listen for Donation events (simplified - one event type)
+        this.contract.on('Donation', async (donor, amount, received, isFirst) => {
             console.log('New donation!', {
                 donor,
                 amount: ethers.utils.formatEther(amount),
-                receivedFrom,
-                receivedAmount: ethers.utils.formatEther(receivedAmount)
+                received: ethers.utils.formatEther(received),
+                isFirst
             });
             
             const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            const receivedFromYou = receivedFrom.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isYou) {
+                if (isFirst) {
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: `✅ You made the first donation of ${ethers.utils.formatEther(amount)} ETH! You are now pending.`,
+                        type: 'success'
+                    });
+                } else {
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: `✅ You donated ${ethers.utils.formatEther(amount)} ETH and received ${ethers.utils.formatEther(received)} ETH!`,
+                        type: 'success'
+                    });
+                }
+            } else {
                 eventBus.emit(EVENTS.TOAST, {
-                    message: `✅ You donated ${ethers.utils.formatEther(amount)} ETH and received ${ethers.utils.formatEther(receivedAmount)} ETH!`,
-                    type: 'success'
-                });
-            } else if (receivedFromYou) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `💰 Someone donated! You are no longer pending.`,
+                    message: `💰 New donation! Someone donated ${ethers.utils.formatEther(amount)} ETH.`,
                     type: 'info'
                 });
             }
-            
-            // Refresh state
-            await this.refreshState();
-        });
-        
-        // Listen for FirstDonation event
-        this.contract.on('FirstDonation', async (donor, amount, timestamp) => {
-            console.log('First donation!', {
-                donor,
-                amount: ethers.utils.formatEther(amount)
-            });
-            
-            const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            eventBus.emit(EVENTS.TOAST, {
-                message: isYou 
-                    ? `✅ You made the first donation! You are now pending.` 
-                    : `🎉 First donation received from ${donor.slice(0, 6)}...`,
-                type: 'success'
-            });
             
             // Refresh state
             await this.refreshState();
@@ -654,8 +632,7 @@ export class PayItForward {
         
         // Remove contract event listeners
         if (this.contract) {
-            this.contract.removeAllListeners('Donated');
-            this.contract.removeAllListeners('FirstDonation');
+            this.contract.removeAllListeners('Donation');
         }
         
         // Clear container
