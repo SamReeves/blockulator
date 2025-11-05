@@ -353,7 +353,10 @@ export class PayItForward {
             });
             
             // Clear input
-            document.getElementById('play-wei').value = '';
+            const amountInput = document.getElementById('donate-amount');
+            if (amountInput) {
+                amountInput.value = '';
+            }
             
             // Refresh state from blockchain
             await this.refreshState();
