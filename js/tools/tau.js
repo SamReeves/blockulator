@@ -113,7 +113,7 @@ export class TauCalculator {
                 />
                 <div class="input-hint">Range: [0, 10)</div>
             </div>
-            <button id="calculate-button" class="button-primary">Calculate τ^x</button>
+            <button id="calculate-button" class="button-primary">Calculate τ^x On-Chain</button>
         `;
         
         container.appendChild(controlsDiv);
@@ -230,16 +230,29 @@ export class TauCalculator {
             const calculateButton = document.getElementById('calculate-button');
             if (calculateButton) {
                 calculateButton.disabled = true;
-                calculateButton.textContent = 'Calculating...';
+                calculateButton.textContent = 'Submitting Transaction...';
             }
             
-            console.log(`Calculating τ^${x}`);
+            console.log(`Calculating τ^${x} on-chain`);
             
             // Convert JavaScript decimal to Vyper fixed-point (10 decimal places)
             const xFixed = ethers.utils.parseUnits(x.toString(), 10);
             
-            // Call the view function (free calculation)
-            const result = await this.contract.calculate(xFixed);
+            // Call the on-chain function (costs gas, emits event)
+            const tx = await this.contract.ask(xFixed);
+            console.log('Transaction submitted:', tx.hash);
+            
+            // Wait for transaction confirmation
+            const receipt = await tx.wait();
+            console.log('Transaction confirmed:', receipt.transactionHash);
+            
+            // Parse the Lookup event to get the result
+            const lookupEvent = receipt.events?.find(e => e.event === 'Lookup');
+            const result = lookupEvent ? lookupEvent.args.y : null;
+            
+            if (!result) {
+                throw new Error('Could not parse result from transaction');
+            }
             
             // Convert result back from fixed-point to decimal
             const resultDecimal = ethers.utils.formatUnits(result, 10);
@@ -268,7 +281,7 @@ export class TauCalculator {
             const calculateButton = document.getElementById('calculate-button');
             if (calculateButton) {
                 calculateButton.disabled = false;
-                calculateButton.textContent = 'Calculate τ^x';
+                calculateButton.textContent = 'Calculate τ^x On-Chain';
             }
         }
     }
