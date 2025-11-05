@@ -1,28 +1,10 @@
 # @version 0.4.3
 
 """
-@title Message Board - Enhanced Edition
+@title Message Board - Minimalist Edition
 @author L1Ca$h
-@notice Pay to post messages on-chain with anti-spam protections
-@dev Simple transparent message board with robust safeguards
-
-     IMPROVEMENTS (2025 v0.4.3 Update):
-     - Updated to Vyper 0.4.3 with pinned version for reproducibility
-     - Added formal invariant documentation
-     - Enhanced loop correctness in get_recent_messages
-     - Documented rate limiting mechanism
-     - Checked send() calls to prevent silent failures ✓
-     - Ownership transfer (2-step) ✓
-     - Minimum posting fee ✓
-     - Rate limiting per user ✓
-     - Message flagging capability ✓
-     - Optimized: Removed per-user statistics and pause mechanism for smaller bytecode
-     
-     CONTRACT INVARIANTS:
-     - INVARIANT: messages array grows monotonically (append-only)
-     - INVARIANT: message_id = index in messages array
-     - INVARIANT: Contract accumulates all fees (no automatic distribution)
-     - Rate limiting enforced per-address with configurable cooldown
+@notice Pay to post messages on-chain with rate limiting
+@dev Ultra-simple message board with essential features only
 """
 
 # ============= DATA STRUCTURES =============
@@ -32,26 +14,15 @@ struct Message:
     content: String[280]
     amount: uint256
     timestamp: uint256
-    block_number: uint256
-    flagged: bool
 
 # ============= STATE VARIABLES =============
 
-owner: public(address)
-proposed_owner: public(address)
+owner: public(immutable(address))
+minimum_post_fee: public(immutable(uint256))
+rate_limit_seconds: public(immutable(uint256))
 
-# Message storage
-# INVARIANT: messages.length monotonically increases (append-only)
-# INVARIANT: message_id corresponds to array index
-# NOTE: DynArray capacity is 10000 messages (hard limit enforced by Vyper)
-messages: public(DynArray[Message, 10000])
+messages: public(DynArray[Message, 1000])
 total_collected: public(uint256)
-
-# Anti-spam settings
-# INVARIANT: last_post_time[addr] ≤ block.timestamp
-# INVARIANT: rate_limit_seconds enforces minimum time between posts per address
-minimum_post_fee: public(uint256)
-rate_limit_seconds: public(uint256)
 last_post_time: public(HashMap[address, uint256])
 
 # ============= EVENTS =============
@@ -61,32 +32,10 @@ event MessagePosted:
     message_id: indexed(uint256)
     amount: uint256
     content: String[280]
-    timestamp: uint256
-
-event MessageFlagged:
-    message_id: indexed(uint256)
-    flagged_by: indexed(address)
-    flagged: bool
 
 event FeesWithdrawn:
     owner: indexed(address)
     amount: uint256
-
-event OwnershipTransferProposed:
-    current_owner: indexed(address)
-    proposed_owner: indexed(address)
-
-event OwnershipTransferred:
-    previous_owner: indexed(address)
-    new_owner: indexed(address)
-
-event MinimumFeeUpdated:
-    old_fee: uint256
-    new_fee: uint256
-
-event RateLimitUpdated:
-    old_limit: uint256
-    new_limit: uint256
 
 # ============= INITIALIZATION =============
 
@@ -94,19 +43,12 @@ event RateLimitUpdated:
 def __init__(min_fee: uint256, rate_limit: uint256):
     """
     @notice Initialize the message board
-    @param min_fee Minimum posting fee in wei (e.g., 0.001 ETH = 1000000000000000)
-    @param rate_limit Minimum seconds between posts per user (e.g., 60 for 1 minute)
-    
-    @dev ESTABLISHES INVARIANTS:
-         - messages array initialized empty (length 0)
-         - All counters initialized to zero
-         - Rate limiting parameters set
-         - No messages flagged (empty array)
+    @param min_fee Minimum posting fee in wei
+    @param rate_limit Minimum seconds between posts per user
     """
-    self.owner = msg.sender
-    self.proposed_owner = empty(address)
-    self.minimum_post_fee = min_fee
-    self.rate_limit_seconds = rate_limit
+    owner = msg.sender
+    minimum_post_fee = min_fee
+    rate_limit_seconds = rate_limit
     self.total_collected = 0
 
 # ============= CORE FUNCTIONALITY =============
@@ -116,130 +58,44 @@ def __init__(min_fee: uint256, rate_limit: uint256):
 def post_message(content: String[280]):
     """
     @notice Post a message to the board
-    @param content Message content (max 280 chars, min 1 char)
-    
-    @dev RATE LIMITING:
-         - Enforces minimum time between posts per address
-         - First post from address has no restriction
-         - Prevents spam while allowing legitimate use
-    
-    @dev INVARIANT PRESERVATION:
-         - message_id = current array length (before append)
-         - Array grows by exactly 1
-         - No external calls (no reentrancy risk)
+    @param content Message content (max 280 chars)
     """
-    assert msg.value >= self.minimum_post_fee, "Below minimum"
-    assert len(content) > 0, "Empty"
-    assert len(content) <= 280, "Too long"
+    assert msg.value >= minimum_post_fee, "Below minimum fee"
+    assert len(content) > 0, "Empty message"
     
-    # Rate limiting check (skip for first post from address)
+    # Rate limiting
     last_post: uint256 = self.last_post_time[msg.sender]
     if last_post > 0:
-        time_since_last: uint256 = block.timestamp - last_post
-        assert time_since_last >= self.rate_limit_seconds, "Rate limit: wait longer"
+        time_since: uint256 = block.timestamp - last_post
+        assert time_since >= rate_limit_seconds, "Too soon, wait longer"
     
     message_id: uint256 = len(self.messages)
     
-    # Update state (no external calls, no reentrancy concerns)
     self.messages.append(Message(
         poster=msg.sender,
         content=content,
         amount=msg.value,
-        timestamp=block.timestamp,
-        block_number=block.number,
-        flagged=False
+        timestamp=block.timestamp
     ))
     
     self.total_collected += msg.value
     self.last_post_time[msg.sender] = block.timestamp
     
-    log MessagePosted(msg.sender, message_id, msg.value, content, block.timestamp)
+    log MessagePosted(msg.sender, message_id, msg.value, content)
 
 # ============= ADMIN FUNCTIONS =============
 
 @external
-def withdraw_fees():
+def withdraw():
     """
     @notice Owner withdraws accumulated fees
-    
-    @dev CEI PATTERN:
-         - Checks amount before transfer
-         - No state changes needed (balance is implicit)
-         - Checked transfer ensures atomicity
-         - Contract can continue receiving fees after withdrawal
     """
-    assert msg.sender == self.owner, "Only owner"
+    assert msg.sender == owner, "Only owner"
     amount: uint256 = self.balance
     assert amount > 0, "Nothing to withdraw"
     
-    # CRITICAL: Checked transfer (revert on failure)
-    send(self.owner, amount)
-    
-    log FeesWithdrawn(self.owner, amount)
-
-@external
-def flag_message(message_id: uint256, flagged: bool):
-    """
-    @notice Flag/unflag a message (content moderation)
-    @param message_id ID of message to flag
-    @param flagged True to flag, False to unflag
-    """
-    assert msg.sender == self.owner, "Only owner"
-    assert message_id < len(self.messages), "Invalid message ID"
-    
-    self.messages[message_id].flagged = flagged
-    log MessageFlagged(message_id, msg.sender, flagged)
-
-@external
-def propose_ownership_transfer(new_owner: address):
-    """
-    @notice Propose a new owner (2-step transfer for safety)
-    @param new_owner Address of proposed new owner
-    """
-    assert msg.sender == self.owner, "Only owner"
-    assert new_owner != empty(address), "Invalid address"
-    assert new_owner != self.owner, "Already owner"
-    
-    self.proposed_owner = new_owner
-    log OwnershipTransferProposed(self.owner, new_owner)
-
-@external
-def accept_ownership():
-    """
-    @notice Accept ownership transfer (must be called by proposed owner)
-    """
-    assert msg.sender == self.proposed_owner, "Not proposed owner"
-    assert self.proposed_owner != empty(address), "No transfer proposed"
-    
-    old_owner: address = self.owner
-    self.owner = self.proposed_owner
-    self.proposed_owner = empty(address)
-    
-    log OwnershipTransferred(old_owner, self.owner)
-
-@external
-def update_minimum_fee(new_fee: uint256):
-    """
-    @notice Update the minimum posting fee
-    @param new_fee New minimum fee in wei
-    """
-    assert msg.sender == self.owner, "Only owner"
-    
-    old_fee: uint256 = self.minimum_post_fee
-    self.minimum_post_fee = new_fee
-    log MinimumFeeUpdated(old_fee, new_fee)
-
-@external
-def update_rate_limit(new_limit: uint256):
-    """
-    @notice Update the rate limit seconds
-    @param new_limit New rate limit in seconds
-    """
-    assert msg.sender == self.owner, "Only owner"
-    
-    old_limit: uint256 = self.rate_limit_seconds
-    self.rate_limit_seconds = new_limit
-    log RateLimitUpdated(old_limit, new_limit)
+    send(owner, amount)
+    log FeesWithdrawn(owner, amount)
 
 # ============= VIEW FUNCTIONS =============
 
@@ -248,29 +104,23 @@ def update_rate_limit(new_limit: uint256):
 def get_message_count() -> uint256:
     """
     @notice Get total number of messages
-    @return Total message count
     """
     return len(self.messages)
 
 @view
 @external
+def get_message(index: uint256) -> Message:
+    """
+    @notice Get a specific message by index
+    """
+    assert index < len(self.messages), "Invalid index"
+    return self.messages[index]
+
+@view
+@external
 def get_recent_messages(count: uint256) -> DynArray[Message, 100]:
     """
-    @notice Get most recent N messages
-    @param count Number of recent messages to retrieve (max 100)
-    @return Array of recent messages (most recent last)
-    
-    @dev LOOP CORRECTNESS:
-         - Bounded loop with explicit bound=100 (Vyper requirement)
-         - Start index calculated to get last N messages
-         - Iterator count verified: (total - start) <= actual_count <= 100
-         - Empty array returned if no messages exist
-    
-    @dev MATHEMATICAL CORRECTNESS:
-         Given: count requested, total messages available
-         - actual_count = min(count, 100)  [enforce max return size]
-         - start = max(0, total - actual_count)  [get last N]
-         - iterations = total - start <= actual_count <= 100  [proven bound]
+    @notice Get most recent N messages (max 100)
     """
     result: DynArray[Message, 100] = []
     total: uint256 = len(self.messages)
@@ -278,19 +128,14 @@ def get_recent_messages(count: uint256) -> DynArray[Message, 100]:
     if total == 0:
         return result
     
-    # Calculate start index and actual count
-    # PROOF: actual_count <= 100 by construction
     actual_count: uint256 = count
     if actual_count > 100:
         actual_count = 100
     
-    # PROOF: start >= 0 always (uint256), start < total if actual_count < total
     start: uint256 = 0
     if total > actual_count:
         start = total - actual_count
     
-    # PROOF: Loop iterations = (total - start) <= actual_count <= 100
-    # Therefore bound=100 is sufficient
     for i: uint256 in range(start, total, bound=100):
         result.append(self.messages[i])
     
@@ -301,19 +146,14 @@ def get_recent_messages(count: uint256) -> DynArray[Message, 100]:
 def get_time_until_next_post(user: address) -> uint256:
     """
     @notice Check how long until user can post again
-    @param user Address to query
-    @return Seconds until next post allowed (0 if can post now)
+    @return Seconds until next post (0 if can post now)
     """
     last_post: uint256 = self.last_post_time[user]
     if last_post == 0:
         return 0
     
     elapsed: uint256 = block.timestamp - last_post
-    if elapsed >= self.rate_limit_seconds:
+    if elapsed >= rate_limit_seconds:
         return 0
     
-    return self.rate_limit_seconds - elapsed
-
-# NOTE: Additional state getters are auto-generated from public variables:
-#       owner(), messages(index), total_collected(), minimum_post_fee(),
-#       rate_limit_seconds(), last_post_time(address), etc.
+    return rate_limit_seconds - elapsed
