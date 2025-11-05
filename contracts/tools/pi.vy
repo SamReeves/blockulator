@@ -1,12 +1,5 @@
 #pragma enable-decimals
 
-s_owner: address
-
-event Lookup:
-    sender: address
-    x: decimal
-    y: decimal
-
 # Lookup table for calculating π^x using digit-by-digit multiplication
 # Row i contains π^(d * 10^(-i)) for d = 0..9
 # Accurate to ~10 decimal places
@@ -27,41 +20,17 @@ TAB: constant(decimal[10][11]) = [
 # Pi (π) - the ratio of circle's circumference to diameter
 PI: constant(decimal) = 3.1415926536
 
-@deploy
-def __init__():
-    """
-    @notice Initialize the pi calculator with the deployer as owner
-    """
-    self.s_owner = msg.sender
-
 @external
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate π^x (FREE - no gas cost for external view calls)
+    @notice Calculate π^x (FREE - no gas cost)
     @param x The exponent (must be in range [0, 10))
     @return The result of π^x
-    @dev This is a view function and costs no gas when called externally
     """
     assert x >= 0.0, "Negative powers are not supported."
     assert x < 10.0, "The power limit is 9.999999999"
     return self._pi_to_the(x)
-
-@external
-def ask(x: decimal) -> decimal:
-    """
-    @notice Calculate π^x with event logging (costs gas, but logs the lookup)
-    @param x The exponent (must be in range [0, 10))
-    @return The result of π^x
-    @dev Only non-owners can call this. Use calculate() for free view access.
-    """
-    assert msg.sender != self.s_owner, "The owner cannot call this function."
-    assert x >= 0.0, "Negative powers are not supported."
-    assert x < 10.0, "The power limit is 9.999999999"
-
-    y: decimal = self._pi_to_the(x)
-    log Lookup(msg.sender, x, y)
-    return y
 
 @external
 @view
@@ -71,23 +40,6 @@ def get_constant() -> decimal:
     @return The constant π
     """
     return PI
-
-@external
-def change_owner(new_owner: address):
-    assert msg.sender == self.s_owner, "Only the owner can change the owner."
-    assert new_owner != empty(address), "The new owner cannot be the zero address."
-    assert new_owner != self.s_owner, "The new owner cannot be the same as the old owner."
-    self.s_owner = new_owner
-
-@external
-def unalive():
-    assert msg.sender == self.s_owner, "Only the owner can unalive the contract."
-    selfdestruct(self.s_owner)
-
-@external
-@view
-def get_owner() -> address:
-    return self.s_owner
 
 @internal
 @pure

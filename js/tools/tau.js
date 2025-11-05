@@ -230,7 +230,7 @@ export class TauCalculator {
             const calculateButton = document.getElementById('calculate-button');
             if (calculateButton) {
                 calculateButton.disabled = true;
-                calculateButton.textContent = 'Submitting Transaction...';
+                calculateButton.textContent = 'Calculating...';
             }
             
             console.log(`Calculating τ^${x} on-chain`);
@@ -238,21 +238,8 @@ export class TauCalculator {
             // Convert JavaScript decimal to Vyper fixed-point (10 decimal places)
             const xFixed = ethers.utils.parseUnits(x.toString(), 10);
             
-            // Call the on-chain function (costs gas, emits event)
-            const tx = await this.contract.ask(xFixed);
-            console.log('Transaction submitted:', tx.hash);
-            
-            // Wait for transaction confirmation
-            const receipt = await tx.wait();
-            console.log('Transaction confirmed:', receipt.transactionHash);
-            
-            // Parse the Lookup event to get the result
-            const lookupEvent = receipt.events?.find(e => e.event === 'Lookup');
-            const result = lookupEvent ? lookupEvent.args.y : null;
-            
-            if (!result) {
-                throw new Error('Could not parse result from transaction');
-            }
+            // Use calculate() view function (free, no gas cost)
+            const result = await this.contract.calculate(xFixed);
             
             // Convert result back from fixed-point to decimal
             const resultDecimal = ethers.utils.formatUnits(result, 10);

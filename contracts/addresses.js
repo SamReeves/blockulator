@@ -11,9 +11,9 @@ export const CONTRACT_ADDRESSES = {
     PAY_IT_BACKWARD: '0xd9145CCE52D386f254917e481eB44e9943F39138',
     
     // Tools (Mathematical Constant Calculators)
-    E_CALCULATOR: '0x84defAdbc0Bdc9dEE9fCf68b47700f7D0016A14f',  // e^x calculator
-    PI_CALCULATOR: '0x1E74Dd04108750FA00C94FbD9eda7BC182BE931e',  // π^x calculator
-    TAU_CALCULATOR: '0xd1576B5640CB1E702BA6394d9fB050c5B0Dee48a'  // τ^x calculator
+    E_CALCULATOR: '0x0df17535A8C9B68C426F4bf872E3F4EE1c57Aab8',  // e^x calculator
+    PI_CALCULATOR: '0xeBFaB280b828153b0419bFc866BF8639b485C1da',  // π^x calculator
+    TAU_CALCULATOR: '0x4D4FF41BbF40BF3edE475686Cfd84Ea356647511'  // τ^x calculator
 };
 
 // Network configuration
