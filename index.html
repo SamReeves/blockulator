@@ -3,25 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="WhaleGames.net - Play blockchain-based games and use mathematical tools on-chain">
-    <title>WhaleGames.net</title>
+    <meta name="description" content="WhaleGames.net - Play blockchain-based games on Sepolia testnet">
+    <title>WhaleGames.net - Blockchain Games</title>
     <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <!-- Version: 4.0 - Fixed custom UI for tools too -->
 <body>
     <div id="app">
-        <!-- Testing Banner -->
-        <div class="testing-banner">
-            <span class="banner-icon">🚧</span>
-            <span class="banner-text">
-                <strong>TESTNET ONLY</strong> - Currently running on Sepolia Test Network. Mainnet coming soon!
-            </span>
-            <span class="banner-icon">🚧</span>
-        </div>
-        
         <!-- Header -->
         <header class="app-header">
-            <h1 class="app-title">🐋 WhaleGames</h1>
+            <div class="header-left">
+                <h1 class="app-title">🐋 WhaleGames</h1>
+                <span class="testnet-badge">🚧 TESTNET</span>
+            </div>
             <button id="connect-wallet" class="btn-connect">Connect Wallet</button>
             <div id="wallet-info" class="wallet-info hidden">
                 <span id="wallet-address"></span>
@@ -29,74 +23,44 @@
             </div>
         </header>
 
-        <!-- Navigation -->
-        <nav class="app-nav">
-            <button class="nav-btn active" data-section="games">Games</button>
-            <button class="nav-btn" data-section="tools">Tools</button>
-        </nav>
-
         <!-- Main Content Area -->
         <main id="content" class="content">
-            <!-- Games Section -->
-            <section id="games-section" class="section active">
-                <div class="game-list">
-                    <button class="game-card" data-game="pissing-contest">
-                        <h3>💦 Pissing Contest</h3>
-                        <p>Compete to make the biggest splash</p>
-                    </button>
-                    <button class="game-card" data-game="pay-it-forward">
-                        <h3>⏩ Pay It Forward</h3>
-                        <p>Donate and receive the previous donation</p>
-                    </button>
-                    <button class="game-card" data-game="pay-it-backward">
-                        <h3>⏪ Pay It Backward</h3>
-                        <p>Reward the previous donor immediately</p>
-                    </button>
-                    <button class="game-card" data-game="message-board">
-                        <h3>💬 Message Board</h3>
-                        <p>Post messages on-chain with anti-spam protection</p>
-                    </button>
-                    <button class="game-card" data-game="king-of-the-hill">
-                        <h3>👑 King of the Hill</h3>
-                        <p>Pay to dethrone and claim the prize. No refunds!</p>
-                    </button>
-                </div>
-                
-                <!-- Game Detail View -->
-                <div id="game-detail" class="game-detail hidden">
-                    <button id="back-to-games" class="btn-back">← Back</button>
-                    <div id="game-container"></div>
-                </div>
-            </section>
-
-            <!-- Tools Section -->
-            <section id="tools-section" class="section hidden">
-                <div class="tool-list">
-                    <button class="tool-card" data-tool="e-calculator">
-                        <h3>🔢 e Calculator</h3>
-                        <p>Calculate e^x on-chain</p>
-                    </button>
-                    <button class="tool-card" data-tool="pi-calculator">
-                        <h3>🥧 π Calculator</h3>
-                        <p>Calculate π^x on-chain</p>
-                    </button>
-                    <button class="tool-card" data-tool="tau-calculator">
-                        <h3>⭕ τ Calculator</h3>
-                        <p>Calculate τ^x on-chain</p>
-                    </button>
-                    <a href="https://sepolia-faucet.pk910.de/" target="_blank" rel="noopener noreferrer" class="tool-card external-link">
-                        <h3>💧 Sepolia ETH Faucet</h3>
-                        <p>Get free Sepolia testnet ETH (PoW)</p>
-                    </a>
-                </div>
-                
-                <!-- Tool Detail View -->
-                <div id="tool-detail" class="tool-detail hidden">
-                    <button id="back-to-tools" class="btn-back">← Back</button>
-                    <div id="tool-container"></div>
-                </div>
-            </section>
+            <div class="game-list">
+                <button class="game-card" data-game="pissing-contest">
+                    <h3>💦 Pissing Contest</h3>
+                    <p>Compete to make the biggest splash</p>
+                </button>
+                <button class="game-card" data-game="pay-it-forward">
+                    <h3>⏩ Pay It Forward</h3>
+                    <p>Donate and receive the previous donation</p>
+                </button>
+                <button class="game-card" data-game="pay-it-backward">
+                    <h3>⏪ Pay It Backward</h3>
+                    <p>Reward the previous donor immediately</p>
+                </button>
+                <button class="game-card" data-game="message-board">
+                    <h3>💬 Message Board</h3>
+                    <p>Post messages on-chain with anti-spam protection</p>
+                </button>
+                <button class="game-card" data-game="king-of-the-hill">
+                    <h3>👑 King of the Hill</h3>
+                    <p>Pay to dethrone and claim the prize. No refunds!</p>
+                </button>
+            </div>
+            
+            <!-- Game Detail View -->
+            <div id="game-detail" class="game-detail hidden">
+                <button id="back-to-games" class="btn-back">← Back</button>
+                <div id="game-container"></div>
+            </div>
         </main>
+
+        <!-- Footer Links -->
+        <footer class="app-footer">
+            <a href="tools.html" class="footer-link">🔧 Tools</a>
+            <span class="footer-separator">•</span>
+            <a href="faucet.html" class="footer-link">💧 Faucet</a>
+        </footer>
 
         <!-- Toast notifications -->
         <div id="toast-container" class="toast-container"></div>

@@ -1,39 +1,34 @@
 /**
- * Main App Entry Point
- * Handles initialization, routing, and UI coordination
+ * Tools Page Entry Point
+ * Handles initialization and UI coordination for calculator tools
  */
 
 import { web3Provider } from './web3-provider.js';
 import { eventBus, EVENTS } from './ui/events.js';
-import { GameRenderer } from './ui/game-renderer.js';
 
-// Import game modules
-import { PissingContest } from './games/pissing-contest.js';
-import { PayItForward } from './games/pay-it-forward.js';
-import { PayItBackward } from './games/pay-it-backward.js';
-import { MessageBoard } from './games/message-board.js';
-import { KingOfTheHill } from './games/king-of-the-hill.js';
+// Import tool modules
+import { ECalculator } from './tools/e.js';
+import { PiCalculator } from './tools/pi.js';
+import { TauCalculator } from './tools/tau.js';
 
-class App {
+class ToolsApp {
     constructor() {
-        console.log('🚀 App constructor called');
+        console.log('🚀 ToolsApp constructor called');
         
         try {
-            this.currentGame = null;
-            this.games = new Map([
-                ['pissing-contest', PissingContest],
-                ['pay-it-forward', PayItForward],
-                ['pay-it-backward', PayItBackward],
-                ['message-board', MessageBoard],
-                ['king-of-the-hill', KingOfTheHill]
+            this.currentTool = null;
+            this.tools = new Map([
+                ['e-calculator', ECalculator],
+                ['pi-calculator', PiCalculator],
+                ['tau-calculator', TauCalculator]
             ]);
             
-            console.log('✅ Maps created successfully');
+            console.log('✅ Tools map created successfully');
             
             this.init();
         } catch (error) {
-            console.error('❌ Error in App constructor:', error);
-            alert('Failed to initialize app: ' + error.message);
+            console.error('❌ Error in ToolsApp constructor:', error);
+            alert('Failed to initialize tools: ' + error.message);
             throw error;
         }
     }
@@ -54,7 +49,7 @@ class App {
         // Setup canvas for effects
         this.setupCanvas();
         
-        console.log('🐋 WhaleGames initialized');
+        console.log('🔧 WhaleGames Tools initialized');
     }
 
     /**
@@ -65,7 +60,6 @@ class App {
         
         // Connect wallet button
         const connectBtn = document.getElementById('connect-wallet');
-        console.log('Connect button found:', !!connectBtn);
         if (connectBtn) {
             connectBtn.addEventListener('click', () => {
                 console.log('Connect wallet button clicked!');
@@ -73,25 +67,23 @@ class App {
             });
         }
         
-        // Game cards
-        const gameCards = document.querySelectorAll('.game-card');
-        console.log('Game cards found:', gameCards.length);
-        gameCards.forEach(card => {
+        // Tool cards
+        const toolCards = document.querySelectorAll('.tool-card');
+        console.log('Tool cards found:', toolCards.length);
+        toolCards.forEach(card => {
             card.addEventListener('click', (e) => {
-                const gameId = e.currentTarget.dataset.game;
-                console.log('Game card clicked:', gameId);
-                this.loadGame(gameId);
+                const toolId = e.currentTarget.dataset.tool;
+                console.log('Tool card clicked:', toolId);
+                this.loadTool(toolId);
             });
         });
         
         // Back button
-        const backToGames = document.getElementById('back-to-games');
-        console.log('Back button found:', !!backToGames);
-        
-        if (backToGames) {
-            backToGames.addEventListener('click', () => {
-                console.log('Back to games clicked');
-                this.showGameList();
+        const backToTools = document.getElementById('back-to-tools');
+        if (backToTools) {
+            backToTools.addEventListener('click', () => {
+                console.log('Back to tools clicked');
+                this.showToolList();
             });
         }
         
@@ -149,8 +141,7 @@ class App {
     async handleConnectWallet() {
         const success = await web3Provider.connect();
         if (success) {
-            // Enable game interactions
-            console.log('Wallet connected, ready to play');
+            console.log('Wallet connected, tools ready');
         }
     }
 
@@ -178,9 +169,9 @@ class App {
     }
 
     /**
-     * Load a game
+     * Load a tool
      */
-    async loadGame(gameId) {
+    loadTool(toolId) {
         if (!web3Provider.isConnected()) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please connect your wallet first',
@@ -189,58 +180,40 @@ class App {
             return;
         }
         
-        // Extra check: ensure address is available
-        if (!web3Provider.currentAddress) {
-            console.warn('Wallet connected but address not available, retrying...');
-            // Try to reconnect
-            const success = await web3Provider.connect();
-            if (!success || !web3Provider.currentAddress) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: 'Please reconnect your wallet',
-                    type: 'error'
-                });
-                return;
-            }
-        }
-        
-        console.log('🎮 Loading game:', gameId, 'for address:', web3Provider.currentAddress);
-        
-        const GameClass = this.games.get(gameId);
-        if (!GameClass) {
-            console.error(`Game not found: ${gameId}`);
+        const ToolClass = this.tools.get(toolId);
+        if (!ToolClass) {
+            console.error(`Tool not found: ${toolId}`);
             return;
         }
         
-        // Cleanup previous game
-        if (this.currentGame && this.currentGame.destroy) {
-            this.currentGame.destroy();
+        // Cleanup previous tool
+        if (this.currentTool && this.currentTool.destroy) {
+            this.currentTool.destroy();
         }
         
-        // Show game detail view
-        document.querySelector('.game-list').classList.add('hidden');
-        document.getElementById('game-detail').classList.remove('hidden');
+        // Show tool detail view
+        document.querySelector('.tool-list').classList.add('hidden');
+        document.getElementById('tool-detail').classList.remove('hidden');
         
-        // Initialize game
-        const container = document.getElementById('game-container');
+        // Initialize tool
+        const container = document.getElementById('tool-container');
         container.innerHTML = '';
         
-        this.currentGame = new GameClass();
-        await this.currentGame.init(container, web3Provider);
-        
-        eventBus.emit(EVENTS.GAME_LOADED, { gameId });
+        this.currentTool = new ToolClass();
+        this.currentTool.init(container, web3Provider);
     }
 
     /**
-     * Show game list
+     * Show tool list
      */
-    showGameList() {
-        if (this.currentGame && this.currentGame.destroy) {
-            this.currentGame.destroy();
+    showToolList() {
+        if (this.currentTool && this.currentTool.destroy) {
+            this.currentTool.destroy();
         }
-        this.currentGame = null;
+        this.currentTool = null;
         
-        document.querySelector('.game-list').classList.remove('hidden');
-        document.getElementById('game-detail').classList.add('hidden');
+        document.querySelector('.tool-list').classList.remove('hidden');
+        document.getElementById('tool-detail').classList.add('hidden');
     }
 
     /**
@@ -266,16 +239,16 @@ class App {
 }
 
 // Initialize app when DOM is loaded
-console.log('📦 Main.js loaded, document.readyState:', document.readyState);
+console.log('📦 Tools-main.js loaded, document.readyState:', document.readyState);
 
 if (document.readyState === 'loading') {
     console.log('⏳ Waiting for DOMContentLoaded...');
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('✅ DOMContentLoaded fired, initializing App...');
-        new App();
+        console.log('✅ DOMContentLoaded fired, initializing ToolsApp...');
+        new ToolsApp();
     });
 } else {
-    console.log('✅ DOM already ready, initializing App...');
-    new App();
+    console.log('✅ DOM already ready, initializing ToolsApp...');
+    new ToolsApp();
 }
 
