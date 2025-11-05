@@ -178,6 +178,28 @@ export class ECalculator {
                 <p class="note">💡 <strong>Fun fact:</strong> e^(iπ) + 1 = 0 (Euler's identity)</p>
                 <p class="note">🔒 <strong>On-chain calculation:</strong> Results are computed on the blockchain using a lookup table for ~10 decimal place accuracy.</p>
             </div>
+            
+            <h3>🔧 Use in Your Smart Contract</h3>
+            <div class="tool-info">
+                <p>You can call this calculator from your own smart contracts! Here's an example in Vyper:</p>
+                <pre><code># Interface for E Calculator
+interface ECalculator:
+    def calculate(x: decimal) -> decimal: view
+    def get_constant() -> decimal: view
+
+# Use the calculator
+E_CALC: constant(address) = ${CONTRACT_ADDRESSES.E_CALCULATOR}
+
+@external
+@view
+def exponential_growth(rate: decimal) -> decimal:
+    # Call e^x calculator (FREE - no gas cost!)
+    result: decimal = staticcall ECalculator(E_CALC).calculate(rate)
+    return result
+</code></pre>
+                <p class="note">✨ <strong>Free to use:</strong> All calculations are view functions with no gas cost!</p>
+                <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.E_CALCULATOR}</code></p>
+            </div>
         `;
         
         return panel;

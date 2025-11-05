@@ -178,6 +178,28 @@ export class PiCalculator {
                 <p class="note">💡 <strong>Fun fact:</strong> π has been calculated to over 100 trillion digits!</p>
                 <p class="note">🔒 <strong>On-chain calculation:</strong> Results are computed on the blockchain using a lookup table for ~10 decimal place accuracy.</p>
             </div>
+            
+            <h3>🔧 Use in Your Smart Contract</h3>
+            <div class="tool-info">
+                <p>You can call this calculator from your own smart contracts! Here's an example in Vyper:</p>
+                <pre><code># Interface for Pi Calculator
+interface PiCalculator:
+    def calculate(x: decimal) -> decimal: view
+    def get_constant() -> decimal: view
+
+# Use the calculator
+PI_CALC: constant(address) = ${CONTRACT_ADDRESSES.PI_CALCULATOR}
+
+@external
+@view
+def my_calculation(exponent: decimal) -> decimal:
+    # Call π^x calculator (FREE - no gas cost!)
+    result: decimal = staticcall PiCalculator(PI_CALC).calculate(exponent)
+    return result
+</code></pre>
+                <p class="note">✨ <strong>Free to use:</strong> All calculations are view functions with no gas cost!</p>
+                <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.PI_CALCULATOR}</code></p>
+            </div>
         `;
         
         return panel;
