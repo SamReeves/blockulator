@@ -34,10 +34,10 @@ export class PiCalculator {
         
         console.log('✅ Wallet confirmed:', web3Provider.currentAddress);
         
-        // Load contract ABI placeholder
+        // Load ABI from file
         try {
-            // Placeholder ABI - will need to be generated from Vyper contract
-            const abi = [];
+            const response = await fetch('/contracts/abis/pi-calculator.json');
+            const abi = await response.json();
             
             this.contract = web3Provider.getContract(
                 CONTRACT_ADDRESSES.PI_CALCULATOR,
