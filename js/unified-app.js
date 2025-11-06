@@ -19,6 +19,9 @@ import { LastCall } from './games/last-call.js';
 import { ECalculator } from './tools/e.js';
 import { PiCalculator } from './tools/pi.js';
 import { TauCalculator } from './tools/tau.js';
+import { SinCalculator } from './tools/sin.js';
+import { CosCalculator } from './tools/cos.js';
+import { TanhCalculator } from './tools/tanh.js';
 
 class UnifiedApp {
     constructor() {
@@ -73,7 +76,10 @@ class UnifiedApp {
         this.modules = new Map([
             ['e-calculator', ECalculator],
             ['pi-calculator', PiCalculator],
-            ['tau-calculator', TauCalculator]
+            ['tau-calculator', TauCalculator],
+            ['sin-calculator', SinCalculator],
+            ['cos-calculator', CosCalculator],
+            ['tanh-calculator', TanhCalculator]
         ]);
         this.config = {
             listSelector: '.tool-list',
