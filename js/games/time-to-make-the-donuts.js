@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class TimeToMakeTheDonuts {
     constructor() {
@@ -43,7 +43,8 @@ export class TimeToMakeTheDonuts {
             title: '🍩 Time to Make the Donuts',
             description: 'Be the FIRST to donate each day! Set your alarm for midnight UTC. First donor of the day wins yesterday\'s pot (99%)!',
             contractAddress: CONTRACT_ADDRESSES.TIME_TO_MAKE_THE_DONUTS,
-            sourceFile: CONTRACT_SOURCES.TIME_TO_MAKE_THE_DONUTS
+            sourceFile: CONTRACT_SOURCES.TIME_TO_MAKE_THE_DONUTS,
+            abiFile: CONTRACT_ABIS.TIME_TO_MAKE_THE_DONUTS
         });
         
         // Create rest of the interface

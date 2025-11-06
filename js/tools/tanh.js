@@ -7,7 +7,7 @@ import { ContractLoader } from '../core/contract-loader.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class TanhCalculator {
     constructor() {
@@ -46,7 +46,8 @@ export class TanhCalculator {
             title: `🌊 ${this.symbol}(x) Calculator`,
             description: `Calculate ${this.symbol}(x) on-chain! Hyperbolic tangent is an activation function commonly used in neural networks and machine learning.`,
             contractAddress: CONTRACT_ADDRESSES.TANH_CALCULATOR,
-            sourceFile: CONTRACT_SOURCES.TANH_CALCULATOR
+            sourceFile: CONTRACT_SOURCES.TANH_CALCULATOR,
+            abiFile: CONTRACT_ABIS.TANH_CALCULATOR
         });
         
         const container = document.createElement('div');

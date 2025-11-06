@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class PayItForward {
     constructor() {
@@ -55,7 +55,8 @@ export class PayItForward {
             title: '⏩ Pay It Forward',
             description: 'Donate now, receive the next donation! A chain of generosity.',
             contractAddress: CONTRACT_ADDRESSES.PAY_IT_FORWARD,
-            sourceFile: CONTRACT_SOURCES.PAY_IT_FORWARD
+            sourceFile: CONTRACT_SOURCES.PAY_IT_FORWARD,
+            abiFile: CONTRACT_ABIS.PAY_IT_FORWARD
         });
         
         const container = document.createElement('div');

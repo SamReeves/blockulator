@@ -7,7 +7,7 @@ import { ContractLoader } from '../core/contract-loader.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class PiCalculator {
     constructor() {
@@ -55,7 +55,8 @@ export class PiCalculator {
             title: `🥧 ${this.symbol} Calculator`,
             description: `Calculate ${this.symbol}^x on-chain! Pi (${this.symbol} ≈ ${this.constantValue}) is the ratio of a circle's circumference to its diameter.`,
             contractAddress: CONTRACT_ADDRESSES.PI_CALCULATOR,
-            sourceFile: CONTRACT_SOURCES.PI_CALCULATOR
+            sourceFile: CONTRACT_SOURCES.PI_CALCULATOR,
+            abiFile: CONTRACT_ABIS.PI_CALCULATOR
         });
         
         const container = document.createElement('div');

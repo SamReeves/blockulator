@@ -25,6 +25,8 @@ import { TauCalculator } from './tools/tau.js';
 import { SinCalculator } from './tools/sin.js';
 import { CosCalculator } from './tools/cos.js';
 import { TanhCalculator } from './tools/tanh.js';
+import { Pow10Calculator } from './tools/pow10.js';
+import { Pow2Calculator } from './tools/pow2.js';
 
 class UnifiedApp {
     constructor() {
@@ -84,7 +86,9 @@ class UnifiedApp {
             ['tau-calculator', TauCalculator],
             ['sin-calculator', SinCalculator],
             ['cos-calculator', CosCalculator],
-            ['tanh-calculator', TanhCalculator]
+            ['tanh-calculator', TanhCalculator],
+            ['pow10-calculator', Pow10Calculator],
+            ['pow2-calculator', Pow2Calculator]
         ]);
         this.config = {
             listSelector: '.tool-list',

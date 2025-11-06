@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class KingOfTheHill {
     constructor() {
@@ -42,7 +42,8 @@ export class KingOfTheHill {
             title: '👑 King of the Hill',
             description: 'Pay to dethrone and win the prize. No refunds. Stakes grow forever.',
             contractAddress: CONTRACT_ADDRESSES.KING_OF_THE_HILL,
-            sourceFile: CONTRACT_SOURCES.KING_OF_THE_HILL
+            sourceFile: CONTRACT_SOURCES.KING_OF_THE_HILL,
+            abiFile: CONTRACT_ABIS.KING_OF_THE_HILL
         });
         
         // Create rest of the interface

@@ -23,7 +23,9 @@ const SEPOLIA_ADDRESSES = {
     TAU_CALCULATOR: '0x4D4FF41BbF40BF3edE475686Cfd84Ea356647511',
     SIN_CALCULATOR: '0x2b974E0C5AD3c1377Ff9d13C341e796B07627f8b',
     COS_CALCULATOR: '0x85DABC736AA6DE75940cA7C33fc970cB703AcE04',
-    TANH_CALCULATOR: '0x4bB456891e1e703Bc3bd23F69B6D6d91323622E1'
+    TANH_CALCULATOR: '0x4bB456891e1e703Bc3bd23F69B6D6d91323622E1',
+    POW10_CALCULATOR: '0x86C5081545f7c8Ab322e8308b5D772e3311DD499',
+    POW2_CALCULATOR: '0x038c3931BB2eA55e564292D64bfC4d595F162059'
 };
 
 // Mainnet Addresses (update these after deploying to mainnet)
@@ -44,7 +46,9 @@ const MAINNET_ADDRESSES = {
     TAU_CALCULATOR: '0x0000000000000000000000000000000000000000',
     SIN_CALCULATOR: '0x0000000000000000000000000000000000000000',
     COS_CALCULATOR: '0x0000000000000000000000000000000000000000',
-    TANH_CALCULATOR: '0x0000000000000000000000000000000000000000'
+    TANH_CALCULATOR: '0x0000000000000000000000000000000000000000',
+    POW10_CALCULATOR: '0x0000000000000000000000000000000000000000',
+    POW2_CALCULATOR: '0x0000000000000000000000000000000000000000'
 };
 
 // Select addresses based on current network
@@ -71,7 +75,29 @@ export const CONTRACT_SOURCES = {
     TAU_CALCULATOR: 'contracts/tools/tau.vy',
     SIN_CALCULATOR: 'contracts/tools/sin.vy',
     COS_CALCULATOR: 'contracts/tools/cos.vy',
-    TANH_CALCULATOR: 'contracts/tools/tanh.vy'
+    TANH_CALCULATOR: 'contracts/tools/tanh.vy',
+    POW10_CALCULATOR: 'contracts/tools/pow10.vy',
+    POW2_CALCULATOR: 'contracts/tools/pow2.vy'
+};
+
+// Map contract addresses to their ABI files
+export const CONTRACT_ABIS = {
+    PISSING_CONTEST: 'contracts/abis/pissing-contest.json',
+    MESSAGE_BOARD: 'contracts/abis/message-board.json',
+    PAY_IT_FORWARD: 'contracts/abis/pay-it-forward.json',
+    PAY_IT_BACKWARD: 'contracts/abis/pay-it-backward.json',
+    KING_OF_THE_HILL: 'contracts/abis/king-of-the-hill.json',
+    LAST_CALL: 'contracts/abis/last-call.json',
+    TIME_TO_MAKE_THE_DONUTS: 'contracts/abis/time-to-make-the-donuts.json',
+    DICE_GODS: 'contracts/abis/dice-gods.json',
+    E_CALCULATOR: 'contracts/abis/e-calculator.json',
+    PI_CALCULATOR: 'contracts/abis/pi-calculator.json',
+    TAU_CALCULATOR: 'contracts/abis/tau-calculator.json',
+    SIN_CALCULATOR: 'contracts/abis/sin-calculator.json',
+    COS_CALCULATOR: 'contracts/abis/cos-calculator.json',
+    TANH_CALCULATOR: 'contracts/abis/tanh-calculator.json',
+    POW10_CALCULATOR: 'contracts/abis/pow10-calculator.json',
+    POW2_CALCULATOR: 'contracts/abis/pow2-calculator.json'
 };
 
 // Network configuration

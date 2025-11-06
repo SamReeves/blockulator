@@ -7,7 +7,7 @@ import { ContractLoader } from '../core/contract-loader.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class SinCalculator {
     constructor() {
@@ -46,7 +46,8 @@ export class SinCalculator {
             title: `📐 ${this.symbol}(x) Calculator`,
             description: `Calculate ${this.symbol}(x) on-chain! Sine is a fundamental trigonometric function that returns the y-coordinate of a point on the unit circle.`,
             contractAddress: CONTRACT_ADDRESSES.SIN_CALCULATOR,
-            sourceFile: CONTRACT_SOURCES.SIN_CALCULATOR
+            sourceFile: CONTRACT_SOURCES.SIN_CALCULATOR,
+            abiFile: CONTRACT_ABIS.SIN_CALCULATOR
         });
         
         const container = document.createElement('div');

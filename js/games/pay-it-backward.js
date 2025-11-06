@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class PayItBackward {
     constructor() {
@@ -55,7 +55,8 @@ export class PayItBackward {
             title: '⏪ Pay It Backward',
             description: 'Donate now, reward the previous donor! Immediate gratification for those who came before.',
             contractAddress: CONTRACT_ADDRESSES.PAY_IT_BACKWARD,
-            sourceFile: CONTRACT_SOURCES.PAY_IT_BACKWARD
+            sourceFile: CONTRACT_SOURCES.PAY_IT_BACKWARD,
+            abiFile: CONTRACT_ABIS.PAY_IT_BACKWARD
         });
         
         const container = document.createElement('div');

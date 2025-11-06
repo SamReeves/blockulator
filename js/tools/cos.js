@@ -7,7 +7,7 @@ import { ContractLoader } from '../core/contract-loader.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class CosCalculator {
     constructor() {
@@ -46,7 +46,8 @@ export class CosCalculator {
             title: `📐 ${this.symbol}(x) Calculator`,
             description: `Calculate ${this.symbol}(x) on-chain! Cosine is a fundamental trigonometric function that returns the x-coordinate of a point on the unit circle.`,
             contractAddress: CONTRACT_ADDRESSES.COS_CALCULATOR,
-            sourceFile: CONTRACT_SOURCES.COS_CALCULATOR
+            sourceFile: CONTRACT_SOURCES.COS_CALCULATOR,
+            abiFile: CONTRACT_ABIS.COS_CALCULATOR
         });
         
         const container = document.createElement('div');

@@ -1,6 +1,6 @@
 /**
- * E (Euler's Number) Calculator Tool
- * Calculate e^x on-chain
+ * Pow2 Calculator Tool
+ * Calculate 2^x on-chain
  */
 
 import { ContractLoader } from '../core/contract-loader.js';
@@ -9,15 +9,15 @@ import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
-export class ECalculator {
+export class Pow2Calculator {
     constructor() {
         this.contract = null;
         this.container = null;
         this.web3Provider = null;
-        this.gameType = 'e-calculator';
-        this.constantValue = 2.7182818285;
-        this.symbol = 'e';
-        this.name = 'Euler';
+        this.gameType = 'pow2-calculator';
+        this.constantValue = 2.0;
+        this.symbol = '2';
+        this.name = 'Power of 2';
     }
 
     /**
@@ -28,7 +28,7 @@ export class ECalculator {
         this.web3Provider = web3Provider;
         
         // Load contract using utility
-        this.contract = await ContractLoader.load('e-calculator', web3Provider);
+        this.contract = await ContractLoader.load('pow2-calculator', web3Provider);
         if (!this.contract) return;
         
         // Load constant value from contract
@@ -36,7 +36,7 @@ export class ECalculator {
             const value = await this.contract.get_constant();
             this.constantValue = parseFloat(ethers.utils.formatUnits(value, 10));
         } catch (error) {
-            console.log('Using default e value');
+            console.log('Using default 2 value');
         }
         
         // Render UI
@@ -52,11 +52,11 @@ export class ECalculator {
     render() {
         // Header with contract info
         const header = GameRenderer.createGameHeader({
-            title: `🔢 ${this.symbol} Calculator`,
-            description: `Calculate ${this.symbol}^x on-chain! Euler's number (${this.symbol} ≈ ${this.constantValue}) is the base of natural logarithms.`,
-            contractAddress: CONTRACT_ADDRESSES.E_CALCULATOR,
-            sourceFile: CONTRACT_SOURCES.E_CALCULATOR,
-            abiFile: CONTRACT_ABIS.E_CALCULATOR
+            title: `🔢 ${this.symbol}^x Calculator`,
+            description: `Calculate ${this.symbol}^x on-chain! Power of 2 is fundamental to computer science, binary systems, and information theory.`,
+            contractAddress: CONTRACT_ADDRESSES.POW2_CALCULATOR,
+            sourceFile: CONTRACT_SOURCES.POW2_CALCULATOR,
+            abiFile: CONTRACT_ABIS.POW2_CALCULATOR
         });
         
         const container = document.createElement('div');
@@ -116,6 +116,16 @@ export class ECalculator {
                 <div class="result-info">
                     Enter an exponent and click Calculate to see the result
                 </div>
+                <div class="result-examples">
+                    <p><strong>Quick Examples:</strong></p>
+                    <ul>
+                        <li>2^0 = 1</li>
+                        <li>2^1 = 2</li>
+                        <li>2^8 = 256 (1 byte)</li>
+                        <li>2^10 = 1024 (1 kibi)</li>
+                        <li>2^0.5 ≈ 1.414 (√2)</li>
+                    </ul>
+                </div>
             </div>
         `;
         return panel;
@@ -128,39 +138,47 @@ export class ECalculator {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
         panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}'s Number</h3>
+            <h3>ℹ️ About ${this.name}</h3>
             <div class="tool-info">
-                <p><strong>${this.symbol} ≈ 2.71828...</strong> is the base of the natural logarithm.</p>
+                <p><strong>Base 2</strong> is the foundation of computing and information theory.</p>
                 <ul>
-                    <li>Discovered by Leonhard Euler</li>
-                    <li>Appears in compound interest calculations</li>
-                    <li>Found in probability theory and statistics</li>
-                    <li>Essential in calculus (derivative of e^x is e^x)</li>
+                    <li><strong>Binary System:</strong> All digital data is stored in powers of 2</li>
+                    <li><strong>Computer Memory:</strong> Sizes are powers of 2 (1KB = 2^10 bytes)</li>
+                    <li><strong>Information Theory:</strong> Bits represent log₂ of possibilities</li>
+                    <li><strong>Algorithms:</strong> Binary search, tree depths, etc.</li>
                 </ul>
-                <p class="note">💡 <strong>Fun fact:</strong> ${this.symbol} is irrational and transcendental, like π!</p>
-                <p class="note">🔒 <strong>On-chain calculation:</strong> Results are computed on the blockchain using a lookup table for ~10 decimal place accuracy.</p>
+                <p class="note">💡 <strong>Fun fact:</strong> 2^10 (1024) is so common in computing it has its own prefix: "kibi" (Ki)!</p>
+                <p class="note">🔒 <strong>On-chain calculation:</strong> Uses digit-by-digit lookup table for high accuracy (~10 decimal places).</p>
             </div>
             
             <h3>🔧 Use in Your Smart Contract</h3>
             <div class="tool-info">
                 <p>You can call this calculator from your own smart contracts! Here's an example in Vyper:</p>
                 <pre><code># Interface for ${this.name} Calculator
-interface ${this.name}Calculator:
+interface Pow2Calculator:
     def calculate(x: decimal) -> decimal: view
     def get_constant() -> decimal: view
 
 # Use the calculator
-CALC: constant(address) = ${CONTRACT_ADDRESSES.E_CALCULATOR}
+CALC: constant(address) = ${CONTRACT_ADDRESSES.POW2_CALCULATOR}
 
 @external
 @view
 def my_calculation(exponent: decimal) -> decimal:
-    # Call ${this.symbol}^x calculator (FREE - no gas cost!)
-    result: decimal = staticcall ${this.name}Calculator(CALC).calculate(exponent)
+    # Call 2^x calculator (FREE - no gas cost!)
+    result: decimal = staticcall Pow2Calculator(CALC).calculate(exponent)
     return result
+
+# Example: Calculate binary tree size
+@external
+@view
+def binary_tree_nodes(depth: decimal) -> decimal:
+    # Total nodes = 2^depth - 1
+    total: decimal = staticcall Pow2Calculator(CALC).calculate(depth)
+    return total - 1.0
 </code></pre>
                 <p class="note">✨ <strong>Free to use:</strong> All calculations are view functions with no gas cost!</p>
-                <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.E_CALCULATOR}</code></p>
+                <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.POW2_CALCULATOR}</code></p>
             </div>
         `;
         return panel;
@@ -183,7 +201,7 @@ def my_calculation(exponent: decimal) -> decimal:
     }
 
     /**
-     * Calculate e^x
+     * Calculate 2^x
      */
     async calculate(exponent) {
         const x = parseFloat(exponent);
@@ -260,3 +278,4 @@ def my_calculation(exponent: decimal) -> decimal:
         }
     }
 }
+

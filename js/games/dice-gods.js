@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class DiceGods {
     constructor() {
@@ -37,7 +37,8 @@ export class DiceGods {
             title: '🎲 Dice Gods',
             description: 'Choose the LEAST popular number to win the pot!',
             contractAddress: CONTRACT_ADDRESSES.DICE_GODS,
-            sourceFile: CONTRACT_SOURCES.DICE_GODS
+            sourceFile: CONTRACT_SOURCES.DICE_GODS,
+            abiFile: CONTRACT_ABIS.DICE_GODS
         });
         
         const container = document.createElement('div');

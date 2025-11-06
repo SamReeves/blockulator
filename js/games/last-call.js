@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class LastCall {
     constructor() {
@@ -43,7 +43,8 @@ export class LastCall {
             title: '⏰ Last Call',
             description: 'Be the LAST to donate before time runs out! Rush to be the final player. Winner takes 99% of the pot!',
             contractAddress: CONTRACT_ADDRESSES.LAST_CALL,
-            sourceFile: CONTRACT_SOURCES.LAST_CALL
+            sourceFile: CONTRACT_SOURCES.LAST_CALL,
+            abiFile: CONTRACT_ABIS.LAST_CALL
         });
         
         // Create rest of the interface

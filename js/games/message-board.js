@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class MessageBoard {
     constructor() {
@@ -38,7 +38,8 @@ export class MessageBoard {
             title: '💬 Message Board',
             description: 'Post messages on-chain. Simple. Transparent.',
             contractAddress: CONTRACT_ADDRESSES.MESSAGE_BOARD,
-            sourceFile: CONTRACT_SOURCES.MESSAGE_BOARD
+            sourceFile: CONTRACT_SOURCES.MESSAGE_BOARD,
+            abiFile: CONTRACT_ABIS.MESSAGE_BOARD
         });
         
         // Create rest of the interface

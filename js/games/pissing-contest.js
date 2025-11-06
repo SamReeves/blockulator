@@ -8,7 +8,7 @@ import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/addresses.js';
 
 export class PissingContest {
     constructor() {
@@ -36,7 +36,8 @@ export class PissingContest {
             title: '💦 Pissing Contest',
             description: 'Send the HIGHEST donation to win the pot!',
             contractAddress: CONTRACT_ADDRESSES.PISSING_CONTEST,
-            sourceFile: CONTRACT_SOURCES.PISSING_CONTEST
+            sourceFile: CONTRACT_SOURCES.PISSING_CONTEST,
+            abiFile: CONTRACT_ABIS.PISSING_CONTEST
         });
         
         const container = document.createElement('div');

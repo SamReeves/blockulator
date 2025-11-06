@@ -27,7 +27,7 @@ export class GameRenderer {
         
         // Add contract info section
         if (config.contractAddress) {
-            const contractInfo = this.createContractInfo(config.contractAddress, config.sourceFile);
+            const contractInfo = this.createContractInfo(config.contractAddress, config.sourceFile, config.abiFile);
             header.appendChild(contractInfo);
         }
         
@@ -192,7 +192,7 @@ export class GameRenderer {
     /**
      * Create contract info section with address, Etherscan link, and view badge
      */
-    static createContractInfo(contractAddress, sourceFile = null) {
+    static createContractInfo(contractAddress, sourceFile = null, abiFile = null) {
         const infoContainer = document.createElement('div');
         infoContainer.className = 'contract-info';
         
@@ -228,6 +228,16 @@ export class GameRenderer {
             viewSourceBtn.title = 'View Vyper source code';
             viewSourceBtn.onclick = () => this.showSourceModal(sourceFile);
             infoContainer.appendChild(viewSourceBtn);
+        }
+        
+        // Add View ABI button if ABI file is provided
+        if (abiFile) {
+            const viewAbiBtn = document.createElement('button');
+            viewAbiBtn.className = 'contract-badge contract-badge-abi';
+            viewAbiBtn.innerHTML = '📋 View ABI';
+            viewAbiBtn.title = 'View contract ABI (JSON)';
+            viewAbiBtn.onclick = () => this.showAbiModal(abiFile);
+            infoContainer.appendChild(viewAbiBtn);
         }
         
         return infoContainer;
@@ -307,6 +317,102 @@ export class GameRenderer {
                 await navigator.clipboard.writeText(code);
                 eventBus.emit(EVENTS.TOAST, {
                     message: 'Source code copied to clipboard!',
+                    type: 'success'
+                });
+            } catch (error) {
+                console.error('Copy failed:', error);
+                eventBus.emit(EVENTS.TOAST, {
+                    message: 'Failed to copy to clipboard',
+                    type: 'error'
+                });
+            }
+        });
+        
+        // Escape key to close
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+    
+    /**
+     * Show ABI modal
+     */
+    static async showAbiModal(abiFile) {
+        try {
+            const response = await fetch(abiFile);
+            if (!response.ok) {
+                throw new Error('Failed to load ABI');
+            }
+            const abi = await response.json();
+            const formattedAbi = JSON.stringify(abi, null, 2);
+            this.createAbiModal(formattedAbi, abiFile);
+        } catch (error) {
+            console.error('Error loading ABI:', error);
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Failed to load ABI',
+                type: 'error'
+            });
+        }
+    }
+    
+    /**
+     * Create and show ABI modal
+     */
+    static createAbiModal(abiJson, abiFile) {
+        // Remove existing modal if any
+        const existingModal = document.getElementById('abi-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        const modal = document.createElement('div');
+        modal.id = 'abi-modal';
+        modal.className = 'modal-overlay';
+        
+        modal.innerHTML = `
+            <div class="modal-content source-modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">📋 Contract ABI</h3>
+                    <button class="modal-close" id="close-abi-modal">✕</button>
+                </div>
+                <div class="modal-file-info">
+                    <span class="file-path">${abiFile}</span>
+                </div>
+                <div class="modal-body">
+                    <pre class="source-code"><code class="language-json">${this.escapeHtml(abiJson)}</code></pre>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="copy-abi">📋 Copy to Clipboard</button>
+                    <button class="btn-primary" id="close-abi-modal-footer">Close</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        const closeButtons = modal.querySelectorAll('#close-abi-modal, #close-abi-modal-footer');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // Copy button
+        const copyBtn = modal.querySelector('#copy-abi');
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(abiJson);
+                eventBus.emit(EVENTS.TOAST, {
+                    message: 'ABI copied to clipboard!',
                     type: 'success'
                 });
             } catch (error) {
