@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="WhaleGames.net Futures - Create and trade Gaussian futures on-chain">
+    <meta name="view-transition" content="same-origin">
+    <title>WhaleGames.net - Futures</title>
+    <link rel="stylesheet" href="styles.css?v=4">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1 class="app-title">📈 WhaleGames Futures</h1>
+                <span class="testnet-badge">🚧 TESTNET</span>
+                <span id="readonly-badge" class="readonly-badge">👀 Browsing</span>
+            </div>
+            <button id="connect-wallet" class="btn-connect">Connect Wallet</button>
+            <div id="wallet-info" class="wallet-info hidden">
+                <span id="wallet-address"></span>
+                <span id="wallet-balance"></span>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main id="content" class="content">
+            <!-- Create Futures Section -->
+            <div class="futures-creator">
+                <div class="game-interface">
+                    <h2 class="game-title">🎯 Create Gaussian Future</h2>
+                    <p class="game-description">
+                        Create a time-limited Gaussian future with custom value and expiration
+                    </p>
+                </div>
+
+                <!-- Creation Form -->
+                <div class="futures-form">
+                    <div class="input-group">
+                        <label for="future-value">Future Value (Wei)</label>
+                        <input 
+                            type="text" 
+                            id="future-value" 
+                            placeholder="Enter value in wei"
+                            class="wei-input"
+                        />
+                        <div class="input-hint">
+                            The target value for the future contract
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="time-to-live">Time to Live (seconds)</label>
+                        <input 
+                            type="number" 
+                            id="time-to-live" 
+                            placeholder="Enter duration in seconds"
+                            min="60"
+                        />
+                        <div class="input-hint">
+                            How long the future will remain active (minimum 60 seconds)
+                        </div>
+                    </div>
+
+                    <!-- Quick Time Presets -->
+                    <div class="quick-amounts">
+                        <button class="quick-amount-btn" data-time="3600">1 Hour</button>
+                        <button class="quick-amount-btn" data-time="86400">1 Day</button>
+                        <button class="quick-amount-btn" data-time="604800">1 Week</button>
+                        <button class="quick-amount-btn" data-time="2592000">30 Days</button>
+                    </div>
+
+                    <!-- ERF Calculation Preview -->
+                    <div id="erf-preview" class="blockchain-data hidden">
+                        <h3>📊 Calculation Preview</h3>
+                        <div class="data-row">
+                            <span class="data-label">ERF Input:</span>
+                            <span class="data-value" id="erf-input">-</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">ERF Result:</span>
+                            <span class="data-value" id="erf-result">-</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Probability:</span>
+                            <span class="data-value" id="probability">-</span>
+                        </div>
+                    </div>
+
+                    <button id="create-future-btn" class="btn-play" disabled>
+                        Create Future (Coming Soon)
+                    </button>
+
+                    <div class="input-hint" style="text-align: center; margin-top: 1rem;">
+                        ℹ️ Future contract deployment coming soon. Currently showing ERF calculations from our on-chain tool.
+                    </div>
+                </div>
+
+                <!-- ERF Calculator Info -->
+                <div class="blockchain-data">
+                    <h3>🧮 Using ERF Calculator</h3>
+                    <div class="tool-info">
+                        <p>Gaussian futures use the Error Function (erf) for probability calculations:</p>
+                        <ul>
+                            <li><strong>erf(x)</strong> - Returns the error function value</li>
+                            <li><strong>Range:</strong> -1 to 1 (input -5 to 5)</li>
+                            <li><strong>Applications:</strong> Normal distributions, probability calculations</li>
+                        </ul>
+                        
+                        <div class="contract-info">
+                            <span class="contract-label">ERF Calculator Contract:</span>
+                            <a 
+                                href="#" 
+                                id="erf-contract-address" 
+                                class="contract-address"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Loading...
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div class="blockchain-data">
+                    <h3>❓ How Gaussian Futures Work</h3>
+                    <div class="how-it-works">
+                        <ol>
+                            <li><strong>Create a Future:</strong> Set a target value and expiration time</li>
+                            <li><strong>Gaussian Distribution:</strong> Values follow a normal distribution curve</li>
+                            <li><strong>ERF Calculation:</strong> The error function determines probabilities on-chain</li>
+                            <li><strong>Time Decay:</strong> Value changes as the future approaches expiration</li>
+                            <li><strong>Settlement:</strong> Futures settle based on final value at expiration</li>
+                        </ol>
+                        
+                        <div class="note">
+                            <strong>📝 Note:</strong> This is a preview interface. The futures contract is currently in development. 
+                            All ERF calculations are performed on-chain using our verified calculator contract.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer Links -->
+        <footer class="app-footer">
+            <a href="index.html" class="footer-link">🎮 Games</a>
+            <span class="footer-separator">•</span>
+            <a href="tools.html" class="footer-link">🔧 Tools</a>
+            <span class="footer-separator">•</span>
+            <a href="https://sepolia-faucet.pk910.de/" class="footer-link">💧 Faucet</a>
+            <span class="footer-separator">•</span>
+            <button id="joy-button" class="footer-link footer-button">✨ Joy</button>
+        </footer>
+
+        <!-- Toast notifications -->
+        <div id="toast-container" class="toast-container"></div>
+
+        <!-- Canvas for animations/effects -->
+        <canvas id="effects-canvas" class="effects-canvas"></canvas>
+    </div>
+
+    <!-- Web3 Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script type="module" src="js/futures-app.js?v=1"></script>
+</body>
+</html>
+
