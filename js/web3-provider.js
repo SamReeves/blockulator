@@ -1,16 +1,37 @@
 /**
  * Web3 Provider Manager
  * Handles wallet connection and Web3 instance
+ * Supports read-only mode without wallet connection
  */
 
 import { eventBus, EVENTS } from './ui/events.js';
 
 class Web3Provider {
     constructor() {
-        this.provider = null;
-        this.signer = null;
-        this.address = null;
-        this.chainId = null;
+        this.provider = null;           // Wallet provider (when connected)
+        this.signer = null;              // Wallet signer
+        this.address = null;             // Connected wallet address
+        this.chainId = null;             // Connected network chain ID
+        this.readOnlyProvider = null;   // Public RPC provider (always available)
+        
+        // Initialize read-only provider immediately
+        this.initReadOnlyProvider();
+    }
+
+    /**
+     * Initialize read-only provider for viewing blockchain state
+     * This works without any wallet connection
+     */
+    initReadOnlyProvider() {
+        try {
+            // Sepolia testnet public RPC
+            this.readOnlyProvider = new ethers.providers.JsonRpcProvider(
+                'https://rpc.sepolia.org'
+            );
+            console.log('📖 Read-only provider initialized');
+        } catch (error) {
+            console.error('Failed to initialize read-only provider:', error);
+        }
     }
 
     /**
@@ -193,21 +214,47 @@ class Web3Provider {
     }
 
     /**
-     * Get contract instance
+     * Get the appropriate provider (wallet if connected, read-only otherwise)
      */
-    getContract(address, abi) {
-        if (!this.signer) {
-            throw new Error('Wallet not connected');
-        }
-        return new ethers.Contract(address, abi, this.signer);
+    getProvider() {
+        return this.provider || this.readOnlyProvider;
     }
 
     /**
-     * Get balance
+     * Get signer (only available when wallet is connected)
+     */
+    getSigner() {
+        if (!this.signer) {
+            return null;
+        }
+        return this.signer;
+    }
+
+    /**
+     * Get contract instance
+     * Returns read-only contract if wallet not connected
+     * Returns contract with signer if wallet is connected
+     */
+    getContract(address, abi) {
+        const provider = this.getProvider();
+        const contract = new ethers.Contract(address, abi, provider);
+        
+        // If wallet connected, attach signer for write operations
+        if (this.signer) {
+            return contract.connect(this.signer);
+        }
+        
+        // Return read-only contract
+        return contract;
+    }
+
+    /**
+     * Get balance (requires connected wallet address)
      */
     async getBalance() {
         if (!this.address) return '0';
-        const balance = await this.provider.getBalance(this.address);
+        const provider = this.getProvider();
+        const balance = await provider.getBalance(this.address);
         return ethers.utils.formatEther(balance);
     }
 

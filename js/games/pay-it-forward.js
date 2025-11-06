@@ -168,6 +168,15 @@ export class PayItForward {
      * Make a donation
      */
     async donate(weiAmount) {
+        // Check wallet connection first
+        if (!this.web3Provider.isConnected()) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🔐 Please connect your wallet to participate',
+                type: 'warning'
+            });
+            return;
+        }
+        
         if (!weiAmount || parseFloat(weiAmount) <= 0) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please enter a valid wei amount',
@@ -205,11 +214,12 @@ export class PayItForward {
         if (!this.contract) return;
 
         try {
-            // Load state in parallel
+            // Load state in parallel - works in read-only mode
+            const provider = this.web3Provider.getProvider();
             const [pendingDonor, pendingAmount, balance] = await Promise.all([
                 this.contract.pending_donor(),
                 this.contract.pending_amount(),
-                this.web3Provider.provider.getBalance(this.contract.address)
+                provider.getBalance(this.contract.address)
             ]);
 
             // Update local state
@@ -227,23 +237,37 @@ export class PayItForward {
                 DOMHelpers.formatWei(balance)
             );
             
-            // Check if current user is pending
-            const isYouPending = pendingDonor.toLowerCase() === 
-                this.web3Provider.currentAddress.toLowerCase();
-            
-            DOMHelpers.updateInfo('your-status', 
-                isYouPending ? '🎯 You are pending!' : 'Not pending'
-            );
+            // User-specific info - only if wallet connected
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                // Check if current user is pending
+                const isYouPending = pendingDonor.toLowerCase() === 
+                    this.web3Provider.currentAddress.toLowerCase();
+                
+                DOMHelpers.updateInfo('your-status', 
+                    isYouPending ? '🎯 You are pending!' : 'Not pending'
+                );
 
-            // Update state message
-            const stateMessage = document.getElementById('state-message');
-            if (stateMessage) {
-                if (pendingDonor === '0x0000000000000000000000000000000000000000') {
-                    stateMessage.textContent = '🚀 Be the first donor to start the chain!';
-                } else if (isYouPending) {
-                    stateMessage.textContent = '⏳ You are pending! Waiting for the next donor to pay you.';
-                } else {
-                    stateMessage.textContent = '💫 Donate now and receive the pending amount immediately!';
+                // Update state message
+                const stateMessage = document.getElementById('state-message');
+                if (stateMessage) {
+                    if (pendingDonor === '0x0000000000000000000000000000000000000000') {
+                        stateMessage.textContent = '🚀 Be the first donor to start the chain!';
+                    } else if (isYouPending) {
+                        stateMessage.textContent = '⏳ You are pending! Waiting for the next donor to pay you.';
+                    } else {
+                        stateMessage.textContent = '💫 Donate now and receive the pending amount immediately!';
+                    }
+                }
+            } else {
+                // Read-only mode
+                DOMHelpers.updateInfo('your-status', '👀 Read-only mode');
+                const stateMessage = document.getElementById('state-message');
+                if (stateMessage) {
+                    if (pendingDonor === '0x0000000000000000000000000000000000000000') {
+                        stateMessage.textContent = '🚀 Chain not started yet. Connect wallet to be first!';
+                    } else {
+                        stateMessage.textContent = '👀 Viewing game state. Connect wallet to participate!';
+                    }
                 }
             }
 
@@ -269,18 +293,20 @@ export class PayItForward {
             // Refresh state when donations occur
             await this.refreshState();
             
-            // Show notification if it involves current user
-            if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                if (isFirst) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: '🎉 You started the chain! Waiting for next donor.',
-                        type: 'success'
-                    });
-                } else {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `🎉 You received ${DOMHelpers.formatWei(received)} and are now pending!`,
-                        type: 'success'
-                    });
+            // Show notification if it involves current user (only if wallet connected)
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+                    if (isFirst) {
+                        eventBus.emit(EVENTS.TOAST, {
+                            message: '🎉 You started the chain! Waiting for next donor.',
+                            type: 'success'
+                        });
+                    } else {
+                        eventBus.emit(EVENTS.TOAST, {
+                            message: `🎉 You received ${DOMHelpers.formatWei(received)} and are now pending!`,
+                            type: 'success'
+                        });
+                    }
                 }
             }
         });

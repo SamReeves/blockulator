@@ -212,6 +212,15 @@ export class DiceGods {
     }
 
     async play(weiAmount) {
+        // Check wallet connection first
+        if (!this.web3Provider.isConnected()) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🔐 Please connect your wallet to play',
+                type: 'warning'
+            });
+            return;
+        }
+        
         if (!this.selectedNumber) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please select a number first',
@@ -228,7 +237,7 @@ export class DiceGods {
             return;
         }
         
-        try {
+        try{
             await TransactionHandler.execute(
                 this.contract.play(this.selectedNumber, { 
                     value: ethers.BigNumber.from(weiAmount) 

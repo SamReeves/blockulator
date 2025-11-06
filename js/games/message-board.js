@@ -134,6 +134,15 @@ export class MessageBoard {
     }
 
     async post() {
+        // Check wallet connection first
+        if (!this.web3Provider.isConnected()) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🔐 Please connect your wallet to post messages',
+                type: 'warning'
+            });
+            return;
+        }
+        
         const content = document.getElementById('msg-content').value.trim();
         const fee = document.getElementById('msg-fee').value;
         
@@ -184,14 +193,12 @@ export class MessageBoard {
         if (!this.contract) return;
         
         try {
-            // Load all data in parallel using DOMHelpers
-            const [count, total, minFee, rateLimit, lastPost, waitTime] = await Promise.all([
+            // Load general data (works in read-only mode)
+            const [count, total, minFee, rateLimit] = await Promise.all([
                 this.contract.get_message_count(),
                 this.contract.total_collected(),
                 this.contract.minimum_post_fee(),
-                this.contract.rate_limit_seconds(),
-                this.contract.last_post_time(this.web3Provider.currentAddress),
-                this.contract.get_time_until_next_post(this.web3Provider.currentAddress)
+                this.contract.rate_limit_seconds()
             ]);
             
             // Update stats using DOMHelpers
@@ -207,12 +214,25 @@ export class MessageBoard {
             }
             
             DOMHelpers.updateInfo('rate-limit', rateLimit.toString() + 's');
-            DOMHelpers.updateInfo('last-post', DOMHelpers.formatTimestamp(lastPost.toNumber()));
             
-            const wait = waitTime.toNumber();
-            DOMHelpers.updateInfo('wait-time', 
-                wait === 0 ? 'Now ✅' : `${wait}s ⏳`
-            );
+            // User-specific data - only if wallet connected
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                const [lastPost, waitTime] = await Promise.all([
+                    this.contract.last_post_time(this.web3Provider.currentAddress),
+                    this.contract.get_time_until_next_post(this.web3Provider.currentAddress)
+                ]);
+                
+                DOMHelpers.updateInfo('last-post', DOMHelpers.formatTimestamp(lastPost.toNumber()));
+                
+                const wait = waitTime.toNumber();
+                DOMHelpers.updateInfo('wait-time', 
+                    wait === 0 ? 'Now ✅' : `${wait}s ⏳`
+                );
+            } else {
+                // Read-only mode
+                DOMHelpers.updateInfo('last-post', '👀 Read-only');
+                DOMHelpers.updateInfo('wait-time', 'Connect wallet');
+            }
             
             // Load recent messages
             await this.loadMessages(count.toNumber());

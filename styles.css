@@ -92,6 +92,22 @@ body {
     white-space: nowrap;
 }
 
+.readonly-badge {
+    background: linear-gradient(135deg, #475569, #334155);
+    color: var(--text-secondary);
+    padding: 2px var(--spacing-xs);
+    border-radius: 4px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    opacity: 0.9;
+}
+
+.readonly-badge.hidden {
+    display: none;
+}
+
 .btn-connect {
     background: var(--primary);
     color: white;

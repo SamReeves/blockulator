@@ -137,6 +137,15 @@ export class PissingContest {
     }
 
     async donate(weiAmount) {
+        // Check wallet connection first
+        if (!this.web3Provider.isConnected()) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🔐 Please connect your wallet to participate',
+                type: 'warning'
+            });
+            return;
+        }
+        
         if (!weiAmount || parseFloat(weiAmount) <= 0) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please enter a valid wei amount',
@@ -168,7 +177,7 @@ export class PissingContest {
     }
 
     async refreshState() {
-        if (!this.contract || !this.web3Provider?.currentAddress) return;
+        if (!this.contract) return;
 
         try {
             const roundInfo = await this.contract.get_current_round_info();
@@ -179,7 +188,7 @@ export class PissingContest {
             const largestDonor = roundInfo[4];
             const totalValue = roundInfo[5];
 
-            // Update UI using DOMHelpers
+            // Update UI using DOMHelpers - these work in read-only mode
             DOMHelpers.updateInfo('prize-pool', 
                 DOMHelpers.formatWei(totalValue)
             );
@@ -192,22 +201,28 @@ export class PissingContest {
                     : DOMHelpers.formatAddress(largestDonor)
             );
 
-            // Get user's position
-            const userPosition = await this.contract.get_current_leaderboard_position(
-                this.web3Provider.currentAddress
-            );
-            const userDonation = userPosition[0];
-            const isWinning = userPosition[1];
+            // User-specific info - only load if wallet connected
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                const userPosition = await this.contract.get_current_leaderboard_position(
+                    this.web3Provider.currentAddress
+                );
+                const userDonation = userPosition[0];
+                const isWinning = userPosition[1];
 
-            DOMHelpers.updateInfo('your-donation', 
-                DOMHelpers.formatWei(userDonation)
-            );
-            
-            DOMHelpers.updateInfo('your-status', 
-                userDonation.gt(0) 
-                    ? (isWinning ? '🥇 Leading!' : '📊 Playing')
-                    : 'Not playing'
-            );
+                DOMHelpers.updateInfo('your-donation', 
+                    DOMHelpers.formatWei(userDonation)
+                );
+                
+                DOMHelpers.updateInfo('your-status', 
+                    userDonation.gt(0) 
+                        ? (isWinning ? '🥇 Leading!' : '📊 Playing')
+                        : 'Not playing'
+                );
+            } else {
+                // Read-only mode - show placeholder
+                DOMHelpers.updateInfo('your-donation', '👀 Read-only mode');
+                DOMHelpers.updateInfo('your-status', 'Connect to play');
+            }
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
@@ -224,25 +239,37 @@ export class PissingContest {
         this.contract.on('DonationReceived', async (roundNumber, donor, amount, donationNumber, isLargest) => {
             await this.refreshState();
             
-            const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            if (isYou && isLargest) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: '🏆 You are now leading!',
-                    type: 'success'
-                });
+            // Only show "you" messages if wallet connected
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                if (isYou && isLargest) {
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: '🏆 You are now leading!',
+                        type: 'success'
+                    });
+                }
             }
         });
 
         this.contract.on('RoundEnded', async (roundNumber, winner, prize) => {
-            const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            
-            if (isYou) {
-                eventBus.emit(EVENTS.CONFETTI);
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `🎉 YOU WON ${DOMHelpers.formatWei(prize)}!`,
-                    type: 'success'
-                });
+            // Check if winner is you, but only if wallet connected
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                
+                if (isYou) {
+                    eventBus.emit(EVENTS.CONFETTI);
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: `🎉 YOU WON ${DOMHelpers.formatWei(prize)}!`,
+                        type: 'success'
+                    });
+                } else {
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: `Round ended. Winner: ${DOMHelpers.formatAddress(winner)}`,
+                        type: 'info'
+                    });
+                }
             } else {
+                // Read-only mode - just show winner
                 eventBus.emit(EVENTS.TOAST, {
                     message: `Round ended. Winner: ${DOMHelpers.formatAddress(winner)}`,
                     type: 'info'

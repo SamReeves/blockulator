@@ -160,17 +160,57 @@ class UnifiedApp {
      * Setup wallet event listeners
      */
     setupWalletListeners() {
-        eventBus.on(EVENTS.WALLET_CONNECTED, (data) => {
-            this.updateWalletUI(data.address);
+        eventBus.on(EVENTS.WALLET_CONNECTED, async (data) => {
+            await this.updateWalletUI(data.address);
+            // Refresh current module to show user-specific data
+            await this.refreshCurrentModule();
         });
 
-        eventBus.on(EVENTS.WALLET_DISCONNECTED, () => {
-            this.updateWalletUI(null);
+        eventBus.on(EVENTS.WALLET_DISCONNECTED, async () => {
+            await this.updateWalletUI(null);
+            // Refresh to show read-only state
+            await this.refreshCurrentModule();
         });
 
-        eventBus.on(EVENTS.WALLET_CHANGED, (data) => {
-            this.updateWalletUI(data.address);
+        eventBus.on(EVENTS.WALLET_CHANGED, async (data) => {
+            await this.updateWalletUI(data.address);
+            // Refresh with new wallet address
+            await this.refreshCurrentModule();
         });
+    }
+
+    /**
+     * Refresh the currently loaded module (game or tool)
+     * Called when wallet connection state changes
+     */
+    async refreshCurrentModule() {
+        if (!this.currentModule) return;
+        
+        console.log('🔄 Refreshing current module after wallet state change...');
+        
+        // Reconnect contract with new signer (if wallet connected)
+        if (this.currentModule.contract && web3Provider.getSigner()) {
+            console.log('🔗 Reconnecting contract with signer...');
+            this.currentModule.contract = this.currentModule.contract.connect(web3Provider.getSigner());
+        }
+        
+        // Check if module has a refresh method
+        if (typeof this.currentModule.refreshState === 'function') {
+            try {
+                await this.currentModule.refreshState();
+                console.log('✅ Module refreshed successfully');
+            } catch (error) {
+                console.error('Failed to refresh module:', error);
+            }
+        } else if (typeof this.currentModule.loadState === 'function') {
+            // Some modules use loadState instead
+            try {
+                await this.currentModule.loadState();
+                console.log('✅ Module refreshed successfully');
+            } catch (error) {
+                console.error('Failed to refresh module:', error);
+            }
+        }
     }
 
     /**
@@ -222,10 +262,13 @@ class UnifiedApp {
         const walletInfo = document.getElementById('wallet-info');
         const walletAddress = document.getElementById('wallet-address');
         const walletBalance = document.getElementById('wallet-balance');
+        const readonlyBadge = document.getElementById('readonly-badge');
 
         if (address) {
+            // Connected mode
             connectBtn?.classList.add('hidden');
             walletInfo?.classList.remove('hidden');
+            readonlyBadge?.classList.add('hidden');
             
             if (walletAddress) {
                 walletAddress.textContent = web3Provider.formatAddress(address);
@@ -237,38 +280,30 @@ class UnifiedApp {
                 walletBalance.textContent = `${parseFloat(balance).toFixed(4)} ETH`;
             }
         } else {
+            // Read-only mode
             connectBtn?.classList.remove('hidden');
             walletInfo?.classList.add('hidden');
+            readonlyBadge?.classList.remove('hidden');
         }
     }
 
     /**
      * Load a module (game or tool)
+     * Now works in both read-only mode and connected mode
      */
     async loadModule(moduleId) {
-        // Check wallet connection
+        // No longer blocks on wallet connection!
+        // Modules can load in read-only mode to view state
+        
+        const mode = web3Provider.isConnected() ? 'connected' : 'read-only';
+        console.log(`🎮 Loading ${this.pageType}:`, moduleId, `(${mode} mode)`);
+        
         if (!web3Provider.isConnected()) {
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
-                type: 'warning'
+                message: '👀 Viewing in read-only mode. Connect wallet to participate!',
+                type: 'info'
             });
-            return;
         }
-
-        // Ensure address is available
-        if (!web3Provider.currentAddress) {
-            console.warn('Wallet connected but address not available, retrying...');
-            const success = await web3Provider.connect();
-            if (!success || !web3Provider.currentAddress) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: 'Please reconnect your wallet',
-                    type: 'error'
-                });
-                return;
-            }
-        }
-
-        console.log(`🎮 Loading ${this.pageType}:`, moduleId, 'for address:', web3Provider.currentAddress);
 
         const ModuleClass = this.modules.get(moduleId);
         if (!ModuleClass) {

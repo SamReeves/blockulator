@@ -168,6 +168,15 @@ export class PayItBackward {
      * Make a donation
      */
     async donate(weiAmount) {
+        // Check wallet connection first
+        if (!this.web3Provider.isConnected()) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🔐 Please connect your wallet to participate',
+                type: 'warning'
+            });
+            return;
+        }
+        
         if (!weiAmount || parseFloat(weiAmount) <= 0) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please enter a valid wei amount',
@@ -225,23 +234,37 @@ export class PayItBackward {
                 DOMHelpers.formatAddress(nextRecipient)
             );
             
-            // Check if current user is last donor
-            const isYouLastDonor = lastDonor.toLowerCase() === 
-                this.web3Provider.currentAddress.toLowerCase();
-            
-            DOMHelpers.updateInfo('your-status', 
-                isYouLastDonor ? '🎯 You are the last donor!' : 'Not last donor'
-            );
+            // User-specific info - only if wallet connected
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                // Check if current user is last donor
+                const isYouLastDonor = lastDonor.toLowerCase() === 
+                    this.web3Provider.currentAddress.toLowerCase();
+                
+                DOMHelpers.updateInfo('your-status', 
+                    isYouLastDonor ? '🎯 You are the last donor!' : 'Not last donor'
+                );
 
-            // Update state message
-            const stateMessage = document.getElementById('state-message');
-            if (stateMessage) {
-                if (lastDonor === '0x0000000000000000000000000000000000000000') {
-                    stateMessage.textContent = '🚀 Be the first donor! Your donation will go to the contract owner.';
-                } else if (isYouLastDonor) {
-                    stateMessage.textContent = '🎉 You are the last donor! You will receive the next donation.';
-                } else {
-                    stateMessage.textContent = `💫 Donate now to reward ${DOMHelpers.formatAddress(nextRecipient)} and become the next recipient!`;
+                // Update state message
+                const stateMessage = document.getElementById('state-message');
+                if (stateMessage) {
+                    if (lastDonor === '0x0000000000000000000000000000000000000000') {
+                        stateMessage.textContent = '🚀 Be the first donor! Your donation will go to the contract owner.';
+                    } else if (isYouLastDonor) {
+                        stateMessage.textContent = '🎉 You are the last donor! You will receive the next donation.';
+                    } else {
+                        stateMessage.textContent = `💫 Donate now to reward ${DOMHelpers.formatAddress(nextRecipient)} and become the next recipient!`;
+                    }
+                }
+            } else {
+                // Read-only mode
+                DOMHelpers.updateInfo('your-status', '👀 Read-only mode');
+                const stateMessage = document.getElementById('state-message');
+                if (stateMessage) {
+                    if (lastDonor === '0x0000000000000000000000000000000000000000') {
+                        stateMessage.textContent = '🚀 No donors yet. Connect wallet to be first!';
+                    } else {
+                        stateMessage.textContent = `👀 Next recipient: ${DOMHelpers.formatAddress(nextRecipient)}. Connect wallet to participate!`;
+                    }
                 }
             }
 
@@ -272,17 +295,19 @@ export class PayItBackward {
             // Refresh state when donations occur
             await this.refreshState();
             
-            // Show notification if it involves current user
-            if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `🎉 You donated ${DOMHelpers.formatWei(amount)} to ${DOMHelpers.formatAddress(recipient)}!`,
-                    type: 'success'
-                });
-            } else if (recipient.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `💰 You received ${DOMHelpers.formatWei(amount)} from ${DOMHelpers.formatAddress(donor)}!`,
-                    type: 'success'
-                });
+            // Show notification if it involves current user (only if wallet connected)
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: `🎉 You donated ${DOMHelpers.formatWei(amount)} to ${DOMHelpers.formatAddress(recipient)}!`,
+                        type: 'success'
+                    });
+                } else if (recipient.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+                    eventBus.emit(EVENTS.TOAST, {
+                        message: `💰 You received ${DOMHelpers.formatWei(amount)} from ${DOMHelpers.formatAddress(donor)}!`,
+                        type: 'success'
+                    });
+                }
             }
         });
     }

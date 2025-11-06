@@ -171,6 +171,15 @@ export class KingOfTheHill {
     }
 
     async claimThrone() {
+        // Check wallet connection first
+        if (!this.web3Provider.isConnected()) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🔐 Please connect your wallet to claim the throne',
+                type: 'warning'
+            });
+            return;
+        }
+        
         const payment = document.getElementById('throne-payment').value;
         
         if (!payment || payment <= 0) {
@@ -181,7 +190,7 @@ export class KingOfTheHill {
             return;
         }
         
-        try {
+        try{
             const minPayment = await this.contract.get_minimum_payment();
             const paymentBN = ethers.BigNumber.from(payment);
             
@@ -219,23 +228,28 @@ export class KingOfTheHill {
         if (!this.contract) return;
         
         try {
+            // Load general data (works in read-only mode)
             const [
                 currentKing,
                 currentPrize,
                 coronationTime,
                 totalDethronements,
                 contractBalance,
-                minPayment,
-                userStats
+                minPayment
             ] = await Promise.all([
                 this.contract.current_king(),
                 this.contract.current_prize(),
                 this.contract.coronation_time(),
                 this.contract.total_dethronements(),
                 this.contract.get_contract_balance(),
-                this.contract.get_minimum_payment(),
-                this.contract.get_king_stats(this.web3Provider.currentAddress)
+                this.contract.get_minimum_payment()
             ]);
+            
+            // Load user stats only if wallet connected
+            let userStats = null;
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                userStats = await this.contract.get_king_stats(this.web3Provider.currentAddress);
+            }
             
             // Update king display using DOMHelpers
             const kingDisplay = currentKing === '0x0000000000000000000000000000000000000000' 
@@ -244,7 +258,9 @@ export class KingOfTheHill {
             
             const kingEl = document.getElementById('king-address');
             if (kingEl) {
-                const isYouKing = currentKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                const isYouKing = this.web3Provider.isConnected() && 
+                                   this.web3Provider.currentAddress &&
+                                   currentKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                 if (isYouKing) {
                     kingEl.innerHTML = 
                         `<span style="color: #ffd700;">YOU!</span><br><span style="font-size: 0.875rem; opacity: 0.9;">${kingDisplay}</span>`;
@@ -270,8 +286,16 @@ export class KingOfTheHill {
             // Update stats using DOMHelpers
             DOMHelpers.updateInfo('total-dethrone', totalDethronements.toString());
             DOMHelpers.updateInfo('contract-balance', DOMHelpers.formatWei(contractBalance));
-            DOMHelpers.updateInfo('your-crowns', userStats[0].toString());
-            DOMHelpers.updateInfo('your-reign', DOMHelpers.formatDuration(userStats[1].toNumber()));
+            
+            // User-specific stats
+            if (userStats) {
+                DOMHelpers.updateInfo('your-crowns', userStats[0].toString());
+                DOMHelpers.updateInfo('your-reign', DOMHelpers.formatDuration(userStats[1].toNumber()));
+            } else {
+                // Read-only mode
+                DOMHelpers.updateInfo('your-crowns', '👀');
+                DOMHelpers.updateInfo('your-reign', 'Read-only');
+            }
             
             // Load history
             await this.loadHistory();

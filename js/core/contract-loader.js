@@ -2,6 +2,9 @@
  * Contract Loading Utility
  * Centralizes ABI fetching and contract instantiation
  * 
+ * Works in both read-only mode (no wallet) and connected mode (with wallet).
+ * Returns read-only contract when wallet not connected, or contract with signer when connected.
+ * 
  * Usage:
  *   import { ContractLoader } from '../core/contract-loader.js';
  *   this.contract = await ContractLoader.load('pissing-contest', web3Provider);
@@ -15,20 +18,11 @@ export class ContractLoader {
     /**
      * Load a contract by name
      * @param {string} contractName - Name in kebab-case (e.g., 'pissing-contest')
-     * @param {Object} web3Provider - Connected Web3 provider
+     * @param {Object} web3Provider - Web3 provider (works with or without wallet connection)
      * @returns {Promise<Contract|null>} Ethers contract instance or null if failed
      */
     static async load(contractName, web3Provider) {
-        // Validate wallet connection
-        if (!web3Provider.isConnected() || !web3Provider.currentAddress) {
-            console.error(`Cannot load ${contractName}: Wallet not connected`);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
-                type: 'error'
-            });
-            return null;
-        }
-
+        // No longer requires wallet connection - works in read-only mode too!
         try {
             // Fetch ABI
             const response = await fetch(`/contracts/abis/${contractName}.json`);
@@ -45,10 +39,11 @@ export class ContractLoader {
                 throw new Error(`No address configured for ${contractName} (key: ${addressKey})`);
             }
 
-            // Create contract instance
+            // Create contract instance (read-only or with signer)
             const contract = web3Provider.getContract(address, abi);
             
-            console.log(`✅ Contract loaded: ${contractName} at ${address}`);
+            const mode = web3Provider.isConnected() ? 'connected' : 'read-only';
+            console.log(`✅ Contract loaded: ${contractName} at ${address} (${mode} mode)`);
             return contract;
 
         } catch (error) {

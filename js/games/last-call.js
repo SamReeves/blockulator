@@ -159,6 +159,15 @@ export class LastCall {
     }
 
     async donate() {
+        // Check wallet connection first
+        if (!this.web3Provider.isConnected()) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🔐 Please connect your wallet to participate',
+                type: 'warning'
+            });
+            return;
+        }
+        
         const amount = document.getElementById('donation-amount').value;
         
         if (!amount || amount <= 0) {
@@ -169,7 +178,7 @@ export class LastCall {
             return;
         }
         
-        try {
+        try{
             const amountBN = ethers.BigNumber.from(amount);
             
             // Use TransactionHandler utility
