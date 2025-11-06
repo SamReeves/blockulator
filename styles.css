@@ -212,6 +212,7 @@ body {
 .game-card:nth-child(5), .tool-card:nth-child(5) { animation-delay: 0.25s; }
 .game-card:nth-child(6), .tool-card:nth-child(6) { animation-delay: 0.30s; }
 .game-card:nth-child(7), .tool-card:nth-child(7) { animation-delay: 0.35s; }
+.game-card:nth-child(8), .tool-card:nth-child(8) { animation-delay: 0.40s; }
 
 @keyframes fadeInUp {
     from {
@@ -2487,6 +2488,185 @@ textarea#message-content:focus {
 ::view-transition-old(root),
 ::view-transition-new(root) {
     animation-duration: 0.25s;
+}
+
+/* Dice Gods Game Styles */
+.dice-selection-area {
+    margin: var(--spacing-lg) 0;
+}
+
+.dice-selection-area h3 {
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.dice-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.dice-button {
+    background: var(--bg-card);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.dice-button:hover {
+    background: rgba(37, 99, 235, 0.1);
+    border-color: var(--primary);
+    transform: translateY(-4px);
+}
+
+.dice-button.selected {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-color: var(--primary);
+    transform: scale(1.05);
+}
+
+.dice-face {
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.dice-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.dice-votes {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.vote-distribution-panel {
+    background: var(--bg-card);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+}
+
+.vote-distribution-panel h3 {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-primary);
+}
+
+.distribution-bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.distribution-row {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.dist-number {
+    min-width: 30px;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.dist-bar-container {
+    flex: 1;
+    height: 24px;
+    background: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dist-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: width 0.3s ease;
+}
+
+.dist-bar.winning {
+    background: linear-gradient(90deg, var(--success), #14b8a6);
+}
+
+.dist-count {
+    min-width: 40px;
+    text-align: right;
+    color: var(--text-secondary);
+}
+
+.winning-badge {
+    font-size: 1.2rem;
+    animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.strategy-hint {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: rgba(16, 185, 129, 0.1);
+    border-left: 3px solid var(--success);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.example-box {
+    margin-top: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: rgba(37, 99, 235, 0.1);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--border-radius-sm);
+}
+
+.example-box h4 {
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+.example-box p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-xs);
+}
+
+/* Responsive Dice Grid */
+@media (max-width: 768px) {
+    .dice-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .dice-face {
+        font-size: 2rem;
+    }
+    
+    .dice-number {
+        font-size: 1.2rem;
+    }
+    
+    .dice-button {
+        padding: var(--spacing-md);
+    }
 }
 
 /* Accessibility: Reduced Motion */
