@@ -30,6 +30,8 @@ import { Pow2Calculator } from './tools/pow2.js';
 import { LnCalculator } from './tools/ln.js';
 import { Log2Calculator } from './tools/log2.js';
 import { Log10Calculator } from './tools/log10.js';
+import { SqrtCalculator } from './tools/sqrt.js';
+import { ErfCalculator } from './tools/erf.js';
 
 class UnifiedApp {
     constructor() {
@@ -94,7 +96,9 @@ class UnifiedApp {
             ['pow2-calculator', Pow2Calculator],
             ['ln-calculator', LnCalculator],
             ['log2-calculator', Log2Calculator],
-            ['log10-calculator', Log10Calculator]
+            ['log10-calculator', Log10Calculator],
+            ['sqrt-calculator', SqrtCalculator],
+            ['erf-calculator', ErfCalculator]
         ]);
         this.config = {
             listSelector: '.tool-list',
