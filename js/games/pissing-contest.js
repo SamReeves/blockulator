@@ -11,6 +11,7 @@ import { eventBus, EVENTS } from '../ui/events.js';
 import { DonationHistory } from '../ui/components/DonationHistory.js';
 import { DonationStats } from '../ui/components/DonationStats.js';
 import { DonationChart } from '../ui/components/DonationChart.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
 
 export class PissingContest {
     constructor() {
@@ -61,7 +62,9 @@ export class PissingContest {
         // Main game interface
         const ui = GameRenderer.createGameInterface({
             title: '💦 Pissing Contest',
-            description: 'Send the HIGHEST donation to win! Winner takes the pot when max donations reached.'
+            description: 'Send the HIGHEST donation to win! Winner takes the pot when max donations reached.',
+            contractAddress: CONTRACT_ADDRESSES.PISSING_CONTEST,
+            sourceFile: CONTRACT_SOURCES.PISSING_CONTEST
         });
         this.container.appendChild(ui);
         

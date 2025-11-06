@@ -6,7 +6,9 @@
 import { ContractLoader } from '../core/contract-loader.js';
 import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
+import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
 
 export class MessageBoard {
     constructor() {
@@ -31,12 +33,21 @@ export class MessageBoard {
     }
 
     render() {
-        this.container.innerHTML = `
-            <div class="game-interface">
-                <div class="game-header">
-                    <h2 class="game-title">💬 Message Board</h2>
-                    <p class="game-description">Post messages on-chain. Simple. Transparent.</p>
-                </div>
+        // Create header with contract info
+        const header = GameRenderer.createGameHeader({
+            title: '💬 Message Board',
+            description: 'Post messages on-chain. Simple. Transparent.',
+            contractAddress: CONTRACT_ADDRESSES.MESSAGE_BOARD,
+            sourceFile: CONTRACT_SOURCES.MESSAGE_BOARD
+        });
+        
+        // Create rest of the interface
+        const gameContent = document.createElement('div');
+        gameContent.className = 'game-interface';
+        gameContent.appendChild(header);
+        
+        const contentInner = document.createElement('div');
+        contentInner.innerHTML = `
 
                 <div class="game-controls">
                     <div class="input-group">
@@ -100,8 +111,10 @@ export class MessageBoard {
                         </div>
                     </div>
                 </div>
-            </div>
         `;
+        
+        gameContent.appendChild(contentInner);
+        this.container.appendChild(gameContent);
     }
 
     setupListeners() {

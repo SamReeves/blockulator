@@ -1,17 +1,13 @@
 #pragma enable-decimals
 
-# Sine calculation using lookup table with linear interpolation
-# 500 points in [0, pi/2] with ~7 decimal place accuracy
-
 # Constants
 PI: constant(decimal) = 3.1415926536
 TWO_PI: constant(decimal) = 6.2831853072
 HALF_PI: constant(decimal) = 1.5707963268
 STEP_SIZE: constant(decimal) = 0.0031478884  # (pi/2) / 499
-INV_STEP: constant(decimal) = 317.6506351  # 1 / STEP_SIZE
+INV_STEP: constant(decimal) = 317.6506351
 TABLE_SIZE: constant(uint256) = 500
 
-# Lookup table: sin(x) for x in [0, pi/2]
 SIN_TABLE: constant(decimal[500]) = [
     0.0000000000, 0.0031478832, 0.0062957353, 0.0094435249, 0.0125912210,
     0.0157387923, 0.0188862077, 0.0220334359, 0.0251804457, 0.0283272061,
@@ -119,7 +115,7 @@ SIN_TABLE: constant(decimal[500]) = [
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate sin(x) in radians (FREE - no gas cost)
+    @notice Calculate sin(x) in radians
     @param x The angle in radians
     @return The result of sin(x) in range [-1, 1]
     """
@@ -137,50 +133,27 @@ def get_constant() -> decimal:
 @internal
 @pure
 def _sin(x: decimal) -> decimal:
-    """
-    Calculate sin(x) using linear interpolation with lookup table
-    
-    Algorithm:
-    1. Handle negative values (sin is odd)
-    2. Reduce to [0, 2pi] range
-    3. Map to [0, pi/2] using symmetries
-    4. Linear interpolation in table
-    """
-    # Handle negative (sin is odd function: sin(-x) = -sin(x))
     sign: decimal = 1.0
     angle: decimal = x
     if angle < 0.0:
         sign = -1.0
         angle = -angle
     
-    # Reduce to [0, 2pi] range
     if angle >= TWO_PI:
-        # Use integer division to find how many full periods
         periods: uint256 = convert(angle / TWO_PI, uint256)
         angle = angle - convert(periods, decimal) * TWO_PI
-    
-    # Map to [0, pi/2] using symmetries and determine sign
-    # Quadrant 1: [0, pi/2] -> use as-is
-    # Quadrant 2: [pi/2, pi] -> sin(x) = sin(pi - x)
-    # Quadrant 3: [pi, 3pi/2] -> sin(x) = -sin(x - pi)
-    # Quadrant 4: [3pi/2, 2pi] -> sin(x) = -sin(2pi - x)
     
     reduced: decimal = angle
     
     if angle > PI:
-        # Quadrants 3 & 4: negative
         sign = -sign
         if angle <= PI + HALF_PI:
-            # Quadrant 3: [pi, 3pi/2]
             reduced = angle - PI
         else:
-            # Quadrant 4: [3pi/2, 2pi]
             reduced = TWO_PI - angle
     elif angle > HALF_PI:
-        # Quadrant 2: [pi/2, pi]
         reduced = PI - angle
     
-    # Now reduced is in [0, pi/2], do linear interpolation
     result: decimal = self._interpolate(reduced)
     
     return sign * result
@@ -188,19 +161,12 @@ def _sin(x: decimal) -> decimal:
 @internal
 @pure
 def _interpolate(x: decimal) -> decimal:
-    """
-    Linear interpolation in lookup table
-    x must be in [0, pi/2]
-    """
-    # Find position in table
     pos: decimal = x * INV_STEP
     idx: uint256 = convert(pos, uint256)
     
-    # Boundary check
     if idx >= TABLE_SIZE - 1:
         return SIN_TABLE[TABLE_SIZE - 1]
     
-    # Linear interpolation: y = y0 + frac * (y1 - y0)
     frac: decimal = pos - convert(idx, decimal)
     y0: decimal = SIN_TABLE[idx]
     y1: decimal = SIN_TABLE[idx + 1]

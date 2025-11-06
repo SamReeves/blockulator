@@ -22,27 +22,26 @@ EXAMPLE:
 - Stakes grow exponentially!
 """
 
-# ============= CONSTANTS =============
+# Constants
 
 MINIMUM_INCREASE_BP: constant(uint256) = 100  # 1% = 100 basis points
 BASIS_POINTS: constant(uint256) = 10000
 MINIMUM_ABSOLUTE_INCREASE: constant(uint256) = 1000  # Minimum 1000 wei increase
 
-# ============= STATE VARIABLES =============
+# State variables
 
 owner: public(immutable(address))
 
 current_king: public(address)
-current_prize: public(uint256)  # The prize you can win by dethroning
+current_prize: public(uint256)
 coronation_time: public(uint256)
 total_dethronements: public(uint256)
 
-# Historical tracking
 king_history: public(DynArray[address, 1000])
-reign_duration: public(HashMap[address, uint256])  # Total time as king
-times_crowned: public(HashMap[address, uint256])   # How many times someone was king
+reign_duration: public(HashMap[address, uint256])
+times_crowned: public(HashMap[address, uint256])
 
-# ============= EVENTS =============
+# Events
 
 event NewKing:
     new_king: indexed(address)
@@ -53,13 +52,13 @@ event NewKing:
     dethronement_number: uint256
     timestamp: uint256
 
-# ============= INITIALIZATION =============
+# Initialization
 
 @deploy
 def __init__(initial_prize: uint256):
     """
     @notice Initialize the eternal hill
-    @param initial_prize Starting prize in wei (e.g., 0.001 ETH)
+    @param initial_prize Starting prize in wei
     """
     assert initial_prize > 0, "Need non-zero starting prize"
     
@@ -69,41 +68,35 @@ def __init__(initial_prize: uint256):
     self.coronation_time = block.timestamp
     self.total_dethronements = 0
 
-# ============= CORE GAME LOGIC =============
+# Core game logic
 
 @payable
 @external
 def claim_throne():
     """
     @notice Pay to dethrone and claim the prize
-    @dev Must satisfy BOTH: payment >= (prize + 1000) AND payment >= (prize × 1.01)
+    @dev Must satisfy BOTH minimum requirements
     """
-    # Calculate both minimum requirements
     percentage_minimum: uint256 = (self.current_prize * (BASIS_POINTS + MINIMUM_INCREASE_BP)) // BASIS_POINTS
     absolute_minimum: uint256 = self.current_prize + MINIMUM_ABSOLUTE_INCREASE
     
-    # BOTH conditions must be met
     assert msg.value >= percentage_minimum, "Payment below percentage minimum"
     assert msg.value >= absolute_minimum, "Payment below absolute minimum"
     
     previous_king: address = self.current_king
     prize_to_win: uint256 = self.current_prize
     
-    # Update reign duration for previous king
     if previous_king != empty(address):
         reign_time: uint256 = block.timestamp - self.coronation_time
         self.reign_duration[previous_king] += reign_time
         
-        # Pay the prize to new king (they paid, then win the prize)
         send(msg.sender, prize_to_win)
     
-    # Crown new king
     self.current_king = msg.sender
-    self.current_prize = msg.value  # Their payment becomes the new prize
+    self.current_prize = msg.value
     self.coronation_time = block.timestamp
     self.total_dethronements += 1
     
-    # Update stats
     self.king_history.append(msg.sender)
     self.times_crowned[msg.sender] += 1
     
@@ -117,23 +110,18 @@ def claim_throne():
         block.timestamp
     )
 
-# ============= ADMIN FUNCTIONS =============
-# (None needed - contract only holds current prize)
-
-# ============= VIEW FUNCTIONS =============
+# View functions
 
 @view
 @external
 def get_minimum_payment() -> uint256:
     """
     @notice Calculate minimum payment to dethrone current king
-    @return Minimum payment (must satisfy BOTH conditions)
+    @return Minimum payment
     """
-    # Calculate both requirements
     percentage_minimum: uint256 = (self.current_prize * (BASIS_POINTS + MINIMUM_INCREASE_BP)) // BASIS_POINTS
     absolute_minimum: uint256 = self.current_prize + MINIMUM_ABSOLUTE_INCREASE
     
-    # Return the maximum (ensures both are satisfied)
     if absolute_minimum > percentage_minimum:
         return absolute_minimum
     return percentage_minimum
@@ -161,7 +149,7 @@ def get_king_stats(king: address) -> (uint256, uint256):
 @external
 def get_recent_kings(count: uint256) -> DynArray[address, 100]:
     """
-    @notice Get most recent N kings (max 100)
+    @notice Get most recent kings
     """
     result: DynArray[address, 100] = []
     total: uint256 = len(self.king_history)
@@ -186,7 +174,7 @@ def get_recent_kings(count: uint256) -> DynArray[address, 100]:
 @external
 def get_contract_balance() -> uint256:
     """
-    @notice Total balance (should equal current prize)
+    @notice Total balance
     """
     return self.balance
 

@@ -17,6 +17,18 @@ export const CONTRACT_ADDRESSES = {
     TAU_CALCULATOR: '0x4D4FF41BbF40BF3edE475686Cfd84Ea356647511'  // τ^x calculator
 };
 
+// Map contract addresses to their source files
+export const CONTRACT_SOURCES = {
+    PISSING_CONTEST: 'contracts/games/pissing_contest.vy',
+    MESSAGE_BOARD: 'contracts/games/message_board.vy',
+    PAY_IT_FORWARD: 'contracts/games/pay_it_forward.vy',
+    PAY_IT_BACKWARD: 'contracts/games/pay_it_backward.vy',
+    KING_OF_THE_HILL: 'contracts/games/king_of_the_hill.vy',
+    E_CALCULATOR: 'contracts/tools/e.vy',
+    PI_CALCULATOR: 'contracts/tools/pi.vy',
+    TAU_CALCULATOR: 'contracts/tools/tau.vy'
+};
+
 // Network configuration
 export const NETWORKS = {
     1: 'Ethereum Mainnet',

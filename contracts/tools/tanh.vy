@@ -1,16 +1,12 @@
 #pragma enable-decimals
 
-# Hyperbolic tangent using lookup table with linear interpolation
-# 500 points in [0, 5] with ~7 decimal place accuracy
-
 # Constants
 MAX_VAL: constant(decimal) = 5.0
 STEP_SIZE: constant(decimal) = 0.0100200401  # 5 / 499
-INV_STEP: constant(decimal) = 99.8003992016  # 1 / STEP_SIZE
+INV_STEP: constant(decimal) = 99.8003992016
 TABLE_SIZE: constant(uint256) = 500
-ASYMPTOTIC_CUTOFF: constant(decimal) = 6.0  # For |x| > 6, return +/-1
+ASYMPTOTIC_CUTOFF: constant(decimal) = 6.0
 
-# Lookup table: tanh(x) for x in [0, 5]
 TANH_TABLE: constant(decimal[500]) = [
     0.0000000000, 0.0100197048, 0.0200373979, 0.0300510693, 0.0400587123,
     0.0500583248, 0.0600479113, 0.0700254844, 0.0799890660, 0.0899366895,
@@ -118,7 +114,7 @@ TANH_TABLE: constant(decimal[500]) = [
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate tanh(x) - hyperbolic tangent (FREE - no gas cost)
+    @notice Calculate tanh(x) - hyperbolic tangent
     @param x The input value
     @return The result of tanh(x) in range (-1, 1)
     """
@@ -136,20 +132,6 @@ def get_constant() -> decimal:
 @internal
 @pure
 def _tanh(x: decimal) -> decimal:
-    """
-    Calculate tanh(x) using linear interpolation with lookup table
-    
-    Properties:
-    - tanh is odd: tanh(-x) = -tanh(x)
-    - tanh(x) approaches 1 as x approaches infinity
-    - tanh(x) approaches -1 as x approaches negative infinity
-    
-    Algorithm:
-    1. Handle sign (odd function)
-    2. Check asymptotic bounds (|x| > 6 -> +/-1)
-    3. Linear interpolation in table for x in [0, 5]
-    """
-    # Handle sign (odd function: tanh(-x) = -tanh(x))
     sign: decimal = 1.0
     val: decimal = x
     
@@ -157,16 +139,12 @@ def _tanh(x: decimal) -> decimal:
         sign = -1.0
         val = -x
     
-    # Asymptotic behavior for large |x|
-    # tanh(6) ~ 0.9999877, essentially 1.0 at 10 decimal precision
     if val >= ASYMPTOTIC_CUTOFF:
         return sign * 1.0
     
-    # For values beyond table max, use last table value (very close to 1)
     if val >= MAX_VAL:
         return sign * TANH_TABLE[TABLE_SIZE - 1]
     
-    # Linear interpolation in table
     result: decimal = self._interpolate(val)
     
     return sign * result
@@ -174,19 +152,12 @@ def _tanh(x: decimal) -> decimal:
 @internal
 @pure
 def _interpolate(x: decimal) -> decimal:
-    """
-    Linear interpolation in lookup table
-    x must be in [0, 5]
-    """
-    # Find position in table
     pos: decimal = x * INV_STEP
     idx: uint256 = convert(pos, uint256)
     
-    # Boundary check
     if idx >= TABLE_SIZE - 1:
         return TANH_TABLE[TABLE_SIZE - 1]
     
-    # Linear interpolation: y = y0 + frac * (y1 - y0)
     frac: decimal = pos - convert(idx, decimal)
     y0: decimal = TANH_TABLE[idx]
     y1: decimal = TANH_TABLE[idx + 1]

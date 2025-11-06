@@ -6,7 +6,9 @@
 import { ContractLoader } from '../core/contract-loader.js';
 import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
+import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
 
 export class KingOfTheHill {
     constructor() {
@@ -35,12 +37,21 @@ export class KingOfTheHill {
     }
 
     render() {
-        this.container.innerHTML = `
-            <div class="game-interface">
-                <div class="game-header">
-                    <h2 class="game-title">👑 King of the Hill</h2>
-                    <p class="game-description">Pay to dethrone and win the prize. No refunds. Stakes grow forever.</p>
-                </div>
+        // Create header with contract info
+        const header = GameRenderer.createGameHeader({
+            title: '👑 King of the Hill',
+            description: 'Pay to dethrone and win the prize. No refunds. Stakes grow forever.',
+            contractAddress: CONTRACT_ADDRESSES.KING_OF_THE_HILL,
+            sourceFile: CONTRACT_SOURCES.KING_OF_THE_HILL
+        });
+        
+        // Create rest of the interface
+        const gameContent = document.createElement('div');
+        gameContent.className = 'game-interface';
+        gameContent.appendChild(header);
+        
+        const contentInner = document.createElement('div');
+        contentInner.innerHTML = `
 
                 <div class="game-sections">
                     <!-- Current King Display -->
@@ -134,8 +145,10 @@ export class KingOfTheHill {
                         </div>
                     </div>
                 </div>
-            </div>
         `;
+        
+        gameContent.appendChild(contentInner);
+        this.container.appendChild(gameContent);
     }
 
     setupListeners() {

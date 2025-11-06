@@ -1,8 +1,5 @@
 #pragma enable-decimals
 
-# Lookup table for calculating e^x using digit-by-digit multiplication
-# Row i contains e^(d * 10^(-i)) for d = 0..9
-# Accurate to ~10 decimal places
 TAB: constant(decimal[10][11]) = [[1.0, 2.7182818285, 7.3890560989, 20.0855369232, 54.5981500331, 148.4131591026, 403.4287934927, 1096.6331584285, 2980.9579870417, 8103.0839275754],
     [1.0, 1.1051709181, 1.2214027582, 1.3498588076, 1.4918246976, 1.6487212707, 1.8221188004, 2.0137527075, 2.2255409285, 2.4596031112],
     [1.0, 1.0100501671, 1.02020134, 1.030454534, 1.0408107742, 1.0512710964, 1.0618365465, 1.0725081813, 1.0832870677, 1.0941742837],
@@ -15,15 +12,14 @@ TAB: constant(decimal[10][11]) = [[1.0, 2.7182818285, 7.3890560989, 20.085536923
     [1.0, 1.000000001, 1.000000002, 1.000000003, 1.000000004, 1.000000005, 1.000000006, 1.000000007, 1.000000008, 1.000000009],
     [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0000000001, 1.0000000001, 1.0000000001, 1.0000000001]]
 
-# Euler's number (e) - base of natural logarithms
 E: constant(decimal) = 2.7182818285
 
 @external
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate e^x (FREE - no gas cost)
-    @param x The exponent (must be in range [0, 10))
+    @notice Calculate e^x
+    @param x The exponent
     @return The result of e^x
     """
     assert x >= 0.0, "Negative powers are not supported."
@@ -34,7 +30,7 @@ def calculate(x: decimal) -> decimal:
 @view
 def get_constant() -> decimal:
     """
-    @notice Get Euler's number (e ≈ 2.71828...)
+    @notice Get Euler's number
     @return The constant e
     """
     return E

@@ -6,7 +6,9 @@
 import { ContractLoader } from '../core/contract-loader.js';
 import { TransactionHandler } from '../core/transaction-handler.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
+import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
 
 export class PayItBackward {
     constructor() {
@@ -48,14 +50,17 @@ export class PayItBackward {
      * Render the game interface
      */
     render() {
+        // Header with contract info
+        const header = GameRenderer.createGameHeader({
+            title: '⏪ Pay It Backward',
+            description: 'Donate now, reward the previous donor! Immediate gratification for those who came before.',
+            contractAddress: CONTRACT_ADDRESSES.PAY_IT_BACKWARD,
+            sourceFile: CONTRACT_SOURCES.PAY_IT_BACKWARD
+        });
+        
         const container = document.createElement('div');
         container.className = 'game-interface';
-        
-        // Header using DOMHelpers
-        container.appendChild(DOMHelpers.createHeader(
-            '⏪ Pay It Backward',
-            'Donate now, reward the previous donor! Immediate gratification for those who came before.'
-        ));
+        container.appendChild(header);
         
         // Donation controls
         const controlsDiv = document.createElement('div');
@@ -75,7 +80,6 @@ export class PayItBackward {
         ));
         
         container.appendChild(controlsDiv);
-        this.container.appendChild(container);
         
         // Content sections container
         const sectionsContainer = document.createElement('div');
@@ -87,7 +91,8 @@ export class PayItBackward {
         // How it works panel
         sectionsContainer.appendChild(this.renderHowItWorks());
         
-        this.container.appendChild(sectionsContainer);
+        container.appendChild(sectionsContainer);
+        this.container.appendChild(container);
     }
 
     /**

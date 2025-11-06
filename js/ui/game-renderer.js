@@ -7,13 +7,9 @@ import { eventBus, EVENTS } from './events.js';
 
 export class GameRenderer {
     /**
-     * Create modern game interface structure with new component system
+     * Create just the header with contract info (for games with custom UIs)
      */
-    static createGameInterface(config) {
-        const container = document.createElement('div');
-        container.className = 'game-interface';
-        
-        // Title and description header
+    static createGameHeader(config) {
         const header = document.createElement('div');
         header.className = 'game-header';
         
@@ -29,7 +25,24 @@ export class GameRenderer {
             header.appendChild(description);
         }
         
-        container.appendChild(header);
+        // Add contract info section
+        if (config.contractAddress) {
+            const contractInfo = this.createContractInfo(config.contractAddress, config.sourceFile);
+            header.appendChild(contractInfo);
+        }
+        
+        return header;
+    }
+    
+    /**
+     * Create modern game interface structure with new component system
+     */
+    static createGameInterface(config) {
+        const container = document.createElement('div');
+        container.className = 'game-interface';
+        
+        // Add header
+        container.appendChild(this.createGameHeader(config));
         
         // Game state bar (universal across all games)
         const gameStateBar = this.createGameStateBar(config);
@@ -176,6 +189,161 @@ export class GameRenderer {
         return section;
     }
 
+    /**
+     * Create contract info section with address, Etherscan link, and view badge
+     */
+    static createContractInfo(contractAddress, sourceFile = null) {
+        const infoContainer = document.createElement('div');
+        infoContainer.className = 'contract-info';
+        
+        const label = document.createElement('span');
+        label.className = 'contract-label';
+        label.textContent = 'Contract:';
+        
+        const addressLink = document.createElement('a');
+        addressLink.className = 'contract-address';
+        addressLink.href = `https://sepolia.etherscan.io/address/${contractAddress}`;
+        addressLink.target = '_blank';
+        addressLink.rel = 'noopener noreferrer';
+        addressLink.textContent = this.formatAddress(contractAddress);
+        addressLink.title = contractAddress; // Full address on hover
+        
+        const viewBadge = document.createElement('a');
+        viewBadge.className = 'contract-badge';
+        viewBadge.href = `https://sepolia.etherscan.io/address/${contractAddress}#code`;
+        viewBadge.target = '_blank';
+        viewBadge.rel = 'noopener noreferrer';
+        viewBadge.innerHTML = '📜 View on Etherscan';
+        viewBadge.title = 'View contract on Etherscan';
+        
+        infoContainer.appendChild(label);
+        infoContainer.appendChild(addressLink);
+        infoContainer.appendChild(viewBadge);
+        
+        // Add View Source button if source file is provided
+        if (sourceFile) {
+            const viewSourceBtn = document.createElement('button');
+            viewSourceBtn.className = 'contract-badge contract-badge-source';
+            viewSourceBtn.innerHTML = '🐍 View Vyper Source';
+            viewSourceBtn.title = 'View Vyper source code';
+            viewSourceBtn.onclick = () => this.showSourceModal(sourceFile);
+            infoContainer.appendChild(viewSourceBtn);
+        }
+        
+        return infoContainer;
+    }
+    
+    /**
+     * Show source code modal
+     */
+    static async showSourceModal(sourceFile) {
+        try {
+            const response = await fetch(sourceFile);
+            if (!response.ok) {
+                throw new Error('Failed to load source code');
+            }
+            const code = await response.text();
+            this.createSourceModal(code, sourceFile);
+        } catch (error) {
+            console.error('Error loading source:', error);
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Failed to load source code',
+                type: 'error'
+            });
+        }
+    }
+    
+    /**
+     * Create and show source code modal
+     */
+    static createSourceModal(code, sourceFile) {
+        // Remove existing modal if any
+        const existingModal = document.getElementById('source-modal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        const modal = document.createElement('div');
+        modal.id = 'source-modal';
+        modal.className = 'modal-overlay';
+        
+        modal.innerHTML = `
+            <div class="modal-content source-modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">📜 Contract Source Code</h3>
+                    <button class="modal-close" id="close-modal">✕</button>
+                </div>
+                <div class="modal-file-info">
+                    <span class="file-path">${sourceFile}</span>
+                </div>
+                <div class="modal-body">
+                    <pre class="source-code"><code class="language-python">${this.escapeHtml(code)}</code></pre>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="copy-source">📋 Copy to Clipboard</button>
+                    <button class="btn-primary" id="close-modal-footer">Close</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Add event listeners
+        const closeButtons = modal.querySelectorAll('#close-modal, #close-modal-footer');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => modal.remove());
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // Copy button
+        const copyBtn = modal.querySelector('#copy-source');
+        copyBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(code);
+                eventBus.emit(EVENTS.TOAST, {
+                    message: 'Source code copied to clipboard!',
+                    type: 'success'
+                });
+            } catch (error) {
+                console.error('Copy failed:', error);
+                eventBus.emit(EVENTS.TOAST, {
+                    message: 'Failed to copy to clipboard',
+                    type: 'error'
+                });
+            }
+        });
+        
+        // Escape key to close
+        const escHandler = (e) => {
+            if (e.key === 'Escape') {
+                modal.remove();
+                document.removeEventListener('keydown', escHandler);
+            }
+        };
+        document.addEventListener('keydown', escHandler);
+    }
+    
+    /**
+     * Escape HTML for safe display
+     */
+    static escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    /**
+     * Format Ethereum address (0x1234...5678)
+     */
+    static formatAddress(address) {
+        if (!address || address.length < 10) return address;
+        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+    }
 
     /**
      * Show loading state

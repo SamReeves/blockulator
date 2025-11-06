@@ -1,8 +1,5 @@
 #pragma enable-decimals
 
-# Lookup table for calculating pi^x using digit-by-digit multiplication
-# Row i contains pi^(d * 10^(-i)) for d = 0..9
-# Accurate to ~10 decimal places
 TAB: constant(decimal[10][11]) = [
     [1.0, 3.1415926536, 9.8696044011, 31.0062766803, 97.409091034, 306.0196847853, 961.3891935753, 3020.2932277768, 9488.5310160706, 29809.0993334462],
     [1.0, 1.1212823532, 1.2572741157, 1.4097592791, 1.5807382019, 1.7724538509, 1.9874212249, 2.228460348, 2.498733263, 2.8017855133],
@@ -17,15 +14,14 @@ TAB: constant(decimal[10][11]) = [
     [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 ]
 
-# Pi (pi) - the ratio of circle's circumference to diameter
 PI: constant(decimal) = 3.1415926536
 
 @external
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate pi^x (FREE - no gas cost)
-    @param x The exponent (must be in range [0, 10))
+    @notice Calculate pi^x
+    @param x The exponent
     @return The result of pi^x
     """
     assert x >= 0.0, "Negative powers are not supported."
@@ -36,7 +32,7 @@ def calculate(x: decimal) -> decimal:
 @view
 def get_constant() -> decimal:
     """
-    @notice Get the value of pi (≈ 3.14159...)
+    @notice Get the value of pi
     @return The constant pi
     """
     return PI

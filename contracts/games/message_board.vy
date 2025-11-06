@@ -7,7 +7,7 @@
 @dev Ultra-simple message board with essential features only
 """
 
-# ============= DATA STRUCTURES =============
+# Data structures
 
 struct Message:
     poster: address
@@ -15,7 +15,7 @@ struct Message:
     amount: uint256
     timestamp: uint256
 
-# ============= STATE VARIABLES =============
+# State variables
 
 owner: public(immutable(address))
 minimum_post_fee: public(immutable(uint256))
@@ -25,7 +25,7 @@ messages: public(DynArray[Message, 1000])
 total_collected: public(uint256)
 last_post_time: public(HashMap[address, uint256])
 
-# ============= EVENTS =============
+# Events
 
 event MessagePosted:
     poster: indexed(address)
@@ -37,7 +37,7 @@ event FeesWithdrawn:
     owner: indexed(address)
     amount: uint256
 
-# ============= INITIALIZATION =============
+# Initialization
 
 @deploy
 def __init__(min_fee: uint256, rate_limit: uint256):
@@ -51,7 +51,7 @@ def __init__(min_fee: uint256, rate_limit: uint256):
     rate_limit_seconds = rate_limit
     self.total_collected = 0
 
-# ============= CORE FUNCTIONALITY =============
+# Core functionality
 
 @payable
 @external
@@ -63,7 +63,6 @@ def post_message(content: String[280]):
     assert msg.value >= minimum_post_fee, "Below minimum fee"
     assert len(content) > 0, "Empty message"
     
-    # Rate limiting
     last_post: uint256 = self.last_post_time[msg.sender]
     if last_post > 0:
         time_since: uint256 = block.timestamp - last_post
@@ -83,7 +82,7 @@ def post_message(content: String[280]):
     
     log MessagePosted(msg.sender, message_id, msg.value, content)
 
-# ============= ADMIN FUNCTIONS =============
+# Admin functions
 
 @external
 def withdraw():
@@ -97,7 +96,7 @@ def withdraw():
     send(owner, amount)
     log FeesWithdrawn(owner, amount)
 
-# ============= VIEW FUNCTIONS =============
+# View functions
 
 @view
 @external
@@ -120,7 +119,7 @@ def get_message(index: uint256) -> Message:
 @external
 def get_recent_messages(count: uint256) -> DynArray[Message, 100]:
     """
-    @notice Get most recent N messages (max 100)
+    @notice Get most recent messages
     """
     result: DynArray[Message, 100] = []
     total: uint256 = len(self.messages)
@@ -146,7 +145,7 @@ def get_recent_messages(count: uint256) -> DynArray[Message, 100]:
 def get_time_until_next_post(user: address) -> uint256:
     """
     @notice Check how long until user can post again
-    @return Seconds until next post (0 if can post now)
+    @return Seconds until next post
     """
     last_post: uint256 = self.last_post_time[user]
     if last_post == 0:

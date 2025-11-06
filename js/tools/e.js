@@ -5,8 +5,9 @@
 
 import { ContractLoader } from '../core/contract-loader.js';
 import { DOMHelpers } from '../core/dom-helpers.js';
+import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES } from '../../contracts/addresses.js';
 
 export class ECalculator {
     constructor() {
@@ -49,14 +50,17 @@ export class ECalculator {
      * Render the tool interface
      */
     render() {
+        // Header with contract info
+        const header = GameRenderer.createGameHeader({
+            title: `🔢 ${this.symbol} Calculator`,
+            description: `Calculate ${this.symbol}^x on-chain! Euler's number (${this.symbol} ≈ ${this.constantValue}) is the base of natural logarithms.`,
+            contractAddress: CONTRACT_ADDRESSES.E_CALCULATOR,
+            sourceFile: CONTRACT_SOURCES.E_CALCULATOR
+        });
+        
         const container = document.createElement('div');
         container.className = 'game-interface';
-        
-        // Header using DOMHelpers
-        container.appendChild(DOMHelpers.createHeader(
-            `🔢 ${this.symbol} Calculator`,
-            `Calculate ${this.symbol}^x on-chain! Euler's number (${this.symbol} ≈ ${this.constantValue}) is the base of natural logarithms.`
-        ));
+        container.appendChild(header);
         
         // Calculator controls
         const controlsDiv = document.createElement('div');
@@ -83,7 +87,6 @@ export class ECalculator {
         ));
         
         container.appendChild(controlsDiv);
-        this.container.appendChild(container);
         
         // Content sections
         const sectionsContainer = document.createElement('div');
@@ -92,7 +95,8 @@ export class ECalculator {
         sectionsContainer.appendChild(this.renderResultPanel());
         sectionsContainer.appendChild(this.renderInfoPanel());
         
-        this.container.appendChild(sectionsContainer);
+        container.appendChild(sectionsContainer);
+        this.container.appendChild(container);
     }
 
     /**

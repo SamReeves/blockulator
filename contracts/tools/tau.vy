@@ -1,8 +1,5 @@
 #pragma enable-decimals
 
-# Lookup table for calculating τ^x using digit-by-digit multiplication
-# Row i contains τ^(d * 10^(-i)) for d = 0..9
-# Accurate to ~10 decimal places
 TAB: constant(decimal[10][11]) = [
     [1.0, 6.2831853072, 39.4784176044, 248.0502134424, 1558.545456544, 9792.629913129, 61528.9083888195, 386597.5331554293, 2429063.940114066, 15262258.858724454],
     [1.0, 1.2017606702, 1.4442287084, 1.7356172606, 2.0857965623, 2.5066282746, 3.0123672753, 3.6201445156, 4.3505472993, 5.2283166382],
@@ -17,15 +14,14 @@ TAB: constant(decimal[10][11]) = [
     [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 ]
 
-# Tau (τ) - the ratio of circle's circumference to radius (2pi)
 TAU: constant(decimal) = 6.2831853072
 
 @external
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate τ^x (FREE - no gas cost)
-    @param x The exponent (must be in range [0, 10))
+    @notice Calculate τ^x
+    @param x The exponent
     @return The result of τ^x
     """
     assert x >= 0.0, "Negative powers are not supported."
@@ -36,7 +32,7 @@ def calculate(x: decimal) -> decimal:
 @view
 def get_constant() -> decimal:
     """
-    @notice Get the value of τ (≈ 6.28318...)
+    @notice Get the value of τ
     @return The constant τ
     """
     return TAU
