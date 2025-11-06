@@ -89,8 +89,8 @@ export class KingOfTheHill {
                                 />
                             </div>
                             
-                            <button id="claim-btn" class="button-primary" style="width: 100%;">
-                                👑 CLAIM THRONE
+                            <button id="claim-btn" class="btn-play">
+                                🎮 Play
                             </button>
                             
                             <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.1); border-radius: 8px; font-size: 0.875rem;">

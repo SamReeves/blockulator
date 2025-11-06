@@ -17,7 +17,7 @@ TAB: constant(decimal[10][11]) = [
     [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 ]
 
-# Tau (τ) - the ratio of circle's circumference to radius (2π)
+# Tau (τ) - the ratio of circle's circumference to radius (2pi)
 TAU: constant(decimal) = 6.2831853072
 
 @external

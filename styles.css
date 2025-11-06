@@ -231,30 +231,34 @@ body {
 .game-interface {
     background: var(--bg-secondary);
     border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
 }
 
 .game-title {
-    font-size: 1.5rem;
-    margin-bottom: var(--spacing-sm);
+    font-size: 1.15rem;
+    margin-bottom: 2px;
+    line-height: 1.3;
 }
 
 .game-description {
     color: var(--text-secondary);
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
 }
 
 /* Input Section */
 .input-group {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
 }
 
 .input-group label {
     display: block;
-    margin-bottom: var(--spacing-xs);
+    margin-bottom: 2px;
     color: var(--text-secondary);
     font-weight: 600;
+    font-size: 0.8rem;
 }
 
 .input-group input {
@@ -472,8 +476,8 @@ body {
 .game-sections {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
-    margin-top: var(--spacing-lg);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
 }
 
 /* Contest Info Panel */
@@ -481,38 +485,43 @@ body {
     background: var(--bg-secondary);
     border: 2px solid var(--bg-card);
     border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
 }
 
 .contest-info-panel h3 {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
     color: var(--text-primary);
+    font-size: 0.85rem;
 }
 
 .info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--spacing-xs);
 }
 
 .info-item {
-    background: var(--bg-tertiary);
-    padding: var(--spacing-md);
-    border-radius: 8px;
+    background: var(--bg-primary);
+    padding: var(--spacing-xs);
+    border-radius: 4px;
     text-align: center;
 }
 
 .info-label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 1px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
 }
 
 .info-value {
-    font-size: 1.25rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
     word-break: break-all;
+    line-height: 1.3;
 }
 
 /* Winners List */
@@ -573,15 +582,16 @@ body {
 /* Message Board Styles */
 .message-input {
     width: 100%;
-    padding: var(--spacing-sm);
-    background: var(--bg-card);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: var(--spacing-md);
+    background: var(--bg-primary);
+    border: 2px solid var(--bg-card);
     border-radius: var(--border-radius-sm);
     color: var(--text-primary);
     font-size: 1rem;
     font-family: inherit;
-    margin-bottom: var(--spacing-sm);
+    line-height: 1.5;
     resize: vertical;
+    transition: border-color var(--transition);
 }
 
 .message-input:focus {
@@ -593,7 +603,8 @@ body {
     text-align: right;
     color: var(--text-muted);
     font-size: 0.875rem;
-    margin-bottom: var(--spacing-sm);
+    margin-top: var(--spacing-xs);
+    font-family: 'Courier New', monospace;
 }
 
 .messages-feed {
@@ -747,12 +758,13 @@ body {
     background: var(--bg-secondary);
     border: 2px solid var(--bg-card);
     border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
 }
 
 .donation-history-container h3 {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
     color: var(--text-primary);
+    font-size: 0.85rem;
 }
 
 .donation-table {
@@ -827,42 +839,47 @@ body {
     background: var(--bg-secondary);
     border: 2px solid var(--bg-card);
     border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
 }
 
 .donation-stats-container h3 {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
     color: var(--text-primary);
+    font-size: 0.85rem;
 }
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: var(--spacing-md);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-xs);
 }
 
 .stat-card {
-    background: var(--bg-tertiary);
-    padding: var(--spacing-md);
-    border-radius: 8px;
+    background: var(--bg-primary);
+    padding: var(--spacing-xs);
+    border-radius: 4px;
     text-align: center;
     border: 1px solid var(--bg-card);
 }
 
 .stat-label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-bottom: var(--spacing-xs);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-bottom: 1px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    line-height: 1.2;
 }
 
 .stat-value {
-    font-size: 1.5rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 4px;
+    line-height: 1.3;
 }
 
 .stat-emoji {
@@ -874,19 +891,20 @@ body {
     background: var(--bg-secondary);
     border: 2px solid var(--bg-card);
     border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
 }
 
 .donation-chart-container h3 {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
     color: var(--text-primary);
+    font-size: 0.85rem;
 }
 
 .donation-chart {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    gap: 3px;
+    margin-bottom: var(--spacing-xs);
 }
 
 .bar-container {
@@ -896,10 +914,10 @@ body {
 .bar {
     background: linear-gradient(90deg, #4b5563, #6b7280);
     border-radius: 4px;
-    padding: var(--spacing-sm);
+    padding: 4px var(--spacing-xs);
     transition: all 0.3s ease;
     position: relative;
-    min-height: 36px;
+    min-height: 28px;
     display: flex;
     align-items: center;
 }
@@ -922,23 +940,26 @@ body {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     white-space: nowrap;
 }
 
 .bar-label {
     font-weight: 700;
-    min-width: 30px;
+    min-width: 24px;
+    font-size: 0.75rem;
 }
 
 .bar-amount {
     font-weight: 600;
+    font-size: 0.8rem;
 }
 
 .bar-donor {
     font-family: 'Courier New', monospace;
     color: var(--text-secondary);
     margin-left: auto;
+    font-size: 0.75rem;
 }
 
 .bar-leader .bar-donor {
@@ -947,9 +968,9 @@ body {
 
 .chart-legend {
     display: flex;
-    gap: var(--spacing-md);
+    gap: var(--spacing-sm);
     flex-wrap: wrap;
-    padding-top: var(--spacing-md);
+    padding-top: var(--spacing-xs);
     border-top: 1px solid var(--bg-card);
 }
 
@@ -1036,7 +1057,7 @@ body {
 
 /* Game Header */
 .game-header {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-sm);
 }
 
 /* Game State Bar */
@@ -1044,52 +1065,56 @@ body {
     background: var(--bg-secondary);
     border: 2px solid var(--bg-card);
     border-radius: var(--border-radius);
-    padding: var(--spacing-md);
+    padding: var(--spacing-xs);
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
 }
 
 .state-item {
     text-align: center;
+    padding: var(--spacing-xs);
 }
 
 .state-label {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: var(--spacing-xs);
+    letter-spacing: 0.3px;
+    margin-bottom: 1px;
+    line-height: 1.2;
 }
 
 .state-value {
-    font-size: 1.125rem;
+    font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-primary);
     font-family: 'Courier New', monospace;
+    line-height: 1.3;
 }
 
 /* Wei Input Section */
 .wei-input-section {
     background: var(--bg-secondary);
     border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
 }
 
 .input-explanation {
     background: rgba(37, 99, 235, 0.1);
     border-left: 3px solid var(--primary);
-    padding: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
     border-radius: var(--border-radius-sm);
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     color: var(--text-secondary);
+    line-height: 1.4;
 }
 
 .wei-input-group {
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
 .wei-input {
@@ -1118,9 +1143,9 @@ body {
 
 .quick-amounts {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-xs);
     flex-wrap: wrap;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
 }
 
 .quick-amount-btn {
@@ -1142,44 +1167,25 @@ body {
     transform: translateY(-1px);
 }
 
-.input-actions {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: var(--spacing-sm);
-}
-
-.btn-simulate {
-    padding: var(--spacing-md);
-    background: var(--secondary);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius-sm);
-    font-weight: 700;
-    cursor: pointer;
-    transition: all var(--transition);
-}
-
-.btn-simulate:hover {
-    background: #0e7490;
-    transform: translateY(-1px);
-}
+/* Removed - no longer needed without simulate button */
 
 /* Play History Component */
 .play-history {
     background: var(--bg-secondary);
     border-radius: var(--border-radius);
-    padding: var(--spacing-lg);
+    padding: var(--spacing-sm);
 }
 
 .play-history-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-md);
+    margin-bottom: var(--spacing-xs);
 }
 
 .play-history-header h3 {
     margin: 0;
+    font-size: 0.85rem;
 }
 
 .sort-controls {
@@ -2030,14 +2036,6 @@ body {
     font-family: 'Courier New', monospace;
     font-weight: 700;
     color: var(--text-secondary);
-}
-
-.char-counter {
-    text-align: right;
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    margin-top: var(--spacing-xs);
-    font-family: 'Courier New', monospace;
 }
 
 textarea#message-content {

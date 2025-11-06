@@ -157,25 +157,14 @@ export class GameRenderer {
         section.appendChild(inputGroup);
         section.appendChild(quickAmounts);
         
-        // Action buttons
-        const actions = document.createElement('div');
-        actions.className = 'input-actions';
-        
-        const simulateBtn = document.createElement('button');
-        simulateBtn.className = 'btn-simulate';
-        simulateBtn.textContent = '🔮 Simulate';
-        simulateBtn.id = 'simulate-button';
-        simulateBtn.type = 'button';
-        
+        // Play button
         const playButton = document.createElement('button');
         playButton.className = 'btn-play';
         playButton.textContent = '🎮 Play';
         playButton.id = 'play-button';
         playButton.type = 'button';
         
-        actions.appendChild(simulateBtn);
-        actions.appendChild(playButton);
-        section.appendChild(actions);
+        section.appendChild(playButton);
         
         // Setup real-time ETH conversion
         input.addEventListener('input', () => {

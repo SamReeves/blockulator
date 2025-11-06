@@ -42,12 +42,13 @@ export class MessageBoard {
                     <div class="input-group">
                         <label for="msg-content">Your Message (max 280 chars)</label>
                         <textarea 
-                            id="msg-content" 
+                            id="msg-content"
+                            class="message-input"
                             placeholder="Say something..."
                             maxlength="280"
-                            rows="3"
+                            rows="4"
                         ></textarea>
-                        <div style="text-align: right; font-size: 0.875rem; color: var(--text-muted);">
+                        <div class="char-counter">
                             <span id="char-count">0</span> / 280
                         </div>
                     </div>
@@ -60,12 +61,11 @@ export class MessageBoard {
                             min="0"
                         />
                     </div>
-                    <button id="post-btn" class="button-primary">Post Message</button>
+                    <button id="post-btn" class="btn-play">🎮 Play</button>
                 </div>
 
                 <div class="game-sections">
                     <div class="contest-info-panel">
-                        <h3>📊 Stats</h3>
                         <div class="info-grid">
                             <div class="info-item">
                                 <div class="info-label">Total Messages</div>
@@ -95,8 +95,7 @@ export class MessageBoard {
                     </div>
 
                     <div class="contest-info-panel">
-                        <h3>📝 Recent Messages</h3>
-                        <div id="messages" style="max-height: 500px; overflow-y: auto;">
+                        <div id="messages" style="max-height: 400px; overflow-y: auto;">
                             <div class="loading">Loading...</div>
                         </div>
                     </div>
@@ -236,10 +235,10 @@ export class MessageBoard {
                 const msgEl = document.createElement('div');
                 msgEl.className = 'message-item';
                 msgEl.style.cssText = `
-                    padding: 1rem;
-                    margin-bottom: 0.5rem;
+                    padding: 0.5rem;
+                    margin-bottom: 0.35rem;
                     background: rgba(255, 255, 255, 0.05);
-                    border-radius: 8px;
+                    border-radius: 6px;
                     border-left: 3px solid var(--primary);
                 `;
                 
@@ -247,20 +246,20 @@ export class MessageBoard {
                     this.web3Provider.currentAddress.toLowerCase();
                 
                 msgEl.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                        <span style="font-family: monospace; font-size: 0.875rem; color: var(--primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;">
+                        <span style="font-family: monospace; font-size: 0.75rem; color: var(--primary);">
                             ${DOMHelpers.formatAddress(msg.poster)}
                             ${isYourMessage ? ' <strong>(You)</strong>' : ''}
                         </span>
-                        <span style="font-size: 0.75rem; color: var(--text-muted);">
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">
                             ${DOMHelpers.formatTimestamp(msg.timestamp.toNumber())}
                         </span>
                     </div>
-                    <div style="font-size: 0.95rem; line-height: 1.5; word-wrap: break-word;">
+                    <div style="font-size: 0.875rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 0.25rem;">
                         ${this.escapeHtml(msg.content)}
                     </div>
-                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
-                        Fee: ${DOMHelpers.formatWei(msg.amount)}
+                    <div style="font-size: 0.7rem; color: var(--text-muted);">
+                        ${DOMHelpers.formatWei(msg.amount)}
                     </div>
                 `;
                 
