@@ -3,7 +3,8 @@
  * Calculate π^x on-chain
  */
 
-import { GameRenderer } from '../ui/game-renderer.js';
+import { ContractLoader } from '../core/contract-loader.js';
+import { DOMHelpers } from '../core/dom-helpers.js';
 import { eventBus, EVENTS } from '../ui/events.js';
 import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
 
@@ -11,9 +12,11 @@ export class PiCalculator {
     constructor() {
         this.contract = null;
         this.container = null;
-        this.eventListeners = [];
+        this.web3Provider = null;
         this.gameType = 'pi-calculator';
         this.constantValue = 3.1415926536;
+        this.symbol = 'π';
+        this.name = 'Pi';
     }
 
     /**
@@ -23,36 +26,16 @@ export class PiCalculator {
         this.container = container;
         this.web3Provider = web3Provider;
         
-        if (!web3Provider.isConnected() || !web3Provider.currentAddress) {
-            console.error('Cannot initialize tool: Wallet not properly connected');
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
-                type: 'error'
-            });
-            return;
-        }
+        // Load contract using utility
+        this.contract = await ContractLoader.load('pi-calculator', web3Provider);
+        if (!this.contract) return;
         
-        console.log('✅ Wallet confirmed:', web3Provider.currentAddress);
-        
-        // Load ABI from file
+        // Load constant value from contract
         try {
-            const response = await fetch('/contracts/abis/pi-calculator.json');
-            const abi = await response.json();
-            
-            this.contract = web3Provider.getContract(
-                CONTRACT_ADDRESSES.PI_CALCULATOR,
-                abi
-            );
-            
-            console.log('Pi Calculator: Contract loaded at', CONTRACT_ADDRESSES.PI_CALCULATOR);
-            
+            const value = await this.contract.get_constant();
+            this.constantValue = parseFloat(ethers.utils.formatUnits(value, 10));
         } catch (error) {
-            console.error('Failed to load contract:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load contract. Deploy the contract and update the ABI.',
-                type: 'error'
-            });
-            return;
+            console.log('Using default π value');
         }
         
         // Render UI
@@ -60,76 +43,54 @@ export class PiCalculator {
         
         // Setup event listeners
         this.setupListeners();
-        
-        // Load constant value
-        if (this.contract) {
-            try {
-                const piValue = await this.contract.get_constant();
-                // Convert from Vyper fixed-point (10 decimals) to JavaScript float
-                this.constantValue = parseFloat(ethers.utils.formatUnits(piValue, 10));
-            } catch (error) {
-                console.log('Using default π value');
-            }
-        }
     }
 
     /**
      * Render the tool interface
      */
     render() {
-        // Create custom calculator interface
         const container = document.createElement('div');
         container.className = 'game-interface';
         
-        // Title and description header
-        const header = document.createElement('div');
-        header.className = 'game-header';
-        
-        const title = document.createElement('h2');
-        title.className = 'game-title';
-        title.textContent = '🥧 π Calculator';
-        header.appendChild(title);
-        
-        const description = document.createElement('p');
-        description.className = 'game-description';
-        description.textContent = `Calculate π^x on-chain! Pi (π ≈ ${this.constantValue}) is the ratio of a circle's circumference to its diameter.`;
-        header.appendChild(description);
-        
-        container.appendChild(header);
+        // Header using DOMHelpers
+        container.appendChild(DOMHelpers.createHeader(
+            `🥧 ${this.symbol} Calculator`,
+            `Calculate ${this.symbol}^x on-chain! Pi (${this.symbol} ≈ ${this.constantValue}) is the ratio of a circle's circumference to its diameter.`
+        ));
         
         // Calculator controls
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
-        controlsDiv.innerHTML = `
-            <div class="input-group">
-                <label for="exponent-input">Exponent (x)</label>
-                <input 
-                    type="number" 
-                    id="exponent-input" 
-                    placeholder="Enter exponent (e.g., 2.5)"
-                    min="0"
-                    max="9.999999"
-                    step="0.1"
-                />
-                <div class="input-hint">Range: [0, 10)</div>
-            </div>
-            <button id="calculate-button" class="button-primary">Calculate π^x On-Chain</button>
-        `;
+        
+        controlsDiv.appendChild(DOMHelpers.createInput({
+            id: 'exponent-input',
+            label: 'Exponent (x)',
+            type: 'number',
+            placeholder: 'Enter exponent (e.g., 2.5)',
+            min: 0,
+            max: 9.999999,
+            step: 0.1
+        }));
+        
+        const hint = document.createElement('div');
+        hint.className = 'input-hint';
+        hint.textContent = 'Range: [0, 10)';
+        controlsDiv.querySelector('.input-group').appendChild(hint);
+        
+        controlsDiv.appendChild(DOMHelpers.createButton(
+            'calculate-button',
+            `Calculate ${this.symbol}^x On-Chain`
+        ));
         
         container.appendChild(controlsDiv);
         this.container.appendChild(container);
         
-        // Content sections container
+        // Content sections
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'game-sections';
         
-        // Result panel
-        const resultPanel = this.renderResultPanel();
-        sectionsContainer.appendChild(resultPanel);
-        
-        // Info panel
-        const infoPanel = this.renderInfoPanel();
-        sectionsContainer.appendChild(infoPanel);
+        sectionsContainer.appendChild(this.renderResultPanel());
+        sectionsContainer.appendChild(this.renderInfoPanel());
         
         this.container.appendChild(sectionsContainer);
     }
@@ -140,13 +101,11 @@ export class PiCalculator {
     renderResultPanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        panel.id = 'result-panel';
-        
         panel.innerHTML = `
             <h3>📊 Result</h3>
             <div class="calculator-result">
                 <div class="result-display" id="result-display">
-                    <div class="result-label">π^x =</div>
+                    <div class="result-label">${this.symbol}^x =</div>
                     <div class="result-value" id="result-value">-</div>
                 </div>
                 <div class="result-info">
@@ -154,7 +113,6 @@ export class PiCalculator {
                 </div>
             </div>
         `;
-        
         return panel;
     }
 
@@ -164,44 +122,42 @@ export class PiCalculator {
     renderInfoPanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        
         panel.innerHTML = `
-            <h3>ℹ️ About Pi</h3>
+            <h3>ℹ️ About ${this.name}</h3>
             <div class="tool-info">
-                <p><strong>π ≈ 3.14159...</strong> is one of the most famous mathematical constants.</p>
+                <p><strong>${this.symbol} ≈ 3.14159...</strong> is one of the most famous mathematical constants.</p>
                 <ul>
                     <li>Ratio of circle's circumference to diameter</li>
                     <li>Appears in geometry and trigonometry</li>
                     <li>Used in wave equations and physics</li>
                     <li>Transcendental number (not a root of any polynomial with rational coefficients)</li>
                 </ul>
-                <p class="note">💡 <strong>Fun fact:</strong> π has been calculated to over 100 trillion digits!</p>
+                <p class="note">💡 <strong>Fun fact:</strong> ${this.symbol} has been calculated to over 100 trillion digits!</p>
                 <p class="note">🔒 <strong>On-chain calculation:</strong> Results are computed on the blockchain using a lookup table for ~10 decimal place accuracy.</p>
             </div>
             
             <h3>🔧 Use in Your Smart Contract</h3>
             <div class="tool-info">
                 <p>You can call this calculator from your own smart contracts! Here's an example in Vyper:</p>
-                <pre><code># Interface for Pi Calculator
-interface PiCalculator:
+                <pre><code># Interface for ${this.name} Calculator
+interface ${this.name}Calculator:
     def calculate(x: decimal) -> decimal: view
     def get_constant() -> decimal: view
 
 # Use the calculator
-PI_CALC: constant(address) = ${CONTRACT_ADDRESSES.PI_CALCULATOR}
+CALC: constant(address) = ${CONTRACT_ADDRESSES.PI_CALCULATOR}
 
 @external
 @view
 def my_calculation(exponent: decimal) -> decimal:
-    # Call π^x calculator (FREE - no gas cost!)
-    result: decimal = staticcall PiCalculator(PI_CALC).calculate(exponent)
+    # Call ${this.symbol}^x calculator (FREE - no gas cost!)
+    result: decimal = staticcall ${this.name}Calculator(CALC).calculate(exponent)
     return result
 </code></pre>
                 <p class="note">✨ <strong>Free to use:</strong> All calculations are view functions with no gas cost!</p>
                 <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.PI_CALCULATOR}</code></p>
             </div>
         `;
-        
         return panel;
     }
 
@@ -212,14 +168,9 @@ def my_calculation(exponent: decimal) -> decimal:
         const calculateButton = document.getElementById('calculate-button');
         const expInput = document.getElementById('exponent-input');
         
-        const handleCalculate = () => this.calculate(expInput.value);
-        
-        if (calculateButton) {
+        if (calculateButton && expInput) {
+            const handleCalculate = () => this.calculate(expInput.value);
             calculateButton.addEventListener('click', handleCalculate);
-            this.eventListeners.push({ element: calculateButton, handler: handleCalculate });
-        }
-        
-        if (expInput) {
             expInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleCalculate();
             });
@@ -248,14 +199,15 @@ def my_calculation(exponent: decimal) -> decimal:
             return;
         }
         
+        const calculateButton = document.getElementById('calculate-button');
+        
         try {
-            const calculateButton = document.getElementById('calculate-button');
             if (calculateButton) {
                 calculateButton.disabled = true;
                 calculateButton.textContent = 'Calculating...';
             }
             
-            console.log(`Calculating π^${x} on-chain`);
+            console.log(`Calculating ${this.symbol}^${x} on-chain`);
             
             // Convert JavaScript decimal to Vyper fixed-point (10 decimal places)
             const xFixed = ethers.utils.parseUnits(x.toString(), 10);
@@ -276,7 +228,7 @@ def my_calculation(exponent: decimal) -> decimal:
             }
             
             eventBus.emit(EVENTS.TOAST, {
-                message: `π^${x} ≈ ${parseFloat(resultDecimal).toFixed(6)}`,
+                message: `${this.symbol}^${x} ≈ ${parseFloat(resultDecimal).toFixed(6)}`,
                 type: 'success'
             });
             
@@ -287,10 +239,9 @@ def my_calculation(exponent: decimal) -> decimal:
                 type: 'error'
             });
         } finally {
-            const calculateButton = document.getElementById('calculate-button');
             if (calculateButton) {
                 calculateButton.disabled = false;
-                calculateButton.textContent = 'Calculate π^x On-Chain';
+                calculateButton.textContent = `Calculate ${this.symbol}^x On-Chain`;
             }
         }
     }
@@ -299,14 +250,8 @@ def my_calculation(exponent: decimal) -> decimal:
      * Cleanup
      */
     destroy() {
-        this.eventListeners.forEach(({ element, handler }) => {
-            element.removeEventListener('click', handler);
-        });
-        this.eventListeners = [];
-        
         if (this.container) {
             this.container.innerHTML = '';
         }
     }
 }
-

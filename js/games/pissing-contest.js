@@ -3,9 +3,11 @@
  * Compete to make the biggest splash - highest wei wins!
  */
 
+import { ContractLoader } from '../core/contract-loader.js';
+import { TransactionHandler } from '../core/transaction-handler.js';
+import { DOMHelpers } from '../core/dom-helpers.js';
 import { GameRenderer } from '../ui/game-renderer.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
 import { DonationHistory } from '../ui/components/DonationHistory.js';
 import { DonationStats } from '../ui/components/DonationStats.js';
 import { DonationChart } from '../ui/components/DonationChart.js';
@@ -14,6 +16,7 @@ export class PissingContest {
     constructor() {
         this.contract = null;
         this.container = null;
+        this.web3Provider = null;
         this.eventListeners = [];
         this.gameType = 'pissing-contest';
         this.donations = []; // Store donations from blockchain events
@@ -34,44 +37,9 @@ export class PissingContest {
         this.container = container;
         this.web3Provider = web3Provider;
         
-        // Ensure wallet is connected and address is available
-        if (!web3Provider.isConnected() || !web3Provider.currentAddress) {
-            console.error('Cannot initialize game: Wallet not properly connected');
-            console.log('Web3Provider state:', {
-                isConnected: web3Provider.isConnected(),
-                address: web3Provider.currentAddress,
-                provider: !!web3Provider.provider,
-                signer: !!web3Provider.signer
-            });
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
-                type: 'error'
-            });
-            return;
-        }
-        
-        console.log('✅ Wallet confirmed:', web3Provider.currentAddress);
-        
-        // Load contract ABI and initialize contract
-        try {
-            const response = await fetch('/contracts/abis/pissing-contest.json');
-            const abi = await response.json();
-            
-            this.contract = web3Provider.getContract(
-                CONTRACT_ADDRESSES.PISSING_CONTEST,
-                abi
-            );
-            
-            console.log('Pissing Contest: Contract loaded at', CONTRACT_ADDRESSES.PISSING_CONTEST);
-            
-        } catch (error) {
-            console.error('Failed to load contract:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load game contract',
-                type: 'error'
-            });
-            return;
-        }
+        // Load contract using utility
+        this.contract = await ContractLoader.load('pissing-contest', web3Provider);
+        if (!this.contract) return;
         
         // Render UI
         this.render();
@@ -85,7 +53,6 @@ export class PissingContest {
         // Load initial state from blockchain
         await this.refreshState();
     }
-
 
     /**
      * Render the game interface
@@ -103,20 +70,16 @@ export class PissingContest {
         sectionsContainer.className = 'game-sections';
         
         // Current round info panel
-        const roundPanel = this.renderRoundInfo();
-        sectionsContainer.appendChild(roundPanel);
+        sectionsContainer.appendChild(this.renderRoundInfo());
         
         // User stats panel
-        const userStatsPanel = this.renderUserStats();
-        sectionsContainer.appendChild(userStatsPanel);
+        sectionsContainer.appendChild(this.renderUserStats());
         
         // Global stats and leaderboard
-        const globalPanel = this.renderGlobalStats();
-        sectionsContainer.appendChild(globalPanel);
+        sectionsContainer.appendChild(this.renderGlobalStats());
         
         // Recent winners
-        const winnersPanel = this.renderRecentWinners();
-        sectionsContainer.appendChild(winnersPanel);
+        sectionsContainer.appendChild(this.renderRecentWinners());
         
         // Donation chart
         const chartPanel = DonationChart.render(
@@ -141,131 +104,44 @@ export class PissingContest {
      * Render current round information panel
      */
     renderRoundInfo() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'round-info-panel';
-        
-        panel.innerHTML = `
-            <h3>🎯 Current Round</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Round Number</div>
-                    <div class="info-value" id="round-number">Loading...</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Current Leader</div>
-                    <div class="info-value" id="current-leader">Loading...</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Donations</div>
-                    <div class="info-value" id="donations-count">0 / 0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Prize Pool</div>
-                    <div class="info-value" id="prize-pool">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Your Donation</div>
-                    <div class="info-value" id="your-donation">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Winner Gets</div>
-                    <div class="info-value" id="winner-amount">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Time Est.</div>
-                    <div class="info-value" id="time-remaining">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Status</div>
-                    <div class="info-value" id="round-status">Active</div>
-                </div>
-            </div>
-        `;
-        
-        return panel;
+        return DOMHelpers.createInfoPanel('🎯 Current Round', [
+            { label: 'Round Number', id: 'round-number' },
+            { label: 'Current Leader', id: 'current-leader' },
+            { label: 'Donations', id: 'donations-count', defaultValue: '0 / 0' },
+            { label: 'Prize Pool', id: 'prize-pool', defaultValue: '0 wei' },
+            { label: 'Your Donation', id: 'your-donation', defaultValue: '0 wei' },
+            { label: 'Winner Gets', id: 'winner-amount', defaultValue: '0 wei' },
+            { label: 'Time Est.', id: 'time-remaining', defaultValue: '-' },
+            { label: 'Status', id: 'round-status', defaultValue: 'Active' }
+        ]);
     }
 
     /**
      * Render user statistics panel
      */
     renderUserStats() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'user-stats-panel';
-        
-        panel.innerHTML = `
-            <h3>👤 Your Statistics</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Lifetime Donated</div>
-                    <div class="info-value" id="user-lifetime-donated">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Lifetime Won</div>
-                    <div class="info-value" id="user-lifetime-won">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Rounds Won</div>
-                    <div class="info-value" id="user-rounds-won">0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Rounds Played</div>
-                    <div class="info-value" id="user-rounds-participated">0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Current Position</div>
-                    <div class="info-value" id="user-current-position">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Win Rate</div>
-                    <div class="info-value" id="user-win-rate">0%</div>
-                </div>
-            </div>
-        `;
-        
-        return panel;
+        return DOMHelpers.createInfoPanel('👤 Your Statistics', [
+            { label: 'Lifetime Donated', id: 'user-lifetime-donated', defaultValue: '0 wei' },
+            { label: 'Lifetime Won', id: 'user-lifetime-won', defaultValue: '0 wei' },
+            { label: 'Rounds Won', id: 'user-rounds-won', defaultValue: '0' },
+            { label: 'Rounds Played', id: 'user-rounds-participated', defaultValue: '0' },
+            { label: 'Current Position', id: 'user-current-position', defaultValue: '-' },
+            { label: 'Win Rate', id: 'user-win-rate', defaultValue: '0%' }
+        ]);
     }
 
     /**
      * Render global statistics panel
      */
     renderGlobalStats() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'global-stats-panel';
-        
-        panel.innerHTML = `
-            <h3>🌍 All-Time Records</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Total Rounds</div>
-                    <div class="info-value" id="total-rounds">0</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Highest Donation</div>
-                    <div class="info-value" id="highest-donation">0 wei</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Top Donor</div>
-                    <div class="info-value" id="highest-donor">-</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Contract Status</div>
-                    <div class="info-value" id="contract-status">Active</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Fee Rate</div>
-                    <div class="info-value" id="fee-rate">0%</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Min Donation</div>
-                    <div class="info-value" id="min-donation">0 wei</div>
-                </div>
-            </div>
-        `;
-        
-        return panel;
+        return DOMHelpers.createInfoPanel('🌍 All-Time Records', [
+            { label: 'Total Rounds', id: 'total-rounds', defaultValue: '0' },
+            { label: 'Highest Donation', id: 'highest-donation', defaultValue: '0 wei' },
+            { label: 'Top Donor', id: 'highest-donor', defaultValue: '-' },
+            { label: 'Contract Status', id: 'contract-status', defaultValue: 'Active' },
+            { label: 'Fee Rate', id: 'fee-rate', defaultValue: '0%' },
+            { label: 'Min Donation', id: 'min-donation', defaultValue: '0 wei' }
+        ]);
     }
 
     /**
@@ -291,25 +167,15 @@ export class PissingContest {
      */
     setupListeners() {
         const playButton = document.getElementById('play-button');
-        const simulateButton = document.getElementById('simulate-button');
         const weiInput = document.getElementById('play-wei');
         
-        const handlePlay = () => this.donate(weiInput.value);
-        
-        playButton.addEventListener('click', handlePlay);
-        
-        // Hide simulate button for now (no historical data)
-        if (simulateButton) {
-            simulateButton.style.display = 'none';
+        if (playButton && weiInput) {
+            const handlePlay = () => this.donate(weiInput.value);
+            playButton.addEventListener('click', handlePlay);
+            weiInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handlePlay();
+            });
         }
-        
-        // Enter key support
-        weiInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handlePlay();
-        });
-        
-        // Store for cleanup
-        this.eventListeners.push({ element: playButton, handler: handlePlay });
     }
 
     /**
@@ -325,56 +191,29 @@ export class PissingContest {
         }
         
         try {
-            GameRenderer.setLoading(true);
+            // Use TransactionHandler utility
+            await TransactionHandler.execute(
+                this.contract.donate({
+                    value: ethers.BigNumber.from(weiAmount)
+                }),
+                {
+                    game: 'pissing-contest',
+                    wei: weiAmount
+                }
+            );
             
-            eventBus.emit(EVENTS.PLAY_SUBMITTED, {
-                game: 'pissing-contest',
-                wei: weiAmount
-            });
-            
-            // Call actual contract donate method (no parameters, value is the donation)
-            console.log(`Sending donation: ${weiAmount} wei`);
-            const tx = await this.contract.donate({
-                value: ethers.BigNumber.from(weiAmount)
-            });
-            
-            console.log('Transaction sent:', tx.hash);
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Transaction sent, waiting for confirmation...',
-                type: 'info'
-            });
-            
-            // Wait for transaction confirmation
-            await tx.wait();
-            
-            console.log('Transaction confirmed!');
-            
-            eventBus.emit(EVENTS.PLAY_CONFIRMED, {
-                game: 'pissing-contest',
-                wei: weiAmount
-            });
-            
-            // Trigger splash animation
+            // Trigger splash animation (unique to this game)
             eventBus.emit(EVENTS.SPLASH, { intensity: parseFloat(weiAmount) });
             
-            eventBus.emit(EVENTS.TOAST, {
-                message: `Donated ${parseInt(weiAmount).toLocaleString()} wei!`,
-                type: 'success'
-            });
+            // Clear input and refresh state
+            const input = document.getElementById('play-wei');
+            if (input) input.value = '';
             
-            // Refresh state from blockchain
             await this.refreshState();
             
         } catch (error) {
+            // Error already handled by TransactionHandler
             console.error('Donation failed:', error);
-            eventBus.emit(EVENTS.PLAY_FAILED, { error });
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Transaction failed: ' + (error.reason || error.message),
-                type: 'error'
-            });
-        } finally {
-            GameRenderer.setLoading(false);
         }
     }
 
@@ -382,597 +221,271 @@ export class PissingContest {
      * Refresh game state from blockchain
      */
     async refreshState() {
+        if (!this.contract) return;
+
         try {
-            console.log('🔄 Refreshing state from contract...');
-            
-            // Get current round info
-            const roundInfo = await this.contract.get_current_round_info();
-            const [roundNumber, donationCount, maxDonations, totalValue, currentLeader, largestDonation, startTime, isActive] = roundInfo;
-            
-            // Get config
-            const config = await this.contract.get_config();
-            const [owner, feeBP, maxDonationsConfig, minDonation, isPaused] = config;
-            
-            // Get global stats
-            const globalStats = await this.contract.get_global_stats();
-            const [totalRounds, totalDonated, totalPaidOut, highestDonor] = globalStats;
-            
-            // Get all-time highest donation
-            const highestDonation = await this.contract.all_time_highest_donation();
-            
-            // Get user stats
-            const userStats = await this.contract.get_user_stats(this.web3Provider.currentAddress);
-            const [userLifetimeDonated, userLifetimeWon, userRoundsWon, userRoundsParticipated] = userStats;
-            
-            // Get user's current position
-            let userPosition = null;
-            let isLeading = false;
-            try {
-                const position = await this.contract.get_current_leaderboard_position(this.web3Provider.currentAddress);
-                userPosition = position[0];
-                isLeading = position[1];
-            } catch (e) {
-                // User might not have donated in this round
-            }
-            
-            // Get current round donation for user
-            const userRoundDonation = await this.contract.round_donations(roundNumber, this.web3Provider.currentAddress);
-            
-            // Calculate winner amount
-            const [winnerAmount, feeAmount] = await this.contract.calculate_current_winnings();
-            
-            // Get time remaining estimate
-            let timeRemaining = null;
-            try {
-                timeRemaining = await this.contract.get_time_remaining_estimate();
-            } catch (e) {
-                // Might not be available
-            }
-            
-            // Load donation history from events for visualization
-            await this.loadDonationHistory();
-            
-            // Store all state
+            // Load all data in parallel
+            const [
+                roundState,
+                config,
+                userStats,
+                globalStats
+            ] = await Promise.all([
+                this.contract.get_current_round_state(),
+                this.contract.get_config(),
+                this.contract.get_player_stats(this.web3Provider.currentAddress),
+                this.contract.get_global_stats()
+            ]);
+
+            // Update round info using DOMHelpers
+            DOMHelpers.updateInfo('round-number', roundState.round_number.toString());
+            DOMHelpers.updateInfo('current-leader', DOMHelpers.formatAddress(roundState.largest_donor));
+            DOMHelpers.updateInfo('donations-count', 
+                `${roundState.donation_count} / ${config.max_donations_per_round}`
+            );
+            DOMHelpers.updateInfo('prize-pool', DOMHelpers.formatWei(roundState.total_value));
+            DOMHelpers.updateInfo('round-status', roundState.is_active ? 'Active' : 'Completed');
+
+            // Calculate winner amount (after fee)
+            const feeAmount = roundState.total_value.mul(config.fee_basis_points).div(10000);
+            const winnerAmount = roundState.total_value.sub(feeAmount);
+            DOMHelpers.updateInfo('winner-amount', DOMHelpers.formatWei(winnerAmount));
+
+            // Update user stats using DOMHelpers
+            DOMHelpers.updateInfo('user-lifetime-donated', DOMHelpers.formatWei(userStats.total_donated));
+            DOMHelpers.updateInfo('user-lifetime-won', DOMHelpers.formatWei(userStats.total_won));
+            DOMHelpers.updateInfo('user-rounds-won', userStats.rounds_won.toString());
+            DOMHelpers.updateInfo('user-rounds-participated', userStats.rounds_participated.toString());
+
+            // Calculate win rate
+            const winRate = userStats.rounds_participated.gt(0)
+                ? (userStats.rounds_won.toNumber() / userStats.rounds_participated.toNumber() * 100).toFixed(1)
+                : '0.0';
+            DOMHelpers.updateInfo('user-win-rate', `${winRate}%`);
+
+            // Update global stats using DOMHelpers
+            DOMHelpers.updateInfo('total-rounds', globalStats.total_rounds_completed.toString());
+            DOMHelpers.updateInfo('highest-donation', DOMHelpers.formatWei(globalStats.highest_single_donation));
+            DOMHelpers.updateInfo('highest-donor', DOMHelpers.formatAddress(globalStats.highest_donor));
+            DOMHelpers.updateInfo('contract-status', config.paused ? 'Paused' : 'Active');
+            DOMHelpers.updateInfo('fee-rate', `${(config.fee_basis_points.toNumber() / 100).toFixed(1)}%`);
+            DOMHelpers.updateInfo('min-donation', DOMHelpers.formatWei(config.minimum_donation));
+
+            // Update contest info for charts
             this.contestInfo = {
-                roundNumber: roundNumber.toNumber(),
-                currentDonations: donationCount,
-                maxDonations: maxDonations,
-                totalPool: totalValue,
-                currentLeader,
-                largestDonation,
-                startTime: startTime.toNumber(),
-                isActive,
-                isPaused,
-                feeBP: feeBP,
-                minDonation,
-                userRoundDonation,
-                winnerAmount,
-                feeAmount,
-                timeRemaining: timeRemaining ? timeRemaining.toNumber() : null,
-                totalRounds: totalRounds.toNumber(),
-                highestDonation,
-                highestDonor,
-                userLifetimeDonated,
-                userLifetimeWon,
-                userRoundsWon: userRoundsWon.toNumber(),
-                userRoundsParticipated: userRoundsParticipated.toNumber(),
-                userPosition,
-                isLeading
+                currentDonations: roundState.donation_count.toNumber(),
+                maxDonations: config.max_donations_per_round.toNumber(),
+                totalPool: roundState.total_value,
+                currentLeader: roundState.largest_donor,
+                contestActive: roundState.is_active
             };
+
+            // Load current round donations
+            await this.loadCurrentRoundDonations(roundState.round_number.toNumber());
+
+            // Load recent winners
+            await this.loadRecentWinners();
+
+            // Find user's donation in current round
+            const userDonation = this.donations.find(
+                d => d.donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()
+            );
             
-            console.log('✅ Contract state loaded:', this.contestInfo);
-            
-            // Update game state bar
-            GameRenderer.updateGameStateBar({
-                playCount: donationCount,
-                prizePool: parseFloat(ethers.utils.formatEther(totalValue)) * 1e18
-            });
-            
-            // Update all UI panels
-            this.updateAllPanels();
-            
-            // Update components with donation data
-            this.updateComponents();
-            
-            console.log('✅ State refresh complete!');
-            
+            if (userDonation) {
+                DOMHelpers.updateInfo('your-donation', DOMHelpers.formatWei(userDonation.amount));
+                
+                // Calculate position
+                const sortedDonations = [...this.donations].sort((a, b) => 
+                    ethers.BigNumber.from(b.amount).sub(ethers.BigNumber.from(a.amount)).toNumber()
+                );
+                const position = sortedDonations.findIndex(
+                    d => d.donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()
+                ) + 1;
+                
+                DOMHelpers.updateInfo('user-current-position', 
+                    position === 1 ? '🥇 Leader!' : `#${position}`
+                );
+            } else {
+                DOMHelpers.updateInfo('your-donation', '0 wei');
+                DOMHelpers.updateInfo('user-current-position', '-');
+            }
+
+            // Update donation visualizations
+            this.updateDonationVisualizations();
+
         } catch (error) {
-            console.error('❌ Failed to refresh state:', error);
+            console.error('Failed to refresh state:', error);
             eventBus.emit(EVENTS.TOAST, {
-                message: `Failed to load game state: ${error.message}`,
+                message: 'Failed to load game state',
                 type: 'error'
             });
         }
     }
 
     /**
-     * Load donation history from blockchain events (current round only)
+     * Load donations for current round
      */
-    async loadDonationHistory() {
+    async loadCurrentRoundDonations(roundNumber) {
         try {
-            // Query recent events only (last 10000 blocks should be safe for most RPC providers)
-            console.log('📊 Getting current block number...');
-            const currentBlock = await this.web3Provider.provider.getBlockNumber();
-            const fromBlock = Math.max(0, currentBlock - 10000);
-            
-            console.log(`📊 Querying events from block ${fromBlock} to ${currentBlock}`);
-            console.log(`📊 Contract: ${this.contract.address}`);
-            
-            // Get all relevant events
-            const donationFilter = this.contract.filters.DonationReceived();
-            const startedFilter = this.contract.filters.RoundStarted();
-            const endedFilter = this.contract.filters.RoundEnded();
-            
-            console.log('📊 Querying DonationReceived events...');
-            const donationEvents = await this.contract.queryFilter(donationFilter, fromBlock, 'latest');
-            console.log(`📊 Found ${donationEvents.length} donation events`);
-            
-            console.log('📊 Querying RoundStarted events...');
-            const startedEvents = await this.contract.queryFilter(startedFilter, fromBlock, 'latest');
-            console.log(`📊 Found ${startedEvents.length} started events`);
-            
-            console.log('📊 Querying RoundEnded events...');
-            const endedEvents = await this.contract.queryFilter(endedFilter, fromBlock, 'latest');
-            console.log(`📊 Found ${endedEvents.length} ended events`);
-            
-            console.log(`📊 Total: ${donationEvents.length} donations, ${startedEvents.length} started, ${endedEvents.length} ended events`);
-            
-            // Get current round number from contract to filter donations
-            const currentRoundNumber = this.contestInfo?.roundNumber;
-            
-            // Filter donations to only those in the current round
-            let currentRoundDonations = donationEvents.filter(e => 
-                e.args.round_number && e.args.round_number.toNumber() === currentRoundNumber
-            );
-            
-            // If we don't have the round number yet, fall back to the old logic
-            if (!currentRoundNumber) {
-                // Find the most recent round boundary (started or ended event)
-                let roundStartBlock = fromBlock;
-                
-                const allBoundaryEvents = [...startedEvents, ...endedEvents].sort((a, b) => b.blockNumber - a.blockNumber);
-                if (allBoundaryEvents.length > 0) {
-                    roundStartBlock = allBoundaryEvents[0].blockNumber;
-                    console.log(`Current round started at block ${roundStartBlock}`);
-                }
-                
-                // Filter donations to only those in the current round (after the last start/end)
-                currentRoundDonations = donationEvents.filter(e => e.blockNumber > roundStartBlock);
-            }
-            
-            console.log(`Current round has ${currentRoundDonations.length} donations`);
-            
-            // Convert events to donation format
-            this.donations = await Promise.all(currentRoundDonations.map(async (event) => {
-                try {
-                    const block = await event.getBlock();
-                    return {
-                        address: event.args.donor,
-                        weiAmount: parseFloat(ethers.utils.formatEther(event.args.amount)) * 1e18,
-                        timestamp: block.timestamp,
-                        donation_number: event.args.donation_number,
-                        isLargest: event.args.is_largest,
-                        txHash: event.transactionHash
-                    };
-                } catch (error) {
-                    console.error('Failed to process event:', error);
-                    return null;
-                }
+            const donations = await this.contract.get_round_donations(roundNumber);
+            this.donations = donations.map(d => ({
+                donor: d.donor,
+                amount: d.amount,
+                timestamp: d.timestamp.toNumber(),
+                donationNumber: d.donation_number.toNumber()
             }));
-            
-            // Filter out any failed conversions
-            this.donations = this.donations.filter(d => d !== null);
-            
-            // Sort by donation number (oldest to newest in current round)
-            this.donations.sort((a, b) => a.donation_number - b.donation_number);
-            
-            console.log(`✅ Loaded ${this.donations.length} donations from current round`);
-            
         } catch (error) {
-            console.error('Failed to load donation history:', error);
+            console.error('Failed to load donations:', error);
             this.donations = [];
         }
     }
 
     /**
-     * Setup real-time event listener for new donations
+     * Load recent winners
      */
-    setupContractEventListeners() {
-        if (!this.contract) return;
-        
-        // Listen for new DonationReceived events
-        this.contract.on('DonationReceived', async (roundNumber, donor, amount, donationNumber, isLargest, timestamp) => {
-            console.log('New donation received!', {
-                roundNumber: roundNumber.toString(),
-                donor,
-                amount: ethers.utils.formatEther(amount),
-                donationNumber: donationNumber.toString(),
-                isLargest
-            });
-            
-            // Only process if it's for the current round
-            if (this.contestInfo && roundNumber.toNumber() === this.contestInfo.roundNumber) {
-                // Show toast notification
-                const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                eventBus.emit(EVENTS.TOAST, {
-                    message: isYou 
-                        ? '✅ Your donation was recorded!' 
-                        : `💰 New donation: ${ethers.utils.formatEther(amount)} ETH`,
-                    type: 'success'
-                });
-                
-                // Refresh state and UI
-                await this.refreshState();
-            }
-        });
-        
-        // Listen for RoundEnded event
-        this.contract.on('RoundEnded', async (roundNumber, winner, prize, feeCollected, totalDonations, duration) => {
-            console.log('Round ended!', {
-                roundNumber: roundNumber.toString(),
-                winner,
-                prize: ethers.utils.formatEther(prize),
-                totalDonations: totalDonations.toString()
-            });
-            
-            const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            eventBus.emit(EVENTS.TOAST, {
-                message: isYou 
-                    ? `🎉 YOU WON Round ${roundNumber}! Prize: ${ethers.utils.formatEther(prize)} ETH!`
-                    : `Round ${roundNumber} ended! Winner: ${winner.slice(0, 6)}...`,
-                type: isYou ? 'success' : 'info'
-            });
-            
-            // Refresh state
-            await this.refreshState();
-        });
-        
-        // Listen for RoundStarted event
-        this.contract.on('RoundStarted', async (roundNumber, startTime) => {
-            console.log('Round started:', {
-                roundNumber: roundNumber.toString(),
-                startTime: new Date(startTime.toNumber() * 1000)
-            });
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: `🔄 Round ${roundNumber} started!`,
-                type: 'info'
-            });
-            
-            // Refresh state
-            await this.refreshState();
-        });
-        
-        // Listen for LeaderboardUpdate event
-        this.contract.on('LeaderboardUpdate', async (roundNumber, newLeader, amount, previousLeader) => {
-            console.log('Leaderboard updated:', {
-                roundNumber: roundNumber.toString(),
-                newLeader,
-                amount: ethers.utils.formatEther(amount)
-            });
-            
-            // Only show notification if it's the current round
-            if (this.contestInfo && roundNumber.toNumber() === this.contestInfo.roundNumber) {
-                const isYou = newLeader.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                if (isYou) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: '👑 You are now the leader!',
-                        type: 'success'
-                    });
-                }
-            }
-        });
-    }
-
-    /**
-     * Update all UI panels with current state
-     */
-    async updateAllPanels() {
-        this.updateRoundInfo();
-        this.updateUserStatsPanel();
-        this.updateGlobalStatsPanel();
-        await this.updateRecentWinners();
-    }
-
-    /**
-     * Update round info panel
-     */
-    updateRoundInfo() {
-        const info = this.contestInfo;
-        
-        // Round number
-        const roundNumEl = document.getElementById('round-number');
-        if (roundNumEl) {
-            roundNumEl.textContent = `#${info.roundNumber}`;
-        }
-        
-        // Current leader
-        const leaderEl = document.getElementById('current-leader');
-        if (leaderEl) {
-            const leader = info.currentLeader;
-            if (leader === '0x0000000000000000000000000000000000000000') {
-                leaderEl.textContent = 'No donations yet';
-                leaderEl.style.color = '';
-            } else if (leader.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                leaderEl.textContent = '🏆 YOU!';
-                leaderEl.style.color = 'var(--success)';
-            } else {
-                leaderEl.textContent = `${leader.slice(0, 6)}...${leader.slice(-4)}`;
-                leaderEl.style.color = '';
-            }
-        }
-        
-        // Donations count
-        const countEl = document.getElementById('donations-count');
-        if (countEl) {
-            countEl.textContent = `${info.currentDonations} / ${info.maxDonations}`;
-        }
-        
-        // Prize pool
-        const poolEl = document.getElementById('prize-pool');
-        if (poolEl) {
-            const pool = parseFloat(ethers.utils.formatEther(info.totalPool));
-            poolEl.textContent = pool >= 0.01 
-                ? `${pool.toFixed(4)} ETH` 
-                : `${(pool * 1e18).toLocaleString()} wei`;
-        }
-        
-        // Your donation
-        const yourEl = document.getElementById('your-donation');
-        if (yourEl) {
-            const donation = parseFloat(ethers.utils.formatEther(info.userRoundDonation));
-            yourEl.textContent = donation >= 0.01 
-                ? `${donation.toFixed(4)} ETH` 
-                : `${(donation * 1e18).toLocaleString()} wei`;
-        }
-        
-        // Winner amount
-        const winnerEl = document.getElementById('winner-amount');
-        if (winnerEl) {
-            const amount = parseFloat(ethers.utils.formatEther(info.winnerAmount));
-            winnerEl.textContent = amount >= 0.01 
-                ? `${amount.toFixed(4)} ETH` 
-                : `${(amount * 1e18).toLocaleString()} wei`;
-        }
-        
-        // Time remaining
-        const timeEl = document.getElementById('time-remaining');
-        if (timeEl) {
-            if (info.timeRemaining && info.timeRemaining > 0) {
-                const hours = Math.floor(info.timeRemaining / 3600);
-                const minutes = Math.floor((info.timeRemaining % 3600) / 60);
-                timeEl.textContent = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-            } else {
-                timeEl.textContent = '-';
-            }
-        }
-        
-        // Status
-        const statusEl = document.getElementById('round-status');
-        if (statusEl) {
-            if (info.isPaused) {
-                statusEl.textContent = '⏸️ Paused';
-                statusEl.style.color = 'var(--warning)';
-            } else if (info.isActive) {
-                statusEl.textContent = '🟢 Active';
-                statusEl.style.color = 'var(--success)';
-            } else {
-                statusEl.textContent = '🔴 Ended';
-                statusEl.style.color = 'var(--danger)';
-            }
-        }
-    }
-
-    /**
-     * Update user statistics panel
-     */
-    updateUserStatsPanel() {
-        const info = this.contestInfo;
-        
-        // Lifetime donated
-        const donatedEl = document.getElementById('user-lifetime-donated');
-        if (donatedEl) {
-            const donated = parseFloat(ethers.utils.formatEther(info.userLifetimeDonated));
-            donatedEl.textContent = donated >= 0.01 
-                ? `${donated.toFixed(4)} ETH` 
-                : `${(donated * 1e18).toLocaleString()} wei`;
-        }
-        
-        // Lifetime won
-        const wonEl = document.getElementById('user-lifetime-won');
-        if (wonEl) {
-            const won = parseFloat(ethers.utils.formatEther(info.userLifetimeWon));
-            wonEl.textContent = won >= 0.01 
-                ? `${won.toFixed(4)} ETH` 
-                : `${(won * 1e18).toLocaleString()} wei`;
-        }
-        
-        // Rounds won
-        const roundsWonEl = document.getElementById('user-rounds-won');
-        if (roundsWonEl) {
-            roundsWonEl.textContent = info.userRoundsWon.toString();
-        }
-        
-        // Rounds participated
-        const participatedEl = document.getElementById('user-rounds-participated');
-        if (participatedEl) {
-            participatedEl.textContent = info.userRoundsParticipated.toString();
-        }
-        
-        // Current position
-        const positionEl = document.getElementById('user-current-position');
-        if (positionEl) {
-            if (info.userPosition !== null) {
-                positionEl.textContent = info.isLeading ? '🏆 Leading!' : `#${info.userPosition}`;
-                positionEl.style.color = info.isLeading ? 'var(--success)' : '';
-            } else {
-                positionEl.textContent = 'Not participating';
-                positionEl.style.color = '';
-            }
-        }
-        
-        // Win rate
-        const winRateEl = document.getElementById('user-win-rate');
-        if (winRateEl) {
-            const rate = info.userRoundsParticipated > 0 
-                ? (info.userRoundsWon / info.userRoundsParticipated * 100).toFixed(1)
-                : '0.0';
-            winRateEl.textContent = `${rate}%`;
-        }
-    }
-
-    /**
-     * Update global statistics panel
-     */
-    updateGlobalStatsPanel() {
-        const info = this.contestInfo;
-        
-        // Total rounds
-        const roundsEl = document.getElementById('total-rounds');
-        if (roundsEl) {
-            roundsEl.textContent = info.totalRounds.toString();
-        }
-        
-        // Highest donation
-        const highestEl = document.getElementById('highest-donation');
-        if (highestEl) {
-            const highest = parseFloat(ethers.utils.formatEther(info.highestDonation));
-            highestEl.textContent = highest >= 0.01 
-                ? `${highest.toFixed(4)} ETH` 
-                : `${(highest * 1e18).toLocaleString()} wei`;
-        }
-        
-        // Highest donor
-        const donorEl = document.getElementById('highest-donor');
-        if (donorEl) {
-            const donor = info.highestDonor;
-            if (donor === '0x0000000000000000000000000000000000000000') {
-                donorEl.textContent = 'None yet';
-            } else if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                donorEl.textContent = '🏆 YOU!';
-                donorEl.style.color = 'var(--success)';
-            } else {
-                donorEl.textContent = `${donor.slice(0, 6)}...${donor.slice(-4)}`;
-                donorEl.style.color = '';
-            }
-        }
-        
-        // Contract status
-        const contractStatusEl = document.getElementById('contract-status');
-        if (contractStatusEl) {
-            contractStatusEl.textContent = info.isPaused ? '⏸️ Paused' : '✅ Active';
-            contractStatusEl.style.color = info.isPaused ? 'var(--warning)' : 'var(--success)';
-        }
-        
-        // Fee rate
-        const feeEl = document.getElementById('fee-rate');
-        if (feeEl) {
-            const feePercent = (info.feeBP / 100).toFixed(1);
-            feeEl.textContent = `${feePercent}%`;
-        }
-        
-        // Min donation
-        const minEl = document.getElementById('min-donation');
-        if (minEl) {
-            const min = parseFloat(ethers.utils.formatEther(info.minDonation));
-            minEl.textContent = min >= 0.01 
-                ? `${min.toFixed(4)} ETH` 
-                : `${(min * 1e18).toLocaleString()} wei`;
-        }
-    }
-
-    /**
-     * Update recent winners list
-     */
-    async updateRecentWinners() {
+    async loadRecentWinners() {
         try {
-            // Get recent winners (last 5)
-            const winners = await this.contract.get_recent_winners(5);
+            const winnersCount = 10;
+            const recentWinners = await this.contract.get_recent_winners(winnersCount);
             
-            const listEl = document.getElementById('recent-winners-list');
-            if (!listEl) return;
-            
-            if (winners.length === 0) {
-                listEl.innerHTML = '<div class="no-data">No winners yet</div>';
+            const winnersEl = document.getElementById('recent-winners-list');
+            if (!winnersEl) return;
+
+            if (recentWinners.length === 0) {
+                winnersEl.innerHTML = '<div class="loading">No winners yet. Be the first!</div>';
                 return;
             }
-            
-            // Build winners list
-            let html = '<div class="winners-grid">';
-            for (let i = 0; i < winners.length; i++) {
-                const winner = winners[i];
-                const roundNum = this.contestInfo.totalRounds - i;
-                const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
+            recentWinners.reverse().forEach((winner, idx) => {
+                const isYou = winner.winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                 html += `
-                    <div class="winner-item">
-                        <div class="winner-round">Round ${roundNum}</div>
-                        <div class="winner-address ${isYou ? 'highlight' : ''}">
-                            ${isYou ? '🏆 YOU' : `${winner.slice(0, 8)}...${winner.slice(-6)}`}
+                    <div style="padding: 0.75rem; background: rgba(0,0,0,0.1); border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span style="font-weight: bold; color: ${isYou ? '#ffd700' : 'inherit'};">
+                                Round #${winner.round_number}
+                            </span>
+                            <span style="font-family: monospace; font-size: 0.875rem;">
+                                ${DOMHelpers.formatAddress(winner.winner)}
+                                ${isYou ? ' <strong>(You)</strong>' : ''}
+                            </span>
+                        </div>
+                        <div style="font-size: 0.875rem; color: var(--text-muted);">
+                            Prize: ${DOMHelpers.formatWei(winner.prize)}
                         </div>
                     </div>
                 `;
-            }
+            });
             html += '</div>';
             
-            listEl.innerHTML = html;
-            
+            winnersEl.innerHTML = html;
+
         } catch (error) {
-            console.error('Failed to load recent winners:', error);
-            const listEl = document.getElementById('recent-winners-list');
-            if (listEl) {
-                listEl.innerHTML = '<div class="error">Failed to load winners</div>';
-            }
+            console.error('Failed to load winners:', error);
         }
     }
 
     /**
-     * Update all components with current data
+     * Update donation visualizations (charts, history)
      */
-    updateComponents() {
-        // Update donation statistics
-        DonationStats.update(
-            this.donations,
-            this.web3Provider.currentAddress,
-            this.contestInfo
-        );
-        
+    updateDonationVisualizations() {
         // Update donation chart
-        DonationChart.update(
-            this.donations,
-            this.web3Provider.currentAddress,
-            this.contestInfo.currentLeader
-        );
-        
+        const chartPanel = document.querySelector('#donation-chart-panel');
+        if (chartPanel) {
+            const newChart = DonationChart.render(
+                this.donations,
+                this.web3Provider.currentAddress,
+                this.contestInfo.currentLeader
+            );
+            chartPanel.replaceWith(newChart);
+        }
+
         // Update donation history
-        DonationHistory.update(
-            this.donations,
-            this.web3Provider.currentAddress,
-            this.contestInfo.currentLeader
-        );
+        const historyPanel = document.querySelector('#donation-history-panel');
+        if (historyPanel) {
+            const newHistory = DonationHistory.render(
+                this.donations,
+                this.web3Provider.currentAddress,
+                this.contestInfo.currentLeader
+            );
+            historyPanel.replaceWith(newHistory);
+        }
     }
 
     /**
-     * Cleanup
+     * Setup real-time contract event listeners
+     */
+    setupContractEventListeners() {
+        if (!this.contract) return;
+
+        // Listen for new donations
+        this.contract.on('DonationReceived', async (roundNumber, donor, amount, donationNumber, isLargest, timestamp) => {
+            console.log('New donation:', { donor, amount: amount.toString(), isLargest });
+            
+            // Refresh state
+            await this.refreshState();
+            
+            // Show notification
+            const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+            if (isYou && isLargest) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: '🏆 You are now leading!',
+                    type: 'success'
+                });
+            } else if (!isYou && this.contestInfo.currentLeader.toLowerCase() === donor.toLowerCase()) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: '⚡ New leader!',
+                    type: 'info'
+                });
+            }
+        });
+
+        // Listen for round ended
+        this.contract.on('RoundEnded', async (roundNumber, winner, prize, feeCollected, totalDonations, duration) => {
+            console.log('Round ended:', { winner, prize: prize.toString() });
+            
+            const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+            
+            if (isYou) {
+                eventBus.emit(EVENTS.WINNER_DETERMINED, { player: winner, prize });
+                eventBus.emit(EVENTS.CONFETTI);
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `🎉 YOU WON ${DOMHelpers.formatWei(prize)}!`,
+                    type: 'success'
+                });
+            } else {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `Round ended. Winner: ${DOMHelpers.formatAddress(winner)}`,
+                    type: 'info'
+                });
+            }
+            
+            // Refresh state
+            await this.refreshState();
+        });
+
+        // Listen for new round started
+        this.contract.on('RoundStarted', async (roundNumber, startTime) => {
+            console.log('New round started:', roundNumber.toString());
+            
+            eventBus.emit(EVENTS.TOAST, {
+                message: `🚀 Round #${roundNumber} started!`,
+                type: 'info'
+            });
+            
+            await this.refreshState();
+        });
+    }
+
+    /**
+     * Cleanup when game is unloaded
      */
     destroy() {
-        // Remove event listeners
-        this.eventListeners.forEach(({ element, handler }) => {
-            element.removeEventListener('click', handler);
-        });
-        this.eventListeners = [];
-        
-        // Remove contract event listeners
         if (this.contract) {
-            this.contract.removeAllListeners('DonationReceived');
-            this.contract.removeAllListeners('RoundEnded');
-            this.contract.removeAllListeners('RoundStarted');
-            this.contract.removeAllListeners('LeaderboardUpdate');
+            this.contract.removeAllListeners();
         }
-        
-        // Clear container
-        if (this.container) {
-            this.container.innerHTML = '';
-        }
+        this.eventListeners.forEach(({ element, handler }) => {
+            element?.removeEventListener('click', handler);
+        });
     }
 }

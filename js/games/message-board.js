@@ -3,8 +3,10 @@
  * Pay to post messages on-chain
  */
 
+import { ContractLoader } from '../core/contract-loader.js';
+import { TransactionHandler } from '../core/transaction-handler.js';
+import { DOMHelpers } from '../core/dom-helpers.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
 
 export class MessageBoard {
     constructor() {
@@ -18,33 +20,9 @@ export class MessageBoard {
         this.container = container;
         this.web3Provider = web3Provider;
         
-        if (!web3Provider.isConnected() || !web3Provider.currentAddress) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
-                type: 'error'
-            });
-            return;
-        }
-        
-        try {
-            const response = await fetch('/contracts/abis/message-board.json');
-            const abi = await response.json();
-            
-            this.contract = web3Provider.getContract(
-                CONTRACT_ADDRESSES.MESSAGE_BOARD,
-                abi
-            );
-            
-            console.log('✅ Message Board loaded');
-            
-        } catch (error) {
-            console.error('Failed to load contract:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load contract',
-                type: 'error'
-            });
-            return;
-        }
+        // Load contract using utility
+        this.contract = await ContractLoader.load('message-board', web3Provider);
+        if (!this.contract) return;
         
         this.render();
         this.setupListeners();
@@ -132,11 +110,15 @@ export class MessageBoard {
         const charCount = document.getElementById('char-count');
         const postBtn = document.getElementById('post-btn');
         
-        content.addEventListener('input', () => {
-            charCount.textContent = content.value.length;
-        });
+        if (content && charCount) {
+            content.addEventListener('input', () => {
+                charCount.textContent = content.value.length;
+            });
+        }
         
-        postBtn.addEventListener('click', () => this.post());
+        if (postBtn) {
+            postBtn.addEventListener('click', () => this.post());
+        }
     }
 
     async post() {
@@ -160,40 +142,37 @@ export class MessageBoard {
         }
         
         try {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Posting...',
-                type: 'info'
-            });
+            // Use TransactionHandler utility
+            await TransactionHandler.execute(
+                this.contract.post_message(content, {
+                    value: ethers.BigNumber.from(fee)
+                }),
+                { 
+                    game: 'message-board', 
+                    message: content, 
+                    fee 
+                }
+            );
             
-            const tx = await this.contract.post_message(content, {
-                value: ethers.BigNumber.from(fee)
-            });
-            
-            await tx.wait();
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: '✅ Message posted!',
-                type: 'success'
-            });
-            
+            // Clear inputs
             document.getElementById('msg-content').value = '';
             document.getElementById('msg-fee').value = '';
             document.getElementById('char-count').textContent = '0';
             
+            // Refresh state
             await this.loadState();
             
         } catch (error) {
+            // Error already handled by TransactionHandler
             console.error('Post failed:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed: ' + (error.reason || error.message),
-                type: 'error'
-            });
         }
     }
 
     async loadState() {
+        if (!this.contract) return;
+        
         try {
-            // Load all data in parallel
+            // Load all data in parallel using DOMHelpers
             const [count, total, minFee, rateLimit, lastPost, waitTime] = await Promise.all([
                 this.contract.get_message_count(),
                 this.contract.total_collected(),
@@ -203,102 +182,119 @@ export class MessageBoard {
                 this.contract.get_time_until_next_post(this.web3Provider.currentAddress)
             ]);
             
-            // Update stats
-            document.getElementById('msg-count').textContent = count.toString();
-            
-            const totalEth = parseFloat(ethers.utils.formatEther(total));
-            document.getElementById('total').textContent = totalEth >= 0.001 
-                ? `${totalEth.toFixed(4)} ETH` 
-                : `${total.toString()} wei`;
+            // Update stats using DOMHelpers
+            DOMHelpers.updateInfo('msg-count', count.toString());
+            DOMHelpers.updateInfo('total', DOMHelpers.formatWei(total));
             
             const minFeeWei = minFee.toString();
-            document.getElementById('min-fee').textContent = minFeeWei + ' wei';
-            document.getElementById('msg-fee').placeholder = `Minimum: ${minFeeWei}`;
+            DOMHelpers.updateInfo('min-fee', minFeeWei + ' wei');
             
-            document.getElementById('rate-limit').textContent = rateLimit.toString() + 's';
-            
-            if (lastPost.toNumber() > 0) {
-                const date = new Date(lastPost.toNumber() * 1000);
-                document.getElementById('last-post').textContent = date.toLocaleString();
-            } else {
-                document.getElementById('last-post').textContent = 'Never';
+            const feeInput = document.getElementById('msg-fee');
+            if (feeInput) {
+                feeInput.placeholder = `Minimum: ${minFeeWei}`;
             }
+            
+            DOMHelpers.updateInfo('rate-limit', rateLimit.toString() + 's');
+            DOMHelpers.updateInfo('last-post', DOMHelpers.formatTimestamp(lastPost.toNumber()));
             
             const wait = waitTime.toNumber();
-            document.getElementById('wait-time').textContent = wait === 0 ? 'Now ✅' : `${wait}s ⏳`;
+            DOMHelpers.updateInfo('wait-time', 
+                wait === 0 ? 'Now ✅' : `${wait}s ⏳`
+            );
             
             // Load recent messages
-            const msgCount = count.toNumber();
-            if (msgCount > 0) {
-                const recent = Math.min(msgCount, 20);
-                const messages = await this.contract.get_recent_messages(recent);
-                this.displayMessages(messages);
-            } else {
-                document.getElementById('messages').innerHTML = 
-                    '<div class="no-data">No messages yet. Be the first!</div>';
-            }
+            await this.loadMessages(count.toNumber());
             
         } catch (error) {
             console.error('Failed to load state:', error);
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load data: ' + error.message,
+                message: 'Failed to load message board state',
                 type: 'error'
             });
         }
     }
 
-    displayMessages(messages) {
-        const container = document.getElementById('messages');
+    async loadMessages(msgCount) {
+        const messagesDiv = document.getElementById('messages');
+        if (!messagesDiv) return;
         
-        if (!messages || messages.length === 0) {
-            container.innerHTML = '<div class="no-data">No messages</div>';
+        if (msgCount === 0) {
+            messagesDiv.innerHTML = '<div class="loading">No messages yet. Be the first!</div>';
             return;
         }
         
-        // Newest first
-        const reversed = [...messages].reverse();
-        const userAddr = this.web3Provider.currentAddress.toLowerCase();
-        
-        container.innerHTML = reversed.map(msg => {
-            const isYou = msg.poster.toLowerCase() === userAddr;
-            const date = new Date(msg.timestamp.toNumber() * 1000);
-            const amount = parseFloat(ethers.utils.formatEther(msg.amount));
+        try {
+            const recent = Math.min(msgCount, 20);
+            const messages = await this.contract.get_recent_messages(recent);
             
-            return `
-                <div class="message-item ${isYou ? 'your-message' : ''}" style="margin-bottom: 1rem; padding: 1rem; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; background: ${isYou ? 'rgba(16,185,129,0.05)' : 'var(--bg-card)'};">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                        <span style="font-weight: 600; ${isYou ? 'color: var(--success);' : ''}">
-                            ${isYou ? '👤 YOU' : `${msg.poster.slice(0,6)}...${msg.poster.slice(-4)}`}
+            messagesDiv.innerHTML = '';
+            
+            // Display messages in reverse (newest first)
+            for (let i = messages.length - 1; i >= 0; i--) {
+                const msg = messages[i];
+                
+                const msgEl = document.createElement('div');
+                msgEl.className = 'message-item';
+                msgEl.style.cssText = `
+                    padding: 1rem;
+                    margin-bottom: 0.5rem;
+                    background: rgba(255, 255, 255, 0.05);
+                    border-radius: 8px;
+                    border-left: 3px solid var(--primary);
+                `;
+                
+                const isYourMessage = msg.poster.toLowerCase() === 
+                    this.web3Provider.currentAddress.toLowerCase();
+                
+                msgEl.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                        <span style="font-family: monospace; font-size: 0.875rem; color: var(--primary);">
+                            ${DOMHelpers.formatAddress(msg.poster)}
+                            ${isYourMessage ? ' <strong>(You)</strong>' : ''}
                         </span>
-                        <span style="color: var(--secondary); font-weight: 600;">
-                            ${amount >= 0.001 ? `${amount.toFixed(4)} ETH` : `${msg.amount.toString()} wei`}
+                        <span style="font-size: 0.75rem; color: var(--text-muted);">
+                            ${DOMHelpers.formatTimestamp(msg.timestamp.toNumber())}
                         </span>
                     </div>
-                    <div style="margin-bottom: 0.5rem; line-height: 1.6;">
-                        ${this.escape(msg.content)}
+                    <div style="font-size: 0.95rem; line-height: 1.5; word-wrap: break-word;">
+                        ${this.escapeHtml(msg.content)}
                     </div>
-                    <div style="font-size: 0.875rem; color: var(--text-muted);">
-                        ${date.toLocaleString()}
+                    <div style="margin-top: 0.5rem; font-size: 0.75rem; color: var(--text-muted);">
+                        Fee: ${DOMHelpers.formatWei(msg.amount)}
                     </div>
-                </div>
-            `;
-        }).join('');
+                `;
+                
+                messagesDiv.appendChild(msgEl);
+            }
+            
+        } catch (error) {
+            console.error('Failed to load messages:', error);
+            messagesDiv.innerHTML = '<div class="loading">Failed to load messages</div>';
+        }
     }
 
     setupContractEvents() {
-        this.contract.on('MessagePosted', (poster, messageId, amount) => {
-            const isYou = poster.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+        if (!this.contract) return;
+
+        // Listen for new messages
+        // Event signature: MessagePosted(poster: indexed(address), message_id: indexed(uint256), amount: uint256, content: String[280])
+        this.contract.on('MessagePosted', async (poster, messageId, amount, content, event) => {
+            console.log('New message posted:', { poster, messageId: messageId.toString(), amount: amount.toString(), content });
             
-            eventBus.emit(EVENTS.TOAST, {
-                message: isYou ? '✅ Your message posted!' : '📝 New message',
-                type: 'success'
-            });
+            // Refresh state and messages
+            await this.loadState();
             
-            this.loadState();
+            // Show notification if it's from current user
+            if (poster.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: '✅ Message posted successfully!',
+                    type: 'success'
+                });
+            }
         });
     }
 
-    escape(text) {
+    escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
@@ -307,9 +303,6 @@ export class MessageBoard {
     destroy() {
         if (this.contract) {
             this.contract.removeAllListeners();
-        }
-        if (this.container) {
-            this.container.innerHTML = '';
         }
     }
 }

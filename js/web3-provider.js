@@ -24,7 +24,12 @@ class Web3Provider {
      * Connect to wallet
      */
     async connect() {
+        console.log('🔌 web3Provider.connect() called');
+        console.log('MetaMask installed:', this.isMetaMaskInstalled());
+        console.log('window.ethereum:', typeof window.ethereum);
+        
         if (!this.isMetaMaskInstalled()) {
+            console.error('❌ MetaMask not installed');
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please install MetaMask to use WhaleGames',
                 type: 'error'
@@ -33,6 +38,7 @@ class Web3Provider {
         }
 
         try {
+            console.log('📝 Requesting account access...');
             // Request account access
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             

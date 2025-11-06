@@ -3,28 +3,20 @@
  * Your donation goes to the next donor - a chain of generosity!
  */
 
-import { GameRenderer } from '../ui/game-renderer.js';
+import { ContractLoader } from '../core/contract-loader.js';
+import { TransactionHandler } from '../core/transaction-handler.js';
+import { DOMHelpers } from '../core/dom-helpers.js';
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
 
 export class PayItForward {
     constructor() {
         this.contract = null;
         this.container = null;
-        this.eventListeners = [];
+        this.web3Provider = null;
         this.gameType = 'pay-it-forward';
         this.gameState = {
             pendingDonor: '0x0000000000000000000000000000000000000000',
-            pendingAmount: 0,
-            totalDonations: 0,
-            donationCount: 0,
-            minimumDonation: 0,
-            paused: false
-        };
-        this.userStats = {
-            totalDonated: 0,
-            totalReceived: 0,
-            donationCount: 0
+            pendingAmount: 0
         };
     }
 
@@ -35,38 +27,9 @@ export class PayItForward {
         this.container = container;
         this.web3Provider = web3Provider;
         
-        // Ensure wallet is connected
-        if (!web3Provider.isConnected() || !web3Provider.currentAddress) {
-            console.error('Cannot initialize game: Wallet not properly connected');
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
-                type: 'error'
-            });
-            return;
-        }
-        
-        console.log('✅ Wallet confirmed:', web3Provider.currentAddress);
-        
-        // Load contract ABI and initialize contract
-        try {
-            const response = await fetch('/contracts/abis/pay-it-forward.json');
-            const abi = await response.json();
-            
-            this.contract = web3Provider.getContract(
-                CONTRACT_ADDRESSES.PAY_IT_FORWARD,
-                abi
-            );
-            
-            console.log('Pay It Forward: Contract loaded at', CONTRACT_ADDRESSES.PAY_IT_FORWARD);
-            
-        } catch (error) {
-            console.error('Failed to load contract:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load game contract',
-                type: 'error'
-            });
-            return;
-        }
+        // Load contract using utility
+        this.contract = await ContractLoader.load('pay-it-forward', web3Provider);
+        if (!this.contract) return;
         
         // Render UI
         this.render();
@@ -85,42 +48,31 @@ export class PayItForward {
      * Render the game interface
      */
     render() {
-        // Create custom interface (not using standard round-based game interface)
         const container = document.createElement('div');
         container.className = 'game-interface';
         
-        // Title and description header
-        const header = document.createElement('div');
-        header.className = 'game-header';
-        
-        const title = document.createElement('h2');
-        title.className = 'game-title';
-        title.textContent = '⏩ Pay It Forward';
-        header.appendChild(title);
-        
-        const description = document.createElement('p');
-        description.className = 'game-description';
-        description.textContent = 'Donate now, receive the next donation! A chain of generosity.';
-        header.appendChild(description);
-        
-        container.appendChild(header);
+        // Header using DOMHelpers
+        container.appendChild(DOMHelpers.createHeader(
+            '⏩ Pay It Forward',
+            'Donate now, receive the next donation! A chain of generosity.'
+        ));
         
         // Donation controls
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls';
-        controlsDiv.innerHTML = `
-            <div class="input-group">
-                <label for="donate-amount">Donation Amount (wei)</label>
-                <input 
-                    type="number" 
-                    id="donate-amount" 
-                    placeholder="Enter amount in wei..."
-                    min="0"
-                    step="1"
-                />
-            </div>
-            <button id="donate-button" class="button-primary">💰 Donate</button>
-        `;
+        
+        controlsDiv.appendChild(DOMHelpers.createInput({
+            id: 'donate-amount',
+            label: 'Donation Amount (wei)',
+            placeholder: 'Enter amount in wei...',
+            min: 0,
+            step: 1
+        }));
+        
+        controlsDiv.appendChild(DOMHelpers.createButton(
+            'donate-button',
+            '💰 Donate'
+        ));
         
         container.appendChild(controlsDiv);
         this.container.appendChild(container);
@@ -130,12 +82,10 @@ export class PayItForward {
         sectionsContainer.className = 'game-sections';
         
         // Current state panel
-        const statePanel = this.renderStatePanel();
-        sectionsContainer.appendChild(statePanel);
+        sectionsContainer.appendChild(this.renderStatePanel());
         
         // How it works panel
-        const howItWorksPanel = this.renderHowItWorks();
-        sectionsContainer.appendChild(howItWorksPanel);
+        sectionsContainer.appendChild(this.renderHowItWorks());
         
         this.container.appendChild(sectionsContainer);
     }
@@ -144,34 +94,19 @@ export class PayItForward {
      * Render state panel - shows actual contract data
      */
     renderStatePanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.id = 'state-panel';
+        const panel = DOMHelpers.createInfoPanel('🎮 Current State', [
+            { label: 'Pending Donor', id: 'pending-donor' },
+            { label: 'Pending Amount', id: 'pending-amount' },
+            { label: 'Contract Balance', id: 'contract-balance' },
+            { label: 'Your Status', id: 'your-status' }
+        ]);
         
-        panel.innerHTML = `
-            <h3>🎮 Current State</h3>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">Pending Donor</div>
-                    <div class="info-value" id="pending-donor">Loading...</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Pending Amount</div>
-                    <div class="info-value" id="pending-amount">Loading...</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Contract Balance</div>
-                    <div class="info-value" id="contract-balance">Loading...</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">Your Status</div>
-                    <div class="info-value" id="your-status">-</div>
-                </div>
-            </div>
-            <div class="info-description" id="state-message">
-                💡 Loading contract state...
-            </div>
-        `;
+        // Add state message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'info-description';
+        messageDiv.id = 'state-message';
+        messageDiv.textContent = '💡 Loading contract state...';
+        panel.appendChild(messageDiv);
         
         return panel;
     }
@@ -208,17 +143,18 @@ export class PayItForward {
         const donateButton = document.getElementById('donate-button');
         const amountInput = document.getElementById('donate-amount');
         
-        const handleDonate = () => this.donate(amountInput.value);
-        
         if (donateButton) {
-            donateButton.addEventListener('click', handleDonate);
-            this.eventListeners.push({ element: donateButton, handler: handleDonate });
+            donateButton.addEventListener('click', () => 
+                this.donate(amountInput.value)
+            );
         }
         
         // Enter key support
         if (amountInput) {
             amountInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleDonate();
+                if (e.key === 'Enter') {
+                    this.donate(e.target.value);
+                }
             });
         }
     }
@@ -235,61 +171,25 @@ export class PayItForward {
             return;
         }
         
-        // No minimum donation check in simplified version
-        
         try {
-            GameRenderer.setLoading(true);
+            // Use TransactionHandler utility
+            await TransactionHandler.execute(
+                this.contract.donate({ 
+                    value: ethers.BigNumber.from(weiAmount) 
+                }),
+                { 
+                    game: 'pay-it-forward', 
+                    wei: weiAmount 
+                }
+            );
             
-            eventBus.emit(EVENTS.PLAY_SUBMITTED, {
-                game: 'pay-it-forward',
-                wei: weiAmount
-            });
-            
-            console.log(`Sending donation: ${weiAmount} wei`);
-            const tx = await this.contract.donate({
-                value: ethers.BigNumber.from(weiAmount)
-            });
-            
-            console.log('Transaction sent:', tx.hash);
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Transaction sent, waiting for confirmation...',
-                type: 'info'
-            });
-            
-            // Wait for transaction confirmation
-            await tx.wait();
-            
-            console.log('Transaction confirmed!');
-            
-            eventBus.emit(EVENTS.PLAY_CONFIRMED, {
-                game: 'pay-it-forward',
-                wei: weiAmount
-            });
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: `Donated ${parseInt(weiAmount).toLocaleString()} wei!`,
-                type: 'success'
-            });
-            
-            // Clear input
-            const amountInput = document.getElementById('donate-amount');
-            if (amountInput) {
-                amountInput.value = '';
-            }
-            
-            // Refresh state from blockchain
+            // Clear input and refresh state
+            document.getElementById('donate-amount').value = '';
             await this.refreshState();
             
         } catch (error) {
+            // Error already handled by TransactionHandler
             console.error('Donation failed:', error);
-            eventBus.emit(EVENTS.PLAY_FAILED, { error });
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Transaction failed: ' + (error.reason || error.message),
-                type: 'error'
-            });
-        } finally {
-            GameRenderer.setLoading(false);
         }
     }
 
@@ -297,188 +197,96 @@ export class PayItForward {
      * Refresh game state from blockchain
      */
     async refreshState() {
+        if (!this.contract) return;
+
         try {
-            console.log('🔄 Refreshing state from contract...');
+            // Load state in parallel
+            const [pendingDonor, pendingAmount, balance] = await Promise.all([
+                this.contract.pending_donor(),
+                this.contract.pending_amount(),
+                this.web3Provider.provider.getBalance(this.contract.address)
+            ]);
+
+            // Update local state
+            this.gameState.pendingDonor = pendingDonor;
+            this.gameState.pendingAmount = pendingAmount;
+
+            // Update UI using DOMHelpers
+            DOMHelpers.updateInfo('pending-donor', 
+                DOMHelpers.formatAddress(pendingDonor)
+            );
+            DOMHelpers.updateInfo('pending-amount', 
+                DOMHelpers.formatWei(pendingAmount)
+            );
+            DOMHelpers.updateInfo('contract-balance', 
+                DOMHelpers.formatWei(balance)
+            );
             
-            // Call individual public getters
-            const pendingDonor = await this.contract.pending_donor();
-            const pendingAmount = await this.contract.pending_amount();
+            // Check if current user is pending
+            const isYouPending = pendingDonor.toLowerCase() === 
+                this.web3Provider.currentAddress.toLowerCase();
             
-            // Get contract balance directly from provider
-            const balance = await this.web3Provider.provider.getBalance(CONTRACT_ADDRESSES.PAY_IT_FORWARD);
-            
-            this.gameState = {
-                pendingDonor,
-                pendingAmount,
-                totalDonations: 0,  // Simplified: track via events if needed
-                donationCount: 0,   // Simplified: track via events if needed
-                minimumDonation: 0, // Simplified: no minimum
-                paused: false,
-                balance
-            };
-            
-            // Simplified: no per-user tracking on-chain
-            this.userStats = {
-                totalDonated: ethers.BigNumber.from(0),
-                totalReceived: ethers.BigNumber.from(0),
-                donationCount: 0
-            };
-            
-            console.log('✅ Contract state loaded:', this.gameState);
-            
-            // Update all UI panels
-            this.updateAllPanels();
-            
-            console.log('✅ State refresh complete!');
-            
+            DOMHelpers.updateInfo('your-status', 
+                isYouPending ? '🎯 You are pending!' : 'Not pending'
+            );
+
+            // Update state message
+            const stateMessage = document.getElementById('state-message');
+            if (stateMessage) {
+                if (pendingDonor === '0x0000000000000000000000000000000000000000') {
+                    stateMessage.textContent = '🚀 Be the first donor to start the chain!';
+                } else if (isYouPending) {
+                    stateMessage.textContent = '⏳ You are pending! Waiting for the next donor to pay you.';
+                } else {
+                    stateMessage.textContent = '💫 Donate now and receive the pending amount immediately!';
+                }
+            }
+
         } catch (error) {
-            console.error('❌ Failed to refresh state:', error);
+            console.error('Failed to refresh state:', error);
             eventBus.emit(EVENTS.TOAST, {
-                message: `Failed to load game state: ${error.message}`,
+                message: 'Failed to load game state',
                 type: 'error'
             });
         }
     }
 
     /**
-     * Setup real-time event listeners
+     * Setup real-time contract event listeners
      */
     setupContractEventListeners() {
         if (!this.contract) return;
-        
-        // Listen for Donation events (simplified - one event type)
-        this.contract.on('Donation', async (donor, amount, received, isFirst) => {
-            console.log('New donation!', {
-                donor,
-                amount: ethers.utils.formatEther(amount),
-                received: ethers.utils.formatEther(received),
-                isFirst
-            });
+
+        // Listen for Donation events
+        this.contract.on('Donation', async (donor, amount, received, isFirst, event) => {
+            console.log('Donation event:', { donor, amount: amount.toString(), received: received.toString(), isFirst });
             
-            const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+            // Refresh state when donations occur
+            await this.refreshState();
             
-            if (isYou) {
+            // Show notification if it involves current user
+            if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                 if (isFirst) {
                     eventBus.emit(EVENTS.TOAST, {
-                        message: `✅ You made the first donation of ${ethers.utils.formatEther(amount)} ETH! You are now pending.`,
+                        message: '🎉 You started the chain! Waiting for next donor.',
                         type: 'success'
                     });
                 } else {
                     eventBus.emit(EVENTS.TOAST, {
-                        message: `✅ You donated ${ethers.utils.formatEther(amount)} ETH and received ${ethers.utils.formatEther(received)} ETH!`,
+                        message: `🎉 You received ${DOMHelpers.formatWei(received)} and are now pending!`,
                         type: 'success'
                     });
                 }
-            } else {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `💰 New donation! Someone donated ${ethers.utils.formatEther(amount)} ETH.`,
-                    type: 'info'
-                });
             }
-            
-            // Refresh state
-            await this.refreshState();
         });
     }
 
     /**
-     * Update all UI panels
-     */
-    updateAllPanels() {
-        this.updateStatePanel();
-    }
-
-    /**
-     * Update state panel with actual contract data
-     */
-    updateStatePanel() {
-        const state = this.gameState;
-        
-        // Pending donor
-        const donorEl = document.getElementById('pending-donor');
-        if (donorEl) {
-            if (state.pendingDonor === '0x0000000000000000000000000000000000000000') {
-                donorEl.textContent = '🌟 None (be the first!)';
-                donorEl.style.color = 'var(--primary)';
-            } else if (state.pendingDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                donorEl.textContent = '🎯 YOU!';
-                donorEl.style.color = 'var(--success)';
-            } else {
-                donorEl.textContent = `${state.pendingDonor.slice(0, 10)}...${state.pendingDonor.slice(-8)}`;
-                donorEl.style.color = '';
-            }
-        }
-        
-        // Pending amount
-        const amountEl = document.getElementById('pending-amount');
-        if (amountEl) {
-            const amount = parseFloat(ethers.utils.formatEther(state.pendingAmount));
-            amountEl.textContent = amount >= 0.01 
-                ? `${amount.toFixed(4)} ETH` 
-                : `${state.pendingAmount.toString()} wei`;
-        }
-        
-        // Contract balance
-        const balanceEl = document.getElementById('contract-balance');
-        if (balanceEl) {
-            const balance = parseFloat(ethers.utils.formatEther(state.balance));
-            balanceEl.textContent = balance >= 0.01 
-                ? `${balance.toFixed(4)} ETH` 
-                : `${state.balance.toString()} wei`;
-        }
-        
-        // Your status and message
-        const statusEl = document.getElementById('your-status');
-        const messageEl = document.getElementById('state-message');
-        
-        if (state.pendingDonor === '0x0000000000000000000000000000000000000000') {
-            if (statusEl) {
-                statusEl.textContent = '🌟 Ready to Start';
-                statusEl.style.color = 'var(--primary)';
-            }
-            if (messageEl) {
-                messageEl.innerHTML = '💡 <strong>Be the first!</strong> Your donation will be pending until someone else donates.';
-            }
-        } else if (state.pendingDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-            if (statusEl) {
-                statusEl.textContent = '⏳ Pending';
-                statusEl.style.color = 'var(--warning)';
-            }
-            if (messageEl) {
-                const pendingAmount = amountEl ? amountEl.textContent : state.pendingAmount.toString() + ' wei';
-                messageEl.innerHTML = `⏳ <strong>You're waiting!</strong> When the next person donates, you'll receive <strong>${pendingAmount}</strong> and they become the new pending donor.`;
-            }
-        } else {
-            if (statusEl) {
-                statusEl.textContent = '💚 Ready to Donate';
-                statusEl.style.color = 'var(--success)';
-            }
-            if (messageEl) {
-                const pendingAmount = amountEl ? amountEl.textContent : state.pendingAmount.toString() + ' wei';
-                messageEl.innerHTML = `💚 <strong>Donate now!</strong> You'll receive <strong>${pendingAmount}</strong> immediately and become the new pending donor.`;
-            }
-        }
-    }
-
-    /**
-     * Cleanup
+     * Cleanup when game is unloaded
      */
     destroy() {
-        // Remove event listeners
-        this.eventListeners.forEach(({ element, handler }) => {
-            element.removeEventListener('click', handler);
-        });
-        this.eventListeners = [];
-        
-        // Remove contract event listeners
         if (this.contract) {
-            this.contract.removeAllListeners('Donation');
-        }
-        
-        // Clear container
-        if (this.container) {
-            this.container.innerHTML = '';
+            this.contract.removeAllListeners();
         }
     }
 }
-

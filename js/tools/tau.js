@@ -3,7 +3,8 @@
  * Calculate τ^x on-chain
  */
 
-import { GameRenderer } from '../ui/game-renderer.js';
+import { ContractLoader } from '../core/contract-loader.js';
+import { DOMHelpers } from '../core/dom-helpers.js';
 import { eventBus, EVENTS } from '../ui/events.js';
 import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
 
@@ -11,9 +12,11 @@ export class TauCalculator {
     constructor() {
         this.contract = null;
         this.container = null;
-        this.eventListeners = [];
+        this.web3Provider = null;
         this.gameType = 'tau-calculator';
         this.constantValue = 6.2831853072;
+        this.symbol = 'τ';
+        this.name = 'Tau';
     }
 
     /**
@@ -23,36 +26,16 @@ export class TauCalculator {
         this.container = container;
         this.web3Provider = web3Provider;
         
-        if (!web3Provider.isConnected() || !web3Provider.currentAddress) {
-            console.error('Cannot initialize tool: Wallet not properly connected');
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
-                type: 'error'
-            });
-            return;
-        }
+        // Load contract using utility
+        this.contract = await ContractLoader.load('tau-calculator', web3Provider);
+        if (!this.contract) return;
         
-        console.log('✅ Wallet confirmed:', web3Provider.currentAddress);
-        
-        // Load ABI from file
+        // Load constant value from contract
         try {
-            const response = await fetch('/contracts/abis/tau-calculator.json');
-            const abi = await response.json();
-            
-            this.contract = web3Provider.getContract(
-                CONTRACT_ADDRESSES.TAU_CALCULATOR,
-                abi
-            );
-            
-            console.log('Tau Calculator: Contract loaded at', CONTRACT_ADDRESSES.TAU_CALCULATOR);
-            
+            const value = await this.contract.get_constant();
+            this.constantValue = parseFloat(ethers.utils.formatUnits(value, 10));
         } catch (error) {
-            console.error('Failed to load contract:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load contract. Deploy the contract and update the ABI.',
-                type: 'error'
-            });
-            return;
+            console.log('Using default τ value');
         }
         
         // Render UI
@@ -60,76 +43,54 @@ export class TauCalculator {
         
         // Setup event listeners
         this.setupListeners();
-        
-        // Load constant value
-        if (this.contract) {
-            try {
-                const tauValue = await this.contract.get_constant();
-                // Convert from Vyper fixed-point (10 decimals) to JavaScript float
-                this.constantValue = parseFloat(ethers.utils.formatUnits(tauValue, 10));
-            } catch (error) {
-                console.log('Using default τ value');
-            }
-        }
     }
 
     /**
      * Render the tool interface
      */
     render() {
-        // Create custom calculator interface
         const container = document.createElement('div');
         container.className = 'game-interface';
         
-        // Title and description header
-        const header = document.createElement('div');
-        header.className = 'game-header';
-        
-        const title = document.createElement('h2');
-        title.className = 'game-title';
-        title.textContent = '⭕ τ Calculator';
-        header.appendChild(title);
-        
-        const description = document.createElement('p');
-        description.className = 'game-description';
-        description.textContent = `Calculate τ^x on-chain! Tau (τ ≈ ${this.constantValue}) is the ratio of a circle's circumference to its radius (2π).`;
-        header.appendChild(description);
-        
-        container.appendChild(header);
+        // Header using DOMHelpers
+        container.appendChild(DOMHelpers.createHeader(
+            `⭕ ${this.symbol} Calculator`,
+            `Calculate ${this.symbol}^x on-chain! Tau (${this.symbol} ≈ ${this.constantValue}) is the circle constant, equal to 2π.`
+        ));
         
         // Calculator controls
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
-        controlsDiv.innerHTML = `
-            <div class="input-group">
-                <label for="exponent-input">Exponent (x)</label>
-                <input 
-                    type="number" 
-                    id="exponent-input" 
-                    placeholder="Enter exponent (e.g., 2.5)"
-                    min="0"
-                    max="9.999999"
-                    step="0.1"
-                />
-                <div class="input-hint">Range: [0, 10)</div>
-            </div>
-            <button id="calculate-button" class="button-primary">Calculate τ^x On-Chain</button>
-        `;
+        
+        controlsDiv.appendChild(DOMHelpers.createInput({
+            id: 'exponent-input',
+            label: 'Exponent (x)',
+            type: 'number',
+            placeholder: 'Enter exponent (e.g., 2.5)',
+            min: 0,
+            max: 9.999999,
+            step: 0.1
+        }));
+        
+        const hint = document.createElement('div');
+        hint.className = 'input-hint';
+        hint.textContent = 'Range: [0, 10)';
+        controlsDiv.querySelector('.input-group').appendChild(hint);
+        
+        controlsDiv.appendChild(DOMHelpers.createButton(
+            'calculate-button',
+            `Calculate ${this.symbol}^x On-Chain`
+        ));
         
         container.appendChild(controlsDiv);
         this.container.appendChild(container);
         
-        // Content sections container
+        // Content sections
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'game-sections';
         
-        // Result panel
-        const resultPanel = this.renderResultPanel();
-        sectionsContainer.appendChild(resultPanel);
-        
-        // Info panel
-        const infoPanel = this.renderInfoPanel();
-        sectionsContainer.appendChild(infoPanel);
+        sectionsContainer.appendChild(this.renderResultPanel());
+        sectionsContainer.appendChild(this.renderInfoPanel());
         
         this.container.appendChild(sectionsContainer);
     }
@@ -140,13 +101,11 @@ export class TauCalculator {
     renderResultPanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        panel.id = 'result-panel';
-        
         panel.innerHTML = `
             <h3>📊 Result</h3>
             <div class="calculator-result">
                 <div class="result-display" id="result-display">
-                    <div class="result-label">τ^x =</div>
+                    <div class="result-label">${this.symbol}^x =</div>
                     <div class="result-value" id="result-value">-</div>
                 </div>
                 <div class="result-info">
@@ -154,7 +113,6 @@ export class TauCalculator {
                 </div>
             </div>
         `;
-        
         return panel;
     }
 
@@ -164,44 +122,42 @@ export class TauCalculator {
     renderInfoPanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
-        
         panel.innerHTML = `
-            <h3>ℹ️ About Tau</h3>
+            <h3>ℹ️ About ${this.name}</h3>
             <div class="tool-info">
-                <p><strong>τ ≈ 6.28318...</strong> is the "true" circle constant (2π).</p>
+                <p><strong>${this.symbol} ≈ 6.28318...</strong> is the circle constant, equal to 2π.</p>
                 <ul>
-                    <li>Ratio of circle's circumference to radius</li>
-                    <li>Simplifies many trigonometric formulas</li>
-                    <li>One full turn = τ radians (not 2π)</li>
-                    <li>Growing movement to replace π with τ in mathematics</li>
+                    <li>One ${this.symbol} represents one full turn of a circle</li>
+                    <li>Simplifies many mathematical formulas</li>
+                    <li>Advocated as more natural than π in some contexts</li>
+                    <li>Ratio of circle's circumference to its radius</li>
                 </ul>
-                <p class="note">💡 <strong>Fun fact:</strong> June 28 (6/28) is Tau Day, celebrating τ!</p>
+                <p class="note">💡 <strong>Fun fact:</strong> June 28th (6/28) is celebrated as Tau Day!</p>
                 <p class="note">🔒 <strong>On-chain calculation:</strong> Results are computed on the blockchain using a lookup table for ~10 decimal place accuracy.</p>
             </div>
             
             <h3>🔧 Use in Your Smart Contract</h3>
             <div class="tool-info">
                 <p>You can call this calculator from your own smart contracts! Here's an example in Vyper:</p>
-                <pre><code># Interface for Tau Calculator
-interface TauCalculator:
+                <pre><code># Interface for ${this.name} Calculator
+interface ${this.name}Calculator:
     def calculate(x: decimal) -> decimal: view
     def get_constant() -> decimal: view
 
 # Use the calculator
-TAU_CALC: constant(address) = ${CONTRACT_ADDRESSES.TAU_CALCULATOR}
+CALC: constant(address) = ${CONTRACT_ADDRESSES.TAU_CALCULATOR}
 
 @external
 @view
-def circle_calculation(exponent: decimal) -> decimal:
-    # Call τ^x calculator (FREE - no gas cost!)
-    result: decimal = staticcall TauCalculator(TAU_CALC).calculate(exponent)
+def my_calculation(exponent: decimal) -> decimal:
+    # Call ${this.symbol}^x calculator (FREE - no gas cost!)
+    result: decimal = staticcall ${this.name}Calculator(CALC).calculate(exponent)
     return result
 </code></pre>
                 <p class="note">✨ <strong>Free to use:</strong> All calculations are view functions with no gas cost!</p>
                 <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.TAU_CALCULATOR}</code></p>
             </div>
         `;
-        
         return panel;
     }
 
@@ -212,14 +168,9 @@ def circle_calculation(exponent: decimal) -> decimal:
         const calculateButton = document.getElementById('calculate-button');
         const expInput = document.getElementById('exponent-input');
         
-        const handleCalculate = () => this.calculate(expInput.value);
-        
-        if (calculateButton) {
+        if (calculateButton && expInput) {
+            const handleCalculate = () => this.calculate(expInput.value);
             calculateButton.addEventListener('click', handleCalculate);
-            this.eventListeners.push({ element: calculateButton, handler: handleCalculate });
-        }
-        
-        if (expInput) {
             expInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') handleCalculate();
             });
@@ -248,14 +199,15 @@ def circle_calculation(exponent: decimal) -> decimal:
             return;
         }
         
+        const calculateButton = document.getElementById('calculate-button');
+        
         try {
-            const calculateButton = document.getElementById('calculate-button');
             if (calculateButton) {
                 calculateButton.disabled = true;
                 calculateButton.textContent = 'Calculating...';
             }
             
-            console.log(`Calculating τ^${x} on-chain`);
+            console.log(`Calculating ${this.symbol}^${x} on-chain`);
             
             // Convert JavaScript decimal to Vyper fixed-point (10 decimal places)
             const xFixed = ethers.utils.parseUnits(x.toString(), 10);
@@ -276,7 +228,7 @@ def circle_calculation(exponent: decimal) -> decimal:
             }
             
             eventBus.emit(EVENTS.TOAST, {
-                message: `τ^${x} ≈ ${parseFloat(resultDecimal).toFixed(6)}`,
+                message: `${this.symbol}^${x} ≈ ${parseFloat(resultDecimal).toFixed(6)}`,
                 type: 'success'
             });
             
@@ -287,10 +239,9 @@ def circle_calculation(exponent: decimal) -> decimal:
                 type: 'error'
             });
         } finally {
-            const calculateButton = document.getElementById('calculate-button');
             if (calculateButton) {
                 calculateButton.disabled = false;
-                calculateButton.textContent = 'Calculate τ^x On-Chain';
+                calculateButton.textContent = `Calculate ${this.symbol}^x On-Chain`;
             }
         }
     }
@@ -299,14 +250,8 @@ def circle_calculation(exponent: decimal) -> decimal:
      * Cleanup
      */
     destroy() {
-        this.eventListeners.forEach(({ element, handler }) => {
-            element.removeEventListener('click', handler);
-        });
-        this.eventListeners = [];
-        
         if (this.container) {
             this.container.innerHTML = '';
         }
     }
 }
-
