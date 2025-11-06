@@ -6,6 +6,7 @@
 
 import { web3Provider } from './web3-provider.js';
 import { eventBus, EVENTS } from './ui/events.js';
+import { initConfetti } from './ui/confetti-animation.js';
 
 // Import game modules
 import { PissingContest } from './games/pissing-contest.js';
@@ -138,6 +139,15 @@ class UnifiedApp {
             backBtn.addEventListener('click', () => {
                 console.log('Back button clicked');
                 this.showModuleList();
+            });
+        }
+
+        // Joy button (confetti test)
+        const joyBtn = document.getElementById('joy-button');
+        if (joyBtn) {
+            joyBtn.addEventListener('click', () => {
+                console.log('🎉 Joy button clicked - triggering confetti!');
+                eventBus.emit(EVENTS.CONFETTI);
             });
         }
     }
