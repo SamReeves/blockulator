@@ -11,6 +11,7 @@ export const CONTRACT_ADDRESSES = {
     PAY_IT_BACKWARD: '0x137E7907709898571948BddE2e0eCbAC1C343d8C',
     KING_OF_THE_HILL: '0x159317d877BbF41dE895465B576e706Ebcb0e30e',
     LAST_CALL: '0xaCffb1F658E1fD7A50E49Ef55f8fbEA2F1df1528',
+    TIME_TO_MAKE_THE_DONUTS: '0x11fd7480998776d817d68B6167d8380163C5d09d',
     
     // Tools (Mathematical Constant Calculators)
     E_CALCULATOR: '0x0df17535A8C9B68C426F4bf872E3F4EE1c57Aab8',
@@ -31,6 +32,7 @@ export const CONTRACT_SOURCES = {
     PAY_IT_BACKWARD: 'contracts/games/pay_it_backward.vy',
     KING_OF_THE_HILL: 'contracts/games/king_of_the_hill.vy',
     LAST_CALL: 'contracts/games/last_call.vy',
+    TIME_TO_MAKE_THE_DONUTS: 'contracts/games/time_to_make_the_donuts.vy',
     E_CALCULATOR: 'contracts/tools/e.vy',
     PI_CALCULATOR: 'contracts/tools/pi.vy',
     TAU_CALCULATOR: 'contracts/tools/tau.vy',

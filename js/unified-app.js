@@ -15,6 +15,7 @@ import { PayItBackward } from './games/pay-it-backward.js';
 import { MessageBoard } from './games/message-board.js';
 import { KingOfTheHill } from './games/king-of-the-hill.js';
 import { LastCall } from './games/last-call.js';
+import { TimeToMakeTheDonuts } from './games/time-to-make-the-donuts.js';
 
 // Import tool modules
 import { ECalculator } from './tools/e.js';
@@ -56,7 +57,8 @@ class UnifiedApp {
             ['pay-it-backward', PayItBackward],
             ['message-board', MessageBoard],
             ['king-of-the-hill', KingOfTheHill],
-            ['last-call', LastCall]
+            ['last-call', LastCall],
+            ['time-to-make-the-donuts', TimeToMakeTheDonuts]
         ]);
         this.config = {
             listSelector: '.game-list',
