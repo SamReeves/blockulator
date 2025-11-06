@@ -5,6 +5,7 @@
  */
 
 import { eventBus, EVENTS } from './ui/events.js';
+import { config } from './config.js';
 
 class Web3Provider {
     constructor() {
@@ -24,11 +25,11 @@ class Web3Provider {
      */
     initReadOnlyProvider() {
         try {
-            // Sepolia testnet public RPC
+            // Initialize with network from config
             this.readOnlyProvider = new ethers.providers.JsonRpcProvider(
-                'https://rpc.sepolia.org'
+                config.rpcUrl
             );
-            console.log('📖 Read-only provider initialized');
+            console.log(`📖 Read-only provider initialized for ${config.name}`);
         } catch (error) {
             console.error('Failed to initialize read-only provider:', error);
         }
@@ -78,19 +79,18 @@ class Web3Provider {
                 address: this.address
             });
             
-            // Check if on Sepolia testnet (chain ID 11155111)
-            const SEPOLIA_CHAIN_ID = 11155111;
-            if (this.chainId !== SEPOLIA_CHAIN_ID) {
+            // Check if on correct network
+            if (this.chainId !== config.chainId) {
                 eventBus.emit(EVENTS.TOAST, {
-                    message: `⚠️ Please switch to Sepolia Testnet! Currently on chain ID: ${this.chainId}`,
+                    message: `⚠️ Please switch to ${config.name}! Currently on chain ID: ${this.chainId}`,
                     type: 'error'
                 });
                 
-                // Try to switch to Sepolia
+                // Try to switch to correct network
                 try {
                     await window.ethereum.request({
                         method: 'wallet_switchEthereumChain',
-                        params: [{ chainId: '0xaa36a7' }], // Sepolia chain ID in hex
+                        params: [{ chainId: config.chainIdHex }],
                     });
                     
                     // Re-get network after switch
@@ -98,7 +98,7 @@ class Web3Provider {
                     this.chainId = newNetwork.chainId;
                     
                     eventBus.emit(EVENTS.TOAST, {
-                        message: '✅ Switched to Sepolia Testnet',
+                        message: `✅ Switched to ${config.name}`,
                         type: 'success'
                     });
                 } catch (switchError) {
@@ -109,15 +109,11 @@ class Web3Provider {
                             await window.ethereum.request({
                                 method: 'wallet_addEthereumChain',
                                 params: [{
-                                    chainId: '0xaa36a7',
-                                    chainName: 'Sepolia Testnet',
-                                    nativeCurrency: {
-                                        name: 'Sepolia ETH',
-                                        symbol: 'ETH',
-                                        decimals: 18
-                                    },
-                                    rpcUrls: ['https://rpc.sepolia.org'],
-                                    blockExplorerUrls: ['https://sepolia.etherscan.io']
+                                    chainId: config.chainIdHex,
+                                    chainName: config.name,
+                                    nativeCurrency: config.nativeCurrency,
+                                    rpcUrls: [config.rpcUrl],
+                                    blockExplorerUrls: [config.blockExplorer]
                                 }]
                             });
                             
@@ -126,7 +122,7 @@ class Web3Provider {
                             this.chainId = newNetwork.chainId;
                             
                             eventBus.emit(EVENTS.TOAST, {
-                                message: '✅ Added and switched to Sepolia Testnet',
+                                message: `✅ Added and switched to ${config.name}`,
                                 type: 'success'
                             });
                         } catch (addError) {
