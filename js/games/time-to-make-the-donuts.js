@@ -225,18 +225,23 @@ export class TimeToMakeTheDonuts {
             DOMHelpers.updateInfo('pot-value', DOMHelpers.formatWei(potValue));
             
             // Update first donor today
-            const donorDisplay = firstDonorToday === '0x0000000000000000000000000000000000000000' 
-                ? 'No one yet - BE FIRST!' 
-                : DOMHelpers.formatAddress(firstDonorToday);
-            
             const donorEl = document.getElementById('first-donor-today');
             if (donorEl) {
-                const isYou = firstDonorToday.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                if (isYou && firstDonorToday !== '0x0000000000000000000000000000000000000000') {
-                    donorEl.innerHTML = 
-                        `<span style="color: #ffd700;">🎉 YOU! 🎉</span><br><span style="font-size: 0.875rem; opacity: 0.9;">${donorDisplay}</span>`;
+                const isZeroAddress = firstDonorToday === '0x0000000000000000000000000000000000000000';
+                
+                if (isZeroAddress) {
+                    donorEl.textContent = 'No one yet - BE FIRST!';
                 } else {
-                    donorEl.textContent = donorDisplay;
+                    // Check if it's the current user (safely)
+                    const currentAddress = this.web3Provider?.currentAddress;
+                    const isYou = currentAddress && firstDonorToday.toLowerCase() === currentAddress.toLowerCase();
+                    
+                    if (isYou) {
+                        donorEl.innerHTML = 
+                            `<span style="color: #ffd700;">🎉 YOU! 🎉</span><br><span style="font-size: 0.875rem; opacity: 0.9;">${DOMHelpers.formatAddress(firstDonorToday)}</span>`;
+                    } else {
+                        donorEl.textContent = DOMHelpers.formatAddress(firstDonorToday);
+                    }
                 }
             }
             

@@ -112,7 +112,12 @@ def donate():
     else:
         # Same day, just add to the pot
         self.pot_value += msg.value
-        is_first_donor = False
+        # Check if this is the first donor of the current day
+        if self.first_donor_today == empty(address):
+            self.first_donor_today = msg.sender
+            is_first_donor = True
+        else:
+            is_first_donor = False
     
     log DonationReceived(
         self.current_day,
