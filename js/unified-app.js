@@ -27,6 +27,9 @@ import { CosCalculator } from './tools/cos.js';
 import { TanhCalculator } from './tools/tanh.js';
 import { Pow10Calculator } from './tools/pow10.js';
 import { Pow2Calculator } from './tools/pow2.js';
+import { LnCalculator } from './tools/ln.js';
+import { Log2Calculator } from './tools/log2.js';
+import { Log10Calculator } from './tools/log10.js';
 
 class UnifiedApp {
     constructor() {
@@ -88,7 +91,10 @@ class UnifiedApp {
             ['cos-calculator', CosCalculator],
             ['tanh-calculator', TanhCalculator],
             ['pow10-calculator', Pow10Calculator],
-            ['pow2-calculator', Pow2Calculator]
+            ['pow2-calculator', Pow2Calculator],
+            ['ln-calculator', LnCalculator],
+            ['log2-calculator', Log2Calculator],
+            ['log10-calculator', Log10Calculator]
         ]);
         this.config = {
             listSelector: '.tool-list',

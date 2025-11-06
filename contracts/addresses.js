@@ -25,7 +25,10 @@ const SEPOLIA_ADDRESSES = {
     COS_CALCULATOR: '0x85DABC736AA6DE75940cA7C33fc970cB703AcE04',
     TANH_CALCULATOR: '0x4bB456891e1e703Bc3bd23F69B6D6d91323622E1',
     POW10_CALCULATOR: '0x86C5081545f7c8Ab322e8308b5D772e3311DD499',
-    POW2_CALCULATOR: '0x038c3931BB2eA55e564292D64bfC4d595F162059'
+    POW2_CALCULATOR: '0x038c3931BB2eA55e564292D64bfC4d595F162059',
+    LN_CALCULATOR: '0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4', 
+    LOG2_CALCULATOR: '0xDfA68b0fcC5fca85BB3c3749Ade5F364744AB65E',
+    LOG10_CALCULATOR: '0xC39b9A0aDE77f8b8428f2BB5F0a7f457CFb68a6c'
 };
 
 // Mainnet Addresses (update these after deploying to mainnet)
@@ -48,7 +51,10 @@ const MAINNET_ADDRESSES = {
     COS_CALCULATOR: '0x0000000000000000000000000000000000000000',
     TANH_CALCULATOR: '0x0000000000000000000000000000000000000000',
     POW10_CALCULATOR: '0x0000000000000000000000000000000000000000',
-    POW2_CALCULATOR: '0x0000000000000000000000000000000000000000'
+    POW2_CALCULATOR: '0x0000000000000000000000000000000000000000',
+    LN_CALCULATOR: '0x0000000000000000000000000000000000000000',
+    LOG2_CALCULATOR: '0x0000000000000000000000000000000000000000',
+    LOG10_CALCULATOR: '0x0000000000000000000000000000000000000000'
 };
 
 // Select addresses based on current network
@@ -77,7 +83,10 @@ export const CONTRACT_SOURCES = {
     COS_CALCULATOR: 'contracts/tools/cos.vy',
     TANH_CALCULATOR: 'contracts/tools/tanh.vy',
     POW10_CALCULATOR: 'contracts/tools/pow10.vy',
-    POW2_CALCULATOR: 'contracts/tools/pow2.vy'
+    POW2_CALCULATOR: 'contracts/tools/pow2.vy',
+    LN_CALCULATOR: 'contracts/tools/ln.vy',
+    LOG2_CALCULATOR: 'contracts/tools/log2.vy',
+    LOG10_CALCULATOR: 'contracts/tools/log10.vy'
 };
 
 // Map contract addresses to their ABI files
@@ -97,7 +106,10 @@ export const CONTRACT_ABIS = {
     COS_CALCULATOR: 'contracts/abis/cos-calculator.json',
     TANH_CALCULATOR: 'contracts/abis/tanh-calculator.json',
     POW10_CALCULATOR: 'contracts/abis/pow10-calculator.json',
-    POW2_CALCULATOR: 'contracts/abis/pow2-calculator.json'
+    POW2_CALCULATOR: 'contracts/abis/pow2-calculator.json',
+    LN_CALCULATOR: 'contracts/abis/ln-calculator.json',
+    LOG2_CALCULATOR: 'contracts/abis/log2-calculator.json',
+    LOG10_CALCULATOR: 'contracts/abis/log10-calculator.json'
 };
 
 // Network configuration

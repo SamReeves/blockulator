@@ -2,9 +2,9 @@
 # @version 0.4.0
 # @author L1Ca$h
 
-# Lookup table for calculating 2^x using digit-by-digit multiplication
+# Lookup table for calculating log2(x) using digit-by-digit extraction
 # Row i contains 2^(d * 10^(-i)) for d = 0..9
-# This uses the same method as e^x, pi^x, τ^x
+# Same table structure as 2^x, but used inversely
 
 TAB: constant(decimal[10][11]) = [
     [1.0000000000, 2.0000000000, 4.0000000000, 8.0000000000, 16.0000000000, 32.0000000000, 64.0000000000, 128.0000000000, 256.0000000000, 512.0000000000],
@@ -27,13 +27,13 @@ BASE2: constant(decimal) = 2.0
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate 2^x (FREE - no gas cost)
-    @param x The exponent (must be in range [0, 10))
-    @return The result of 2^x
+    @notice Calculate log2(x) - binary logarithm (FREE - no gas cost)
+    @param x The input value (must be in range (0, 2^10])
+    @return The result of log2(x)
     """
-    assert x >= 0.0, "Negative powers are not supported."
-    assert x < 10.0, "The power limit is 9.999999999"
-    return self._pow2_to_the(x)
+    assert x > 0.0, "Logarithm undefined for x <= 0"
+    assert x <= 1024.0, "Input exceeds maximum (2^10)"
+    return self._log2(x)
 
 @external
 @view
@@ -46,20 +46,48 @@ def get_constant() -> decimal:
 
 @internal
 @pure
-def _pow2_to_the(_x: decimal) -> decimal:
+def _log2(_x: decimal) -> decimal:
     """
-    @notice Internal function to calculate 2^x using digit-by-digit method
-    @param _x The exponent
-    @return The result of 2^x
+    @notice Internal function to calculate log2(x) using digit-by-digit extraction
+    @param _x The input value
+    @return The result of log2(x)
     """
     x: decimal = _x
-    y: decimal = 1.0
-    for i: uint256 in range(11):
-        if x != 0.0:
-            d: uint256 = convert(x, uint256)
-            y *= TAB[i][d]
-            x -= convert(d, decimal)
-            x *= 10.0
+    
+    # Step 1: Normalize x to [1, 2) and track integer exponent
+    int_exp: int256 = 0
+    
+    # Handle x >= 2
+    for _: uint256 in range(20):  # Support up to 2^20
+        if x >= BASE2:
+            x /= BASE2
+            int_exp += 1
         else:
             break
-    return y
+    
+    # Handle x < 1
+    for _: uint256 in range(20):  # Support down to 2^-20
+        if x < 1.0:
+            x *= BASE2
+            int_exp -= 1
+        else:
+            break
+    
+    # Step 2: Extract fractional part digit by digit
+    # Now x is in [1, 2), so log2(x) is in [0, 1)
+    result: decimal = 0.0
+    scale: decimal = 1.0
+    
+    for i: uint256 in range(11):
+        # Try digits from 9 down to 0 to find largest that fits
+        for d: uint256 in range(10):
+            digit: uint256 = 9 - d  # Count down from 9 to 0
+            if x >= TAB[i][digit]:
+                x /= TAB[i][digit]
+                result += convert(digit, decimal) * scale
+                break
+        scale /= 10.0
+    
+    # Add integer exponent
+    return convert(int_exp, decimal) + result
+
