@@ -40,7 +40,7 @@ def calculate(x: decimal) -> decimal:
 def get_constant() -> decimal:
     """
     @notice Get Euler's number (e)
-    @return The constant e ≈ 2.718281828
+    @return The constant e = 2.718281828
     """
     return E
 

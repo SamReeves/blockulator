@@ -10,15 +10,15 @@ MECHANICS:
 - Prize pot starts at initial_stake
 - To claim throne and win the prize, you must pay BOTH:
   * At least (current_prize + 1000 wei)
-  * At least (current_prize × 1.01)
+  * At least (current_prize * 1.01)
 - Winner receives the current prize immediately
 - Your payment becomes the new prize for the next person
 - No refunds - prize pot keeps growing
 
 EXAMPLE:
 - Prize: 10000 wei
-- Alice pays 11000 (≥10000+1000 ✓ and ≥10100 ✓) → wins 10000, new prize: 11000
-- Bob pays 12100 (≥11000+1000 ✓ and ≥11110 ✓) → wins 11000, new prize: 12100
+- Alice pays 11000 (>=10000+1000 and >=10100) -> wins 10000, new prize: 11000
+- Bob pays 12100 (>=11000+1000 and >=11110) -> wins 11000, new prize: 12100
 - Stakes grow exponentially!
 """
 

@@ -4,7 +4,7 @@
 
 # Lookup table for calculating 2^x using digit-by-digit multiplication
 # Row i contains 2^(d * 10^(-i)) for d = 0..9
-# This uses the same method as e^x, pi^x, τ^x
+# This uses the same method as e^x, pi^x, tau^x
 
 TAB: constant(decimal[10][11]) = [
     [1.0000000000, 2.0000000000, 4.0000000000, 8.0000000000, 16.0000000000, 32.0000000000, 64.0000000000, 128.0000000000, 256.0000000000, 512.0000000000],

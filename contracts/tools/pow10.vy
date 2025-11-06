@@ -4,7 +4,7 @@
 
 # Lookup table for calculating 10^x using digit-by-digit multiplication
 # Row i contains 10^(d * 10^(-i)) for d = 0..9
-# This uses the same method as e^x, pi^x, τ^x
+# This uses the same method as e^x, pi^x, tau^x
 
 TAB: constant(decimal[10][11]) = [
     [1.0000000000, 10.0000000000, 100.0000000000, 1000.0000000000, 10000.0000000000, 100000.0000000000, 1000000.0000000000, 10000000.0000000000, 100000000.0000000000, 1000000000.0000000000],

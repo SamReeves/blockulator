@@ -28,7 +28,9 @@ const SEPOLIA_ADDRESSES = {
     POW2_CALCULATOR: '0x038c3931BB2eA55e564292D64bfC4d595F162059',
     LN_CALCULATOR: '0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4', 
     LOG2_CALCULATOR: '0xDfA68b0fcC5fca85BB3c3749Ade5F364744AB65E',
-    LOG10_CALCULATOR: '0xC39b9A0aDE77f8b8428f2BB5F0a7f457CFb68a6c'
+    LOG10_CALCULATOR: '0xC39b9A0aDE77f8b8428f2BB5F0a7f457CFb68a6c',
+    SQRT_CALCULATOR: '0xb7DdD29478DFC6318f48BeA493f6ae8df1C39226',
+    ERF_CALCULATOR: '0x774f4e29521d0AE16E4101419dD059785345F142'
 };
 
 // Mainnet Addresses (update these after deploying to mainnet)
@@ -54,7 +56,9 @@ const MAINNET_ADDRESSES = {
     POW2_CALCULATOR: '0x0000000000000000000000000000000000000000',
     LN_CALCULATOR: '0x0000000000000000000000000000000000000000',
     LOG2_CALCULATOR: '0x0000000000000000000000000000000000000000',
-    LOG10_CALCULATOR: '0x0000000000000000000000000000000000000000'
+    LOG10_CALCULATOR: '0x0000000000000000000000000000000000000000',
+    SQRT_CALCULATOR: '0x0000000000000000000000000000000000000000',
+    ERF_CALCULATOR: '0x0000000000000000000000000000000000000000'
 };
 
 // Select addresses based on current network
@@ -86,7 +90,9 @@ export const CONTRACT_SOURCES = {
     POW2_CALCULATOR: 'contracts/tools/pow2.vy',
     LN_CALCULATOR: 'contracts/tools/ln.vy',
     LOG2_CALCULATOR: 'contracts/tools/log2.vy',
-    LOG10_CALCULATOR: 'contracts/tools/log10.vy'
+    LOG10_CALCULATOR: 'contracts/tools/log10.vy',
+    SQRT_CALCULATOR: 'contracts/tools/sqrt.vy',
+    ERF_CALCULATOR: 'contracts/tools/erf.vy'
 };
 
 // Map contract addresses to their ABI files
@@ -109,7 +115,9 @@ export const CONTRACT_ABIS = {
     POW2_CALCULATOR: 'contracts/abis/pow2-calculator.json',
     LN_CALCULATOR: 'contracts/abis/ln-calculator.json',
     LOG2_CALCULATOR: 'contracts/abis/log2-calculator.json',
-    LOG10_CALCULATOR: 'contracts/abis/log10-calculator.json'
+    LOG10_CALCULATOR: 'contracts/abis/log10-calculator.json',
+    SQRT_CALCULATOR: 'contracts/abis/sqrt-calculator.json',
+    ERF_CALCULATOR: 'contracts/abis/erf-calculator.json'
 };
 
 // Network configuration

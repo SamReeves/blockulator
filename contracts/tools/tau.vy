@@ -20,9 +20,9 @@ TAU: constant(decimal) = 6.2831853072
 @view
 def calculate(x: decimal) -> decimal:
     """
-    @notice Calculate τ^x
+    @notice Calculate tau^x
     @param x The exponent
-    @return The result of τ^x
+    @return The result of tau^x
     """
     assert x >= 0.0, "Negative powers are not supported."
     assert x < 10.0, "The power limit is 9.999999999"
@@ -32,8 +32,8 @@ def calculate(x: decimal) -> decimal:
 @view
 def get_constant() -> decimal:
     """
-    @notice Get the value of τ
-    @return The constant τ
+    @notice Get the value of tau
+    @return The constant tau
     """
     return TAU
 
