@@ -42,78 +42,138 @@ export class TimeToMakeTheDonuts extends Game {
         contentInner.innerHTML = `
                 <div class="game-sections">
                     <!-- Countdown Display -->
-                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
-                        <h3 style="color: white;">⏰ NEXT DAY COUNTDOWN</h3>
-                        <div style="text-align: center; padding: 2rem 0;">
-                            <div id="countdown" style="font-size: 3rem; font-weight: bold; font-family: monospace; margin-bottom: 1rem;">
+                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); color: white; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">🍩</div>
+                        <h3 style="color: white; position: relative; z-index: 1;">⏰ NEXT DAY COUNTDOWN</h3>
+                        <div style="text-align: center; padding: 2rem 0; position: relative; z-index: 1;">
+                            <div id="countdown" style="font-size: 3rem; font-weight: bold; font-family: monospace; margin-bottom: 1rem; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">
                                 --:--:--
                             </div>
-                            <div id="countdown-status" style="font-size: 1rem; opacity: 0.9;">
+                            <div id="countdown-status" style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">
                                 Time until next day (00:00 UTC)
                             </div>
-                            <div id="new-day-alert" style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.2); border: 2px solid white; border-radius: 8px; font-weight: bold; display: none;">
+                            <div id="new-day-alert" style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.2); border: 2px solid white; border-radius: 12px; font-weight: bold; display: none; backdrop-filter: blur(10px); animation: pulse 2s infinite;">
                                 🚨 NEW DAY! BE FIRST TO WIN! 🚨
                             </div>
                         </div>
                     </div>
 
                     <!-- Current Status Display -->
-                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
-                        <h3 style="color: white;">🏆 TODAY'S STATUS</h3>
-                        <div style="text-align: center; padding: 2rem 0;">
-                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">First Donor Today</div>
-                            <div id="first-donor-today" style="font-family: monospace; font-size: 1.25rem; font-weight: bold; word-break: break-all; margin-bottom: 1rem;">
+                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; position: relative; overflow: hidden;">
+                        <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">🏆</div>
+                        <h3 style="color: white; position: relative; z-index: 1;">🏆 TODAY'S STATUS</h3>
+                        <div style="text-align: center; padding: 2rem 0; position: relative; z-index: 1;">
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">First Donor Today</div>
+                            <div id="first-donor-today" style="font-family: monospace; font-size: 1.25rem; font-weight: bold; word-break: break-all; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(10px);">
                                 No one yet
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
-                                <div>
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.25rem;">NEXT PRIZE POT</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+                                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
+                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">NEXT PRIZE POT</div>
                                     <div id="pot-value" style="font-size: 1.5rem; font-weight: bold;">0</div>
                                 </div>
-                                <div>
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.25rem;">WINNER GETS (99%)</div>
+                                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
+                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">WINNER GETS (99%)</div>
                                     <div id="winner-prize" style="font-size: 1.5rem; font-weight: bold;">0</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Donate Panel -->
-                    <div class="contest-info-panel">
-                        <h3>💰 Make Your Move</h3>
-                        <div class="game-controls">
-                            <div class="info-grid" style="margin-bottom: 1rem;">
-                                <div class="info-item">
-                                    <div class="info-label">Current Day</div>
-                                    <div class="info-value" id="current-day">0</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Total Days</div>
-                                    <div class="info-value" id="total-days">1</div>
-                                </div>
+                    <!-- Game Info -->
+                    <div class="contest-info-panel" style="border: 2px solid #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📊</span>
+                            <span>Daily Stats</span>
+                        </h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                            <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Current Day</div>
+                                <div id="current-day" style="font-size: 1.5rem; font-weight: bold;">0</div>
                             </div>
-                            
-                            <div class="input-group">
-                                <label for="donation-amount">Donation Amount (wei)</label>
+                            <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Total Days</div>
+                                <div id="total-days" style="font-size: 1.5rem; font-weight: bold;">1</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Donate Panel -->
+                    <div class="contest-info-panel" style="border: 2px solid #ec4899;">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ec4899;">
+                            <span>💰</span>
+                            <span>Make Your Move</span>
+                        </h3>
+                        <div class="game-controls">
+                            <div class="input-group" style="margin-top: 1rem;">
+                                <label for="donation-amount" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Donation Amount (wei)</label>
                                 <input 
                                     type="number" 
                                     id="donation-amount" 
                                     placeholder="Enter wei amount..."
                                     min="1"
+                                    style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1.1rem; font-family: monospace; transition: border-color 0.2s;"
+                                    onfocus="this.style.borderColor='#ec4899'"
+                                    onblur="this.style.borderColor='var(--md-sys-color-outline)'"
                                 />
                             </div>
                             
-                            <button id="donate-btn" class="btn-play">
+                            <button id="donate-btn" class="btn-play" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);">
                                 🎮 Donate (Try to Be First!)
                             </button>
                             
-                            <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.1); border-radius: 8px; font-size: 0.875rem;">
-                                <strong>How it works:</strong><br>
-                                • Each day starts at 00:00 UTC<br>
-                                • The FIRST person to donate each day wins the previous day's pot<br>
-                                • All donations add to tomorrow's prize<br>
-                                • Set your alarm and be ready at midnight!<br>
-                                • Winner gets 99% of the pot
+                            <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%); border-radius: 12px; border-left: 4px solid #f59e0b;">
+                                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
+                                    <span style="font-size: 1.5rem;">⏰</span>
+                                    <strong style="font-size: 1.1rem; color: #f59e0b;">Race To Be First!</strong>
+                                </div>
+                                <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
+                                    <li>Each day starts at 00:00 UTC (midnight)</li>
+                                    <li>The FIRST person to donate wins yesterday's pot</li>
+                                    <li>All donations add to tomorrow's prize</li>
+                                    <li>Set your alarm - timing is everything!</li>
+                                    <li>Winner gets 99% of the accumulated pot</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- How It Works Panel -->
+                    <div class="contest-info-panel">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>📖</span>
+                            <span>How To Win</span>
+                        </h3>
+                        <div style="margin-top: 1rem;">
+                            <div style="display: grid; gap: 1rem;">
+                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(236, 72, 153, 0.05); border-radius: 8px; border-left: 4px solid #ec4899;">
+                                    <div style="font-size: 2rem; font-weight: bold; color: #ec4899; min-width: 2.5rem;">1</div>
+                                    <div>
+                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Wait For Midnight UTC</strong>
+                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Each day starts at 00:00 UTC - watch the countdown timer closely</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                    <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">2</div>
+                                    <div>
+                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Be The First To Donate</strong>
+                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Race to submit your donation as soon as the day changes</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
+                                    <div style="font-size: 2rem; font-weight: bold; color: #10b981; min-width: 2.5rem;">3</div>
+                                    <div>
+                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Claim Your Prize</strong>
+                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">If you're first, you win 99% of yesterday's accumulated pot!</span>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
+                                    <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; min-width: 2.5rem;">💡</div>
+                                    <div>
+                                        <strong style="display: block; margin-bottom: 0.25rem; color: #3b82f6;">Pro Strategy</strong>
+                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">The pot grows every day. Later days have bigger prizes but more competition. Choose your timing wisely!</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

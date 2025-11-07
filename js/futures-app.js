@@ -129,15 +129,6 @@ class FuturesApp {
             });
         }
 
-        // Joy button (confetti test)
-        const joyBtn = document.getElementById('joy-button');
-        if (joyBtn) {
-            joyBtn.addEventListener('click', () => {
-                console.log('🎉 Joy button clicked - triggering confetti!');
-                eventBus.emit(EVENTS.CONFETTI);
-            });
-        }
-
         // Draw the distribution graph
         this.drawDistributionGraph();
 

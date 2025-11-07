@@ -100,16 +100,27 @@ def __init__(_discussion_blueprint: address):
 
 @payable
 @external
-def create_and_register(subject: String[200], body: String[1000]) -> address:
+def create_and_register(
+    subject: String[200], 
+    body: String[1000],
+    max_messages: uint256,
+    max_message_length: uint256,
+    min_donation: uint256
+) -> address:
     """
     @notice Deploy a new discussion and register it on the board (factory pattern)
     @param subject Discussion subject
     @param body Discussion body/description
+    @param max_messages Maximum number of messages (1-1000)
+    @param max_message_length Maximum message length (1-500)
+    @param min_donation Minimum donation required to post
     @return Address of newly created discussion
     @dev Deploys from blueprint, initializes, and registers in one transaction
     """
     assert msg.value >= MIN_INITIAL_VALUE, "Initial value too low"
     assert len(subject) > 0, "Subject cannot be empty"
+    assert max_messages > 0 and max_messages <= 1000, "Invalid max messages"
+    assert max_message_length > 0 and max_message_length <= 500, "Invalid max message length"
     
     # Deploy new discussion from blueprint
     new_discussion: address = create_from_blueprint(
@@ -117,6 +128,9 @@ def create_and_register(subject: String[200], body: String[1000]) -> address:
         self,  # board address
         subject,
         body,
+        max_messages,
+        max_message_length,
+        min_donation,
         value=msg.value,
         code_offset=3
     )
@@ -139,18 +153,18 @@ def create_and_register(subject: String[200], body: String[1000]) -> address:
         self.total_created += 1
         
         log DiscussionCreated(
-            new_discussion,
-            creator,
-            subject,
-            msg.value,
-            current_count,
-            block.timestamp,
-            False
+            discussion_address=new_discussion,
+            creator=creator,
+            subject=subject,
+            initial_value=msg.value,
+            slot_index=current_count,
+            timestamp=block.timestamp,
+            was_replacement=False
         )
     else:
         # Board is full - find lowest-value INACTIVE discussion
         min_idx: uint256 = 0
-        min_value: uint256 = max_value(uint256)
+        min_val: uint256 = max_value(uint256)
         found_inactive: bool = False
         
         for i: uint256 in range(MAX_DISCUSSIONS):
@@ -162,20 +176,20 @@ def create_and_register(subject: String[200], body: String[1000]) -> address:
             if is_inactive:
                 # Query initial value from discussion contract
                 disc: IDiscussion = IDiscussion(entry.discussion_address)
-                disc_initial_value: uint256 = disc.initial_value()
+                disc_initial_value: uint256 = staticcall disc.initial_value()
                 
-                if disc_initial_value < min_value:
-                    min_value = disc_initial_value
+                if disc_initial_value < min_val:
+                    min_val = disc_initial_value
                     min_idx = i
                     found_inactive = True
         
         assert found_inactive, "No inactive discussions to replace"
-        assert msg.value > min_value, "Initial value too low to replace"
+        assert msg.value > min_val, "Initial value too low to replace"
         
         # Replace
         old_discussion: address = self.discussions[min_idx].discussion_address
         old_disc: IDiscussion = IDiscussion(old_discussion)
-        old_value: uint256 = old_disc.initial_value()
+        old_value: uint256 = staticcall old_disc.initial_value()
         
         # Clear old mapping
         self.is_discussion[old_discussion] = False
@@ -192,21 +206,21 @@ def create_and_register(subject: String[200], body: String[1000]) -> address:
         self.total_created += 1
         
         log DiscussionReplaced(
-            old_discussion,
-            new_discussion,
-            min_idx,
-            old_value,
-            msg.value
+            old_discussion=old_discussion,
+            new_discussion=new_discussion,
+            slot_index=min_idx,
+            old_initial_value=old_value,
+            new_initial_value=msg.value
         )
         
         log DiscussionCreated(
-            new_discussion,
-            creator,
-            subject,
-            msg.value,
-            min_idx,
-            block.timestamp,
-            True
+            discussion_address=new_discussion,
+            creator=creator,
+            subject=subject,
+            initial_value=msg.value,
+            slot_index=min_idx,
+            timestamp=block.timestamp,
+            was_replacement=True
         )
     
     return new_discussion
@@ -226,17 +240,17 @@ def create_discussion(discussion_address: address):
     # Get discussion details via interface
     discussion: IDiscussion = IDiscussion(discussion_address)
     
-    subject: String[200] = discussion.subject()
-    initial_value: uint256 = discussion.initial_value()
-    creator: address = discussion.creator()
-    creation_time: uint256 = discussion.creation_time()
-    last_activity: uint256 = discussion.last_activity()
+    subject: String[200] = staticcall discussion.subject()
+    initial_value: uint256 = staticcall discussion.initial_value()
+    creator: address = staticcall discussion.creator()
+    creation_time: uint256 = staticcall discussion.creation_time()
+    last_activity: uint256 = staticcall discussion.last_activity()
     
     assert initial_value >= MIN_INITIAL_VALUE, "Initial value too low"
     
     # Verify this discussion was created with this board as its board address
     # This prevents registering discussions that point to different boards
-    board_addr: address = discussion.board()
+    board_addr: address = staticcall discussion.board()
     assert board_addr == self, "Discussion not created for this board"
     
     current_count: uint256 = len(self.discussions)
@@ -254,18 +268,18 @@ def create_discussion(discussion_address: address):
         self.total_created += 1
         
         log DiscussionCreated(
-            discussion_address,
-            creator,
-            subject,
-            initial_value,
-            current_count,
-            block.timestamp,
-            False
+            discussion_address=discussion_address,
+            creator=creator,
+            subject=subject,
+            initial_value=initial_value,
+            slot_index=current_count,
+            timestamp=block.timestamp,
+            was_replacement=False
         )
     else:
         # Board is full - find lowest-value INACTIVE discussion
         min_idx: uint256 = 0
-        min_value: uint256 = max_value(uint256)
+        min_val: uint256 = max_value(uint256)
         found_inactive: bool = False
         
         for i: uint256 in range(MAX_DISCUSSIONS):
@@ -277,20 +291,20 @@ def create_discussion(discussion_address: address):
             if is_inactive:
                 # Query initial value from discussion contract
                 disc: IDiscussion = IDiscussion(entry.discussion_address)
-                disc_initial_value: uint256 = disc.initial_value()
+                disc_initial_value: uint256 = staticcall disc.initial_value()
                 
-                if disc_initial_value < min_value:
-                    min_value = disc_initial_value
+                if disc_initial_value < min_val:
+                    min_val = disc_initial_value
                     min_idx = i
                     found_inactive = True
         
         assert found_inactive, "No inactive discussions to replace"
-        assert initial_value > min_value, "Initial value too low to replace"
+        assert initial_value > min_val, "Initial value too low to replace"
         
         # Replace
         old_discussion: address = self.discussions[min_idx].discussion_address
         old_disc: IDiscussion = IDiscussion(old_discussion)
-        old_value: uint256 = old_disc.initial_value()
+        old_value: uint256 = staticcall old_disc.initial_value()
         
         # Clear old mapping
         self.is_discussion[old_discussion] = False
@@ -307,21 +321,21 @@ def create_discussion(discussion_address: address):
         self.total_created += 1
         
         log DiscussionReplaced(
-            old_discussion,
-            discussion_address,
-            min_idx,
-            old_value,
-            initial_value
+            old_discussion=old_discussion,
+            new_discussion=discussion_address,
+            slot_index=min_idx,
+            old_initial_value=old_value,
+            new_initial_value=initial_value
         )
         
         log DiscussionCreated(
-            discussion_address,
-            creator,
-            subject,
-            initial_value,
-            min_idx,
-            block.timestamp,
-            True
+            discussion_address=discussion_address,
+            creator=creator,
+            subject=subject,
+            initial_value=initial_value,
+            slot_index=min_idx,
+            timestamp=block.timestamp,
+            was_replacement=True
         )
 
 @external
@@ -340,22 +354,22 @@ def terminate_discussion(discussion_address: address):
     
     # Call terminate on the discussion contract
     discussion: IDiscussion = IDiscussion(discussion_address)
-    discussion.terminate()
+    extcall discussion.terminate()
     
     # Update board state - mark termination time
     self.discussions[idx].last_activity = block.timestamp
     
     # Get final pool value and age
-    final_pool: uint256 = discussion.total_pool()
-    creation_time: uint256 = discussion.creation_time()
+    final_pool: uint256 = staticcall discussion.total_pool()
+    creation_time: uint256 = staticcall discussion.creation_time()
     age: uint256 = block.timestamp - creation_time
     
     log DiscussionTerminated(
-        discussion_address,
-        msg.sender,
-        final_pool,
-        age,
-        block.timestamp
+        discussion_address=discussion_address,
+        terminator=msg.sender,
+        final_pool=final_pool,
+        age=age,
+        timestamp=block.timestamp
     )
 
 @external
@@ -372,7 +386,7 @@ def report_activity():
     # Update cache to current block timestamp
     self.discussions[idx].last_activity = block.timestamp
     
-    log ActivityUpdated(msg.sender, block.timestamp)
+    log ActivityUpdated(discussion_address=msg.sender, new_last_activity=block.timestamp)
 
 @external
 def update_activity(discussion_address: address):
@@ -387,12 +401,12 @@ def update_activity(discussion_address: address):
     idx: uint256 = self.discussion_index[discussion_address]
     
     discussion: IDiscussion = IDiscussion(discussion_address)
-    new_activity: uint256 = discussion.last_activity()
+    new_activity: uint256 = staticcall discussion.last_activity()
     
     # Update cache
     self.discussions[idx].last_activity = new_activity
     
-    log ActivityUpdated(discussion_address, new_activity)
+    log ActivityUpdated(discussion_address=discussion_address, new_last_activity=new_activity)
 
 # View Functions
 
@@ -476,7 +490,7 @@ def can_terminate(discussion_address: address) -> bool:
     
     # Check if already terminated
     discussion: IDiscussion = IDiscussion(discussion_address)
-    if discussion.terminated():
+    if staticcall discussion.terminated():
         return False
     
     return self._is_inactive(discussion_address)
@@ -488,7 +502,7 @@ def get_min_inactive_value() -> uint256:
     @notice Get minimum initial value of inactive discussions
     @return Minimum value, or max_value(uint256) if no inactive discussions
     """
-    min_value: uint256 = max_value(uint256)
+    min_val: uint256 = max_value(uint256)
     found: bool = False
     
     for i: uint256 in range(MAX_DISCUSSIONS):
@@ -499,13 +513,13 @@ def get_min_inactive_value() -> uint256:
         if self._is_inactive(entry.discussion_address):
             # Query initial value from discussion
             disc: IDiscussion = IDiscussion(entry.discussion_address)
-            disc_initial_value: uint256 = disc.initial_value()
+            disc_initial_value: uint256 = staticcall disc.initial_value()
             
-            if disc_initial_value < min_value:
-                min_value = disc_initial_value
+            if disc_initial_value < min_val:
+                min_val = disc_initial_value
                 found = True
     
-    return min_value if found else max_value(uint256)
+    return min_val if found else max_value(uint256)
 
 @view
 @external
@@ -522,9 +536,27 @@ def can_create(initial_value: uint256) -> bool:
     if len(self.discussions) < MAX_DISCUSSIONS:
         return True
     
-    # Must beat minimum inactive value
-    min_inactive: uint256 = self.get_min_inactive_value()
-    return initial_value > min_inactive
+    # Must beat minimum inactive value - compute inline
+    min_inactive_val: uint256 = max_value(uint256)
+    found: bool = False
+    
+    for i: uint256 in range(MAX_DISCUSSIONS):
+        if i >= len(self.discussions):
+            break
+        
+        entry: DiscussionEntry = self.discussions[i]
+        if self._is_inactive(entry.discussion_address):
+            disc: IDiscussion = IDiscussion(entry.discussion_address)
+            disc_initial_value: uint256 = staticcall disc.initial_value()
+            
+            if disc_initial_value < min_inactive_val:
+                min_inactive_val = disc_initial_value
+                found = True
+    
+    if not found:
+        return False  # No inactive discussions to replace
+    
+    return initial_value > min_inactive_val
 
 @view
 @external
@@ -562,7 +594,7 @@ def _is_inactive(discussion_address: address) -> bool:
     discussion: IDiscussion = IDiscussion(discussion_address)
     
     # Terminated is always inactive
-    if discussion.terminated():
+    if staticcall discussion.terminated():
         return True
     
     # Check inactivity threshold using cached last_activity

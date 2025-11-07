@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WhaleGames - On-chain discussion board">
+    <title>WhaleGames - Discussions</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header loaded dynamically -->
+
+        <main id="content" class="content">
+            <header class="page-header">
+                <h1>💬 Discussion Board</h1>
+                <p>Create discussions. Up to 100 discussions, 100 messages each.</p>
+            </header>
+
+            <!-- Contract Information Section -->
+            <section class="contract-info-section">
+                <details class="contract-details">
+                    <summary>📋 Contract Information</summary>
+                    <div class="contract-info-grid">
+                        <!-- Board Contract -->
+                        <div class="contract-info-card" id="board-contract-info">
+                            <h4>Discussion Board Contract</h4>
+                            <div id="board-contract-details" class="loading-contract-info">Loading...</div>
+                        </div>
+                        <!-- Discussion Blueprint Contract -->
+                        <div class="contract-info-card" id="discussion-contract-info">
+                            <h4>Discussion Blueprint Contract</h4>
+                            <div id="discussion-contract-details" class="loading-contract-info">Loading...</div>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
+            <div class="board-stats-bar">
+                <div class="stat-card">
+                    <div class="stat-label">Discussions</div>
+                    <div class="stat-value" id="total-discussions">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active</div>
+                    <div class="stat-value" id="active-discussions">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Min Entry</div>
+                    <div class="stat-value" id="min-entry">0.001 ETH</div>
+                </div>
+            </div>
+
+            <section class="create-section">
+                <button id="toggle-create-form" class="btn-toggle-create">+ New Discussion</button>
+                
+                <div id="create-form-container" class="create-form-container hidden">
+                    <h2>Create Discussion</h2>
+                    <form id="create-form" class="discussion-form">
+                        <div class="form-group">
+                            <label for="discussion-subject">
+                                Subject <span id="subject-counter" class="char-counter">0/200</span>
+                            </label>
+                            <input type="text" id="discussion-subject" name="subject" placeholder="Enter subject..." maxlength="200" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="discussion-body">
+                                Description <span id="body-counter" class="char-counter">0/1000</span>
+                            </label>
+                            <textarea id="discussion-body" name="body" placeholder="Describe your topic..." maxlength="1000" rows="4" required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <div id="initial-value-input"></div>
+                            <div id="value-warning" class="value-warning"></div>
+                        </div>
+
+                        <details class="form-section">
+                            <summary>⚙️ Configuration (Optional)</summary>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="max-messages">Max Messages (1-1000)</label>
+                                    <input type="number" id="max-messages" name="max_messages" value="100" min="1" max="1000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="max-message-length">Max Length (1-500)</label>
+                                    <input type="number" id="max-message-length" name="max_message_length" value="200" min="1" max="500" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div id="min-donation-input"></div>
+                            </div>
+                        </details>
+
+                        <div class="form-actions">
+                            <button type="button" id="cancel-create-btn" class="btn-secondary">Cancel</button>
+                            <button type="submit" id="create-submit-btn" class="btn-primary">Create</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="info-section">
+                <details class="info-details">
+                    <summary>📖 How It Works</summary>
+                    <ul>
+                        <li>Up to 100 discussions, 100 messages each</li>
+                        <li>Inactive after 7 days without activity</li>
+                        <li>Post messages with ETH donations</li>
+                        <li>Higher donations replace lower ones when full</li>
+                        <li>When terminated, pool splits among unique authors</li>
+                    </ul>
+                </details>
+            </section>
+
+            <div class="discussion-controls">
+                <div class="filter-tabs">
+                    <button class="tab active" data-filter="all">All</button>
+                    <button class="tab" data-filter="active">Active</button>
+                    <button class="tab" data-filter="inactive">Inactive</button>
+                </div>
+                <div class="sort-controls">
+                    <label for="sort-select">Sort:</label>
+                    <select id="sort-select">
+                        <option value="recent">Recent</option>
+                        <option value="activity">Activity</option>
+                        <option value="pool">Pool</option>
+                        <option value="messages">Messages</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="discussions-list" class="discussions-grid">
+                <div class="loading-discussions">Loading...</div>
+            </div>
+        </main>
+
+        <div id="toast-container" class="toast-container"></div>
+        <canvas id="effects-canvas" class="effects-canvas"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script type="module">
+        import { HeaderLoader } from './js/presentation/components/header-loader.js';
+        await HeaderLoader.load('discussions');
+    </script>
+    <script type="module" src="js/discussions-app.js"></script>
+</body>
+</html>

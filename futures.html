@@ -2,276 +2,146 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="WhaleGames.net Futures - Create and trade Gaussian futures on-chain">
-    <meta name="view-transition" content="same-origin">
-    <title>WhaleGames.net - Futures</title>
-    <link rel="stylesheet" href="styles.css?v=4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WhaleGames - Gaussian futures on-chain">
+    <title>WhaleGames - Futures</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-left">
-                <h1 class="app-title">📈 WhaleGames Futures</h1>
-                <span class="testnet-badge">🚧 TESTNET</span>
-                <span id="readonly-badge" class="readonly-badge">👀 Browsing</span>
-            </div>
-            <nav class="header-nav">
-                <a href="index.html" class="nav-link">🎮 Games</a>
-                <a href="tools.html" class="nav-link">🔧 Tools</a>
-                <a href="futures.html" class="nav-link nav-link-active">📈 Futures</a>
-                <a href="https://sepolia-faucet.pk910.de/" class="nav-link" target="_blank">💧 Faucet</a>
-                <button id="joy-button" class="nav-link nav-button">✨ Joy</button>
-            </nav>
-            <div class="header-right">
-            <button id="connect-wallet" class="btn-connect">Connect Wallet</button>
-            <div id="wallet-info" class="wallet-info hidden">
-                    <div class="wallet-line">
-                        <span id="wallet-address" class="wallet-value"></span>
-                        <button id="copy-address" class="copy-btn" title="Copy address">📋</button>
-                    </div>
-                    <div class="wallet-line">
-                        <span id="wallet-balance" class="wallet-value"></span>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <!-- Header loaded dynamically -->
 
-        <!-- Main Content Area -->
         <main id="content" class="content">
-            <!-- Create Futures Section -->
-            <div class="futures-creator">
-                <div class="game-interface">
-                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center;">
-                        <h2 class="game-title" style="margin: 0;">🎯 Create Gaussian Future</h2>
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            <button class="contract-badge contract-badge-source" onclick="window.open('/contracts/src/futures/gaussian_future.vy', '_blank')" title="View Vyper source code">
-                                🐍 View Vyper Source
-                            </button>
-                            <button class="contract-badge contract-badge-bytecode" id="view-bytecode-btn" title="View compiled bytecode">
-                                📦 View Bytecode
-                            </button>
-                            <button class="contract-badge contract-badge-abi" id="view-abi-btn" title="View contract ABI (JSON)">
-                                📋 View ABI
-                            </button>
-                        </div>
+            <section class="game-interface">
+                <div class="header-with-badges">
+                    <h2 class="game-title">🎯 Create Gaussian Future</h2>
+                    <div class="contract-badges">
+                        <button class="contract-badge contract-badge-source" onclick="window.open('/contracts/src/futures/gaussian_future.vy', '_blank')">View Source</button>
+                        <button class="contract-badge contract-badge-bytecode" id="view-bytecode-btn">Bytecode</button>
+                        <button class="contract-badge contract-badge-abi" id="view-abi-btn">ABI</button>
                     </div>
-
                 </div>
 
-                <!-- Creation Form -->
-                <div class="futures-form">
+                <form class="futures-form">
                     <div class="input-group">
                         <label for="future-value">Future Value (Wei)</label>
-                        <input 
-                            type="text" 
-                            id="future-value" 
-                            placeholder="Enter value in wei"
-                            class="wei-input"
-                        />
-                        <div class="input-hint">
-                            The target value for the future contract
-                        </div>
+                        <input type="text" id="future-value" class="wei-input" placeholder="Enter value in wei">
+                        <small>Target value for the future contract</small>
                     </div>
 
                     <div class="input-group">
                         <label for="time-to-live">Time to Live (seconds)</label>
-                        <input 
-                            type="number" 
-                            id="time-to-live" 
-                            placeholder="0"
-                            min="0"
-                            value="0"
-                        />
-                        <div class="input-hint">
-                            Tap buttons below to add time (minimum 60 seconds total)
-                        </div>
+                        <input type="number" id="time-to-live" min="0" value="0">
+                        <small>Tap buttons below to add time (minimum 60 seconds)</small>
                     </div>
 
-                    <!-- Quick Time Presets -->
                     <div class="quick-amounts">
-                        <button class="quick-amount-btn" data-time="3600">+1 Hour</button>
-                        <button class="quick-amount-btn" data-time="86400">+1 Day</button>
-                        <button class="quick-amount-btn" data-time="604800">+1 Week</button>
-                        <button class="quick-amount-btn" data-time="2592000">+1 Month</button>
-                        <button class="quick-amount-btn" data-time="31536000">+1 Year</button>
-                        <button class="quick-amount-btn" data-time="315360000">+1 Decade</button>
+                        <button type="button" class="quick-amount-btn" data-time="3600">+1 Hour</button>
+                        <button type="button" class="quick-amount-btn" data-time="86400">+1 Day</button>
+                        <button type="button" class="quick-amount-btn" data-time="604800">+1 Week</button>
+                        <button type="button" class="quick-amount-btn" data-time="2592000">+1 Month</button>
+                        <button type="button" class="quick-amount-btn" data-time="31536000">+1 Year</button>
                     </div>
 
-                    <button id="create-future-btn" class="btn-play" disabled>
-                        Create Future
-                    </button>
-                </div>
+                    <button type="button" id="create-future-btn" class="btn-play" disabled>Create Future</button>
+                </form>
 
-                <!-- Deployed Futures Section -->
-                <div id="deployed-contracts" class="blockchain-data hidden" style="margin-top: 2rem;">
+                <div id="deployed-contracts" class="blockchain-data hidden">
                     <h3>📋 Your Deployed Futures</h3>
-                    <!-- Deployed contracts will be added here dynamically -->
                 </div>
+            </section>
 
-                <!-- Manage Existing Future Section -->
-                <div class="futures-manager" style="margin-top: 2rem;">
-                    <div class="game-interface">
-                        <h2 class="game-title">🔄 Manage Existing Future</h2>
-                        <p class="game-description">
-                            Transfer ownership of a future contract to claim your payout
-                        </p>
+            <section class="game-interface">
+                <h2 class="game-title">🔄 Manage Existing Future</h2>
+                <p class="game-description">Transfer ownership to claim your payout</p>
+
+                <form class="futures-form">
+                    <div class="input-group">
+                        <label for="contract-address">Contract Address</label>
+                        <input type="text" id="contract-address" class="wei-input" placeholder="0x...">
+                        <small>Enter your deployed future contract address</small>
                     </div>
 
-                    <div class="futures-form">
-                        <div class="input-group">
-                            <label for="contract-address">Future Contract Address</label>
-                            <input 
-                                type="text" 
-                                id="contract-address" 
-                                placeholder="0x..."
-                                class="wei-input"
-                            />
-                            <div class="input-hint">
-                                Enter the address of your deployed future contract
-                            </div>
-                        </div>
+                    <div class="input-group">
+                        <label for="new-owner-address">New Owner Address</label>
+                        <input type="text" id="new-owner-address" class="wei-input" placeholder="0x...">
+                        <small>Address that will receive ownership (you get payout)</small>
+                    </div>
 
-                        <div class="input-group">
-                            <label for="new-owner-address">New Owner Address</label>
-                            <input 
-                                type="text" 
-                                id="new-owner-address" 
-                                placeholder="0x..."
-                                class="wei-input"
-                            />
-                            <div class="input-hint">
-                                The address that will receive ownership (and you get the payout)
-                            </div>
+                    <div id="contract-info" class="blockchain-data hidden">
+                        <h3>📊 Contract Information</h3>
+                        <div class="data-row">
+                            <span class="data-label">Owner:</span>
+                            <span class="data-value" id="info-owner">-</span>
+                            <button class="copy-btn hidden" id="copy-owner" data-copy-target="info-owner">📋</button>
                         </div>
-
-                        <!-- Contract Info Display -->
-                        <div id="contract-info" class="blockchain-data hidden" style="margin: 1rem 0;">
-                            <h3>📊 Contract Information</h3>
-                            <div class="data-row">
-                                <span class="data-label">Current Owner:</span>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span class="data-value" id="info-owner" style="color: white;">-</span>
-                                    <button class="copy-btn hidden" id="copy-owner" data-copy-target="info-owner" title="Copy to clipboard">📋</button>
-                                </div>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label">Initial Value:</span>
-                                <span class="data-value" id="info-value">-</span>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label">Contract Balance:</span>
-                                <span class="data-value" id="info-balance">-</span>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label">Time Remaining:</span>
-                                <span class="data-value" id="info-time">-</span>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label">Current Position:</span>
-                                <span class="data-value" id="info-position">-</span>
-                            </div>
-                            <div class="data-row">
-                                <span class="data-label">Expected Payout:</span>
-                                <span class="data-value" id="info-payout" style="color: var(--success); font-weight: bold;">-</span>
-                            </div>
+                        <div class="data-row">
+                            <span class="data-label">Initial Value:</span>
+                            <span class="data-value" id="info-value">-</span>
                         </div>
-
-                        <div style="display: flex; gap: 1rem;">
-                            <button id="load-contract-btn" class="btn-play" style="flex: 1;" disabled>
-                                Load Contract Info
-                            </button>
-                            <button id="transfer-ownership-btn" class="btn-play" style="flex: 1;" disabled>
-                                Transfer & Claim
-                            </button>
+                        <div class="data-row">
+                            <span class="data-label">Balance:</span>
+                            <span class="data-value" id="info-balance">-</span>
                         </div>
-
-                        <div class="input-hint" style="text-align: center; margin-top: 1rem;">
-                            You must be the current owner to transfer ownership
+                        <div class="data-row">
+                            <span class="data-label">Time Remaining:</span>
+                            <span class="data-value" id="info-time">-</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Position:</span>
+                            <span class="data-value" id="info-position">-</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="data-label">Expected Payout:</span>
+                            <span class="data-value" id="info-payout">-</span>
                         </div>
                     </div>
-                </div>
 
-                <!-- How It Works -->
-                <div class="blockchain-data">
-                    <h3>❓ How Gaussian Futures Work</h3>
-                    <div class="how-it-works">
-                        <p><strong>The Hot Potato That Pays You:</strong></p>
-                        <p>
-                            A Gaussian Future is a unique on-chain contract that distributes its value over time following a bell curve (normal distribution).
-                            Think of it as a hot potato game where <em>passing the potato pays you</em>, not the person catching it!
-                        </p>
-                        
-                        <h4>📈 The Distribution</h4>
-                        <canvas id="distribution-graph" width="600" height="300" style="max-width: 100%; height: auto; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 1rem 0;"></canvas>
-                        
-                        <h4>🎯 How to Play</h4>
-                        <ol>
-                            <li>
-                                <strong>Deploy:</strong> Create a future with ETH and set its lifetime (e.g., 1 hour, 1 day, 1 week).
-                                The contract starts with 100% of the value you deposit.
-                            </li>
-                            <li>
-                                <strong>Wait for the Sweet Spot:</strong> The contract follows a Gaussian (bell curve) distribution centered at the midpoint.
-                                The most value is released when transferring around the middle of the lifetime.
-                            </li>
-                            <li>
-                                <strong>Transfer to Claim:</strong> When you transfer ownership to another address, the contract calculates 
-                                how much time has passed and <em>pays you</em> based on the probability distribution. The earlier or later you transfer,
-                                the less you receive. Transfer near the midpoint for maximum payout!
-                            </li>
-                            <li>
-                                <strong>New Owner's Turn:</strong> The new owner now controls the contract and can transfer it again to claim 
-                                <em>their</em> portion of the remaining value.
-                            </li>
-                            <li>
-                                <strong>Expiration:</strong> When the lifetime ends, the final owner can claim any remaining ETH in the contract.
-                            </li>
-                        </ol>
-                        
-                        <h4>🧮 The Math Behind It</h4>
-                        <p>
-                            The contract uses the <strong>Lin 1990 approximation</strong> of the Gaussian distribution (normal curve).
-                            It calculates your payout based on the "area under the curve" between transfers:
-                        </p>
-                        <ul>
-                            <li><strong>Mean (μ):</strong> Lifetime ÷ 2 (the center point)</li>
-                            <li><strong>Standard Deviation (σ):</strong> Lifetime ÷ √12 (controls the curve's spread)</li>
-                            <li><strong>Your Payout:</strong> Initial Value × (CDF at your transfer time - CDF at previous transfer time)</li>
-                        </ul>
-                        
-                        <h4>💡 Strategy Tips</h4>
-                        <ul>
-                            <li>✅ Transfer near the midpoint for maximum value extraction</li>
-                            <li>✅ The contract is fully deterministic - you can calculate expected payouts before transferring</li>
-                            <li>✅ Early transfers and late transfers both receive minimal payouts</li>
-                            <li>⚠️ Each transfer permanently reduces the remaining contract balance</li>
-                            <li>⚠️ Gas costs matter - make sure payouts exceed transaction fees!</li>
-                        </ul>
-                        
-                        <div class="note">
-                            <strong>📝 Technical Note:</strong> All calculations happen on-chain using lookup tables for e^x with 10-decimal precision.
-                            No oracles, no external dependencies - pure deterministic smart contract math.
-                        </div>
+                    <div class="button-group">
+                        <button type="button" id="load-contract-btn" class="btn-play" disabled>Load Info</button>
+                        <button type="button" id="transfer-ownership-btn" class="btn-play" disabled>Transfer & Claim</button>
                     </div>
+                </form>
+            </section>
+
+            <section class="blockchain-data">
+                <h3>❓ How Gaussian Futures Work</h3>
+                <div class="how-it-works">
+                    <p><strong>The Hot Potato That Pays You</strong></p>
+                    <p>A Gaussian Future distributes its value over time following a bell curve. Passing the potato pays you, not the catcher!</p>
+                    
+                    <h4>📈 Distribution</h4>
+                    <canvas id="distribution-graph" width="600" height="300"></canvas>
+                    
+                    <h4>🎯 How to Play</h4>
+                    <ol>
+                        <li><strong>Deploy:</strong> Create with ETH, set lifetime (hour/day/week)</li>
+                        <li><strong>Wait:</strong> Value peaks at midpoint (bell curve)</li>
+                        <li><strong>Transfer:</strong> Transfer ownership to claim your payout</li>
+                        <li><strong>Repeat:</strong> New owner can transfer again</li>
+                        <li><strong>Expire:</strong> Final owner claims remaining ETH</li>
+                    </ol>
+                    
+                    <h4>💡 Strategy</h4>
+                    <ul>
+                        <li>✅ Transfer near midpoint for maximum value</li>
+                        <li>✅ Fully deterministic - calculate before transferring</li>
+                        <li>⚠️ Each transfer permanently reduces balance</li>
+                        <li>⚠️ Mind gas costs vs payouts</li>
+                    </ul>
                 </div>
-            </div>
+            </section>
         </main>
 
-
-        <!-- Toast notifications -->
         <div id="toast-container" class="toast-container"></div>
-
-        <!-- Canvas for animations/effects -->
         <canvas id="effects-canvas" class="effects-canvas"></canvas>
     </div>
 
-    <!-- Web3 Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    
-    <!-- App Scripts -->
+    <script type="module">
+        import { HeaderLoader } from './js/presentation/components/header-loader.js';
+        await HeaderLoader.load('futures');
+    </script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
-

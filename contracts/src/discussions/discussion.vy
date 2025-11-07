@@ -3,12 +3,12 @@
 """
 @title Discussion Contract
 @author L1Ca$h
-@notice A discussion with subject, body, and up to 100 messages
+@notice A discussion with configurable message limits
 @dev Survivors at termination split the pool evenly
 
 MECHANICS:
 - Creator sets subject, body, and loads initial value
-- Up to 100 messages, each requires a donation
+- Configurable max messages (up to 1000), message length (up to 500), and min donation
 - When full, higher donations replace lowest donation messages
 - Board can terminate the discussion
 - At termination, pool is split evenly among unique surviving authors
@@ -57,13 +57,14 @@ interface IBoard:
 
 struct Message:
     author: address
-    content: String[200]
+    content: String[500]  # Maximum possible message length
     donation: uint256
     timestamp: uint256
 
 # Constants
 
-MAX_MESSAGES: constant(uint256) = 100
+ABSOLUTE_MAX_MESSAGES: constant(uint256) = 1000  # Hard limit
+ABSOLUTE_MAX_MESSAGE_LENGTH: constant(uint256) = 500  # Hard limit
 
 # Immutable state (set at creation)
 
@@ -73,10 +74,13 @@ subject: public(immutable(String[200]))
 body: public(immutable(String[1000]))
 initial_value: public(immutable(uint256))
 creation_time: public(immutable(uint256))
+max_messages: public(immutable(uint256))  # Configurable max messages for this discussion
+max_message_length: public(immutable(uint256))  # Configurable max message length
+min_donation: public(immutable(uint256))  # Minimum donation required to post
 
 # Mutable state
 
-messages: public(DynArray[Message, MAX_MESSAGES])
+messages: public(DynArray[Message, ABSOLUTE_MAX_MESSAGES])
 total_pool: public(uint256)
 last_activity: public(uint256)
 terminated: public(bool)
@@ -85,17 +89,29 @@ terminated: public(bool)
 
 @deploy
 @payable
-def __init__(_board: address, _subject: String[200], _body: String[1000]):
+def __init__(
+    _board: address, 
+    _subject: String[200], 
+    _body: String[1000],
+    _max_messages: uint256,
+    _max_message_length: uint256,
+    _min_donation: uint256
+):
     """
     @notice Initialize a new discussion
     @param _board The board contract that can terminate this discussion
     @param _subject The discussion subject (immutable)
     @param _body The discussion body/description (immutable)
+    @param _max_messages Maximum number of messages (1-1000)
+    @param _max_message_length Maximum message length (1-500)
+    @param _min_donation Minimum donation required to post (can be 0)
     @dev msg.value becomes the initial pool value
     """
     assert _board != empty(address), "Board cannot be zero address"
     assert len(_subject) > 0, "Subject cannot be empty"
     assert msg.value > 0, "Must load initial value"
+    assert _max_messages > 0 and _max_messages <= ABSOLUTE_MAX_MESSAGES, "Invalid max messages"
+    assert _max_message_length > 0 and _max_message_length <= ABSOLUTE_MAX_MESSAGE_LENGTH, "Invalid max message length"
     
     board = _board
     creator = msg.sender
@@ -103,6 +119,9 @@ def __init__(_board: address, _subject: String[200], _body: String[1000]):
     body = _body
     initial_value = msg.value
     creation_time = block.timestamp
+    max_messages = _max_messages
+    max_message_length = _max_message_length
+    min_donation = _min_donation
     
     self.total_pool = msg.value
     self.last_activity = block.timestamp
@@ -116,16 +135,17 @@ def post_message(content: String[500]):
     """
     @notice Post a message with a donation
     @param content The message content
-    @dev If under 100 messages, appends. If full, replaces lowest donation if msg.value is higher
+    @dev If under max_messages, appends. If full, replaces lowest donation if msg.value is higher
     """
     assert not self.terminated, "Discussion terminated"
-    assert msg.value > 0, "Must send donation"
+    assert msg.value >= min_donation, "Donation below minimum"
     assert len(content) > 0, "Message cannot be empty"
+    assert len(content) <= max_message_length, "Message too long"
     
     current_length: uint256 = len(self.messages)
     
-    # If under 100, just append
-    if current_length < MAX_MESSAGES:
+    # If under max_messages, just append
+    if current_length < max_messages:
         new_message: Message = Message(
             author=msg.sender,
             content=content,
@@ -138,39 +158,41 @@ def post_message(content: String[500]):
         self.last_activity = block.timestamp
         
         log MessagePosted(
-            msg.sender,
-            msg.value,
-            content,
-            block.timestamp,
-            current_length,
-            False
+            author=msg.sender,
+            donation=msg.value,
+            content=content,
+            timestamp=block.timestamp,
+            index=current_length,
+            was_replacement=False
         )
         
         # Report activity to board
         board_interface: IBoard = IBoard(board)
-        board_interface.report_activity()
+        extcall board_interface.report_activity()
     else:
         # Find minimum donation
         min_idx: uint256 = 0
-        min_donation: uint256 = self.messages[0].donation
+        min_donation_val: uint256 = self.messages[0].donation
         
-        for i: uint256 in range(MAX_MESSAGES):
-            if self.messages[i].donation < min_donation:
-                min_donation = self.messages[i].donation
+        for i: uint256 in range(ABSOLUTE_MAX_MESSAGES):
+            if i >= current_length:
+                break
+            if self.messages[i].donation < min_donation_val:
+                min_donation_val = self.messages[i].donation
                 min_idx = i
         
         # Must beat the minimum
-        assert msg.value > min_donation, "Donation too low to replace"
+        assert msg.value > min_donation_val, "Donation too low to replace"
         
         # Log eviction
         evicted_author: address = self.messages[min_idx].author
         evicted_donation: uint256 = self.messages[min_idx].donation
         
         log MessageEvicted(
-            evicted_author,
-            evicted_donation,
-            min_idx,
-            msg.sender
+            author=evicted_author,
+            original_donation=evicted_donation,
+            index=min_idx,
+            replaced_by=msg.sender
         )
         
         # Replace
@@ -185,17 +207,17 @@ def post_message(content: String[500]):
         self.last_activity = block.timestamp
         
         log MessagePosted(
-            msg.sender,
-            msg.value,
-            content,
-            block.timestamp,
-            min_idx,
-            True
+            author=msg.sender,
+            donation=msg.value,
+            content=content,
+            timestamp=block.timestamp,
+            index=min_idx,
+            was_replacement=True
         )
         
         # Report activity to board
         board_interface: IBoard = IBoard(board)
-        board_interface.report_activity()
+        extcall board_interface.report_activity()
 
 @payable
 @external
@@ -217,17 +239,17 @@ def boost_message(message_idx: uint256):
     self.last_activity = block.timestamp
     
     log MessageBoosted(
-        msg.sender,
-        self.messages[message_idx].author,
-        message_idx,
-        msg.value,
-        self.messages[message_idx].donation,
-        block.timestamp
+        supporter=msg.sender,
+        message_author=self.messages[message_idx].author,
+        message_index=message_idx,
+        boost_amount=msg.value,
+        new_total_donation=self.messages[message_idx].donation,
+        timestamp=block.timestamp
     )
     
     # Report activity to board
     board_interface: IBoard = IBoard(board)
-    board_interface.report_activity()
+    extcall board_interface.report_activity()
 
 @external
 def terminate():
@@ -241,24 +263,24 @@ def terminate():
     self.terminated = True
     
     # Get unique survivor addresses
-    survivors: DynArray[address, MAX_MESSAGES] = self._get_unique_authors()
+    survivors: DynArray[address, ABSOLUTE_MAX_MESSAGES] = self._get_unique_authors()
     survivor_count: uint256 = len(survivors)
     
     final_pool: uint256 = self.balance
     
     log DiscussionTerminated(
-        msg.sender,
-        final_pool,
-        survivor_count,
-        block.timestamp
+        terminator=msg.sender,
+        final_pool=final_pool,
+        survivor_count=survivor_count,
+        timestamp=block.timestamp
     )
     
     # Distribute evenly
     if survivor_count > 0:
-        payout_per_survivor: uint256 = final_pool / survivor_count
+        payout_per_survivor: uint256 = final_pool // survivor_count
         remainder: uint256 = final_pool % survivor_count
         
-        for i: uint256 in range(MAX_MESSAGES):
+        for i: uint256 in range(ABSOLUTE_MAX_MESSAGES):
             if i >= survivor_count:
                 break
             
@@ -269,7 +291,7 @@ def terminate():
             
             send(survivors[i], amount)
             
-            log PayoutDistributed(survivors[i], amount)
+            log PayoutDistributed(recipient=survivors[i], amount=amount)
 
 # View functions
 
@@ -295,7 +317,7 @@ def get_message(idx: uint256) -> Message:
 
 @view
 @external
-def get_all_messages() -> DynArray[Message, MAX_MESSAGES]:
+def get_all_messages() -> DynArray[Message, ABSOLUTE_MAX_MESSAGES]:
     """
     @notice Get all messages
     @return Array of all messages
@@ -304,7 +326,7 @@ def get_all_messages() -> DynArray[Message, MAX_MESSAGES]:
 
 @view
 @external
-def get_min_donation() -> uint256:
+def get_min_donation_in_messages() -> uint256:
     """
     @notice Get minimum donation amount in current messages
     @return Minimum donation (0 if no messages)
@@ -312,27 +334,38 @@ def get_min_donation() -> uint256:
     if len(self.messages) == 0:
         return 0
     
-    min_donation: uint256 = self.messages[0].donation
+    min_donation_val: uint256 = self.messages[0].donation
     
-    for i: uint256 in range(MAX_MESSAGES):
+    for i: uint256 in range(ABSOLUTE_MAX_MESSAGES):
         if i >= len(self.messages):
             break
-        if self.messages[i].donation < min_donation:
-            min_donation = self.messages[i].donation
+        if self.messages[i].donation < min_donation_val:
+            min_donation_val = self.messages[i].donation
     
-    return min_donation
+    return min_donation_val
 
 @view
 @external
 def get_required_donation() -> uint256:
     """
-    @notice Get minimum donation needed to post (1 more than current min)
+    @notice Get minimum donation needed to post
     @return Required donation amount
     """
-    if len(self.messages) < MAX_MESSAGES:
-        return 1  # Any positive amount works
+    if len(self.messages) < max_messages:
+        return min_donation  # Just need to meet minimum
     
-    return self.get_min_donation() + 1
+    # Calculate min donation inline - need to beat lowest to replace
+    if len(self.messages) == 0:
+        return min_donation
+    
+    min_donation_val: uint256 = self.messages[0].donation
+    for i: uint256 in range(ABSOLUTE_MAX_MESSAGES):
+        if i >= len(self.messages):
+            break
+        if self.messages[i].donation < min_donation_val:
+            min_donation_val = self.messages[i].donation
+    
+    return min_donation_val + 1
 
 @view
 @external
@@ -345,7 +378,7 @@ def get_survivor_count() -> uint256:
 
 @view
 @external
-def get_survivors() -> DynArray[address, MAX_MESSAGES]:
+def get_survivors() -> DynArray[address, ABSOLUTE_MAX_MESSAGES]:
     """
     @notice Get list of unique authors who would split the pool
     @return Array of unique survivor addresses
@@ -359,10 +392,10 @@ def get_potential_payout() -> uint256:
     @notice Get potential payout per survivor if terminated now
     @return Payout amount per survivor
     """
-    survivors: DynArray[address, MAX_MESSAGES] = self._get_unique_authors()
+    survivors: DynArray[address, ABSOLUTE_MAX_MESSAGES] = self._get_unique_authors()
     if len(survivors) == 0:
         return 0
-    return self.balance / len(survivors)
+    return self.balance // len(survivors)
 
 @view
 @external
@@ -379,18 +412,27 @@ def get_status() -> (bool, uint256, uint256, uint256, uint256):
         len(self._get_unique_authors())
     )
 
+@view
+@external
+def get_config() -> (uint256, uint256, uint256):
+    """
+    @notice Get discussion configuration
+    @return (max_messages, max_message_length, min_donation)
+    """
+    return (max_messages, max_message_length, min_donation)
+
 # Internal functions
 
 @view
 @internal
-def _get_unique_authors() -> DynArray[address, MAX_MESSAGES]:
+def _get_unique_authors() -> DynArray[address, ABSOLUTE_MAX_MESSAGES]:
     """
     @notice Get unique authors from current messages
     @return Array of unique addresses
     """
-    unique: DynArray[address, MAX_MESSAGES] = []
+    unique: DynArray[address, ABSOLUTE_MAX_MESSAGES] = []
     
-    for i: uint256 in range(MAX_MESSAGES):
+    for i: uint256 in range(ABSOLUTE_MAX_MESSAGES):
         if i >= len(self.messages):
             break
         
@@ -398,7 +440,7 @@ def _get_unique_authors() -> DynArray[address, MAX_MESSAGES]:
         is_unique: bool = True
         
         # Check if already in unique list
-        for j: uint256 in range(MAX_MESSAGES):
+        for j: uint256 in range(ABSOLUTE_MAX_MESSAGES):
             if j >= len(unique):
                 break
             if unique[j] == author:

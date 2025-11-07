@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Single Discussion</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .test-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+        }
+        .config-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .message-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .message-content {
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 0.5rem;
+        }
+        .message-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .post-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .form-group textarea,
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn:hover {
+            background: var(--secondary-color);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .info-item {
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: var(--border-radius-sm);
+        }
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            color: #ef4444;
+            margin-bottom: 1rem;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            padding: 1rem;
+            border-radius: var(--border-radius-sm);
+            color: #22c55e;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test Single Discussion</h1>
+        
+        <!-- Configuration -->
+        <div class="config-section">
+            <h2>📍 Contract Configuration</h2>
+            <div class="form-group">
+                <label for="contract-address">Discussion Address:</label>
+                <input type="text" id="contract-address" value="0x456328A47ed2cF11447C1F88c26BcD7400aCb426" placeholder="0x...">
+                <button class="btn" onclick="loadDiscussion()" style="margin-top: 0.5rem;">Load Discussion</button>
+            </div>
+            
+            <div id="wallet-status" style="margin-top: 1rem;">
+                <button class="btn" id="connect-wallet">Connect Wallet</button>
+            </div>
+        </div>
+
+        <!-- Discussion Info -->
+        <div id="discussion-info" style="display: none;">
+            <div class="config-section">
+                <h2>📋 Discussion Info</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Subject</div>
+                        <div class="info-value" id="subject">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Creator</div>
+                        <div class="info-value" id="creator" style="font-size: 0.9rem;">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Total Pool</div>
+                        <div class="info-value" id="total-pool">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Messages</div>
+                        <div class="info-value" id="message-count">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Max Messages</div>
+                        <div class="info-value" id="max-messages">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Max Length</div>
+                        <div class="info-value" id="max-length">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Min Donation</div>
+                        <div class="info-value" id="min-donation">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value" id="status">-</div>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; padding: 1rem; background: var(--bg-primary); border-radius: var(--border-radius-sm);">
+                    <strong>Body:</strong> <span id="body">-</span>
+                </p>
+            </div>
+
+            <!-- Messages -->
+            <div class="config-section">
+                <h2>💬 Messages</h2>
+                <div id="messages-container">
+                    <div class="loading">Loading messages...</div>
+                </div>
+            </div>
+
+            <!-- Post Message -->
+            <div class="post-section">
+                <h2>📝 Post a Message</h2>
+                <div id="post-feedback"></div>
+                <div class="form-group">
+                    <label for="message-content">
+                        Message Content 
+                        <span style="float: right; font-weight: normal; color: var(--text-muted);">
+                            <span id="char-count">0</span>/<span id="max-char">200</span>
+                        </span>
+                    </label>
+                    <textarea id="message-content" rows="4" placeholder="Enter your message..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="donation-amount">Donation (ETH):</label>
+                    <input type="number" id="donation-amount" step="0.001" placeholder="0.001">
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">
+                        Required: <span id="required-donation">-</span> ETH
+                    </small>
+                </div>
+                <button class="btn" id="post-message-btn" onclick="postMessage()">Post Message</button>
+                <button class="btn" onclick="refreshMessages()" style="margin-left: 0.5rem; background: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                    🔄 Refresh
+                </button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            Connect wallet and load discussion to begin...
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        let provider = null;
+        let signer = null;
+        let contract = null;
+        let currentAddress = null;
+
+        const DISCUSSION_ABI = [{"name":"MessagePosted","inputs":[{"name":"author","type":"address","indexed":true},{"name":"donation","type":"uint256","indexed":false},{"name":"content","type":"string","indexed":false},{"name":"timestamp","type":"uint256","indexed":false},{"name":"index","type":"uint256","indexed":false},{"name":"was_replacement","type":"bool","indexed":false}],"anonymous":false,"type":"event"},{"name":"MessageEvicted","inputs":[{"name":"author","type":"address","indexed":true},{"name":"original_donation","type":"uint256","indexed":false},{"name":"index","type":"uint256","indexed":false},{"name":"replaced_by","type":"address","indexed":true}],"anonymous":false,"type":"event"},{"name":"DiscussionTerminated","inputs":[{"name":"terminator","type":"address","indexed":true},{"name":"final_pool","type":"uint256","indexed":false},{"name":"survivor_count","type":"uint256","indexed":false},{"name":"timestamp","type":"uint256","indexed":false}],"anonymous":false,"type":"event"},{"name":"PayoutDistributed","inputs":[{"name":"recipient","type":"address","indexed":true},{"name":"amount","type":"uint256","indexed":false}],"anonymous":false,"type":"event"},{"name":"MessageBoosted","inputs":[{"name":"supporter","type":"address","indexed":true},{"name":"message_author","type":"address","indexed":true},{"name":"message_index","type":"uint256","indexed":false},{"name":"boost_amount","type":"uint256","indexed":false},{"name":"new_total_donation","type":"uint256","indexed":false},{"name":"timestamp","type":"uint256","indexed":false}],"anonymous":false,"type":"event"},{"stateMutability":"payable","type":"function","name":"post_message","inputs":[{"name":"content","type":"string"}],"outputs":[]},{"stateMutability":"payable","type":"function","name":"boost_message","inputs":[{"name":"message_idx","type":"uint256"}],"outputs":[]},{"stateMutability":"nonpayable","type":"function","name":"terminate","inputs":[],"outputs":[]},{"stateMutability":"view","type":"function","name":"get_message_count","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"get_message","inputs":[{"name":"idx","type":"uint256"}],"outputs":[{"name":"","type":"tuple","components":[{"name":"author","type":"address"},{"name":"content","type":"string"},{"name":"donation","type":"uint256"},{"name":"timestamp","type":"uint256"}]}]},{"stateMutability":"view","type":"function","name":"get_all_messages","inputs":[],"outputs":[{"name":"","type":"tuple[]","components":[{"name":"author","type":"address"},{"name":"content","type":"string"},{"name":"donation","type":"uint256"},{"name":"timestamp","type":"uint256"}]}]},{"stateMutability":"view","type":"function","name":"get_min_donation_in_messages","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"get_required_donation","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"get_survivor_count","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"get_survivors","inputs":[],"outputs":[{"name":"","type":"address[]"}]},{"stateMutability":"view","type":"function","name":"get_potential_payout","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"get_status","inputs":[],"outputs":[{"name":"","type":"bool"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"get_config","inputs":[],"outputs":[{"name":"","type":"uint256"},{"name":"","type":"uint256"},{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"board","inputs":[],"outputs":[{"name":"","type":"address"}]},{"stateMutability":"view","type":"function","name":"creator","inputs":[],"outputs":[{"name":"","type":"address"}]},{"stateMutability":"view","type":"function","name":"subject","inputs":[],"outputs":[{"name":"","type":"string"}]},{"stateMutability":"view","type":"function","name":"body","inputs":[],"outputs":[{"name":"","type":"string"}]},{"stateMutability":"view","type":"function","name":"initial_value","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"creation_time","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"max_messages","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"max_message_length","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"min_donation","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"messages","inputs":[{"name":"arg0","type":"uint256"}],"outputs":[{"name":"","type":"tuple","components":[{"name":"author","type":"address"},{"name":"content","type":"string"},{"name":"donation","type":"uint256"},{"name":"timestamp","type":"uint256"}]}]},{"stateMutability":"view","type":"function","name":"total_pool","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"last_activity","inputs":[],"outputs":[{"name":"","type":"uint256"}]},{"stateMutability":"view","type":"function","name":"terminated","inputs":[],"outputs":[{"name":"","type":"bool"}]},{"stateMutability":"payable","type":"constructor","inputs":[{"name":"_board","type":"address"},{"name":"_subject","type":"string"},{"name":"_body","type":"string"},{"name":"_max_messages","type":"uint256"},{"name":"_max_message_length","type":"uint256"},{"name":"_min_donation","type":"uint256"}],"outputs":[]}];
+
+        // Connect wallet
+        document.getElementById('connect-wallet').addEventListener('click', async () => {
+            try {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('Please install MetaMask!');
+                    return;
+                }
+
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                currentAddress = await signer.getAddress();
+
+                document.getElementById('wallet-status').innerHTML = `
+                    <div style="color: var(--success-color);">
+                        ✅ Connected: ${currentAddress.slice(0, 6)}...${currentAddress.slice(-4)}
+                    </div>
+                `;
+
+                // Auto-load discussion
+                await loadDiscussion();
+            } catch (error) {
+                alert('Failed to connect wallet: ' + error.message);
+            }
+        });
+
+        // Character counter
+        document.getElementById('message-content')?.addEventListener('input', (e) => {
+            document.getElementById('char-count').textContent = e.target.value.length;
+        });
+
+        async function loadDiscussion() {
+            const address = document.getElementById('contract-address').value;
+            if (!address) {
+                alert('Please enter a discussion address');
+                return;
+            }
+
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('discussion-info').style.display = 'none';
+
+                if (!provider) {
+                    provider = new ethers.providers.JsonRpcProvider('https://sepolia.infura.io/v3/YOUR_KEY');
+                }
+
+                contract = new ethers.Contract(address, DISCUSSION_ABI, signer || provider);
+
+                // Load all data
+                const [subject, body, creator, config, status, totalPool, requiredDonation] = await Promise.all([
+                    contract.subject(),
+                    contract.body(),
+                    contract.creator(),
+                    contract.get_config(),
+                    contract.get_status(),
+                    contract.total_pool(),
+                    contract.get_required_donation()
+                ]);
+
+                // Update UI
+                document.getElementById('subject').textContent = subject;
+                document.getElementById('body').textContent = body;
+                document.getElementById('creator').textContent = `${creator.slice(0, 6)}...${creator.slice(-4)}`;
+                document.getElementById('total-pool').textContent = ethers.utils.formatEther(totalPool) + ' ETH';
+                document.getElementById('message-count').textContent = `${status[1].toNumber()}/${config[0].toNumber()}`;
+                document.getElementById('max-messages').textContent = config[0].toNumber();
+                document.getElementById('max-length').textContent = config[1].toNumber() + ' chars';
+                document.getElementById('min-donation').textContent = ethers.utils.formatEther(config[2]) + ' ETH';
+                document.getElementById('status').textContent = status[0] ? '❌ Terminated' : '✅ Active';
+                document.getElementById('required-donation').textContent = ethers.utils.formatEther(requiredDonation);
+                document.getElementById('donation-amount').value = ethers.utils.formatEther(requiredDonation);
+                document.getElementById('max-char').textContent = config[1].toNumber();
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('discussion-info').style.display = 'block';
+
+                await loadMessages();
+            } catch (error) {
+                alert('Failed to load discussion: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        async function loadMessages() {
+            try {
+                const messages = await contract.get_all_messages();
+                const container = document.getElementById('messages-container');
+
+                if (messages.length === 0) {
+                    container.innerHTML = '<div class="loading">No messages yet. Be the first to post!</div>';
+                    return;
+                }
+
+                container.innerHTML = messages.map((msg, i) => `
+                    <div class="message-card">
+                        <div class="message-header">
+                            <span><strong>Message #${i}</strong> by ${msg.author.slice(0, 6)}...${msg.author.slice(-4)}</span>
+                            <span>${new Date(msg.timestamp.toNumber() * 1000).toLocaleString()}</span>
+                        </div>
+                        <div class="message-content">${msg.content}</div>
+                        <div class="message-footer">
+                            <span>💰 Donation: ${ethers.utils.formatEther(msg.donation)} ETH</span>
+                            <button class="btn" style="padding: 0.25rem 0.75rem; font-size: 0.9rem;" 
+                                    onclick="boostMessage(${i})">⬆️ Boost</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load messages:', error);
+            }
+        }
+
+        async function postMessage() {
+            const content = document.getElementById('message-content').value;
+            const donation = document.getElementById('donation-amount').value;
+            const feedback = document.getElementById('post-feedback');
+
+            if (!content) {
+                feedback.innerHTML = '<div class="error">Please enter a message</div>';
+                return;
+            }
+
+            if (!signer) {
+                feedback.innerHTML = '<div class="error">Please connect your wallet first</div>';
+                return;
+            }
+
+            try {
+                feedback.innerHTML = '<div class="loading">Posting message...</div>';
+                document.getElementById('post-message-btn').disabled = true;
+
+                const contractWithSigner = contract.connect(signer);
+                const tx = await contractWithSigner.post_message(content, {
+                    value: ethers.utils.parseEther(donation)
+                });
+
+                feedback.innerHTML = '<div class="loading">Waiting for confirmation...</div>';
+                await tx.wait();
+
+                feedback.innerHTML = '<div class="success">✅ Message posted successfully!</div>';
+                document.getElementById('message-content').value = '';
+                
+                setTimeout(() => {
+                    feedback.innerHTML = '';
+                }, 3000);
+
+                await loadMessages();
+            } catch (error) {
+                feedback.innerHTML = `<div class="error">❌ ${error.message}</div>`;
+            } finally {
+                document.getElementById('post-message-btn').disabled = false;
+            }
+        }
+
+        async function boostMessage(index) {
+            if (!signer) {
+                alert('Please connect your wallet first');
+                return;
+            }
+
+            const amount = prompt('Enter ETH amount to boost this message:', '0.001');
+            if (!amount) return;
+
+            try {
+                const contractWithSigner = contract.connect(signer);
+                const tx = await contractWithSigner.boost_message(index, {
+                    value: ethers.utils.parseEther(amount)
+                });
+
+                alert('Boosting... waiting for confirmation');
+                await tx.wait();
+                alert('✅ Message boosted!');
+                await loadMessages();
+            } catch (error) {
+                alert('Failed to boost: ' + error.message);
+            }
+        }
+
+        async function refreshMessages() {
+            await loadMessages();
+        }
+    </script>
+</body>
+</html>
+

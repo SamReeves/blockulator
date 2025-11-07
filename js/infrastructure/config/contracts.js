@@ -19,6 +19,10 @@ const SEPOLIA_ADDRESSES = {
     DICE_GODS: '0xfE76b636ea9dD2881c72Ba1e6A66998B60B2b07d',
     SATAN_MOLOCH_BAAL: '0x1C5596AF550A33bc73d5bB401D6Fd9a0e17751f6',
     
+    // Discussions
+    DISCUSSION_BOARD: '0xd9145CCE52D386f254917e481eB44e9943F39138',
+    DISCUSSION_BLUEPRINT: '0x456328A47ed2cF11447C1F88c26BcD7400aCb426', // Not needed by frontend
+    
     // Tools (Mathematical Constant Calculators)
     E_CALCULATOR: '0x0df17535A8C9B68C426F4bf872E3F4EE1c57Aab8',
     PI_CALCULATOR: '0xeBFaB280b828153b0419bFc866BF8639b485C1da',
@@ -47,6 +51,10 @@ const MAINNET_ADDRESSES = {
     TIME_TO_MAKE_THE_DONUTS: '0x0000000000000000000000000000000000000000',
     DICE_GODS: '0x0000000000000000000000000000000000000000',
     SATAN_MOLOCH_BAAL: '0x0000000000000000000000000000000000000000',
+    
+    // Discussions
+    DISCUSSION_BOARD: '0x0000000000000000000000000000000000000000',
+    DISCUSSION_BLUEPRINT: '0x0000000000000000000000000000000000000000',
     
     // Tools (Mathematical Constant Calculators)
     E_CALCULATOR: '0x0000000000000000000000000000000000000000',
@@ -84,6 +92,8 @@ export const CONTRACT_SOURCES = {
     TIME_TO_MAKE_THE_DONUTS: 'contracts/src/games/time_to_make_the_donuts.vy',
     DICE_GODS: 'contracts/src/games/dice_gods.vy',
     SATAN_MOLOCH_BAAL: 'contracts/src/games/satan_moloch_baal.vy',
+    DISCUSSION_BOARD: 'contracts/src/discussions/board.vy',
+    DISCUSSION_BLUEPRINT: 'contracts/src/discussions/discussion.vy',
     E_CALCULATOR: 'contracts/src/tools/constants/e.vy',
     PI_CALCULATOR: 'contracts/src/tools/constants/pi.vy',
     TAU_CALCULATOR: 'contracts/src/tools/constants/tau.vy',
@@ -110,6 +120,8 @@ export const CONTRACT_ABIS = {
     TIME_TO_MAKE_THE_DONUTS: 'contracts/build/abis/time-to-make-the-donuts.json',
     DICE_GODS: 'contracts/build/abis/dice-gods.json',
     SATAN_MOLOCH_BAAL: 'contracts/build/abis/satan-moloch-baal.json',
+    DISCUSSION_BOARD: 'contracts/build/abis/board.json',
+    DISCUSSION_BLUEPRINT: 'contracts/build/abis/discussion.json',
     E_CALCULATOR: 'contracts/build/abis/e-calculator.json',
     PI_CALCULATOR: 'contracts/build/abis/pi-calculator.json',
     TAU_CALCULATOR: 'contracts/build/abis/tau-calculator.json',

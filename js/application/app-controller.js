@@ -42,23 +42,7 @@ export class AppController {
         this.router = new Router(this.moduleRegistry, this.web3Provider);
         this.router.init();
         
-        // Setup joy button
-        this.setupJoyButton();
-        
         console.log('✅ Application initialized');
-    }
-
-    /**
-     * Setup the joy button to trigger confetti
-     */
-    setupJoyButton() {
-        const joyButton = document.getElementById('joy-button');
-        if (joyButton) {
-            joyButton.addEventListener('click', () => {
-                eventBus.emit(EVENTS.CONFETTI);
-            });
-            console.log('✨ Joy button ready');
-        }
     }
 
     /**

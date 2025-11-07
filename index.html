@@ -2,104 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="WhaleGames.net - Play blockchain-based games on Sepolia testnet">
-    <meta name="view-transition" content="same-origin">
-    <title>WhaleGames.net - Blockchain Games</title>
-    <link rel="stylesheet" href="styles.css?v=4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WhaleGames - Blockchain games on Sepolia testnet">
+    <title>WhaleGames - Games</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<!-- Version: 4.0 - Fixed custom UI for tools too -->
 <body>
     <div id="app">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-left">
-                <h1 class="app-title">🐋 WhaleGames</h1>
-                <span class="testnet-badge">🚧 TESTNET</span>
-                <span id="readonly-badge" class="readonly-badge">👀 Browsing</span>
-            </div>
-            <nav class="header-nav">
-                <a href="index.html" class="nav-link nav-link-active">🎮 Games</a>
-                <a href="tools.html" class="nav-link">🔧 Tools</a>
-                <a href="futures.html" class="nav-link">📈 Futures</a>
-                <a href="https://sepolia-faucet.pk910.de/" class="nav-link" target="_blank">💧 Faucet</a>
-                <button id="joy-button" class="nav-link nav-button">✨ Joy</button>
-            </nav>
-            <div class="header-right">
-                <button id="connect-wallet" class="btn-connect">Connect Wallet</button>
-            <div id="wallet-info" class="wallet-info hidden">
-                    <div class="wallet-line">
-                        <span id="wallet-address" class="wallet-value"></span>
-                        <button id="copy-address" class="copy-btn" title="Copy address">📋</button>
-                    </div>
-                    <div class="wallet-line">
-                        <span id="wallet-balance" class="wallet-value"></span>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <!-- Header loaded dynamically -->
 
-        <!-- Main Content Area -->
         <main id="content" class="content">
             <div class="game-list">
-                <button class="game-card" data-game="pissing-contest">
+                <button class="game-card" data-game="pissing-contest" data-emoji="💦">
                     <h3>💦 Pissing Contest</h3>
-                    <p>Make the biggest donation to win the pot</p>
+                    <p>Biggest donation takes the pot</p>
                 </button>
-                <button class="game-card" data-game="pay-it-forward">
+                <button class="game-card" data-game="pay-it-forward" data-emoji="⏩">
                     <h3>⏩ Pay It Forward</h3>
-                    <p>Donate and instantly receive the previous donation</p>
+                    <p>Get previous player's donation</p>
                 </button>
-                <button class="game-card" data-game="pay-it-backward">
+                <button class="game-card" data-game="pay-it-backward" data-emoji="⏪">
                     <h3>⏪ Pay It Backward</h3>
-                    <p>Your donation rewards the previous donor</p>
+                    <p>Reward the previous donor</p>
                 </button>
-                <button class="game-card" data-game="message-board">
+                <button class="game-card" data-game="message-board" data-emoji="💬">
                     <h3>💬 Message Board</h3>
-                    <p>Post permanent on-chain messages</p>
+                    <p>Permanent on-chain messages</p>
                 </button>
-                <button class="game-card" data-game="king-of-the-hill">
+                <button class="game-card" data-game="king-of-the-hill" data-emoji="👑">
                     <h3>👑 King of the Hill</h3>
-                    <p>Pay to dethrone and claim the prize. Stakes grow!</p>
+                    <p>Dethrone king, stakes grow</p>
                 </button>
-                <button class="game-card" data-game="last-call">
+                <button class="game-card" data-game="last-call" data-emoji="⏰">
                     <h3>⏰ Last Call</h3>
-                    <p>Be the LAST donor before 10-day timer ends. Win 99%!</p>
+                    <p>Last donor wins after timer</p>
                 </button>
-                <button class="game-card" data-game="time-to-make-the-donuts">
-                    <h3>🍩 Time to Make the Donuts</h3>
-                    <p>Be FIRST donor each day at 00:00 UTC. Win 99%!</p>
+                <button class="game-card" data-game="time-to-make-the-donuts" data-emoji="🍩">
+                    <h3>🍩 Make the Donuts</h3>
+                    <p>First donor daily at midnight</p>
                 </button>
-                <button class="game-card" data-game="dice-gods">
+                <button class="game-card" data-game="dice-gods" data-emoji="🎲">
                     <h3>🎲 Dice Gods</h3>
-                    <p>Pick the LEAST popular number (1-6) to win the pot</p>
+                    <p>Pick the least popular number</p>
                 </button>
-                <button class="game-card" data-game="satan-moloch-baal">
+                <button class="game-card" data-game="satan-moloch-baal" data-emoji="🔥">
                     <h3>🔥 Satan, Moloch, Baal</h3>
-                    <p>Vote for your demon by burning ETH to the void!</p>
+                    <p>Vote for demons or burn to void</p>
                 </button>
             </div>
             
-            <!-- Game Detail View -->
             <div id="game-detail" class="game-detail hidden">
                 <button id="back-to-games" class="btn-back">← Back</button>
                 <div id="game-container"></div>
             </div>
         </main>
 
-
-        <!-- Toast notifications -->
         <div id="toast-container" class="toast-container"></div>
-
-        <!-- Canvas for animations/effects -->
         <canvas id="effects-canvas" class="effects-canvas"></canvas>
     </div>
 
-    <!-- Web3 Libraries (CDN for now, can be replaced) -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    
-    <!-- App Scripts -->
+    <script type="module">
+        import { HeaderLoader } from './js/presentation/components/header-loader.js';
+        await HeaderLoader.load('games');
+    </script>
     <script type="module" src="js/main.js"></script>
 </body>
 </html>
-

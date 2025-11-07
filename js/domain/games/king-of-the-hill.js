@@ -22,6 +22,9 @@ export class KingOfTheHill extends Game {
     }
 
     async onAfterInit() {
+        // Call parent to setup events and load initial state
+        await super.onAfterInit();
+        
         // Update reign timer every second
         this.updateInterval = setInterval(() => this.updateReign(), 1000);
     }

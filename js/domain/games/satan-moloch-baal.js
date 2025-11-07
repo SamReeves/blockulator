@@ -26,146 +26,209 @@ export class SatanMolochBaal extends Game {
             abiFile: CONTRACT_ABIS.SATAN_MOLOCH_BAAL
         });
         
-        const container = document.createElement('div');
-        container.className = 'game-interface';
-        container.appendChild(header);
+        const gameContent = document.createElement('div');
+        gameContent.className = 'game-interface';
+        gameContent.appendChild(header);
         
-        // Voting controls
-        const votingDiv = document.createElement('div');
-        votingDiv.className = 'voting-interface';
-        votingDiv.innerHTML = `
-            <h3>🔥 Cast Your Vote by Burning ETH 🔥</h3>
-            <p class="vote-description">All donations go straight to the null address - eternal sacrifice!</p>
-            
-            <div class="vote-amount-input">
-                <label for="vote-amount">Amount to Burn (wei)</label>
-                <input type="number" id="vote-amount" placeholder="Enter wei amount..." min="0" step="1" />
-            </div>
-            
-            <div class="demon-voting-buttons">
-                <button id="vote-satan" class="demon-button satan">
-                    <span class="demon-icon">😈</span>
-                    <span class="demon-name">SATAN</span>
-                    <span class="demon-subtitle">The Adversary</span>
-                </button>
-                
-                <button id="vote-moloch" class="demon-button moloch">
-                    <span class="demon-icon">🐂</span>
-                    <span class="demon-name">MOLOCH</span>
-                    <span class="demon-subtitle">The Bull God</span>
-                </button>
-                
-                <button id="vote-baal" class="demon-button baal">
-                    <span class="demon-icon">⚡</span>
-                    <span class="demon-name">BAAL</span>
-                    <span class="demon-subtitle">Lord of Storms</span>
-                </button>
+        const contentInner = document.createElement('div');
+        contentInner.innerHTML = `
+            <div class="game-sections">
+                <!-- Voting Controls -->
+                <div class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ef4444;">
+                        <span>🔥</span>
+                        <span>Cast Your Vote by Burning ETH</span>
+                    </h3>
+                    <div style="text-align: center; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 12px; margin-top: 1rem; margin-bottom: 1.5rem;">
+                        <strong style="color: #ef4444;">All donations go straight to the null address - eternal sacrifice!</strong>
+                    </div>
+                    
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label for="vote-amount" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Amount to Burn (wei)</label>
+                        <input type="number" id="vote-amount" placeholder="Enter wei amount..." min="0" step="1" 
+                            style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1.1rem; font-family: monospace; transition: border-color 0.2s;"
+                            onfocus="this.style.borderColor='#ef4444'"
+                            onblur="this.style.borderColor='var(--md-sys-color-outline)'"
+                        />
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+                        <button id="vote-satan" class="demon-button" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'">
+                            <span style="font-size: 3rem;">😈</span>
+                            <span style="font-size: 1.25rem; font-weight: bold;">SATAN</span>
+                            <span style="font-size: 0.75rem; opacity: 0.9;">The Adversary</span>
+                        </button>
+                        
+                        <button id="vote-moloch" class="demon-button" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
+                            <span style="font-size: 3rem;">🐂</span>
+                            <span style="font-size: 1.25rem; font-weight: bold;">MOLOCH</span>
+                            <span style="font-size: 0.75rem; opacity: 0.9;">The Bull God</span>
+                        </button>
+                        
+                        <button id="vote-baal" class="demon-button" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
+                            <span style="font-size: 3rem;">⚡</span>
+                            <span style="font-size: 1.25rem; font-weight: bold;">BAAL</span>
+                            <span style="font-size: 0.75rem; opacity: 0.9;">Lord of Storms</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Demon Standings -->
+                <div class="contest-info-panel">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📊</span>
+                        <span>Demon Standings</span>
+                    </h3>
+                    <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); border-radius: 12px; border-left: 4px solid #ef4444;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                                <span style="font-size: 2.5rem;">😈</span>
+                                <div>
+                                    <div style="font-size: 1.25rem; font-weight: bold; color: #ef4444;">Satan</div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">The Adversary</div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Burned</div>
+                                    <div id="satan-total" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Votes</div>
+                                    <div id="satan-votes" style="font-size: 1.25rem; font-weight: bold;">0</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(239, 68, 68, 0.2);">
+                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Champion</div>
+                                <div id="satan-champion" style="font-family: monospace; font-size: 0.875rem;">No champion yet</div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%); border-radius: 12px; border-left: 4px solid #f59e0b;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                                <span style="font-size: 2.5rem;">🐂</span>
+                                <div>
+                                    <div style="font-size: 1.25rem; font-weight: bold; color: #f59e0b;">Moloch</div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">The Bull God</div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Burned</div>
+                                    <div id="moloch-total" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Votes</div>
+                                    <div id="moloch-votes" style="font-size: 1.25rem; font-weight: bold;">0</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(245, 158, 11, 0.2);">
+                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Champion</div>
+                                <div id="moloch-champion" style="font-family: monospace; font-size: 0.875rem;">No champion yet</div>
+                            </div>
+                        </div>
+
+                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border-radius: 12px; border-left: 4px solid #8b5cf6;">
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                                <span style="font-size: 2.5rem;">⚡</span>
+                                <div>
+                                    <div style="font-size: 1.25rem; font-weight: bold; color: #8b5cf6;">Baal</div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">Lord of Storms</div>
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Burned</div>
+                                    <div id="baal-total" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Votes</div>
+                                    <div id="baal-votes" style="font-size: 1.25rem; font-weight: bold;">0</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(139, 92, 246, 0.2);">
+                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Champion</div>
+                                <div id="baal-champion" style="font-family: monospace; font-size: 0.875rem;">No champion yet</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%); border-radius: 12px; text-align: center; border: 2px solid #ef4444;">
+                        <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">🔥 Total Sacrificed to the Void</div>
+                        <div id="total-burned" style="font-size: 2rem; font-weight: bold; color: #ef4444;">0 wei</div>
+                    </div>
+                </div>
+
+                <!-- Your Stats -->
+                <div class="contest-info-panel" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #10b981;">
+                        <span>📈</span>
+                        <span>Your Stats</span>
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid #ef4444;">
+                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">😈 Satan Burned</div>
+                            <div id="user-satan-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                        </div>
+                        <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">🐂 Moloch Burned</div>
+                            <div id="user-moloch-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                        </div>
+                        <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">⚡ Baal Burned</div>
+                            <div id="user-baal-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                        </div>
+                        <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981;">
+                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">🔥 Total Burned</div>
+                            <div id="user-total-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- How It Works -->
+                <div class="contest-info-panel">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span>📖</span>
+                        <span>The Ritual</span>
+                    </h3>
+                    <div style="margin-top: 1rem;">
+                        <div style="display: grid; gap: 1rem;">
+                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 4px solid #ef4444;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #ef4444; min-width: 2.5rem;">1</div>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Choose Your Demon</strong>
+                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Vote for Satan, Moloch, or Baal - pledge your allegiance</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">2</div>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Burn Your ETH</strong>
+                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">All donations are sent to address(0) - the eternal void. Your ETH is destroyed forever</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 4px solid #8b5cf6;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6; min-width: 2.5rem;">3</div>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Become Champion</strong>
+                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">The highest donor per demon becomes their champion - eternal glory</span>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; padding: 1rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); border-radius: 8px; border: 2px solid #ef4444;">
+                                <div style="font-size: 2rem; font-weight: bold; color: #ef4444; min-width: 2.5rem;">⚠️</div>
+                                <div>
+                                    <strong style="display: block; margin-bottom: 0.25rem; color: #ef4444;">No Rewards - Pure Sacrifice</strong>
+                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">There are NO refunds, NO winners, NO prizes. All ETH is permanently destroyed. This is digital sacrifice to the void.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
         
-        container.appendChild(votingDiv);
-        
-        // Content sections container
-        const sectionsContainer = document.createElement('div');
-        sectionsContainer.className = 'game-sections';
-        
-        // Current standings panel
-        sectionsContainer.appendChild(this.renderStandingsPanel());
-        
-        // Your stats panel
-        sectionsContainer.appendChild(this.renderUserStatsPanel());
-        
-        // How it works panel
-        sectionsContainer.appendChild(this.renderHowItWorks());
-        
-        container.appendChild(sectionsContainer);
-        this.container.appendChild(container);
-    }
-
-    renderStandingsPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'info-panel';
-        
-        panel.innerHTML = `
-            <h3>📊 Demon Standings</h3>
-            <div class="demon-standings">
-                <div class="demon-stat-card satan-card">
-                    <div class="demon-stat-header">
-                        <span class="demon-stat-icon">😈</span>
-                        <span class="demon-stat-name">Satan</span>
-                    </div>
-                    <div class="demon-stat-amount" id="satan-total">0 wei</div>
-                    <div class="demon-stat-votes" id="satan-votes">0 votes</div>
-                    <div class="demon-stat-champion" id="satan-champion">No champion yet</div>
-                </div>
-                
-                <div class="demon-stat-card moloch-card">
-                    <div class="demon-stat-header">
-                        <span class="demon-stat-icon">🐂</span>
-                        <span class="demon-stat-name">Moloch</span>
-                    </div>
-                    <div class="demon-stat-amount" id="moloch-total">0 wei</div>
-                    <div class="demon-stat-votes" id="moloch-votes">0 votes</div>
-                    <div class="demon-stat-champion" id="moloch-champion">No champion yet</div>
-                </div>
-                
-                <div class="demon-stat-card baal-card">
-                    <div class="demon-stat-header">
-                        <span class="demon-stat-icon">⚡</span>
-                        <span class="demon-stat-name">Baal</span>
-                    </div>
-                    <div class="demon-stat-amount" id="baal-total">0 wei</div>
-                    <div class="demon-stat-votes" id="baal-votes">0 votes</div>
-                    <div class="demon-stat-champion" id="baal-champion">No champion yet</div>
-                </div>
-            </div>
-            <div class="total-burned-section">
-                <div class="info-label">🔥 Total Sacrificed to the Void</div>
-                <div class="info-value" id="total-burned">0 wei</div>
-            </div>
-        `;
-        
-        return panel;
-    }
-
-    renderUserStatsPanel() {
-        const panel = DOMHelpers.createInfoPanel('📈 Your Stats', [
-            { label: 'Satan Burned', id: 'user-satan-burned' },
-            { label: 'Moloch Burned', id: 'user-moloch-burned' },
-            { label: 'Baal Burned', id: 'user-baal-burned' },
-            { label: 'Total Burned', id: 'user-total-burned' }
-        ]);
-        
-        return panel;
-    }
-
-    renderHowItWorks() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        
-        panel.innerHTML = `
-            <h3>📖 How It Works</h3>
-            <div class="how-it-works">
-                <ol>
-                    <li><strong>Choose Your Demon:</strong> Satan, Moloch, or Baal</li>
-                    <li><strong>Enter Amount:</strong> How much ETH to sacrifice (in wei)</li>
-                    <li><strong>Cast Your Vote:</strong> Click the demon button to burn ETH in their name</li>
-                    <li><strong>Watch the Tally:</strong> All burned ETH goes to 0x000...000 (the void)</li>
-                    <li><strong>Become Champion:</strong> Burn more than anyone else for a demon to become their Best Worshipper!</li>
-                </ol>
-                <p class="note">
-                    ⚠️ <strong>Warning:</strong> All ETH sent is PERMANENTLY BURNED to the null address. There are no winners, no prizes - only eternal sacrifice to the void!
-                </p>
-                <p class="note">
-                    🔥 <strong>The Game:</strong> Which demon will receive the most burned ETH? Can you become a demon's champion? Vote with your sacrifice!
-                </p>
-                <p class="note">
-                    👑 <strong>Best Worshipper:</strong> The address that has burned the most ETH for each demon gets eternal glory as their champion!
-                </p>
-            </div>
-        `;
-        
-        return panel;
+        gameContent.appendChild(contentInner);
+        this.container.appendChild(gameContent);
     }
 
     setupListeners() {
