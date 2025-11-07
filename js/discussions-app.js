@@ -8,6 +8,7 @@ import { eventBus, EVENTS } from './infrastructure/events/event-bus.js';
 import { WalletConnectComponent, ToastComponent } from './presentation/components/index.js';
 import { initConfetti } from './presentation/effects/confetti-animation.js';
 import { DiscussionBoard } from './domain/discussions/discussion-board.js';
+import { Discussion } from './domain/discussions/discussion.js';
 import { DiscussionList } from './presentation/discussions/discussion-list.js';
 import { CreateForm } from './presentation/discussions/create-form.js';
 import { GameRenderer } from './presentation/renderers/game-renderer.js';
@@ -283,6 +284,142 @@ class DiscussionsApp {
                 CONTRACT_ABIS.DISCUSSION_BLUEPRINT
             );
             discussionDetailsEl.appendChild(discussionInfo);
+        }
+    }
+
+    async openDiscussionModal(discussion) {
+        const modal = document.getElementById('discussion-modal');
+        
+        // Show modal
+        modal.style.display = 'block';
+        
+        // Populate basic info
+        document.getElementById('modal-subject').textContent = discussion.subject;
+        document.getElementById('modal-creator').textContent = `Creator: ${discussion.creator.substring(0, 6)}...${discussion.creator.substring(38)}`;
+        document.getElementById('modal-created').textContent = `Created: ${new Date(discussion.creationTime * 1000).toLocaleString()}`;
+        document.getElementById('modal-body').textContent = discussion.body;
+        document.getElementById('modal-pool').textContent = ethers.utils.formatEther(discussion.totalPool) + ' ETH';
+        document.getElementById('modal-messages').textContent = discussion.messageCount;
+        document.getElementById('modal-survivors').textContent = discussion.survivorCount;
+        document.getElementById('modal-status').textContent = discussion.terminated ? 'Terminated ❌' : 'Active ✅';
+        document.getElementById('modal-address').textContent = discussion.address;
+        document.getElementById('modal-etherscan').href = `https://sepolia.etherscan.io/address/${discussion.address}`;
+        document.getElementById('modal-min-donation').textContent = ethers.utils.formatEther(discussion.minDonation || '0');
+        
+        // Load messages
+        await this.loadDiscussionMessages(discussion.address);
+        
+        // Setup modal close handlers
+        const closeModal = () => {
+            modal.style.display = 'none';
+        };
+        
+        document.getElementById('close-modal').onclick = closeModal;
+        modal.onclick = (e) => {
+            if (e.target === modal) closeModal();
+        };
+        
+        // Setup post message handler
+        document.getElementById('post-message-btn').onclick = async () => {
+            await this.postMessage(discussion.address);
+        };
+    }
+
+    async loadDiscussionMessages(discussionAddress) {
+        const messagesList = document.getElementById('modal-messages-list');
+        messagesList.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 2rem;">Loading messages...</p>';
+        
+        try {
+            const discussion = new Discussion(
+                this.web3Provider,
+                discussionAddress,
+                this.discussionAbi
+            );
+            await discussion.init();
+            
+            const messages = await discussion.getAllMessages();
+            
+            if (messages.length === 0) {
+                messagesList.innerHTML = '<p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 2rem;">No messages yet. Be the first to post!</p>';
+                return;
+            }
+            
+            messagesList.innerHTML = messages.map((msg, i) => `
+                <div style="padding: 1.5rem; margin-bottom: 1rem; background: var(--md-sys-color-surface-variant); border-radius: 12px; border-left: 4px solid #6366f1;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <strong style="color: var(--md-sys-color-primary);">${msg.author.substring(0, 6)}...${msg.author.substring(38)}</strong>
+                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">${ethers.utils.formatEther(msg.donation)} ETH</span>
+                    </div>
+                    <p style="color: var(--md-sys-color-on-surface); white-space: pre-wrap; margin-bottom: 0.5rem;">${msg.content}</p>
+                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">
+                        ${new Date(msg.timestamp * 1000).toLocaleString()}
+                    </div>
+                </div>
+            `).join('');
+            
+        } catch (error) {
+            console.error('Error loading messages:', error);
+            messagesList.innerHTML = '<p style="text-align: center; color: #ef4444; padding: 2rem;">Failed to load messages</p>';
+        }
+    }
+
+    async postMessage(discussionAddress) {
+        const content = document.getElementById('message-content').value.trim();
+        const donationEth = document.getElementById('message-donation').value;
+        
+        if (!content) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Please enter a message',
+                type: 'warning'
+            });
+            return;
+        }
+        
+        if (!donationEth || parseFloat(donationEth) <= 0) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Please enter a donation amount',
+                type: 'warning'
+            });
+            return;
+        }
+        
+        try {
+            const discussion = new Discussion(
+                this.web3Provider,
+                discussionAddress,
+                this.discussionAbi
+            );
+            await discussion.init();
+            
+            const donationWei = ethers.utils.parseEther(donationEth);
+            
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Posting message...',
+                type: 'info'
+            });
+            
+            await discussion.postMessage(content, donationWei);
+            
+            // Clear form
+            document.getElementById('message-content').value = '';
+            document.getElementById('message-donation').value = '';
+            
+            eventBus.emit(EVENTS.TOAST, {
+                message: '🎉 Message posted successfully!',
+                type: 'success'
+            });
+            
+            // Reload messages after a short delay
+            setTimeout(() => {
+                this.loadDiscussionMessages(discussionAddress);
+            }, 2000);
+            
+        } catch (error) {
+            console.error('Error posting message:', error);
+            eventBus.emit(EVENTS.TOAST, {
+                message: error.message || 'Failed to post message',
+                type: 'error'
+            });
         }
     }
 }
