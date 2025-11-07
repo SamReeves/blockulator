@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Discussion Board</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #00ff00; max-width: 1400px; margin: 0 auto; }
+        pre { background: #000; padding: 15px; border: 1px solid #00ff00; overflow-x: auto; white-space: pre-wrap; }
+        h2 { color: #00ffff; }
+        .error { color: #ff0000; }
+        .success { color: #00ff00; }
+        .warning { color: #ffaa00; }
+        .info { color: #00aaff; }
+        button { background: #00ff00; color: #000; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; font-weight: bold; border-radius: 5px; }
+        button:hover { background: #00ffff; }
+        button:disabled { background: #555; color: #888; cursor: not-allowed; }
+        .status { padding: 10px; margin: 10px 0; border-left: 4px solid #00ff00; background: rgba(0, 255, 0, 0.1); }
+    </style>
+</head>
+<body>
+    <h1>🔍 Discussion Board Debugger</h1>
+    
+    <div class="status">
+        <strong>Status:</strong> <span id="status">Initializing...</span>
+    </div>
+    
+    <h2>1. Connect Wallet</h2>
+    <button id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
+    <pre id="wallet-info">Not connected</pre>
+    
+    <h2>2. Contract Configuration</h2>
+    <pre id="config">Loading...</pre>
+    
+    <h2>3. ABI Validation</h2>
+    <pre id="abi-info">Loading...</pre>
+    
+    <h2>4. Board Query</h2>
+    <button onclick="queryBoard()" id="queryBtn" disabled>Query Board Contract</button>
+    <pre id="board-info">Click button to query...</pre>
+    
+    <h2>5. Discussion List</h2>
+    <button onclick="loadAllDiscussions()" id="allBtn" disabled>Load All Discussions</button>
+    <button onclick="loadActiveDiscussions()" id="activeBtn" disabled>Load Active Discussions</button>
+    <button onclick="loadInactiveDiscussions()" id="inactiveBtn" disabled>Load Inactive Discussions</button>
+    <pre id="discussions-info">Click button to load...</pre>
+    
+    <script>
+        // Configuration - hardcoded to avoid module loading issues
+        const BOARD_ADDRESS = '0xb216dfcDDB1A465675Ab1A79CA519A7e00fd8D63';  // NEW DEPLOYMENT!
+        const BOARD_ABI_PATH = 'contracts/build/abis/board.json';
+        const DISCUSSION_ABI_PATH = 'contracts/build/abis/discussion.json';
+        
+        // Global state
+        let provider = null;
+        let signer = null;
+        let boardContract = null;
+        let boardAbi = null;
+        let discussionAbi = null;
+        let userAddress = null;
+        
+        // Update status
+        function setStatus(msg, isError = false) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = msg;
+            statusEl.style.color = isError ? '#ff0000' : '#00ff00';
+        }
+        
+        // Connect wallet
+        async function connectWallet() {
+            const walletInfo = document.getElementById('wallet-info');
+            const connectBtn = document.getElementById('connectBtn');
+            
+            try {
+                if (!window.ethereum) {
+                    walletInfo.innerHTML = '<span class="error">❌ MetaMask not found! Please install MetaMask.</span>';
+                    return;
+                }
+                
+                walletInfo.innerHTML = '<span class="warning">Connecting...</span>';
+                connectBtn.disabled = true;
+                
+                // Request account access
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userAddress = accounts[0];
+                
+                // Get chain ID
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                
+                // Initialize provider
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                
+                walletInfo.innerHTML = `<span class="success">✅ Connected!</span>
+Address: ${userAddress}
+Chain ID: ${chainId} (${chainId === '0x7a69' ? 'Anvil Local' : chainId === '0xaa36a7' ? 'Sepolia' : 'Unknown'})`;
+                
+                connectBtn.textContent = 'Connected ✓';
+                connectBtn.style.background = '#00ff00';
+                
+                // Enable query buttons
+                document.getElementById('queryBtn').disabled = false;
+                document.getElementById('allBtn').disabled = false;
+                document.getElementById('activeBtn').disabled = false;
+                document.getElementById('inactiveBtn').disabled = false;
+                
+                setStatus('Wallet connected - Ready to query');
+                
+            } catch (error) {
+                walletInfo.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+                connectBtn.disabled = false;
+                setStatus('Connection failed', true);
+            }
+        }
+        
+        // Initialize
+        async function init() {
+            const configEl = document.getElementById('config');
+            const abiEl = document.getElementById('abi-info');
+            
+            try {
+                setStatus('Loading ABIs...');
+                
+                // Show configuration
+                configEl.innerHTML = `<span class="info">Network: Anvil (localhost:8545)</span>
+Board Address: ${BOARD_ADDRESS}
+Board ABI Path: ${BOARD_ABI_PATH}
+Discussion ABI Path: ${DISCUSSION_ABI_PATH}`;
+                
+                // Load ABIs
+                const [boardResponse, discussionResponse] = await Promise.all([
+                    fetch(BOARD_ABI_PATH),
+                    fetch(DISCUSSION_ABI_PATH)
+                ]);
+                
+                if (!boardResponse.ok) throw new Error('Failed to load board ABI');
+                if (!discussionResponse.ok) throw new Error('Failed to load discussion ABI');
+                
+                boardAbi = await boardResponse.json();
+                discussionAbi = await discussionResponse.json();
+                
+                const boardFunctions = boardAbi.filter(i => i.type === 'function');
+                const discussionFunctions = discussionAbi.filter(i => i.type === 'function');
+                
+                abiEl.innerHTML = `<span class="success">✅ Board ABI loaded</span>
+  - Events: ${boardAbi.filter(i => i.type === 'event').length}
+  - Functions: ${boardFunctions.length}
+  
+<span class="success">✅ Discussion ABI loaded</span>
+  - Events: ${discussionAbi.filter(i => i.type === 'event').length}
+  - Functions: ${discussionFunctions.length}
+  
+<span class="success">Key Board Functions:</span>
+${boardFunctions.filter(f => f.name && f.name.includes('discussion')).map(f => `  - ${f.name}`).join('\n')}`;
+                
+                setStatus('ABIs loaded - Please connect wallet');
+                console.log('✅ ABIs loaded successfully');
+                
+            } catch (error) {
+                configEl.innerHTML += `\n\n<span class="error">❌ Error: ${error.message}</span>`;
+                abiEl.innerHTML = `<span class="error">❌ Error loading ABIs: ${error.message}</span>`;
+                setStatus('Initialization failed', true);
+                console.error('Init error:', error);
+            }
+        }
+        
+        // Query board contract
+        async function queryBoard() {
+            const infoEl = document.getElementById('board-info');
+            infoEl.innerHTML = '<span class="warning">Querying...</span>';
+            setStatus('Querying board...');
+            
+            try {
+                if (!provider) {
+                    throw new Error('Wallet not connected');
+                }
+                
+                // Create contract instance
+                boardContract = new ethers.Contract(BOARD_ADDRESS, boardAbi, provider);
+                
+                // Query discussion count
+                const count = await boardContract.get_discussion_count();
+                
+                // Query stats
+                const stats = await boardContract.get_stats();
+                
+                infoEl.innerHTML = `<span class="success">✅ Successfully queried board contract</span>
+
+<span class="success">Discussion Count:</span> ${count.toString()}
+
+<span class="success">Stats:</span>
+  - Total on board: ${stats[0].toString()}
+  - Total created: ${stats[1].toString()}
+  - Active count: ${stats[2].toString()}`;
+                
+                setStatus(`Query complete - ${count.toString()} discussions on board`);
+                
+            } catch (error) {
+                infoEl.innerHTML = `<span class="error">❌ Error: ${error.message}</span>
+
+${error.stack || ''}`;
+                setStatus('Query failed', true);
+                console.error('Query error:', error);
+            }
+        }
+        
+        // Load all discussions
+        async function loadAllDiscussions() {
+            const infoEl = document.getElementById('discussions-info');
+            infoEl.innerHTML = '<span class="warning">Loading all discussions...</span>';
+            setStatus('Loading discussions...');
+            
+            try {
+                if (!provider) throw new Error('Wallet not connected');
+                if (!boardContract) {
+                    boardContract = new ethers.Contract(BOARD_ADDRESS, boardAbi, provider);
+                }
+                
+                const entries = await boardContract.get_all_discussions();
+                
+                infoEl.innerHTML = `<span class="success">✅ Retrieved ${entries.length} discussion entries</span>\n\n`;
+                
+                if (entries.length === 0) {
+                    infoEl.innerHTML += `<span class="warning">⚠️  No discussions found on board.
+                    
+This could mean:
+  - The board is empty (create a discussion first!)
+  - Wrong contract address
+  - Contract not deployed</span>`;
+                    setStatus('No discussions found');
+                    return;
+                }
+                
+                // Load detailed info for each
+                for (let i = 0; i < entries.length; i++) {
+                    const entry = entries[i];
+                    const discussionAddr = entry.discussion_address || entry[0];
+                    const lastActivity = entry.last_activity || entry[1];
+                    
+                    infoEl.innerHTML += `\n<span class="success">━━━ Discussion ${i + 1} ━━━</span>
+  Address: ${discussionAddr}
+  Last Activity: ${new Date(lastActivity.toNumber() * 1000).toLocaleString()}
+  `;
+                    
+                    try {
+                        const discussionContract = new ethers.Contract(discussionAddr, discussionAbi, provider);
+                        
+                        const [subject, creator, messageCount, totalPool, terminated] = await Promise.all([
+                            discussionContract.subject(),
+                            discussionContract.creator(),
+                            discussionContract.get_message_count(),
+                            discussionContract.total_pool(),
+                            discussionContract.terminated()
+                        ]);
+                        
+                        infoEl.innerHTML += `  Subject: "${subject}"
+  Creator: ${creator}
+  Messages: ${messageCount.toString()}
+  Pool: ${ethers.utils.formatEther(totalPool)} ETH
+  Terminated: ${terminated ? 'Yes ❌' : 'No ✅'}
+  `;
+                        
+                    } catch (error) {
+                        infoEl.innerHTML += `  <span class="error">❌ Failed to load details: ${error.message}</span>
+  `;
+                    }
+                }
+                
+                setStatus(`Loaded ${entries.length} discussions`);
+                
+            } catch (error) {
+                infoEl.innerHTML = `<span class="error">❌ Error: ${error.message}</span>
+
+${error.stack || ''}`;
+                setStatus('Load failed', true);
+                console.error('Load error:', error);
+            }
+        }
+        
+        // Load active discussions
+        async function loadActiveDiscussions() {
+            const infoEl = document.getElementById('discussions-info');
+            infoEl.innerHTML = '<span class="warning">Loading active discussions...</span>';
+            setStatus('Loading active discussions...');
+            
+            try {
+                if (!provider) throw new Error('Wallet not connected');
+                if (!boardContract) {
+                    boardContract = new ethers.Contract(BOARD_ADDRESS, boardAbi, provider);
+                }
+                
+                const entries = await boardContract.get_active_discussions();
+                infoEl.innerHTML = `<span class="success">✅ Retrieved ${entries.length} active discussion entries</span>\n`;
+                
+                if (entries.length === 0) {
+                    infoEl.innerHTML += `\n<span class="warning">⚠️  No ACTIVE discussions found.
+                    
+This could mean:
+  - All discussions are inactive (>7 days old) or terminated
+  - The board is empty
+  - Try "Load All Discussions" to see all discussions</span>`;
+                    setStatus('No active discussions');
+                    return;
+                }
+                
+                entries.forEach((entry, i) => {
+                    const addr = entry.discussion_address || entry[0];
+                    const lastActivity = entry.last_activity || entry[1];
+                    infoEl.innerHTML += `\nDiscussion ${i + 1}: ${addr}
+  Last Activity: ${new Date(lastActivity.toNumber() * 1000).toLocaleString()}`;
+                });
+                
+                setStatus(`Found ${entries.length} active discussions`);
+                
+            } catch (error) {
+                infoEl.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+                setStatus('Load failed', true);
+                console.error('Load error:', error);
+            }
+        }
+        
+        // Load inactive discussions
+        async function loadInactiveDiscussions() {
+            const infoEl = document.getElementById('discussions-info');
+            infoEl.innerHTML = '<span class="warning">Loading inactive discussions...</span>';
+            setStatus('Loading inactive discussions...');
+            
+            try {
+                if (!provider) throw new Error('Wallet not connected');
+                if (!boardContract) {
+                    boardContract = new ethers.Contract(BOARD_ADDRESS, boardAbi, provider);
+                }
+                
+                const entries = await boardContract.get_inactive_discussions();
+                infoEl.innerHTML = `<span class="success">✅ Retrieved ${entries.length} inactive discussion entries</span>\n`;
+                
+                if (entries.length === 0) {
+                    infoEl.innerHTML += `\n<span class="info">No inactive discussions found.</span>`;
+                    setStatus('No inactive discussions');
+                    return;
+                }
+                
+                entries.forEach((entry, i) => {
+                    const addr = entry.discussion_address || entry[0];
+                    const lastActivity = entry.last_activity || entry[1];
+                    infoEl.innerHTML += `\nDiscussion ${i + 1}: ${addr}
+  Last Activity: ${new Date(lastActivity.toNumber() * 1000).toLocaleString()}`;
+                });
+                
+                setStatus(`Found ${entries.length} inactive discussions`);
+                
+            } catch (error) {
+                infoEl.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+                setStatus('Load failed', true);
+                console.error('Load error:', error);
+            }
+        }
+        
+        // Wait for ethers to load, then initialize
+        if (typeof ethers !== 'undefined') {
+            init();
+        } else {
+            window.addEventListener('load', () => {
+                if (typeof ethers !== 'undefined') {
+                    init();
+                } else {
+                    setStatus('Failed to load ethers.js library', true);
+                    document.getElementById('config').innerHTML = '<span class="error">❌ ethers.js failed to load from CDN. Check your internet connection.</span>';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+

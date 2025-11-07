@@ -212,6 +212,76 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <!-- Discussion Detail Modal -->
+    <div id="discussion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; backdrop-filter: blur(4px); overflow-y: auto;">
+        <div style="max-width: 900px; margin: 2rem auto; padding: 2rem; background: var(--md-sys-color-surface); border-radius: 24px; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);">
+            <!-- Modal Header -->
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+                <div style="flex: 1;">
+                    <h2 id="modal-subject" style="font-size: 1.75rem; font-weight: 700; color: var(--md-sys-color-primary); margin-bottom: 0.5rem;">Discussion Title</h2>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
+                        <span id="modal-creator">Creator: ...</span>
+                        <span id="modal-created">Created: ...</span>
+                    </div>
+                </div>
+                <button id="close-modal" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--md-sys-color-on-surface); padding: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">×</button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Pool</div>
+                    <div id="modal-pool" style="font-size: 1.5rem; font-weight: 700; color: #6366f1;">0 ETH</div>
+                </div>
+                <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Messages</div>
+                    <div id="modal-messages" style="font-size: 1.5rem; font-weight: 700; color: #10b981;">0</div>
+                </div>
+                <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Survivors</div>
+                    <div id="modal-survivors" style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">0</div>
+                </div>
+                <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 12px; text-align: center;">
+                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Status</div>
+                    <div id="modal-status" style="font-size: 1.5rem; font-weight: 700; color: #8b5cf6;">Active</div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div style="margin-bottom: 2rem; padding: 1.5rem; background: var(--md-sys-color-surface-variant); border-radius: 16px;">
+                <h3 style="font-size: 1rem; font-weight: 600; color: var(--md-sys-color-on-surface-variant); margin-bottom: 1rem;">Description</h3>
+                <p id="modal-body" style="color: var(--md-sys-color-on-surface); line-height: 1.6; white-space: pre-wrap;">Loading...</p>
+            </div>
+
+            <!-- Messages Section -->
+            <div style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--md-sys-color-on-surface); margin-bottom: 1rem;">💬 Messages</h3>
+                <div id="modal-messages-list" style="max-height: 400px; overflow-y: auto;">
+                    <p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 2rem;">Loading messages...</p>
+                </div>
+            </div>
+
+            <!-- Post Message Form -->
+            <div style="padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border-radius: 16px; border: 2px solid rgba(99, 102, 241, 0.2);">
+                <h3 style="font-size: 1rem; font-weight: 600; color: var(--md-sys-color-on-surface); margin-bottom: 1rem;">📝 Post a Message</h3>
+                <textarea id="message-content" placeholder="Write your message..." style="width: 100%; min-height: 100px; padding: 1rem; border: 2px solid var(--md-sys-color-outline); border-radius: 12px; font-family: inherit; font-size: 1rem; resize: vertical; margin-bottom: 1rem;"></textarea>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <input type="number" id="message-donation" placeholder="Donation (ETH)" step="0.001" min="0" style="flex: 1; padding: 0.75rem; border: 2px solid var(--md-sys-color-outline); border-radius: 12px; font-size: 1rem;">
+                    <button id="post-message-btn" style="padding: 0.75rem 2rem; background: var(--md-sys-color-primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem;">Post Message</button>
+                </div>
+                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
+                    Min donation: <span id="modal-min-donation">Loading...</span> ETH
+                </p>
+            </div>
+
+            <!-- Contract Address -->
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(0, 0, 0, 0.2); border-radius: 12px; font-family: monospace; font-size: 0.875rem;">
+                <strong>Contract:</strong> <span id="modal-address">...</span>
+                <a id="modal-etherscan" href="#" target="_blank" style="margin-left: 1rem; color: var(--md-sys-color-primary);">View on Etherscan →</a>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { HeaderLoader } from './js/presentation/components/header-loader.js';
         await HeaderLoader.load('discussions');

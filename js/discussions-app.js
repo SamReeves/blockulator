@@ -139,6 +139,12 @@ class DiscussionsApp {
             await this.discussionList.refresh();
         });
 
+        // Listen for discussion selection
+        eventBus.on('DISCUSSION_SELECTED', async (discussion) => {
+            console.log('Discussion selected:', discussion);
+            await this.openDiscussionModal(discussion);
+        });
+
         // Listen to board events
         this.board.subscribeToEvents({
             DiscussionCreated: async (event) => {

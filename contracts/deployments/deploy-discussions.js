@@ -8,8 +8,9 @@ const fs = require('fs');
 const path = require('path');
 
 // CONFIGURATION - Update these before deploying
-const RPC_URL = 'https://sepolia.infura.io/v3/YOUR_INFURA_KEY'; // or your RPC
-const PRIVATE_KEY = 'YOUR_PRIVATE_KEY_HERE'; // NEVER commit this!
+// You can use any of these public RPCs for Sepolia:
+const RPC_URL = process.env.RPC_URL || 'https://ethereum-sepolia-rpc.publicnode.com';
+const PRIVATE_KEY = process.env.PRIVATE_KEY || 'YOUR_PRIVATE_KEY_HERE'; // NEVER commit this!
 const NETWORK = 'sepolia'; // or 'mainnet'
 
 async function main() {
@@ -116,18 +117,39 @@ async function main() {
     const addressesPath = path.join(__dirname, 'addresses.js');
     let addressesContent = fs.readFileSync(addressesPath, 'utf8');
     
-    // Replace placeholder addresses
-    addressesContent = addressesContent.replace(
-        /DISCUSSION_BOARD: '0x0+'/,
+    // Replace SEPOLIA addresses (match any hex address)
+    const sepoliaSection = addressesContent.match(/const SEPOLIA_ADDRESSES = \{[\s\S]*?\n\};/)[0];
+    let updatedSection = sepoliaSection.replace(
+        /DISCUSSION_BOARD: '0x[a-fA-F0-9]{40}'/,
         `DISCUSSION_BOARD: '${board.address}'`
     );
-    addressesContent = addressesContent.replace(
-        /DISCUSSION_BLUEPRINT: '0x0+'/,
+    updatedSection = updatedSection.replace(
+        /DISCUSSION_BLUEPRINT: '0x[a-fA-F0-9]{40}'/,
         `DISCUSSION_BLUEPRINT: '${blueprintAddress}'`
     );
+    addressesContent = addressesContent.replace(sepoliaSection, updatedSection);
     
     fs.writeFileSync(addressesPath, addressesContent);
     console.log('   Updated addresses.js');
+    
+    // Update contracts.js
+    const contractsPath = path.join(__dirname, '../../js/infrastructure/config/contracts.js');
+    let contractsContent = fs.readFileSync(contractsPath, 'utf8');
+    
+    // Find and update SEPOLIA_ADDRESSES section
+    const contractsSepoliaSection = contractsContent.match(/const SEPOLIA_ADDRESSES = \{[\s\S]*?\n\};/)[0];
+    let updatedContractsSection = contractsSepoliaSection.replace(
+        /DISCUSSION_BOARD: '0x[a-fA-F0-9]{40}'/,
+        `DISCUSSION_BOARD: '${board.address}'`
+    );
+    updatedContractsSection = updatedContractsSection.replace(
+        /DISCUSSION_BLUEPRINT: '0x[a-fA-F0-9]{40}'/,
+        `DISCUSSION_BLUEPRINT: '${blueprintAddress}'`
+    );
+    contractsContent = contractsContent.replace(contractsSepoliaSection, updatedContractsSection);
+    
+    fs.writeFileSync(contractsPath, contractsContent);
+    console.log('   Updated contracts.js');
     
     // Save detailed deployment info
     fs.writeFileSync(
