@@ -2361,6 +2361,26 @@ textarea#message-content:focus {
     box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
 }
 
+.contract-badge-bytecode {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+}
+
+.contract-badge-bytecode:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.4);
+}
+
+.contract-badge-abi {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.contract-badge-abi:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+}
+
 /* Responsive adjustments for contract info */
 @media (max-width: 640px) {
     .contract-info {

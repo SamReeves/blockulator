@@ -7,6 +7,30 @@
     <meta name="view-transition" content="same-origin">
     <title>WhaleGames.net - Futures</title>
     <link rel="stylesheet" href="styles.css?v=4">
+    <style>
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            color: white;
+        }
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+        .copy-btn.copied {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4CAF50;
+        }
+    </style>
 </head>
 <body>
     <div id="app">
@@ -29,10 +53,21 @@
             <!-- Create Futures Section -->
             <div class="futures-creator">
                 <div class="game-interface">
-                    <h2 class="game-title">🎯 Create Gaussian Future</h2>
-                    <p class="game-description">
-                        Create a time-limited Gaussian future with custom value and expiration
-                    </p>
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+                        <h2 class="game-title" style="margin: 0;">🎯 Create Gaussian Future</h2>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <button class="contract-badge contract-badge-source" onclick="window.open('/contracts/futures/gaussian_future.vy', '_blank')" title="View Vyper source code">
+                                🐍 View Vyper Source
+                            </button>
+                            <button class="contract-badge contract-badge-bytecode" id="view-bytecode-btn" title="View compiled bytecode">
+                                📦 View Bytecode
+                            </button>
+                            <button class="contract-badge contract-badge-abi" id="view-abi-btn" title="View contract ABI (JSON)">
+                                📋 View ABI
+                            </button>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- Creation Form -->
@@ -55,46 +90,28 @@
                         <input 
                             type="number" 
                             id="time-to-live" 
-                            placeholder="Enter duration in seconds"
-                            min="1"
+                            placeholder="0"
+                            min="0"
+                            value="0"
                         />
                         <div class="input-hint">
-                            How long the future will remain active (minimum 1 second)
+                            Tap buttons below to add time (minimum 60 seconds total)
                         </div>
                     </div>
 
                     <!-- Quick Time Presets -->
                     <div class="quick-amounts">
-                        <button class="quick-amount-btn" data-time="3600">1 Hour</button>
-                        <button class="quick-amount-btn" data-time="86400">1 Day</button>
-                        <button class="quick-amount-btn" data-time="604800">1 Week</button>
-                        <button class="quick-amount-btn" data-time="2592000">30 Days</button>
-                    </div>
-
-                    <!-- ERF Calculation Preview -->
-                    <div id="erf-preview" class="blockchain-data hidden">
-                        <h3>📊 Calculation Preview</h3>
-                        <div class="data-row">
-                            <span class="data-label">ERF Input:</span>
-                            <span class="data-value" id="erf-input">-</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">ERF Result:</span>
-                            <span class="data-value" id="erf-result">-</span>
-                        </div>
-                        <div class="data-row">
-                            <span class="data-label">Probability:</span>
-                            <span class="data-value" id="probability">-</span>
-                        </div>
+                        <button class="quick-amount-btn" data-time="3600">+1 Hour</button>
+                        <button class="quick-amount-btn" data-time="86400">+1 Day</button>
+                        <button class="quick-amount-btn" data-time="604800">+1 Week</button>
+                        <button class="quick-amount-btn" data-time="2592000">+1 Month</button>
+                        <button class="quick-amount-btn" data-time="31536000">+1 Year</button>
+                        <button class="quick-amount-btn" data-time="315360000">+1 Decade</button>
                     </div>
 
                     <button id="create-future-btn" class="btn-play" disabled>
                         Create Future
                     </button>
-
-                    <div class="input-hint" style="text-align: center; margin-top: 1rem;">
-                        💡 Connect your wallet to deploy Gaussian future contracts
-                    </div>
                 </div>
 
                 <!-- Deployed Futures Section -->
@@ -103,28 +120,85 @@
                     <!-- Deployed contracts will be added here dynamically -->
                 </div>
 
-                <!-- ERF Calculator Info -->
-                <div class="blockchain-data">
-                    <h3>🧮 Using ERF Calculator</h3>
-                    <div class="tool-info">
-                        <p>Gaussian futures use the Error Function (erf) for probability calculations:</p>
-                        <ul>
-                            <li><strong>erf(x)</strong> - Returns the error function value</li>
-                            <li><strong>Range:</strong> -1 to 1 (input -5 to 5)</li>
-                            <li><strong>Applications:</strong> Normal distributions, probability calculations</li>
-                        </ul>
-                        
-                        <div class="contract-info">
-                            <span class="contract-label">ERF Calculator Contract:</span>
-                            <a 
-                                href="#" 
-                                id="erf-contract-address" 
-                                class="contract-address"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                            >
-                                Loading...
-                            </a>
+                <!-- Manage Existing Future Section -->
+                <div class="futures-manager" style="margin-top: 2rem;">
+                    <div class="game-interface">
+                        <h2 class="game-title">🔄 Manage Existing Future</h2>
+                        <p class="game-description">
+                            Transfer ownership of a future contract to claim your payout
+                        </p>
+                    </div>
+
+                    <div class="futures-form">
+                        <div class="input-group">
+                            <label for="contract-address">Future Contract Address</label>
+                            <input 
+                                type="text" 
+                                id="contract-address" 
+                                placeholder="0x..."
+                                class="wei-input"
+                            />
+                            <div class="input-hint">
+                                Enter the address of your deployed future contract
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="new-owner-address">New Owner Address</label>
+                            <input 
+                                type="text" 
+                                id="new-owner-address" 
+                                placeholder="0x..."
+                                class="wei-input"
+                            />
+                            <div class="input-hint">
+                                The address that will receive ownership (and you get the payout)
+                            </div>
+                        </div>
+
+                        <!-- Contract Info Display -->
+                        <div id="contract-info" class="blockchain-data hidden" style="margin: 1rem 0;">
+                            <h3>📊 Contract Information</h3>
+                            <div class="data-row">
+                                <span class="data-label">Current Owner:</span>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="data-value" id="info-owner" style="color: white;">-</span>
+                                    <button class="copy-btn hidden" id="copy-owner" data-copy-target="info-owner" title="Copy to clipboard">📋</button>
+                                </div>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Initial Value:</span>
+                                <span class="data-value" id="info-value">-</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Contract Balance:</span>
+                                <span class="data-value" id="info-balance">-</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Time Remaining:</span>
+                                <span class="data-value" id="info-time">-</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Current Position:</span>
+                                <span class="data-value" id="info-position">-</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Expected Payout:</span>
+                                <span class="data-value" id="info-payout" style="color: var(--success); font-weight: bold;">-</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem;">
+                            <button id="load-contract-btn" class="btn-play" style="flex: 1;" disabled>
+                                Load Contract Info
+                            </button>
+                            <button id="transfer-ownership-btn" class="btn-play" style="flex: 1;" disabled>
+                                Transfer & Claim
+                            </button>
+                        </div>
+
+                        <div class="input-hint" style="text-align: center; margin-top: 1rem;">
+                            You must be the current owner to transfer ownership
                         </div>
                     </div>
                 </div>
@@ -133,17 +207,62 @@
                 <div class="blockchain-data">
                     <h3>❓ How Gaussian Futures Work</h3>
                     <div class="how-it-works">
+                        <p><strong>The Hot Potato That Pays You:</strong></p>
+                        <p>
+                            A Gaussian Future is a unique on-chain contract that distributes its value over time following a bell curve (normal distribution).
+                            Think of it as a hot potato game where <em>passing the potato pays you</em>, not the person catching it!
+                        </p>
+                        
+                        <h4>📈 The Distribution</h4>
+                        <canvas id="distribution-graph" width="600" height="300" style="max-width: 100%; height: auto; background: rgba(255,255,255,0.05); border-radius: 8px; margin: 1rem 0;"></canvas>
+                        
+                        <h4>🎯 How to Play</h4>
                         <ol>
-                            <li><strong>Create a Future:</strong> Set a target value and expiration time</li>
-                            <li><strong>Gaussian Distribution:</strong> Values follow a normal distribution curve</li>
-                            <li><strong>ERF Calculation:</strong> The error function determines probabilities on-chain</li>
-                            <li><strong>Time Decay:</strong> Value changes as the future approaches expiration</li>
-                            <li><strong>Settlement:</strong> Futures settle based on final value at expiration</li>
+                            <li>
+                                <strong>Deploy:</strong> Create a future with ETH and set its lifetime (e.g., 1 hour, 1 day, 1 week).
+                                The contract starts with 100% of the value you deposit.
+                            </li>
+                            <li>
+                                <strong>Wait for the Sweet Spot:</strong> The contract follows a Gaussian (bell curve) distribution centered at the midpoint.
+                                The most value is released when transferring around the middle of the lifetime.
+                            </li>
+                            <li>
+                                <strong>Transfer to Claim:</strong> When you transfer ownership to another address, the contract calculates 
+                                how much time has passed and <em>pays you</em> based on the probability distribution. The earlier or later you transfer,
+                                the less you receive. Transfer near the midpoint for maximum payout!
+                            </li>
+                            <li>
+                                <strong>New Owner's Turn:</strong> The new owner now controls the contract and can transfer it again to claim 
+                                <em>their</em> portion of the remaining value.
+                            </li>
+                            <li>
+                                <strong>Expiration:</strong> When the lifetime ends, the final owner can claim any remaining ETH in the contract.
+                            </li>
                         </ol>
                         
+                        <h4>🧮 The Math Behind It</h4>
+                        <p>
+                            The contract uses the <strong>Lin 1990 approximation</strong> of the Gaussian distribution (normal curve).
+                            It calculates your payout based on the "area under the curve" between transfers:
+                        </p>
+                        <ul>
+                            <li><strong>Mean (μ):</strong> Lifetime ÷ 2 (the center point)</li>
+                            <li><strong>Standard Deviation (σ):</strong> Lifetime ÷ √12 (controls the curve's spread)</li>
+                            <li><strong>Your Payout:</strong> Initial Value × (CDF at your transfer time - CDF at previous transfer time)</li>
+                        </ul>
+                        
+                        <h4>💡 Strategy Tips</h4>
+                        <ul>
+                            <li>✅ Transfer near the midpoint for maximum value extraction</li>
+                            <li>✅ The contract is fully deterministic - you can calculate expected payouts before transferring</li>
+                            <li>✅ Early transfers and late transfers both receive minimal payouts</li>
+                            <li>⚠️ Each transfer permanently reduces the remaining contract balance</li>
+                            <li>⚠️ Gas costs matter - make sure payouts exceed transaction fees!</li>
+                        </ul>
+                        
                         <div class="note">
-                            <strong>📝 Note:</strong> This is a preview interface. The futures contract is currently in development. 
-                            All ERF calculations are performed on-chain using our verified calculator contract.
+                            <strong>📝 Technical Note:</strong> All calculations happen on-chain using lookup tables for e^x with 10-decimal precision.
+                            No oracles, no external dependencies - pure deterministic smart contract math.
                         </div>
                     </div>
                 </div>
