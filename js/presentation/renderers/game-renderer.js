@@ -1,9 +1,9 @@
 /**
  * Game Renderer
- * Reusable UI patterns for rendering game interfaces
+ * Presentation layer - reusable UI patterns for rendering game interfaces
  */
 
-import { eventBus, EVENTS } from './events.js';
+import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 
 export class GameRenderer {
     /**

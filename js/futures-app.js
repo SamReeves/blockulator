@@ -298,6 +298,7 @@ class FuturesApp {
         const walletInfo = document.getElementById('wallet-info');
         const walletAddress = document.getElementById('wallet-address');
         const walletBalance = document.getElementById('wallet-balance');
+        const walletNetwork = document.getElementById('wallet-network');
         const readonlyBadge = document.getElementById('readonly-badge');
 
         if (address) {
@@ -314,6 +315,11 @@ class FuturesApp {
             if (walletBalance) {
                 const balance = await web3Provider.getBalance();
                 walletBalance.textContent = `${parseFloat(balance).toFixed(4)} ETH`;
+            }
+
+            // Update network
+            if (walletNetwork) {
+                walletNetwork.textContent = web3Provider.getNetworkName();
             }
         } else {
             // Read-only mode

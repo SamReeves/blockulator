@@ -1,9 +1,10 @@
 /**
- * Contract Addresses
+ * Contract Configuration
+ * Infrastructure layer - contract addresses and metadata
  * Network-specific contract addresses for testnet and mainnet
  */
 
-import { NETWORK } from '../../js/config.js';
+import { NETWORK } from './network.js';
 
 // Sepolia Testnet Addresses
 const SEPOLIA_ADDRESSES = {
@@ -45,6 +46,7 @@ const MAINNET_ADDRESSES = {
     LAST_CALL: '0x0000000000000000000000000000000000000000',
     TIME_TO_MAKE_THE_DONUTS: '0x0000000000000000000000000000000000000000',
     DICE_GODS: '0x0000000000000000000000000000000000000000',
+    SATAN_MOLOCH_BAAL: '0x0000000000000000000000000000000000000000',
     
     // Tools (Mathematical Constant Calculators)
     E_CALCULATOR: '0x0000000000000000000000000000000000000000',

@@ -1,19 +1,11 @@
 /**
  * DOM Helper Functions
- * Reusable DOM building and formatting utilities
- * 
- * Usage:
- *   import { DOMHelpers } from '../core/dom-helpers.js';
- *   const header = DOMHelpers.createHeader('Game Title', 'Description');
- *   container.appendChild(header);
+ * Presentation layer - reusable DOM building and formatting utilities
  */
 
 export const DOMHelpers = {
     /**
      * Create game/tool header
-     * @param {string} title - Header title
-     * @param {string} description - Header description
-     * @returns {HTMLElement} Header element
      */
     createHeader(title, description) {
         const header = document.createElement('div');
@@ -34,15 +26,6 @@ export const DOMHelpers = {
 
     /**
      * Create input group
-     * @param {Object} config - Input configuration
-     * @param {string} config.id - Input ID
-     * @param {string} config.label - Input label text
-     * @param {string} config.type - Input type (default: 'number')
-     * @param {string} config.placeholder - Placeholder text
-     * @param {number} config.min - Minimum value
-     * @param {number} config.max - Maximum value
-     * @param {number} config.step - Step value
-     * @returns {HTMLElement} Input group element
      */
     createInput(config) {
         const { 
@@ -77,8 +60,6 @@ export const DOMHelpers = {
 
     /**
      * Create textarea group
-     * @param {Object} config - Textarea configuration
-     * @returns {HTMLElement} Textarea group element
      */
     createTextarea(config) {
         const { id, label, placeholder = '', rows = 3, maxlength } = config;
@@ -103,10 +84,6 @@ export const DOMHelpers = {
 
     /**
      * Create button
-     * @param {string} id - Button ID
-     * @param {string} text - Button text
-     * @param {string} className - Button class (default: 'button-primary')
-     * @returns {HTMLElement} Button element
      */
     createButton(id, text, className = 'button-primary') {
         const button = document.createElement('button');
@@ -118,9 +95,6 @@ export const DOMHelpers = {
 
     /**
      * Create info panel with grid items
-     * @param {string} title - Panel title
-     * @param {Array} items - Array of {label, id, defaultValue?}
-     * @returns {HTMLElement} Panel element
      */
     createInfoPanel(title, items) {
         const panel = document.createElement('div');
@@ -157,8 +131,6 @@ export const DOMHelpers = {
 
     /**
      * Update info value by ID
-     * @param {string} id - Element ID
-     * @param {string} value - New value
      */
     updateInfo(id, value) {
         const el = document.getElementById(id);
@@ -169,9 +141,6 @@ export const DOMHelpers = {
 
     /**
      * Format wei to readable string
-     * @param {BigNumber|string|number} wei - Wei amount
-     * @param {number} threshold - ETH threshold for display (default: 0.001)
-     * @returns {string} Formatted string
      */
     formatWei(wei, threshold = 0.001) {
         try {
@@ -186,8 +155,6 @@ export const DOMHelpers = {
 
     /**
      * Format address for display
-     * @param {string} address - Ethereum address
-     * @returns {string} Formatted address or 'None' for zero address
      */
     formatAddress(address) {
         if (!address || address === '0x0000000000000000000000000000000000000000') {
@@ -198,8 +165,6 @@ export const DOMHelpers = {
 
     /**
      * Format timestamp to readable date
-     * @param {number} timestamp - Unix timestamp
-     * @returns {string} Formatted date string
      */
     formatTimestamp(timestamp) {
         if (!timestamp || timestamp === 0) {
@@ -211,8 +176,6 @@ export const DOMHelpers = {
 
     /**
      * Format duration in seconds to readable string
-     * @param {number} seconds - Duration in seconds
-     * @returns {string} Formatted duration
      */
     formatDuration(seconds) {
         if (seconds === 0) return 'Now ✅';

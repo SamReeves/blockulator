@@ -1,6 +1,7 @@
 /**
  * Central Event Bus
- * Allows loose coupling between game logic and animations/effects
+ * Infrastructure layer - provides event-driven communication
+ * Allows loose coupling between layers
  */
 
 class EventBus {

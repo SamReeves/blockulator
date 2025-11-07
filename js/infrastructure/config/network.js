@@ -1,10 +1,8 @@
 /**
- * Network Configuration for WhaleGames
+ * Network Configuration
+ * Infrastructure layer - centralizes network-specific settings
  * 
- * This file centralizes all network-specific settings.
- * To switch between testnet and mainnet, simply change the NETWORK constant.
- * 
- * For deployment:
+ * To switch between testnet and mainnet, change the NETWORK constant.
  * - master branch: Use 'sepolia' for testnet
  * - mainnet branch: Use 'mainnet' for production
  */
@@ -13,7 +11,8 @@ const NETWORKS = {
     sepolia: {
         chainId: 11155111,
         chainIdHex: '0xaa36a7',
-        rpcUrl: 'https://rpc.sepolia.org',
+        // Using PublicNode RPC - free, reliable, no API key required
+        rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
         name: 'Sepolia Testnet',
         blockExplorer: 'https://sepolia.etherscan.io',
         nativeCurrency: {

@@ -7,30 +7,6 @@
     <meta name="view-transition" content="same-origin">
     <title>WhaleGames.net - Futures</title>
     <link rel="stylesheet" href="styles.css?v=4">
-    <style>
-        .copy-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            padding: 4px 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            color: white;
-        }
-        .copy-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: scale(1.05);
-        }
-        .copy-btn:active {
-            transform: scale(0.95);
-        }
-        .copy-btn.copied {
-            background: rgba(76, 175, 80, 0.3);
-            border-color: #4CAF50;
-        }
-    </style>
 </head>
 <body>
     <div id="app">
@@ -41,10 +17,24 @@
                 <span class="testnet-badge">🚧 TESTNET</span>
                 <span id="readonly-badge" class="readonly-badge">👀 Browsing</span>
             </div>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link">🎮 Games</a>
+                <a href="tools.html" class="nav-link">🔧 Tools</a>
+                <a href="futures.html" class="nav-link nav-link-active">📈 Futures</a>
+                <a href="https://sepolia-faucet.pk910.de/" class="nav-link" target="_blank">💧 Faucet</a>
+                <button id="joy-button" class="nav-link nav-button">✨ Joy</button>
+            </nav>
+            <div class="header-right">
             <button id="connect-wallet" class="btn-connect">Connect Wallet</button>
             <div id="wallet-info" class="wallet-info hidden">
-                <span id="wallet-address"></span>
-                <span id="wallet-balance"></span>
+                    <div class="wallet-line">
+                        <span id="wallet-address" class="wallet-value"></span>
+                        <button id="copy-address" class="copy-btn" title="Copy address">📋</button>
+                    </div>
+                    <div class="wallet-line">
+                        <span id="wallet-balance" class="wallet-value"></span>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -269,16 +259,6 @@
             </div>
         </main>
 
-        <!-- Footer Links -->
-        <footer class="app-footer">
-            <a href="index.html" class="footer-link">🎮 Games</a>
-            <span class="footer-separator">•</span>
-            <a href="tools.html" class="footer-link">🔧 Tools</a>
-            <span class="footer-separator">•</span>
-            <a href="https://sepolia-faucet.pk910.de/" class="footer-link">💧 Faucet</a>
-            <span class="footer-separator">•</span>
-            <button id="joy-button" class="footer-link footer-button">✨ Joy</button>
-        </footer>
 
         <!-- Toast notifications -->
         <div id="toast-container" class="toast-container"></div>
@@ -291,7 +271,7 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     
     <!-- App Scripts -->
-    <script type="module" src="js/futures-app.js?v=1"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
 

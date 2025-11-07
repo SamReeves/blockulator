@@ -1,38 +1,27 @@
 /**
  * Dice Gods - Reverse Popularity Contest
  * Choose the least popular number (1-6) to win!
+ * Domain layer - extends Game base class
  */
 
-import { ContractLoader } from '../core/contract-loader.js';
-import { TransactionHandler } from '../core/transaction-handler.js';
-import { DOMHelpers } from '../core/dom-helpers.js';
-import { GameRenderer } from '../ui/game-renderer.js';
-import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/deployments/addresses.js';
+import { Game } from '../models/game.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
+import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
+import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
+import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
-export class DiceGods {
+export class DiceGods extends Game {
     constructor() {
-        this.contract = null;
-        this.container = null;
-        this.web3Provider = null;
+        super();
         this.selectedNumber = null;
     }
 
-    async init(container, web3Provider) {
-        this.container = container;
-        this.web3Provider = web3Provider;
-        
-        this.contract = await ContractLoader.load('dice-gods', web3Provider);
-        if (!this.contract) return;
-        
-        this.render();
-        this.setupListeners();
-        this.setupContractEvents();
-        await this.refreshState();
+    getContractName() {
+        return 'dice-gods';
     }
 
     render() {
-        // Header with contract info
         const header = GameRenderer.createGameHeader({
             title: '🎲 Dice Gods',
             description: 'Choose the LEAST popular number to win the pot!',
@@ -45,7 +34,6 @@ export class DiceGods {
         container.className = 'game-interface';
         container.appendChild(header);
         
-        // Number selection area
         const selectionDiv = document.createElement('div');
         selectionDiv.className = 'dice-selection-area';
         selectionDiv.innerHTML = `
@@ -54,7 +42,6 @@ export class DiceGods {
         `;
         container.appendChild(selectionDiv);
         
-        // Play controls
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls';
         
@@ -75,23 +62,16 @@ export class DiceGods {
         
         container.appendChild(controlsDiv);
         
-        // Content sections container
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'game-sections';
         
-        // Current round panel
         sectionsContainer.appendChild(this.renderRoundPanel());
-        
-        // Vote distribution
         sectionsContainer.appendChild(this.renderVoteDistribution());
-        
-        // How it works panel
         sectionsContainer.appendChild(this.renderHowItWorks());
         
         container.appendChild(sectionsContainer);
         this.container.appendChild(container);
         
-        // Render dice buttons after DOM is ready
         this.renderDiceButtons();
     }
 
@@ -119,13 +99,11 @@ export class DiceGods {
     selectNumber(number) {
         this.selectedNumber = number;
         
-        // Update button styles
         document.querySelectorAll('.dice-button').forEach(btn => {
             btn.classList.remove('selected');
         });
         document.querySelector(`.dice-button[data-number="${number}"]`)?.classList.add('selected');
         
-        // Enable play button
         const playButton = document.getElementById('play-button');
         if (playButton) {
             playButton.disabled = false;
@@ -202,7 +180,6 @@ export class DiceGods {
             );
         }
         
-        // Enter key support
         if (amountInput) {
             amountInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter' && this.selectedNumber) {
@@ -213,14 +190,7 @@ export class DiceGods {
     }
 
     async play(weiAmount) {
-        // Check wallet connection first
-        if (!this.web3Provider.isConnected()) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: '🔐 Please connect your wallet to play',
-                type: 'warning'
-            });
-            return;
-        }
+        if (!this.requiresWallet('play')) return;
         
         if (!this.selectedNumber) {
             eventBus.emit(EVENTS.TOAST, {
@@ -238,7 +208,7 @@ export class DiceGods {
             return;
         }
         
-        try{
+        try {
             await TransactionHandler.execute(
                 this.contract.play(this.selectedNumber, { 
                     value: ethers.BigNumber.from(weiAmount) 
@@ -250,7 +220,6 @@ export class DiceGods {
                 }
             );
             
-            // Clear input and selection
             document.getElementById('play-amount').value = '';
             this.selectedNumber = null;
             document.querySelectorAll('.dice-button').forEach(btn => {
@@ -269,25 +238,17 @@ export class DiceGods {
         if (!this.contract) return;
 
         try {
-            console.log('Contract instance:', this.contract);
-            console.log('Contract address:', this.contract.address);
-            console.log('Calling get_current_round_info...');
-            
-            // Get current round info (returns: round_number, play_count, total_pot)
             const roundInfo = await this.contract.get_current_round_info();
             const roundNumber = roundInfo[0];
             const playCount = typeof roundInfo[1] === 'number' ? roundInfo[1] : roundInfo[1].toNumber();
             const totalPot = roundInfo[2];
 
-            // Update round panel
             DOMHelpers.updateInfo('round-number', `#${roundNumber.toString()}`);
             DOMHelpers.updateInfo('plays-count', `${playCount} / 10`);
             DOMHelpers.updateInfo('prize-pool', DOMHelpers.formatWei(totalPot));
 
-            // Get number counts
             const numberCounts = await this.contract.get_number_counts();
             
-            // Update dice button vote counts
             for (let i = 0; i < 6; i++) {
                 const count = typeof numberCounts[i] === 'number' ? numberCounts[i] : numberCounts[i].toNumber();
                 const voteElement = document.getElementById(`dice-votes-${i+1}`);
@@ -296,10 +257,8 @@ export class DiceGods {
                 }
             }
 
-            // Update distribution visualization
             this.updateDistributionBars(numberCounts);
 
-            // Only load user-specific data if address is available
             if (this.web3Provider?.currentAddress) {
                 const currentPlays = await this.contract.get_plays();
                 const userPlay = currentPlays.find(play => 
@@ -318,7 +277,7 @@ export class DiceGods {
         } catch (error) {
             console.error('Failed to refresh state:', error);
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load game state. Check console for details.',
+                message: 'Failed to load game state',
                 type: 'error'
             });
         }
@@ -403,12 +362,6 @@ export class DiceGods {
             });
             await this.refreshState();
         });
-    }
-
-    destroy() {
-        if (this.contract) {
-            this.contract.removeAllListeners();
-        }
     }
 }
 

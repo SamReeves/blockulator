@@ -1,28 +1,24 @@
 /**
  * Transaction Execution Wrapper
- * Standardizes transaction flow with loading states, events, and error handling
- * 
- * Usage:
- *   import { TransactionHandler } from '../core/transaction-handler.js';
- *   await TransactionHandler.execute(
- *       this.contract.donate({ value: amount }),
- *       { game: 'pay-it-forward', amount }
- *   );
+ * Infrastructure layer - standardizes transaction flow
+ * Provides loading states, events, and error handling
  */
 
-import { GameRenderer } from '../ui/game-renderer.js';
-import { eventBus, EVENTS } from '../ui/events.js';
+import { eventBus, EVENTS } from '../events/event-bus.js';
 
 export class TransactionHandler {
     /**
      * Execute a transaction with full lifecycle handling
      * @param {Promise} txPromise - Transaction promise from contract call
      * @param {Object} context - Context data for events (game name, action, etc.)
+     * @param {Function} setLoadingFn - Function to set loading state in UI
      * @returns {Promise<TransactionReceipt>} Transaction receipt
      * @throws {Error} If transaction fails
      */
-    static async execute(txPromise, context = {}) {
-        GameRenderer.setLoading(true);
+    static async execute(txPromise, context = {}, setLoadingFn = null) {
+        if (setLoadingFn) {
+            setLoadingFn(true);
+        }
         
         // Emit submission event
         eventBus.emit(EVENTS.PLAY_SUBMITTED, {
@@ -100,7 +96,9 @@ export class TransactionHandler {
             throw error;
 
         } finally {
-            GameRenderer.setLoading(false);
+            if (setLoadingFn) {
+                setLoadingFn(false);
+            }
         }
     }
 
@@ -109,11 +107,12 @@ export class TransactionHandler {
      * @param {Promise} txPromise
      * @param {Object} context
      * @param {Function} refreshCallback - Called after successful transaction
+     * @param {Function} setLoadingFn - Function to set loading state in UI
      * @returns {Promise<TransactionReceipt|null>}
      */
-    static async executeWithRefresh(txPromise, context, refreshCallback) {
+    static async executeWithRefresh(txPromise, context, refreshCallback, setLoadingFn = null) {
         try {
-            const receipt = await this.execute(txPromise, context);
+            const receipt = await this.execute(txPromise, context, setLoadingFn);
             
             if (refreshCallback && typeof refreshCallback === 'function') {
                 await refreshCallback();

@@ -18,10 +18,24 @@
                 <span class="testnet-badge">🚧 TESTNET</span>
                 <span id="readonly-badge" class="readonly-badge">👀 Browsing</span>
             </div>
-            <button id="connect-wallet" class="btn-connect">Connect to Play</button>
+            <nav class="header-nav">
+                <a href="index.html" class="nav-link nav-link-active">🎮 Games</a>
+                <a href="tools.html" class="nav-link">🔧 Tools</a>
+                <a href="futures.html" class="nav-link">📈 Futures</a>
+                <a href="https://sepolia-faucet.pk910.de/" class="nav-link" target="_blank">💧 Faucet</a>
+                <button id="joy-button" class="nav-link nav-button">✨ Joy</button>
+            </nav>
+            <div class="header-right">
+                <button id="connect-wallet" class="btn-connect">Connect Wallet</button>
             <div id="wallet-info" class="wallet-info hidden">
-                <span id="wallet-address"></span>
-                <span id="wallet-balance"></span>
+                    <div class="wallet-line">
+                        <span id="wallet-address" class="wallet-value"></span>
+                        <button id="copy-address" class="copy-btn" title="Copy address">📋</button>
+                    </div>
+                    <div class="wallet-line">
+                        <span id="wallet-balance" class="wallet-value"></span>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -60,6 +74,10 @@
                     <h3>🎲 Dice Gods</h3>
                     <p>Pick the LEAST popular number (1-6) to win the pot</p>
                 </button>
+                <button class="game-card" data-game="satan-moloch-baal">
+                    <h3>🔥 Satan, Moloch, Baal</h3>
+                    <p>Vote for your demon by burning ETH to the void!</p>
+                </button>
             </div>
             
             <!-- Game Detail View -->
@@ -69,16 +87,6 @@
             </div>
         </main>
 
-        <!-- Footer Links -->
-        <footer class="app-footer">
-            <a href="tools.html" class="footer-link">🔧 Tools</a>
-            <span class="footer-separator">•</span>
-            <a href="futures.html" class="footer-link">📈 Futures</a>
-            <span class="footer-separator">•</span>
-            <a href="https://sepolia-faucet.pk910.de/" class="footer-link">💧 Faucet</a>
-            <span class="footer-separator">•</span>
-            <button id="joy-button" class="footer-link footer-button">✨ Joy</button>
-        </footer>
 
         <!-- Toast notifications -->
         <div id="toast-container" class="toast-container"></div>
@@ -91,7 +99,7 @@
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
     
     <!-- App Scripts -->
-    <script type="module" src="js/unified-app.js?v=5"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>
 

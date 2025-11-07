@@ -1,36 +1,28 @@
 /**
  * Binary Logarithm (log2) Calculator Tool
  * Calculate log2(x) on-chain
+ * Domain layer - extends Calculator base class
  */
 
-import { ContractLoader } from '../core/contract-loader.js';
-import { DOMHelpers } from '../core/dom-helpers.js';
-import { GameRenderer } from '../ui/game-renderer.js';
-import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/deployments/addresses.js';
+import { Calculator } from '../models/calculator.js';
+import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
+import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
+import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
-export class Log2Calculator {
+export class Log2Calculator extends Calculator {
     constructor() {
-        this.contract = null;
-        this.container = null;
-        this.web3Provider = null;
-        this.gameType = 'log2-calculator';
-        this.constantValue = 2.0;
+        super();
         this.symbol = 'log₂';
         this.name = 'Binary Logarithm';
+        this.constantValue = 2.0;
     }
 
-    /**
-     * Initialize the tool
-     */
-    async init(container, web3Provider) {
-        this.container = container;
-        this.web3Provider = web3Provider;
-        
-        // Load contract using utility
-        this.contract = await ContractLoader.load('log2-calculator', web3Provider);
-        if (!this.contract) return;
-        
+    getContractName() {
+        return 'log2-calculator';
+    }
+
+    async onAfterInit() {
         // Load constant value from contract (2)
         try {
             const value = await this.contract.get_constant();
@@ -38,19 +30,9 @@ export class Log2Calculator {
         } catch (error) {
             console.log('Using default 2 value');
         }
-        
-        // Render UI
-        this.render();
-        
-        // Setup event listeners
-        this.setupListeners();
     }
 
-    /**
-     * Render the tool interface
-     */
     render() {
-        // Header with contract info
         const header = GameRenderer.createGameHeader({
             title: `🔢 ${this.symbol}(x) Calculator`,
             description: `Calculate log₂(x) on-chain! The binary logarithm is the inverse of 2^x and is fundamental to computer science, information theory, and algorithmic complexity.`,
@@ -63,7 +45,6 @@ export class Log2Calculator {
         container.className = 'game-interface';
         container.appendChild(header);
         
-        // Calculator controls
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
@@ -89,7 +70,6 @@ export class Log2Calculator {
         
         container.appendChild(controlsDiv);
         
-        // Content sections
         const sectionsContainer = document.createElement('div');
         sectionsContainer.className = 'game-sections';
         
@@ -100,9 +80,6 @@ export class Log2Calculator {
         this.container.appendChild(container);
     }
 
-    /**
-     * Render result panel
-     */
     renderResultPanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
@@ -131,9 +108,6 @@ export class Log2Calculator {
         return panel;
     }
 
-    /**
-     * Render info panel
-     */
     renderInfoPanel() {
         const panel = document.createElement('div');
         panel.className = 'contest-info-panel';
@@ -154,7 +128,7 @@ export class Log2Calculator {
             
             <h3>🔧 Use in Your Smart Contract</h3>
             <div class="tool-info">
-                <p>You can call this calculator from your own smart contracts! Here's an example in Vyper:</p>
+                <p>You can call this calculator from your own smart contracts!</p>
                 <pre><code># Interface for ${this.name} Calculator
 interface Log2Calculator:
     def calculate(x: decimal) -> decimal: view
@@ -186,9 +160,6 @@ def bits_needed(num_values: decimal) -> decimal:
         return panel;
     }
 
-    /**
-     * Setup event listeners
-     */
     setupListeners() {
         const calculateButton = document.getElementById('calculate-button');
         const valueInput = document.getElementById('input-value');
@@ -202,9 +173,6 @@ def bits_needed(num_values: decimal) -> decimal:
         }
     }
 
-    /**
-     * Calculate log2(x)
-     */
     async calculate(inputValue) {
         const x = parseFloat(inputValue);
         
@@ -234,28 +202,13 @@ def bits_needed(num_values: decimal) -> decimal:
             
             console.log(`Calculating ${this.symbol}(${x}) on-chain`);
             
-            // Convert JavaScript decimal to Vyper fixed-point (10 decimal places)
             const xFixed = ethers.utils.parseUnits(x.toString(), 10);
-            
-            // Use calculate() view function (free, no gas cost)
             const result = await this.contract.calculate(xFixed);
-            
-            // Convert result back from fixed-point to decimal
             const resultDecimal = ethers.utils.formatUnits(result, 10);
             
             console.log('Result:', resultDecimal);
             
-            // Display result
-            const resultValue = document.getElementById('result-value');
-            if (resultValue) {
-                resultValue.textContent = parseFloat(resultDecimal).toFixed(10);
-                resultValue.style.color = 'var(--success)';
-            }
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: `${this.symbol}(${x}) ≈ ${parseFloat(resultDecimal).toFixed(6)}`,
-                type: 'success'
-            });
+            this.displayResult(resultDecimal, `${this.symbol}(${x}) ≈ ${parseFloat(resultDecimal).toFixed(6)}`);
             
         } catch (error) {
             console.error('Calculation failed:', error);
@@ -268,15 +221,6 @@ def bits_needed(num_values: decimal) -> decimal:
                 calculateButton.disabled = false;
                 calculateButton.textContent = `Calculate ${this.symbol}(x) On-Chain`;
             }
-        }
-    }
-
-    /**
-     * Cleanup
-     */
-    destroy() {
-        if (this.container) {
-            this.container.innerHTML = '';
         }
     }
 }

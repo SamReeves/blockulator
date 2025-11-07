@@ -1,11 +1,11 @@
 /**
  * Web3 Provider Manager
- * Handles wallet connection and Web3 instance
+ * Infrastructure layer - handles wallet connection and Web3 instance
  * Supports read-only mode without wallet connection
  */
 
-import { eventBus, EVENTS } from './ui/events.js';
-import { config } from './config.js';
+import { eventBus, EVENTS } from '../events/event-bus.js';
+import { config } from '../config/network.js';
 
 class Web3Provider {
     constructor() {
@@ -14,6 +14,7 @@ class Web3Provider {
         this.address = null;             // Connected wallet address
         this.chainId = null;             // Connected network chain ID
         this.readOnlyProvider = null;   // Public RPC provider (always available)
+        this.listenersSetup = false;    // Track if event listeners are set up
         
         // Initialize read-only provider immediately
         this.initReadOnlyProvider();
@@ -40,6 +41,51 @@ class Web3Provider {
      */
     isMetaMaskInstalled() {
         return typeof window.ethereum !== 'undefined';
+    }
+
+    /**
+     * Check if already connected and restore connection
+     */
+    async checkConnection() {
+        if (!this.isMetaMaskInstalled()) {
+            return false;
+        }
+
+        try {
+            // Check if we have permission to access accounts
+            const accounts = await window.ethereum.request({ 
+                method: 'eth_accounts' 
+            });
+            
+            if (accounts.length > 0) {
+                console.log('🔄 Restoring wallet connection...');
+                // Create provider without requesting accounts (already has permission)
+                this.provider = new ethers.providers.Web3Provider(window.ethereum);
+                this.signer = this.provider.getSigner();
+                this.address = accounts[0];
+                
+                // Get network
+                const network = await this.provider.getNetwork();
+                this.chainId = network.chainId;
+                
+                // Setup listeners
+                this.setupListeners();
+                
+                // Emit wallet connected event
+                eventBus.emit(EVENTS.WALLET_CONNECTED, {
+                    address: this.address,
+                    chainId: this.chainId
+                });
+                
+                console.log('✅ Wallet connection restored:', this.formatAddress(this.address));
+                return true;
+            }
+            
+            return false;
+        } catch (error) {
+            console.error('Failed to check wallet connection:', error);
+            return false;
+        }
     }
 
     /**
@@ -163,7 +209,10 @@ class Web3Provider {
      * Setup event listeners for wallet changes
      */
     setupListeners() {
-        if (window.ethereum) {
+        if (this.listenersSetup || !window.ethereum) {
+            return; // Already set up or no ethereum provider
+        }
+
             // Account changed
             window.ethereum.on('accountsChanged', (accounts) => {
                 if (accounts.length === 0) {
@@ -177,7 +226,9 @@ class Web3Provider {
             window.ethereum.on('chainChanged', () => {
                 window.location.reload();
             });
-        }
+
+        this.listenersSetup = true;
+        console.log('👂 Wallet event listeners set up');
     }
 
     /**
@@ -274,6 +325,23 @@ class Web3Provider {
      */
     get currentAddress() {
         return this.address;
+    }
+
+    /**
+     * Get network name
+     */
+    getNetworkName() {
+        if (!this.chainId) return 'Not Connected';
+        
+        const networkNames = {
+            1: 'Ethereum',
+            11155111: 'Sepolia',
+            5: 'Goerli',
+            137: 'Polygon',
+            80001: 'Mumbai'
+        };
+        
+        return networkNames[this.chainId] || `Chain ${this.chainId}`;
     }
 }
 

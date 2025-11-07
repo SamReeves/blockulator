@@ -1,43 +1,32 @@
 /**
  * King of the Hill - Winner Takes All Edition
  * Pay to dethrone and claim the prize. No refunds. Stakes grow exponentially.
+ * Domain layer - extends Game base class
  */
 
-import { ContractLoader } from '../core/contract-loader.js';
-import { TransactionHandler } from '../core/transaction-handler.js';
-import { DOMHelpers } from '../core/dom-helpers.js';
-import { GameRenderer } from '../ui/game-renderer.js';
-import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../contracts/deployments/addresses.js';
+import { Game } from '../models/game.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
+import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
+import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
+import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
-export class KingOfTheHill {
+export class KingOfTheHill extends Game {
     constructor() {
-        this.contract = null;
-        this.container = null;
-        this.web3Provider = null;
-        this.gameType = 'king-of-the-hill';
+        super();
         this.updateInterval = null;
     }
 
-    async init(container, web3Provider) {
-        this.container = container;
-        this.web3Provider = web3Provider;
-        
-        // Load contract using utility
-        this.contract = await ContractLoader.load('king-of-the-hill', web3Provider);
-        if (!this.contract) return;
-        
-        this.render();
-        this.setupListeners();
-        this.setupContractEvents();
-        await this.loadState();
-        
+    getContractName() {
+        return 'king-of-the-hill';
+    }
+
+    async onAfterInit() {
         // Update reign timer every second
         this.updateInterval = setInterval(() => this.updateReign(), 1000);
     }
 
     render() {
-        // Create header with contract info
         const header = GameRenderer.createGameHeader({
             title: '👑 King of the Hill',
             description: 'Pay to dethrone and win the prize. No refunds. Stakes grow forever.',
@@ -46,14 +35,12 @@ export class KingOfTheHill {
             abiFile: CONTRACT_ABIS.KING_OF_THE_HILL
         });
         
-        // Create rest of the interface
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
         gameContent.appendChild(header);
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-
                 <div class="game-sections">
                     <!-- Current King Display -->
                     <div class="contest-info-panel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
@@ -160,7 +147,6 @@ export class KingOfTheHill {
             claimBtn.addEventListener('click', () => this.claimThrone());
         }
         
-        // Auto-fill minimum payment
         if (paymentInput) {
             paymentInput.addEventListener('focus', async () => {
                 if (!paymentInput.value) {
@@ -172,14 +158,7 @@ export class KingOfTheHill {
     }
 
     async claimThrone() {
-        // Check wallet connection first
-        if (!this.web3Provider.isConnected()) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: '🔐 Please connect your wallet to claim the throne',
-                type: 'warning'
-            });
-            return;
-        }
+        if (!this.requiresWallet('claim the throne')) return;
         
         const payment = document.getElementById('throne-payment').value;
         
@@ -191,7 +170,7 @@ export class KingOfTheHill {
             return;
         }
         
-        try{
+        try {
             const minPayment = await this.contract.get_minimum_payment();
             const paymentBN = ethers.BigNumber.from(payment);
             
@@ -203,33 +182,28 @@ export class KingOfTheHill {
                 return;
             }
             
-            // Use TransactionHandler utility
             await TransactionHandler.execute(
                 this.contract.claim_throne({ value: paymentBN }),
                 { game: 'king-of-the-hill', payment: payment }
             );
             
-            // Show custom success message
             eventBus.emit(EVENTS.TOAST, {
                 message: '👑 You are now KING!',
                 type: 'success'
             });
             
-            // Clear input and refresh
             document.getElementById('throne-payment').value = '';
-            await this.loadState();
+            await this.refreshState();
             
         } catch (error) {
-            // Error already handled by TransactionHandler
             console.error('Claim failed:', error);
         }
     }
 
-    async loadState() {
+    async refreshState() {
         if (!this.contract) return;
         
         try {
-            // Load general data (works in read-only mode)
             const [
                 currentKing,
                 currentPrize,
@@ -246,13 +220,11 @@ export class KingOfTheHill {
                 this.contract.get_minimum_payment()
             ]);
             
-            // Load user stats only if wallet connected
             let userStats = null;
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 userStats = await this.contract.get_king_stats(this.web3Provider.currentAddress);
             }
             
-            // Update king display using DOMHelpers
             const kingDisplay = currentKing === '0x0000000000000000000000000000000000000000' 
                 ? 'No King Yet' 
                 : DOMHelpers.formatAddress(currentKing);
@@ -270,13 +242,8 @@ export class KingOfTheHill {
                 }
             }
             
-            // Update prize using DOMHelpers
             DOMHelpers.updateInfo('current-prize', DOMHelpers.formatWei(currentPrize));
-            
-            // Update reign time
             this.updateReign();
-            
-            // Update minimum payment using DOMHelpers
             DOMHelpers.updateInfo('min-payment', DOMHelpers.formatWei(minPayment));
             
             const paymentInput = document.getElementById('throne-payment');
@@ -284,25 +251,21 @@ export class KingOfTheHill {
                 paymentInput.placeholder = `Minimum: ${minPayment.toString()}`;
             }
             
-            // Update stats using DOMHelpers
             DOMHelpers.updateInfo('total-dethrone', totalDethronements.toString());
             DOMHelpers.updateInfo('contract-balance', DOMHelpers.formatWei(contractBalance));
             
-            // User-specific stats
             if (userStats) {
                 DOMHelpers.updateInfo('your-crowns', userStats[0].toString());
                 DOMHelpers.updateInfo('your-reign', DOMHelpers.formatDuration(userStats[1].toNumber()));
             } else {
-                // Read-only mode
                 DOMHelpers.updateInfo('your-crowns', '👀');
                 DOMHelpers.updateInfo('your-reign', 'Read-only');
             }
             
-            // Load history
             await this.loadHistory();
             
         } catch (error) {
-            console.error('Failed to load state:', error);
+            console.error('Failed to refresh state:', error);
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Failed to load game state',
                 type: 'error'
@@ -323,7 +286,6 @@ export class KingOfTheHill {
                 return;
             }
             
-            // Reverse to show most recent first
             const kings = [...recentKings].reverse();
             
             let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
@@ -353,7 +315,6 @@ export class KingOfTheHill {
     }
 
     updateReign() {
-        // This gets called every second to update the reign timer
         if (!this.contract) return;
         
         this.contract.get_current_reign_duration()
@@ -388,7 +349,7 @@ export class KingOfTheHill {
                 });
             }
             
-            this.loadState();
+            this.refreshState();
         });
     }
 
@@ -396,8 +357,7 @@ export class KingOfTheHill {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
         }
-        if (this.contract) {
-            this.contract.removeAllListeners();
-        }
+        super.destroy();
     }
 }
+
