@@ -10,6 +10,7 @@ MECHANICS:
 - Creator sets subject, body, and loads initial value
 - Configurable max messages (up to 1000), message length (up to 500), and min donation
 - When full, higher donations replace lowest donation messages
+- IMPORTANT: Evicted message donations stay in the pool (become part of prize pool)
 - Board can terminate the discussion
 - At termination, pool is split evenly among unique surviving authors
 """
@@ -65,6 +66,7 @@ struct Message:
 
 ABSOLUTE_MAX_MESSAGES: constant(uint256) = 1000  # Hard limit
 ABSOLUTE_MAX_MESSAGE_LENGTH: constant(uint256) = 500  # Hard limit
+MESSAGE_COOLDOWN: constant(uint256) = 60  # 1 minute between messages per address
 
 # Immutable state (set at creation)
 
@@ -84,6 +86,9 @@ messages: public(DynArray[Message, ABSOLUTE_MAX_MESSAGES])
 total_pool: public(uint256)
 last_activity: public(uint256)
 terminated: public(bool)
+
+# Anti-spam: Track last message time per address
+last_message_time: public(HashMap[address, uint256])
 
 # Initialization
 
@@ -142,6 +147,11 @@ def post_message(content: String[500]):
     assert len(content) > 0, "Message cannot be empty"
     assert len(content) <= max_message_length, "Message too long"
     
+    # Anti-spam: Enforce cooldown between messages
+    last_posted: uint256 = self.last_message_time[msg.sender]
+    if last_posted > 0:
+        assert block.timestamp >= last_posted + MESSAGE_COOLDOWN, "Message cooldown active"
+    
     current_length: uint256 = len(self.messages)
     
     # If under max_messages, just append
@@ -157,6 +167,9 @@ def post_message(content: String[500]):
         self.total_pool += msg.value
         self.last_activity = block.timestamp
         
+        # Update sender's last message time
+        self.last_message_time[msg.sender] = block.timestamp
+        
         log MessagePosted(
             author=msg.sender,
             donation=msg.value,
@@ -166,7 +179,7 @@ def post_message(content: String[500]):
             was_replacement=False
         )
         
-        # Report activity to board
+        # Report activity to board (must succeed - discussion must remain registered)
         board_interface: IBoard = IBoard(board)
         extcall board_interface.report_activity()
     else:
@@ -195,7 +208,7 @@ def post_message(content: String[500]):
             replaced_by=msg.sender
         )
         
-        # Replace
+        # Replace (evicted donation stays in pool - becomes part of prize pool)
         self.messages[min_idx] = Message(
             author=msg.sender,
             content=content,
@@ -203,8 +216,12 @@ def post_message(content: String[500]):
             timestamp=block.timestamp
         )
         
+        # Add new donation to pool (evicted donation already in pool, not refunded)
         self.total_pool += msg.value
         self.last_activity = block.timestamp
+        
+        # Update sender's last message time
+        self.last_message_time[msg.sender] = block.timestamp
         
         log MessagePosted(
             author=msg.sender,
@@ -215,7 +232,7 @@ def post_message(content: String[500]):
             was_replacement=True
         )
         
-        # Report activity to board
+        # Report activity to board (must succeed - discussion must remain registered)
         board_interface: IBoard = IBoard(board)
         extcall board_interface.report_activity()
 
@@ -247,7 +264,7 @@ def boost_message(message_idx: uint256):
         timestamp=block.timestamp
     )
     
-    # Report activity to board
+    # Report activity to board (must succeed - discussion must remain registered)
     board_interface: IBoard = IBoard(board)
     extcall board_interface.report_activity()
 

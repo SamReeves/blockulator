@@ -115,8 +115,8 @@ export class Discussion {
     /**
      * Get minimum donation in current messages
      */
-    async getMinDonation() {
-        const min = await this.contract.get_min_donation();
+    async getMinDonationInMessages() {
+        const min = await this.contract.get_min_donation_in_messages();
         return min;
     }
 

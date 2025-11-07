@@ -23,26 +23,19 @@ async function main() {
     const balance = await wallet.getBalance();
     console.log('💰 Balance:', ethers.utils.formatEther(balance), 'ETH\n');
 
-    // Step 1: Compile and deploy Discussion as Blueprint
+    // Step 1: Deploy Discussion as Blueprint
     console.log('📝 Step 1: Deploying Discussion Blueprint...');
     
-    // Read compiled bytecode (you need to compile discussion.vy first)
-    const discussionBytecode = fs.readFileSync(
-        path.join(__dirname, '../build/bytecode/discussion.json'),
+    // Read compiled blueprint bytecode (Vyper generates this with proper EIP-5202 preamble)
+    const discussionBlueprintData = fs.readFileSync(
+        path.join(__dirname, '../build/bytecode/discussion-blueprint.json'),
         'utf8'
     );
     
-    // For Vyper blueprints, we need to prepend the blueprint preamble
-    // Blueprint format: 0xFE71<length><bytecode>
-    const blueprintPreamble = '0xFE7100'; // FE71 + 00 (length placeholder)
-    const discussionCode = JSON.parse(discussionBytecode).bytecode;
+    const blueprintBytecode = JSON.parse(discussionBlueprintData).bytecode;
+    const blueprintSize = (blueprintBytecode.length - 2) / 2; // bytes
     
-    // Calculate length and create proper blueprint bytecode
-    const codeLength = (discussionCode.length - 2) / 2; // Remove 0x and convert to bytes
-    const lengthHex = codeLength.toString(16).padStart(4, '0');
-    const blueprintBytecode = '0xFE71' + lengthHex + discussionCode.slice(2);
-    
-    console.log('📦 Deploying blueprint with length:', codeLength, 'bytes');
+    console.log('📦 Deploying EIP-5202 blueprint...', blueprintSize, 'bytes');
     
     const blueprintTx = await wallet.sendTransaction({
         data: blueprintBytecode,
@@ -70,10 +63,15 @@ async function main() {
     ).bytecode;
     
     // Create factory and deploy
+    // Board constructor: __init__(_discussion_blueprint: address, _owner: address)
     const BoardFactory = new ethers.ContractFactory(boardAbi, boardBytecode, wallet);
-    const board = await BoardFactory.deploy(blueprintAddress, {
-        gasLimit: 3000000
-    });
+    const board = await BoardFactory.deploy(
+        blueprintAddress,  // _discussion_blueprint
+        wallet.address,    // _owner (deployer becomes owner)
+        {
+            gasLimit: 3000000
+        }
+    );
     
     console.log('⏳ Waiting for board deployment...');
     console.log('   Tx hash:', board.deployTransaction.hash);

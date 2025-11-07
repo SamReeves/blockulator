@@ -44,6 +44,12 @@ event ActivityUpdated:
     discussion_address: indexed(address)
     new_last_activity: uint256
 
+event FeesWithdrawn:
+    owner: indexed(address)
+    amount: uint256
+    remaining_balance: uint256
+    timestamp: uint256
+
 # Structs
 
 struct DiscussionEntry:
@@ -67,7 +73,9 @@ interface IDiscussion:
 
 MAX_DISCUSSIONS: constant(uint256) = 100
 INACTIVITY_THRESHOLD: constant(uint256) = 7 * 24 * 60 * 60  # 7 days
-MIN_INITIAL_VALUE: constant(uint256) = 1000000000000000  # 0.001 ETH
+MIN_INITIAL_VALUE: constant(uint256) = 100000000000000  # 0.0001 ETH (much lower!)
+BOARD_FEE_PERCENT: constant(uint256) = 10  # 10% goes to board
+CREATION_COOLDOWN: constant(uint256) = 300  # 5 minutes between creations per address
 
 # State
 
@@ -77,8 +85,17 @@ discussions: public(DynArray[DiscussionEntry, MAX_DISCUSSIONS])
 discussion_index: public(HashMap[address, uint256])  # address -> index (0-based)
 is_discussion: public(HashMap[address, bool])
 
+# Anti-spam: Track last creation time per address
+last_creation_time: public(HashMap[address, uint256])
+
 # Stats (can be derived from len(discussions) but kept for convenience)
 total_created: public(uint256)
+
+# Board economics
+board_balance: public(uint256)  # Accumulated fees (separate from contract balance for clarity)
+
+# Governance
+owner: public(immutable(address))
 
 # Blueprint for deploying discussions
 discussion_blueprint: public(immutable(address))
@@ -86,15 +103,20 @@ discussion_blueprint: public(immutable(address))
 # Initialization
 
 @deploy
-def __init__(_discussion_blueprint: address):
+def __init__(_discussion_blueprint: address, _owner: address):
     """
     @notice Initialize the discussion board
     @param _discussion_blueprint Address of the discussion contract blueprint
-    @dev No owner - fully algorithmic
+    @param _owner Address that can withdraw board fees
+    @dev Board collects 10% fee on all discussion creations
     """
     assert _discussion_blueprint != empty(address), "Blueprint cannot be zero address"
+    assert _owner != empty(address), "Owner cannot be zero address"
+    
     discussion_blueprint = _discussion_blueprint
+    owner = _owner
     self.total_created = 0
+    self.board_balance = 0
 
 # Core Functions
 
@@ -122,7 +144,19 @@ def create_and_register(
     assert max_messages > 0 and max_messages <= 1000, "Invalid max messages"
     assert max_message_length > 0 and max_message_length <= 500, "Invalid max message length"
     
-    # Deploy new discussion from blueprint
+    # Anti-spam: Enforce cooldown between creations
+    last_created: uint256 = self.last_creation_time[msg.sender]
+    if last_created > 0:
+        assert block.timestamp >= last_created + CREATION_COOLDOWN, "Creation cooldown active"
+    
+    # Calculate board fee (10%) and discussion value (90%)
+    board_fee: uint256 = msg.value * BOARD_FEE_PERCENT // 100
+    discussion_value: uint256 = msg.value - board_fee
+    
+    # Collect board fee
+    self.board_balance += board_fee
+    
+    # Deploy new discussion from blueprint with 90% of value
     new_discussion: address = create_from_blueprint(
         discussion_blueprint,
         self,  # board address
@@ -131,7 +165,7 @@ def create_and_register(
         max_messages,
         max_message_length,
         min_donation,
-        value=msg.value,
+        value=discussion_value,
         code_offset=3
     )
     
@@ -151,6 +185,9 @@ def create_and_register(
         self.discussion_index[new_discussion] = current_count
         self.is_discussion[new_discussion] = True
         self.total_created += 1
+        
+        # Update creator's last creation time
+        self.last_creation_time[creator] = block.timestamp
         
         log DiscussionCreated(
             discussion_address=new_discussion,
@@ -186,13 +223,19 @@ def create_and_register(
         assert found_inactive, "No inactive discussions to replace"
         assert msg.value > min_val, "Initial value too low to replace"
         
-        # Replace
+        # Replace - terminate old discussion first to distribute funds
         old_discussion: address = self.discussions[min_idx].discussion_address
         old_disc: IDiscussion = IDiscussion(old_discussion)
         old_value: uint256 = staticcall old_disc.initial_value()
         
-        # Clear old mapping
+        # Terminate old discussion (distributes pool to survivors)
+        # Check if not already terminated to avoid revert
+        if not staticcall old_disc.terminated():
+            extcall old_disc.terminate()
+        
+        # Clear old mapping (both flags)
         self.is_discussion[old_discussion] = False
+        self.discussion_index[old_discussion] = 0  # Reset to 0
         
         # Create new entry
         new_entry: DiscussionEntry = DiscussionEntry(
@@ -204,6 +247,9 @@ def create_and_register(
         self.discussion_index[new_discussion] = min_idx
         self.is_discussion[new_discussion] = True
         self.total_created += 1
+        
+        # Update creator's last creation time
+        self.last_creation_time[creator] = block.timestamp
         
         log DiscussionReplaced(
             old_discussion=old_discussion,
@@ -301,13 +347,19 @@ def create_discussion(discussion_address: address):
         assert found_inactive, "No inactive discussions to replace"
         assert initial_value > min_val, "Initial value too low to replace"
         
-        # Replace
+        # Replace - terminate old discussion first to distribute funds
         old_discussion: address = self.discussions[min_idx].discussion_address
         old_disc: IDiscussion = IDiscussion(old_discussion)
         old_value: uint256 = staticcall old_disc.initial_value()
         
-        # Clear old mapping
+        # Terminate old discussion (distributes pool to survivors)
+        # Check if not already terminated to avoid revert
+        if not staticcall old_disc.terminated():
+            extcall old_disc.terminate()
+        
+        # Clear old mapping (both flags)
         self.is_discussion[old_discussion] = False
+        self.discussion_index[old_discussion] = 0  # Reset to 0
         
         # Create new entry
         new_entry: DiscussionEntry = DiscussionEntry(
@@ -407,6 +459,34 @@ def update_activity(discussion_address: address):
     self.discussions[idx].last_activity = new_activity
     
     log ActivityUpdated(discussion_address=discussion_address, new_last_activity=new_activity)
+
+@external
+def withdraw_board_fees(percentage: uint256):
+    """
+    @notice Withdraw a percentage of accumulated board fees
+    @param percentage Percentage to withdraw (1-100)
+    @dev Only callable by owner, allows partial withdrawals to keep board operational
+    """
+    assert msg.sender == owner, "Only owner can withdraw"
+    assert percentage > 0 and percentage <= 100, "Invalid percentage"
+    assert self.board_balance > 0, "No fees to withdraw"
+    
+    # Calculate withdrawal amount
+    withdrawal_amount: uint256 = self.board_balance * percentage // 100
+    
+    # Update board balance
+    self.board_balance -= withdrawal_amount
+    
+    # Send to owner
+    send(owner, withdrawal_amount)
+    
+    # Log withdrawal
+    log FeesWithdrawn(
+        owner=owner,
+        amount=withdrawal_amount,
+        remaining_balance=self.board_balance,
+        timestamp=block.timestamp
+    )
 
 # View Functions
 
@@ -600,6 +680,10 @@ def _is_inactive(discussion_address: address) -> bool:
     # Check inactivity threshold using cached last_activity
     idx: uint256 = self.discussion_index[discussion_address]
     last_activity: uint256 = self.discussions[idx].last_activity
+    
+    # Underflow protection: if last_activity is in the future, treat as active
+    if last_activity > block.timestamp:
+        return False
     
     time_since_activity: uint256 = block.timestamp - last_activity
     return time_since_activity >= INACTIVITY_THRESHOLD

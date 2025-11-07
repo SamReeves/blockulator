@@ -1,0 +1,7 @@
+{
+  "contractName": "BOARD",
+  "contractFile": "board.vy",
+  "abiPath": "contracts/build/abis/board.json",
+  "bytecodePath": "contracts/build/bytecode/board.json",
+  "timestamp": "2025-11-07T20:19:03Z"
+}

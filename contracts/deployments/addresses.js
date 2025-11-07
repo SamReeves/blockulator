@@ -7,6 +7,10 @@ import { NETWORK } from '../../js/config.js';
 
 // Sepolia Testnet Addresses
 const SEPOLIA_ADDRESSES = {
+    // Discussions
+    DISCUSSION_BOARD: '0xb3fa9bad0654b553ec31adc94773a4bf4fb5ea08',
+    DISCUSSION_BLUEPRINT: '0xbfe748a73d276f1d69e833eff61abe842bb11f84',
+    
     // Games
     PISSING_CONTEST: '0x483470B5B779360b70d4CD7e5253d4d6380aA07d',
     MESSAGE_BOARD: '0xf90592207441eeef27845dE4B87a5259851EBa75',
@@ -36,6 +40,10 @@ const SEPOLIA_ADDRESSES = {
 
 // Mainnet Addresses (update these after deploying to mainnet)
 const MAINNET_ADDRESSES = {
+    // Discussions
+    DISCUSSION_BOARD: '0x0000000000000000000000000000000000000000',
+    DISCUSSION_BLUEPRINT: '0x0000000000000000000000000000000000000000',
+    
     // Games
     PISSING_CONTEST: '0x0000000000000000000000000000000000000000',
     MESSAGE_BOARD: '0x0000000000000000000000000000000000000000',
@@ -73,6 +81,8 @@ export const CONTRACT_ADDRESSES = NETWORK_ADDRESSES[NETWORK];
 
 // Map contract addresses to their source files
 export const CONTRACT_SOURCES = {
+    DISCUSSION_BOARD: 'contracts/src/discussions/board.vy',
+    DISCUSSION_BLUEPRINT: 'contracts/src/discussions/discussion.vy',
     PISSING_CONTEST: 'contracts/src/games/pissing_contest.vy',
     MESSAGE_BOARD: 'contracts/src/games/message_board.vy',
     PAY_IT_FORWARD: 'contracts/src/games/pay_it_forward.vy',
@@ -99,6 +109,8 @@ export const CONTRACT_SOURCES = {
 
 // Map contract addresses to their ABI files
 export const CONTRACT_ABIS = {
+    DISCUSSION_BOARD: 'contracts/build/abis/board.json',
+    DISCUSSION_BLUEPRINT: 'contracts/build/abis/discussion.json',
     PISSING_CONTEST: 'contracts/build/abis/pissing-contest.json',
     MESSAGE_BOARD: 'contracts/build/abis/message-board.json',
     PAY_IT_FORWARD: 'contracts/build/abis/pay-it-forward.json',

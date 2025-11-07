@@ -105,7 +105,11 @@ class DiscussionsApp {
     }
 
     async loadBoard() {
-        const BOARD_ADDRESS = '0xd9145CCE52D386f254917e481eB44e9943F39138'; // Deployed board address
+        const BOARD_ADDRESS = CONTRACT_ADDRESSES.DISCUSSION_BOARD;
+
+        if (!BOARD_ADDRESS || BOARD_ADDRESS === '0x0000000000000000000000000000000000000000') {
+            throw new Error('Discussion Board address not configured');
+        }
 
         this.board = new DiscussionBoard(
             this.web3Provider,
@@ -114,7 +118,7 @@ class DiscussionsApp {
         );
 
         await this.board.init();
-        console.log('✅ Board contract initialized');
+        console.log('✅ Board contract initialized at:', BOARD_ADDRESS);
     }
 
     setupEventListeners() {
