@@ -10,8 +10,13 @@ import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { ValueInput } from '../../presentation/components/value-input.js';
 
 export class MessageBoard extends Game {
+    constructor() {
+        super();
+        this.feeInput = null;
+    }
     getContractName() {
         return 'message-board';
     }
@@ -58,16 +63,7 @@ export class MessageBoard extends Game {
                             ></textarea>
                         </div>
                         <div class="input-group">
-                            <label for="msg-fee" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Fee (wei)</label>
-                            <input 
-                                type="number" 
-                                id="msg-fee" 
-                                placeholder="Enter fee amount..."
-                                min="0"
-                                style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1.1rem; font-family: monospace; transition: border-color 0.2s;"
-                                onfocus="this.style.borderColor='#3b82f6'"
-                                onblur="this.style.borderColor='var(--md-sys-color-outline)'"
-                            />
+                            <div id="msg-fee-input"></div>
                         </div>
                         <button id="post-btn" class="btn-play" style="width: 100%; margin-top: 0.5rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                             📝 Post Message
@@ -153,13 +149,23 @@ export class MessageBoard extends Game {
         if (postBtn) {
             postBtn.addEventListener('click', () => this.post());
         }
+        
+        // Initialize ValueInput component
+        this.feeInput = new ValueInput('msg-fee-input', {
+            label: 'Fee',
+            hint: 'Fee to post your message',
+            defaultUnit: 'gwei',
+            minWei: '0',
+            required: true
+        });
+        this.feeInput.render();
     }
 
     async post() {
         if (!this.requiresWallet('post messages')) return;
         
         const content = document.getElementById('msg-content').value.trim();
-        const fee = document.getElementById('msg-fee').value;
+        const fee = this.feeInput.getWeiValue();
         
         if (!content) {
             eventBus.emit(EVENTS.TOAST, {
@@ -179,13 +185,11 @@ export class MessageBoard extends Game {
         
         try {
             await TransactionHandler.execute(
-                this.contract.post_message(content, {
-                    value: ethers.BigNumber.from(fee)
-                }),
+                this.contract.post_message(content, { value: fee }),
                 { 
                     game: 'message-board', 
                     message: content, 
-                    fee 
+                    fee: fee.toString() 
                 },
                 (isLoading) => {
                     const btn = document.getElementById('post-btn');
@@ -197,7 +201,7 @@ export class MessageBoard extends Game {
             );
             
             document.getElementById('msg-content').value = '';
-            document.getElementById('msg-fee').value = '';
+            this.feeInput.reset();
             document.getElementById('char-count').textContent = '0';
             
             await this.refreshState();

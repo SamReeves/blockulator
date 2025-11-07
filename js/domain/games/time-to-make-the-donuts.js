@@ -10,11 +10,13 @@ import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { ValueInput } from '../../presentation/components/value-input.js';
 
 export class TimeToMakeTheDonuts extends Game {
     constructor() {
         super();
         this.countdownInterval = null;
+        this.donationInput = null;
     }
 
     getContractName() {
@@ -106,16 +108,7 @@ export class TimeToMakeTheDonuts extends Game {
                         </h3>
                         <div class="game-controls">
                             <div class="input-group" style="margin-top: 1rem;">
-                                <label for="donation-amount" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Donation Amount (wei)</label>
-                                <input 
-                                    type="number" 
-                                    id="donation-amount" 
-                                    placeholder="Enter wei amount..."
-                                    min="1"
-                                    style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1.1rem; font-family: monospace; transition: border-color 0.2s;"
-                                    onfocus="this.style.borderColor='#ec4899'"
-                                    onblur="this.style.borderColor='var(--md-sys-color-outline)'"
-                                />
+                                <div id="donation-amount-input"></div>
                             </div>
                             
                             <button id="donate-btn" class="btn-play" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);">
@@ -182,31 +175,32 @@ export class TimeToMakeTheDonuts extends Game {
         
         gameContent.appendChild(contentInner);
         this.container.appendChild(gameContent);
+        
+        // Initialize ValueInput component
+        this.donationInput = new ValueInput('donation-amount-input', {
+            label: 'Donation Amount',
+            hint: 'Donate before midnight to avoid being a donut!',
+            defaultUnit: 'gwei',
+            minWei: '1',
+            required: true
+        });
+        this.donationInput.render();
     }
 
     setupListeners() {
         const donateBtn = document.getElementById('donate-btn');
-        const donationInput = document.getElementById('donation-amount');
         
         if (donateBtn) {
             donateBtn.addEventListener('click', () => this.donate());
-        }
-        
-        if (donationInput) {
-            donationInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.donate();
-                }
-            });
         }
     }
 
     async donate() {
         if (!this.requiresWallet('participate')) return;
         
-        const amount = document.getElementById('donation-amount').value;
+        const amount = this.donationInput.getWeiValue();
         
-        if (!amount || amount <= 0) {
+        if (!amount || amount.eq(0)) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please enter a donation amount',
                 type: 'warning'
@@ -215,11 +209,9 @@ export class TimeToMakeTheDonuts extends Game {
         }
         
         try {
-            const amountBN = ethers.BigNumber.from(amount);
-            
             await TransactionHandler.execute(
-                this.contract.donate({ value: amountBN }),
-                { game: 'time-to-make-the-donuts', amount: amount }
+                this.contract.donate({ value: amount }),
+                { game: 'time-to-make-the-donuts', amount: amount.toString() }
             );
             
             eventBus.emit(EVENTS.TOAST, {
@@ -227,7 +219,7 @@ export class TimeToMakeTheDonuts extends Game {
                 type: 'success'
             });
             
-            document.getElementById('donation-amount').value = '';
+            this.donationInput.reset();
             await this.refreshState();
             
         } catch (error) {

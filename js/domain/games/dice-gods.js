@@ -10,11 +10,13 @@ import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { ValueInput } from '../../presentation/components/value-input.js';
 
 export class DiceGods extends Game {
     constructor() {
         super();
         this.selectedNumber = null;
+        this.donationInput = null;
     }
 
     getContractName() {
@@ -57,17 +59,7 @@ export class DiceGods extends Game {
                     </h3>
                     <div class="game-controls">
                         <div class="input-group" style="margin-top: 1rem;">
-                            <label for="play-amount" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Donation Amount (wei)</label>
-                            <input 
-                                type="number" 
-                                id="play-amount" 
-                                placeholder="Enter amount in wei..."
-                                min="0"
-                                step="1"
-                                style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1.1rem; font-family: monospace; transition: border-color 0.2s;"
-                                onfocus="this.style.borderColor='#10b981'"
-                                onblur="this.style.borderColor='var(--md-sys-color-outline)'"
-                            />
+                            <div id="play-amount-input"></div>
                         </div>
                         
                         <button id="play-button" class="btn-play" disabled style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); opacity: 0.5;">
@@ -139,6 +131,16 @@ export class DiceGods extends Game {
         
         gameContent.appendChild(contentInner);
         this.container.appendChild(gameContent);
+        
+        // Initialize ValueInput component
+        this.donationInput = new ValueInput('play-amount-input', {
+            label: 'Donation Amount',
+            hint: 'Vote with wei for your lucky number',
+            defaultUnit: 'gwei',
+            minWei: '1',
+            required: true
+        });
+        this.donationInput.render();
         
         this.renderDiceButtons();
         this.renderRoundPanel();
@@ -284,24 +286,13 @@ export class DiceGods extends Game {
 
     setupListeners() {
         const playButton = document.getElementById('play-button');
-        const amountInput = document.getElementById('play-amount');
         
         if (playButton) {
-            playButton.addEventListener('click', () => 
-                this.play(amountInput.value)
-            );
-        }
-        
-        if (amountInput) {
-            amountInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && this.selectedNumber) {
-                    this.play(e.target.value);
-                }
-            });
+            playButton.addEventListener('click', () => this.play());
         }
     }
 
-    async play(weiAmount) {
+    async play() {
         if (!this.requiresWallet('play')) return;
         
         if (!this.selectedNumber) {
@@ -312,9 +303,11 @@ export class DiceGods extends Game {
             return;
         }
         
-        if (!weiAmount || parseFloat(weiAmount) <= 0) {
+        const weiAmount = this.donationInput.getWeiValue();
+        
+        if (!weiAmount || weiAmount.eq(0)) {
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter a valid wei amount',
+                message: 'Please enter a valid donation amount',
                 type: 'warning'
             });
             return;
@@ -322,17 +315,15 @@ export class DiceGods extends Game {
         
         try {
             await TransactionHandler.execute(
-                this.contract.play(this.selectedNumber, { 
-                    value: ethers.BigNumber.from(weiAmount) 
-                }),
+                this.contract.play(this.selectedNumber, { value: weiAmount }),
                 { 
                     game: 'dice-gods', 
                     number: this.selectedNumber,
-                    wei: weiAmount 
+                    wei: weiAmount.toString() 
                 }
             );
             
-            document.getElementById('play-amount').value = '';
+            this.donationInput.reset();
             this.selectedNumber = null;
             document.querySelectorAll('.dice-button').forEach(btn => {
                 btn.classList.remove('selected');

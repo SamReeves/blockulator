@@ -87,33 +87,104 @@ export class DiscussionBoard {
      * Get all discussions on the board
      */
     async getAllDiscussions() {
-        const entries = await this.contract.get_all_discussions();
-        return entries.map(entry => ({
-            address: entry.discussion_address,
-            lastActivity: entry.last_activity.toNumber()
-        }));
+        try {
+            // Try bulk method first (for newer contract versions)
+            const entries = await this.contract.get_all_discussions();
+            return entries.map(entry => ({
+                address: entry.discussion_address,
+                lastActivity: entry.last_activity.toNumber()
+            }));
+        } catch (error) {
+            // Fallback: Use individual getters for deployed contract
+            console.log('Using fallback: fetching discussions individually');
+            try {
+                const count = await this.contract.get_discussion_count();
+                const entries = [];
+                
+                for (let i = 0; i < count.toNumber(); i++) {
+                    try {
+                        const entry = await this.contract.get_discussion(i);
+                        entries.push({
+                            address: entry.discussion_address,
+                            lastActivity: entry.last_activity.toNumber()
+                        });
+                    } catch (err) {
+                        console.error(`Failed to fetch discussion at index ${i}:`, err);
+                    }
+                }
+                
+                return entries;
+            } catch (err) {
+                console.error('Failed to get discussions:', err);
+                return [];
+            }
+        }
     }
 
     /**
      * Get only active discussions
      */
     async getActiveDiscussions() {
-        const entries = await this.contract.get_active_discussions();
-        return entries.map(entry => ({
-            address: entry.discussion_address,
-            lastActivity: entry.last_activity.toNumber()
-        }));
+        try {
+            // Try bulk method first (for newer contract versions)
+            const entries = await this.contract.get_active_discussions();
+            return entries.map(entry => ({
+                address: entry.discussion_address,
+                lastActivity: entry.last_activity.toNumber()
+            }));
+        } catch (error) {
+            // Fallback: Filter manually using can_terminate
+            console.log('Using fallback: filtering active discussions manually');
+            const allDiscussions = await this.getAllDiscussions();
+            const activeEntries = [];
+            
+            for (const entry of allDiscussions) {
+                try {
+                    const canTerminate = await this.contract.can_terminate(entry.address);
+                    // If can't be terminated, it's active
+                    if (!canTerminate) {
+                        activeEntries.push(entry);
+                    }
+                } catch (err) {
+                    console.error(`Failed to check discussion ${entry.address}:`, err);
+                }
+            }
+            
+            return activeEntries;
+        }
     }
 
     /**
      * Get inactive/terminated discussions
      */
     async getInactiveDiscussions() {
-        const entries = await this.contract.get_inactive_discussions();
-        return entries.map(entry => ({
-            address: entry.discussion_address,
-            lastActivity: entry.last_activity.toNumber()
-        }));
+        try {
+            // Try bulk method first (for newer contract versions)
+            const entries = await this.contract.get_inactive_discussions();
+            return entries.map(entry => ({
+                address: entry.discussion_address,
+                lastActivity: entry.last_activity.toNumber()
+            }));
+        } catch (error) {
+            // Fallback: Filter manually using can_terminate
+            console.log('Using fallback: filtering inactive discussions manually');
+            const allDiscussions = await this.getAllDiscussions();
+            const inactiveEntries = [];
+            
+            for (const entry of allDiscussions) {
+                try {
+                    const canTerminate = await this.contract.can_terminate(entry.address);
+                    // If can be terminated, it's inactive
+                    if (canTerminate) {
+                        inactiveEntries.push(entry);
+                    }
+                } catch (err) {
+                    console.error(`Failed to check discussion ${entry.address}:`, err);
+                }
+            }
+            
+            return inactiveEntries;
+        }
     }
 
     /**
@@ -171,12 +242,59 @@ export class DiscussionBoard {
      * Returns: (total_on_board, total_created, active_count)
      */
     async getStats() {
-        const stats = await this.contract.get_stats();
-        return {
-            totalOnBoard: stats[0].toNumber(),
-            totalCreated: stats[1].toNumber(),
-            activeCount: stats[2].toNumber()
-        };
+        try {
+            // Try bulk method first (for newer contract versions)
+            const stats = await this.contract.get_stats();
+            return {
+                totalOnBoard: stats[0].toNumber(),
+                totalCreated: stats[1].toNumber(),
+                activeCount: stats[2].toNumber()
+            };
+        } catch (error) {
+            // Fallback: Calculate stats manually
+            console.log('Using fallback: calculating stats manually');
+            try {
+                const count = await this.contract.get_discussion_count();
+                const totalOnBoard = count.toNumber();
+                
+                // Get total created from contract
+                let totalCreated = totalOnBoard;
+                try {
+                    const created = await this.contract.total_created();
+                    totalCreated = created.toNumber();
+                } catch (err) {
+                    console.log('total_created not available, using board count');
+                }
+                
+                // Calculate active count
+                const allDiscussions = await this.getAllDiscussions();
+                let activeCount = 0;
+                
+                for (const entry of allDiscussions) {
+                    try {
+                        const canTerminate = await this.contract.can_terminate(entry.address);
+                        if (!canTerminate) {
+                            activeCount++;
+                        }
+                    } catch (err) {
+                        // Skip if can't check
+                    }
+                }
+                
+                return {
+                    totalOnBoard,
+                    totalCreated,
+                    activeCount
+                };
+            } catch (err) {
+                console.error('Failed to get stats:', err);
+                return {
+                    totalOnBoard: 0,
+                    totalCreated: 0,
+                    activeCount: 0
+                };
+            }
+        }
     }
 
     /**

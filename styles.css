@@ -736,6 +736,11 @@ body {
 .game-card:nth-child(6), .tool-card:nth-child(6) { animation-delay: 0.30s; }
 .game-card:nth-child(7), .tool-card:nth-child(7) { animation-delay: 0.35s; }
 .game-card:nth-child(8), .tool-card:nth-child(8) { animation-delay: 0.40s; }
+.game-card:nth-child(9), .tool-card:nth-child(9) { animation-delay: 0.45s; }
+.game-card:nth-child(10), .tool-card:nth-child(10) { animation-delay: 0.50s; }
+.game-card:nth-child(11), .tool-card:nth-child(11) { animation-delay: 0.55s; }
+.game-card:nth-child(12), .tool-card:nth-child(12) { animation-delay: 0.60s; }
+.game-card:nth-child(13), .tool-card:nth-child(13) { animation-delay: 0.65s; }
 
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(16px); }
@@ -1179,114 +1184,114 @@ body {
 
 /* Individual gradients for each game */
 .game-card[data-game="pissing-contest"] {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-    border-color: rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    border-color: #3b82f6;
 }
 
 .game-card[data-game="pay-it-forward"] {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
-    border-color: rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #10b981;
 }
 
 .game-card[data-game="pay-it-backward"] {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
-    border-color: rgba(245, 158, 11, 0.3);
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-color: #f59e0b;
 }
 
 .game-card[data-game="message-board"] {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.15) 100%);
-    border-color: rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #3b82f6;
 }
 
 .game-card[data-game="king-of-the-hill"] {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
-    border-color: rgba(102, 126, 234, 0.3);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
 }
 
 .game-card[data-game="last-call"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
-    border-color: rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border-color: #ef4444;
 }
 
 .game-card[data-game="time-to-make-the-donuts"] {
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(219, 39, 119, 0.15) 100%);
-    border-color: rgba(236, 72, 153, 0.3);
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    border-color: #ec4899;
 }
 
 .game-card[data-game="dice-gods"] {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    border-color: #a855f7;
 }
 
 .game-card[data-game="satan-moloch-baal"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(153, 27, 27, 0.15) 100%);
-    border-color: rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    border-color: #ef4444;
 }
 
 /* Individual gradients for each tool */
 .tool-card[data-tool="e-calculator"] {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.15) 100%);
-    border-color: rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #3b82f6;
 }
 
 .tool-card[data-tool="pi-calculator"] {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
-    border-color: rgba(245, 158, 11, 0.3);
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-color: #f59e0b;
 }
 
 .tool-card[data-tool="tau-calculator"] {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
-    border-color: rgba(16, 185, 129, 0.3);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #10b981;
 }
 
 .tool-card[data-tool="sin-calculator"] {
-    background: linear-gradient(135deg, rgba(8, 145, 178, 0.15) 0%, rgba(6, 95, 117, 0.15) 100%);
-    border-color: rgba(8, 145, 178, 0.3);
+    background: linear-gradient(135deg, #0891b2 0%, #065f75 100%);
+    border-color: #0891b2;
 }
 
 .tool-card[data-tool="cos-calculator"] {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%);
-    border-color: rgba(139, 92, 246, 0.3);
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: #8b5cf6;
 }
 
 .tool-card[data-tool="tanh-calculator"] {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
-    border-color: rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+    border-color: #a855f7;
 }
 
 .tool-card[data-tool="pow10-calculator"] {
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(219, 39, 119, 0.15) 100%);
-    border-color: rgba(236, 72, 153, 0.3);
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+    border-color: #ec4899;
 }
 
 .tool-card[data-tool="pow2-calculator"] {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.15) 100%);
-    border-color: rgba(99, 102, 241, 0.3);
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    border-color: #6366f1;
 }
 
 .tool-card[data-tool="ln-calculator"] {
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
-    border-color: rgba(52, 211, 153, 0.3);
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    border-color: #34d399;
 }
 
 .tool-card[data-tool="log2-calculator"] {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
-    border-color: rgba(251, 191, 36, 0.3);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border-color: #fbbf24;
 }
 
 .tool-card[data-tool="log10-calculator"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
-    border-color: rgba(239, 68, 68, 0.3);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    border-color: #ef4444;
 }
 
 .tool-card[data-tool="sqrt-calculator"] {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.15) 100%);
-    border-color: rgba(14, 165, 233, 0.3);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    border-color: #0ea5e9;
 }
 
 .tool-card[data-tool="erf-calculator"] {
-    background: linear-gradient(135deg, rgba(244, 63, 94, 0.15) 0%, rgba(225, 29, 72, 0.15) 100%);
-    border-color: rgba(244, 63, 94, 0.3);
+    background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+    border-color: #f43f5e;
 }
 
 /* Temporary component classes */

@@ -10,6 +10,7 @@ import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { ValueInput } from '../../presentation/components/value-input.js';
 
 export class PayItForward extends Game {
     constructor() {
@@ -18,6 +19,7 @@ export class PayItForward extends Game {
             pendingDonor: '0x0000000000000000000000000000000000000000',
             pendingAmount: 0
         };
+        this.donationInput = null;
     }
 
     getContractName() {
@@ -84,19 +86,7 @@ export class PayItForward extends Game {
                         <span>Make Your Donation</span>
                     </h3>
                     <div class="game-controls">
-                        <div class="input-group" style="margin-top: 1rem;">
-                            <label for="donate-amount" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Donation Amount (wei)</label>
-                            <input 
-                                type="number" 
-                                id="donate-amount" 
-                                placeholder="Enter amount in wei..."
-                                min="0"
-                                step="1"
-                                style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1.1rem; font-family: monospace; transition: border-color 0.2s;"
-                                onfocus="this.style.borderColor='#3b82f6'"
-                                onblur="this.style.borderColor='var(--md-sys-color-outline)'"
-                            />
-                        </div>
+                        <div id="donate-amount-input" style="margin-top: 1rem;"></div>
                         
                         <button id="donate-button" class="btn-play" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
                             💰 Donate
@@ -161,33 +151,34 @@ export class PayItForward extends Game {
         
         gameContent.appendChild(contentInner);
         this.container.appendChild(gameContent);
+        
+        // Initialize ValueInput component
+        this.donationInput = new ValueInput('donate-amount-input', {
+            label: 'Donation Amount',
+            hint: 'Your donation will go to the next donor',
+            defaultUnit: 'gwei',
+            minWei: '1',
+            required: true
+        });
+        this.donationInput.render();
     }
 
     setupListeners() {
         const donateButton = document.getElementById('donate-button');
-        const amountInput = document.getElementById('donate-amount');
         
         if (donateButton) {
-            donateButton.addEventListener('click', () => 
-                this.donate(amountInput.value)
-            );
-        }
-        
-        if (amountInput) {
-            amountInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.donate(e.target.value);
-                }
-            });
+            donateButton.addEventListener('click', () => this.donate());
         }
     }
 
-    async donate(weiAmount) {
+    async donate() {
         if (!this.requiresWallet('donate')) return;
         
-        if (!weiAmount || parseFloat(weiAmount) <= 0) {
+        const weiAmount = this.donationInput.getWeiValue();
+        
+        if (!weiAmount || weiAmount.eq(0)) {
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter a valid wei amount',
+                message: 'Please enter a valid donation amount',
                 type: 'warning'
             });
             return;
@@ -195,12 +186,10 @@ export class PayItForward extends Game {
         
         try {
             await TransactionHandler.execute(
-                this.contract.donate({ 
-                    value: ethers.BigNumber.from(weiAmount) 
-                }),
+                this.contract.donate({ value: weiAmount }),
                 { 
                     game: 'pay-it-forward', 
-                    wei: weiAmount 
+                    wei: weiAmount.toString() 
                 },
                 (isLoading) => {
                     const btn = document.getElementById('donate-button');
@@ -211,7 +200,7 @@ export class PayItForward extends Game {
                 }
             );
             
-            document.getElementById('donate-amount').value = '';
+            this.donationInput.reset();
             await this.refreshState();
             
         } catch (error) {

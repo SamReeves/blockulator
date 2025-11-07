@@ -10,11 +10,13 @@ import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { ValueInput } from '../../presentation/components/value-input.js';
 
 export class KingOfTheHill extends Game {
     constructor() {
         super();
         this.updateInterval = null;
+        this.paymentInput = null;
     }
 
     getContractName() {
@@ -81,15 +83,7 @@ export class KingOfTheHill extends Game {
                                 </div>
                             </div>
                             
-                            <div class="input-group">
-                                <label for="throne-payment">Your Payment (wei)</label>
-                                <input 
-                                    type="number" 
-                                    id="throne-payment" 
-                                    placeholder="Minimum..."
-                                    min="0"
-                                />
-                            </div>
+                            <div id="throne-payment-input"></div>
                             
                             <button id="claim-btn" class="btn-play">
                                 🎮 Play
@@ -140,32 +134,32 @@ export class KingOfTheHill extends Game {
         
         gameContent.appendChild(contentInner);
         this.container.appendChild(gameContent);
+        
+        // Initialize ValueInput component
+        this.paymentInput = new ValueInput('throne-payment-input', {
+            label: 'Your Payment',
+            hint: 'Amount to claim the throne',
+            defaultUnit: 'gwei',
+            minWei: '0',
+            required: true
+        });
+        this.paymentInput.render();
     }
 
     setupListeners() {
         const claimBtn = document.getElementById('claim-btn');
-        const paymentInput = document.getElementById('throne-payment');
         
         if (claimBtn) {
             claimBtn.addEventListener('click', () => this.claimThrone());
-        }
-        
-        if (paymentInput) {
-            paymentInput.addEventListener('focus', async () => {
-                if (!paymentInput.value) {
-                    const minPayment = await this.contract.get_minimum_payment();
-                    paymentInput.value = minPayment.toString();
-                }
-            });
         }
     }
 
     async claimThrone() {
         if (!this.requiresWallet('claim the throne')) return;
         
-        const payment = document.getElementById('throne-payment').value;
+        const paymentBN = this.paymentInput.getWeiValue();
         
-        if (!payment || payment <= 0) {
+        if (!paymentBN || paymentBN.eq(0)) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please enter a payment amount',
                 type: 'warning'
@@ -175,11 +169,10 @@ export class KingOfTheHill extends Game {
         
         try {
             const minPayment = await this.contract.get_minimum_payment();
-            const paymentBN = ethers.BigNumber.from(payment);
             
             if (paymentBN.lt(minPayment)) {
                 eventBus.emit(EVENTS.TOAST, {
-                    message: `Payment too low. Minimum: ${minPayment.toString()} wei`,
+                    message: `Payment too low. Minimum: ${ethers.utils.formatUnits(minPayment, 'gwei')} GWEI`,
                     type: 'error'
                 });
                 return;
@@ -187,7 +180,7 @@ export class KingOfTheHill extends Game {
             
             await TransactionHandler.execute(
                 this.contract.claim_throne({ value: paymentBN }),
-                { game: 'king-of-the-hill', payment: payment }
+                { game: 'king-of-the-hill', payment: paymentBN.toString() }
             );
             
             eventBus.emit(EVENTS.TOAST, {
@@ -195,7 +188,7 @@ export class KingOfTheHill extends Game {
                 type: 'success'
             });
             
-            document.getElementById('throne-payment').value = '';
+            this.paymentInput.reset();
             await this.refreshState();
             
         } catch (error) {
@@ -248,11 +241,6 @@ export class KingOfTheHill extends Game {
             DOMHelpers.updateInfo('current-prize', DOMHelpers.formatWei(currentPrize));
             this.updateReign();
             DOMHelpers.updateInfo('min-payment', DOMHelpers.formatWei(minPayment));
-            
-            const paymentInput = document.getElementById('throne-payment');
-            if (paymentInput) {
-                paymentInput.placeholder = `Minimum: ${minPayment.toString()}`;
-            }
             
             DOMHelpers.updateInfo('total-dethrone', totalDethronements.toString());
             DOMHelpers.updateInfo('contract-balance', DOMHelpers.formatWei(contractBalance));

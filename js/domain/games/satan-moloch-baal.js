@@ -10,8 +10,14 @@ import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { ValueInput } from '../../presentation/components/value-input.js';
 
 export class SatanMolochBaal extends Game {
+    constructor() {
+        super();
+        this.voteInput = null;
+    }
+
     getContractName() {
         return 'satan-moloch-baal';
     }
@@ -43,14 +49,7 @@ export class SatanMolochBaal extends Game {
                         <strong style="color: #ef4444;">All donations go straight to the null address - eternal sacrifice!</strong>
                     </div>
                     
-                    <div class="input-group" style="margin-bottom: 1.5rem;">
-                        <label for="vote-amount" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Amount to Burn (wei)</label>
-                        <input type="number" id="vote-amount" placeholder="Enter wei amount..." min="0" step="1" 
-                            style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1.1rem; font-family: monospace; transition: border-color 0.2s;"
-                            onfocus="this.style.borderColor='#ef4444'"
-                            onblur="this.style.borderColor='var(--md-sys-color-outline)'"
-                        />
-                    </div>
+                    <div id="vote-amount-input" style="margin-bottom: 1.5rem;"></div>
                     
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
                         <button id="vote-satan" class="demon-button" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'">
@@ -229,40 +228,45 @@ export class SatanMolochBaal extends Game {
         
         gameContent.appendChild(contentInner);
         this.container.appendChild(gameContent);
+        
+        // Initialize ValueInput component
+        this.voteInput = new ValueInput('vote-amount-input', {
+            label: 'Amount to Burn',
+            hint: 'All goes to the null address - eternal sacrifice!',
+            defaultUnit: 'gwei',
+            minWei: '1',
+            required: true
+        });
+        this.voteInput.render();
     }
 
     setupListeners() {
         const satanButton = document.getElementById('vote-satan');
         const molochButton = document.getElementById('vote-moloch');
         const baalButton = document.getElementById('vote-baal');
-        const amountInput = document.getElementById('vote-amount');
         
         if (satanButton) {
-            satanButton.addEventListener('click', () => 
-                this.vote('satan', amountInput.value)
-            );
+            satanButton.addEventListener('click', () => this.vote('satan'));
         }
         
         if (molochButton) {
-            molochButton.addEventListener('click', () => 
-                this.vote('moloch', amountInput.value)
-            );
+            molochButton.addEventListener('click', () => this.vote('moloch'));
         }
         
         if (baalButton) {
-            baalButton.addEventListener('click', () => 
-                this.vote('baal', amountInput.value)
-            );
+            baalButton.addEventListener('click', () => this.vote('baal'));
         }
     }
 
-    async vote(demon, weiAmount) {
+    async vote(demon) {
         // Check wallet connection using base class method
         if (!this.requiresWallet('vote')) return;
         
-        if (!weiAmount || parseFloat(weiAmount) <= 0) {
+        const weiAmount = this.voteInput.getWeiValue();
+        
+        if (!weiAmount || weiAmount.eq(0)) {
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter a valid wei amount to burn',
+                message: 'Please enter a valid amount to burn',
                 type: 'warning'
             });
             return;
@@ -279,13 +283,11 @@ export class SatanMolochBaal extends Game {
         try {
             // Use TransactionHandler utility with loading state callback
             await TransactionHandler.execute(
-                this.contract[demonInfo.method]({ 
-                    value: ethers.BigNumber.from(weiAmount) 
-                }),
+                this.contract[demonInfo.method]({ value: weiAmount }),
                 { 
                     game: 'satan-moloch-baal',
                     demon: demon,
-                    wei: weiAmount 
+                    wei: weiAmount.toString() 
                 },
                 (isLoading) => {
                     const btn = document.getElementById(demonInfo.button);
@@ -308,7 +310,7 @@ export class SatanMolochBaal extends Game {
             });
             
             // Clear input and refresh state
-            document.getElementById('vote-amount').value = '';
+            this.voteInput.reset();
             await this.refreshState();
             
         } catch (error) {

@@ -228,17 +228,6 @@ export class CreateForm {
                 return;
             }
 
-            // Advanced validation - check if board is full (expensive, do only on submit)
-            try {
-                const isValid = await this.validateValue(weiValue.toString(), true);
-                if (!isValid) {
-                    return; // Error already shown by validateValue
-                }
-            } catch (validationError) {
-                console.error('Validation failed:', validationError);
-                // Continue anyway - let the contract decide
-            }
-
             // Disable form
             const submitBtn = document.getElementById('create-submit-btn');
             const originalText = submitBtn?.textContent;
