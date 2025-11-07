@@ -170,8 +170,10 @@ class FuturesApp {
             }
 
             // Call ERF calculator
+            // Convert to string with fixed decimal places to avoid scientific notation
+            const inputStr = normalizedInput.toFixed(10);
             const erfResult = await this.erfContract.erf(
-                ethers.utils.parseUnits(normalizedInput.toString(), 10)
+                ethers.utils.parseUnits(inputStr, 10)
             );
             const erfValue = parseFloat(ethers.utils.formatUnits(erfResult, 10));
             

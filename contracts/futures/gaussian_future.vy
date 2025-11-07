@@ -56,7 +56,7 @@ def transfer(new: address):
         self.expired = True
         return
     t: uint256 = block.timestamp - self.start_time
-    left: decimal = self.last_cdf if self.last_t > 0 else self.normal_cdf(self.last_t)
+    left: decimal = self.last_cdf if self.last_t > 0 else 0.0
     right: decimal = self.normal_cdf(t)
     w: decimal = right - left if right > left else 0.0
     raw_call(self.current_owner, b"", value=convert(convert(self.initial_value, decimal) * w, uint256))
