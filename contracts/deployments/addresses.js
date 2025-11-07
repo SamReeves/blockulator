@@ -3,7 +3,7 @@
  * Network-specific contract addresses for testnet and mainnet
  */
 
-import { NETWORK } from '../js/config.js';
+import { NETWORK } from '../../js/config.js';
 
 // Sepolia Testnet Addresses
 const SEPOLIA_ADDRESSES = {
@@ -72,52 +72,52 @@ export const CONTRACT_ADDRESSES = NETWORK_ADDRESSES[NETWORK];
 
 // Map contract addresses to their source files
 export const CONTRACT_SOURCES = {
-    PISSING_CONTEST: 'contracts/games/pissing_contest.vy',
-    MESSAGE_BOARD: 'contracts/games/message_board.vy',
-    PAY_IT_FORWARD: 'contracts/games/pay_it_forward.vy',
-    PAY_IT_BACKWARD: 'contracts/games/pay_it_backward.vy',
-    KING_OF_THE_HILL: 'contracts/games/king_of_the_hill.vy',
-    LAST_CALL: 'contracts/games/last_call.vy',
-    TIME_TO_MAKE_THE_DONUTS: 'contracts/games/time_to_make_the_donuts.vy',
-    DICE_GODS: 'contracts/games/dice_gods.vy',
-    E_CALCULATOR: 'contracts/tools/e.vy',
-    PI_CALCULATOR: 'contracts/tools/pi.vy',
-    TAU_CALCULATOR: 'contracts/tools/tau.vy',
-    SIN_CALCULATOR: 'contracts/tools/sin.vy',
-    COS_CALCULATOR: 'contracts/tools/cos.vy',
-    TANH_CALCULATOR: 'contracts/tools/tanh.vy',
-    POW10_CALCULATOR: 'contracts/tools/pow10.vy',
-    POW2_CALCULATOR: 'contracts/tools/pow2.vy',
-    LN_CALCULATOR: 'contracts/tools/ln.vy',
-    LOG2_CALCULATOR: 'contracts/tools/log2.vy',
-    LOG10_CALCULATOR: 'contracts/tools/log10.vy',
-    SQRT_CALCULATOR: 'contracts/tools/sqrt.vy',
-    ERF_CALCULATOR: 'contracts/tools/erf.vy'
+    PISSING_CONTEST: 'contracts/src/games/pissing_contest.vy',
+    MESSAGE_BOARD: 'contracts/src/games/message_board.vy',
+    PAY_IT_FORWARD: 'contracts/src/games/pay_it_forward.vy',
+    PAY_IT_BACKWARD: 'contracts/src/games/pay_it_backward.vy',
+    KING_OF_THE_HILL: 'contracts/src/games/king_of_the_hill.vy',
+    LAST_CALL: 'contracts/src/games/last_call.vy',
+    TIME_TO_MAKE_THE_DONUTS: 'contracts/src/games/time_to_make_the_donuts.vy',
+    DICE_GODS: 'contracts/src/games/dice_gods.vy',
+    E_CALCULATOR: 'contracts/src/tools/constants/e.vy',
+    PI_CALCULATOR: 'contracts/src/tools/constants/pi.vy',
+    TAU_CALCULATOR: 'contracts/src/tools/constants/tau.vy',
+    SIN_CALCULATOR: 'contracts/src/tools/trig/sin.vy',
+    COS_CALCULATOR: 'contracts/src/tools/trig/cos.vy',
+    TANH_CALCULATOR: 'contracts/src/tools/trig/tanh.vy',
+    POW10_CALCULATOR: 'contracts/src/tools/math/pow10.vy',
+    POW2_CALCULATOR: 'contracts/src/tools/math/pow2.vy',
+    LN_CALCULATOR: 'contracts/src/tools/math/ln.vy',
+    LOG2_CALCULATOR: 'contracts/src/tools/math/log2.vy',
+    LOG10_CALCULATOR: 'contracts/src/tools/math/log10.vy',
+    SQRT_CALCULATOR: 'contracts/src/tools/math/sqrt.vy',
+    ERF_CALCULATOR: 'contracts/src/tools/math/erf.vy'
 };
 
 // Map contract addresses to their ABI files
 export const CONTRACT_ABIS = {
-    PISSING_CONTEST: 'contracts/abis/pissing-contest.json',
-    MESSAGE_BOARD: 'contracts/abis/message-board.json',
-    PAY_IT_FORWARD: 'contracts/abis/pay-it-forward.json',
-    PAY_IT_BACKWARD: 'contracts/abis/pay-it-backward.json',
-    KING_OF_THE_HILL: 'contracts/abis/king-of-the-hill.json',
-    LAST_CALL: 'contracts/abis/last-call.json',
-    TIME_TO_MAKE_THE_DONUTS: 'contracts/abis/time-to-make-the-donuts.json',
-    DICE_GODS: 'contracts/abis/dice-gods.json',
-    E_CALCULATOR: 'contracts/abis/e-calculator.json',
-    PI_CALCULATOR: 'contracts/abis/pi-calculator.json',
-    TAU_CALCULATOR: 'contracts/abis/tau-calculator.json',
-    SIN_CALCULATOR: 'contracts/abis/sin-calculator.json',
-    COS_CALCULATOR: 'contracts/abis/cos-calculator.json',
-    TANH_CALCULATOR: 'contracts/abis/tanh-calculator.json',
-    POW10_CALCULATOR: 'contracts/abis/pow10-calculator.json',
-    POW2_CALCULATOR: 'contracts/abis/pow2-calculator.json',
-    LN_CALCULATOR: 'contracts/abis/ln-calculator.json',
-    LOG2_CALCULATOR: 'contracts/abis/log2-calculator.json',
-    LOG10_CALCULATOR: 'contracts/abis/log10-calculator.json',
-    SQRT_CALCULATOR: 'contracts/abis/sqrt-calculator.json',
-    ERF_CALCULATOR: 'contracts/abis/erf-calculator.json'
+    PISSING_CONTEST: 'contracts/build/abis/pissing-contest.json',
+    MESSAGE_BOARD: 'contracts/build/abis/message-board.json',
+    PAY_IT_FORWARD: 'contracts/build/abis/pay-it-forward.json',
+    PAY_IT_BACKWARD: 'contracts/build/abis/pay-it-backward.json',
+    KING_OF_THE_HILL: 'contracts/build/abis/king-of-the-hill.json',
+    LAST_CALL: 'contracts/build/abis/last-call.json',
+    TIME_TO_MAKE_THE_DONUTS: 'contracts/build/abis/time-to-make-the-donuts.json',
+    DICE_GODS: 'contracts/build/abis/dice-gods.json',
+    E_CALCULATOR: 'contracts/build/abis/e-calculator.json',
+    PI_CALCULATOR: 'contracts/build/abis/pi-calculator.json',
+    TAU_CALCULATOR: 'contracts/build/abis/tau-calculator.json',
+    SIN_CALCULATOR: 'contracts/build/abis/sin-calculator.json',
+    COS_CALCULATOR: 'contracts/build/abis/cos-calculator.json',
+    TANH_CALCULATOR: 'contracts/build/abis/tanh-calculator.json',
+    POW10_CALCULATOR: 'contracts/build/abis/pow10-calculator.json',
+    POW2_CALCULATOR: 'contracts/build/abis/pow2-calculator.json',
+    LN_CALCULATOR: 'contracts/build/abis/ln-calculator.json',
+    LOG2_CALCULATOR: 'contracts/build/abis/log2-calculator.json',
+    LOG10_CALCULATOR: 'contracts/build/abis/log10-calculator.json',
+    SQRT_CALCULATOR: 'contracts/build/abis/sqrt-calculator.json',
+    ERF_CALCULATOR: 'contracts/build/abis/erf-calculator.json'
 };
 
 // Network configuration
