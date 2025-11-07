@@ -25,7 +25,11 @@ Thumbs.db
 # Docker
 *.tar
 
-# Build artifacts
+# Build artifacts (compilation outputs)
 dist/
-build/
+contracts/build/bins/
+contracts/build/bytecode/
+
+# Keep ABIs - they're interface definitions for deployed contracts
+!contracts/build/abis/
 
