@@ -12,7 +12,7 @@
  */
 
 import { eventBus, EVENTS } from '../ui/events.js';
-import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES } from '../../contracts/deployments/addresses.js';
 
 export class ContractLoader {
     /**
@@ -25,7 +25,7 @@ export class ContractLoader {
         // No longer requires wallet connection - works in read-only mode too!
         try {
             // Fetch ABI
-            const response = await fetch(`/contracts/abis/${contractName}.json`);
+            const response = await fetch(`/contracts/build/abis/${contractName}.json`);
             if (!response.ok) {
                 throw new Error(`ABI file not found: ${contractName}.json`);
             }

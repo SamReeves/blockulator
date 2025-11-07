@@ -41,8 +41,16 @@ whalegames/
 │       ├── events.js      # Central event bus
 │       └── game-renderer.js  # Reusable UI patterns
 ├── contracts/
-│   ├── abis/              # Contract ABI JSON files
-│   └── addresses.js       # Contract addresses
+│   ├── src/               # Vyper source code
+│   │   ├── games/         # Game contracts
+│   │   ├── futures/       # Future contracts
+│   │   └── tools/         # Math utility contracts
+│   ├── build/             # Compilation artifacts
+│   │   ├── abis/          # Contract ABI JSON files
+│   │   ├── bytecode/      # Contract bytecode
+│   │   └── bins/          # Binary files
+│   └── deployments/       # Deployment data
+│       └── addresses.js   # Contract addresses
 ├── Dockerfile             # Docker build configuration
 ├── docker-compose.yml     # Docker Compose setup
 └── nginx.conf             # Nginx configuration
@@ -64,8 +72,8 @@ whalegames/
 2. **Connect your wallet** - Make sure you have MetaMask installed
 
 3. **Update contract configuration**:
-   - Add your contract ABIs to `contracts/abis/`
-   - Update contract addresses in `contracts/addresses.js`
+   - Add your contract ABIs to `contracts/build/abis/`
+   - Update contract addresses in `contracts/deployments/addresses.js`
 
 ### Docker Deployment
 
@@ -105,7 +113,7 @@ docker run -d -p 80:80 --restart unless-stopped whalegames:latest
 
 ### 1. Add Contract ABIs
 
-Create JSON files in `contracts/abis/`:
+Create JSON files in `contracts/build/abis/`:
 - `pissing-contest.json`
 - `median-whale.json`
 - `mean-whale.json`
@@ -127,7 +135,7 @@ Example ABI structure:
 
 ### 2. Update Contract Addresses
 
-Edit `contracts/addresses.js` with your deployed addresses:
+Edit `contracts/deployments/addresses.js` with your deployed addresses:
 ```javascript
 export const CONTRACT_ADDRESSES = {
     PISSING_CONTEST: '0xYourContractAddress...',
@@ -141,10 +149,10 @@ export const CONTRACT_ADDRESSES = {
 In each game file (e.g., `js/games/pissing-contest.js`), update the contract initialization:
 
 ```javascript
-import { CONTRACT_ADDRESSES } from '../../contracts/addresses.js';
+import { CONTRACT_ADDRESSES } from '../../contracts/deployments/addresses.js';
 
 // Load ABI
-const response = await fetch('/contracts/abis/pissing-contest.json');
+const response = await fetch('/contracts/build/abis/pissing-contest.json');
 const abi = await response.json();
 
 // Initialize contract

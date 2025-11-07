@@ -8,7 +8,7 @@ import { eventBus, EVENTS } from './ui/events.js';
 import { initConfetti } from './ui/confetti-animation.js';
 import { ContractLoader } from './core/contract-loader.js';
 import { ContractDeployer } from './core/contract-deployer.js';
-import { CONTRACT_ADDRESSES } from '../contracts/addresses.js';
+import { CONTRACT_ADDRESSES } from '../contracts/deployments/addresses.js';
 import { config } from './config.js';
 
 class FuturesApp {
@@ -583,7 +583,7 @@ class FuturesApp {
 
         try {
             // Load the contract ABI
-            const response = await fetch('/contracts/bytecode/gaussian-future.json');
+            const response = await fetch('/contracts/build/bytecode/gaussian-future.json');
             const { abi } = await response.json();
             
             // Create contract instance
@@ -696,7 +696,7 @@ class FuturesApp {
 
         try {
             // Load the contract ABI
-            const response = await fetch('/contracts/bytecode/gaussian-future.json');
+            const response = await fetch('/contracts/build/bytecode/gaussian-future.json');
             const { abi } = await response.json();
             
             // Create contract instance with signer
@@ -772,7 +772,7 @@ class FuturesApp {
      */
     async handleViewBytecode() {
         try {
-            const response = await fetch('/contracts/bytecode/gaussian-future.json');
+            const response = await fetch('/contracts/build/bytecode/gaussian-future.json');
             const data = await response.json();
             
             const bytecode = data.bytecode;
@@ -858,7 +858,7 @@ class FuturesApp {
      */
     async handleViewAbi() {
         try {
-            const response = await fetch('/contracts/abis/gaussian-future.json');
+            const response = await fetch('/contracts/build/abis/gaussian-future.json');
             const abi = await response.json();
             
             const formattedAbi = JSON.stringify(abi, null, 2);

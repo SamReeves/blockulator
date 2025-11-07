@@ -21,7 +21,7 @@ export class ContractDeployer {
 
         try {
             // Fetch bytecode and ABI
-            const response = await fetch(`/contracts/bytecode/${contractName}.json`);
+            const response = await fetch(`/contracts/build/bytecode/${contractName}.json`);
             if (!response.ok) {
                 throw new Error(`Bytecode file not found: ${contractName}.json`);
             }
@@ -89,7 +89,7 @@ export class ContractDeployer {
         }
 
         try {
-            const response = await fetch(`/contracts/bytecode/${contractName}.json`);
+            const response = await fetch(`/contracts/build/bytecode/${contractName}.json`);
             if (!response.ok) return null;
             
             const { bytecode, abi } = await response.json();
