@@ -3,289 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WhaleGames - On-chain discussion board">
-    <title>WhaleGames - Discussions</title>
+    <meta name="description" content="WhaleGames - On-chain discussion board with algorithmic curation">
+    <title>WhaleGames - Discussion Board</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
 <body>
     <div id="app">
         <!-- Header loaded dynamically -->
 
         <main id="content" class="content">
-            <div class="game-sections">
-                <!-- Hero Header Panel -->
-                <div class="contest-info-panel" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -30px; right: -30px; font-size: 150px; opacity: 0.1;">💬</div>
-                    <div style="position: relative; z-index: 1;">
-                        <h1 style="color: white; font-size: 2rem; margin-bottom: 0.5rem;">💬 Discussion Board</h1>
-                        <p style="font-size: 1rem; opacity: 0.95; margin-bottom: 1.5rem;">On-chain discussions with ETH-weighted messaging. Up to 100 discussions, 100 messages each.</p>
+            <div class="discussions-layout">
+                
+                <!-- Hero Header -->
+                <div class="hero-header">
+                    <div class="hero-bg-icon">💬</div>
+                    <div class="hero-content">
+                        <h1 class="hero-title">💬 Discussion Board</h1>
+                        <p class="hero-description">
+                            On-chain discussions with algorithmic curation. Up to 100 discussions, 
+                            each with configurable message limits. ETH-weighted, self-organizing, no admins.
+                        </p>
                         
                         <!-- Stats Grid -->
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
-                            <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Total Discussions</div>
-                                <div id="total-discussions" style="font-size: 1.5rem; font-weight: bold;">-</div>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-label">Total Discussions</div>
+                                <div id="total-discussions" class="stat-value">-</div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Active Now</div>
-                                <div id="active-discussions" style="font-size: 1.5rem; font-weight: bold;">-</div>
+                            <div class="stat-box">
+                                <div class="stat-label">Active Now</div>
+                                <div id="active-discussions" class="stat-value">-</div>
                             </div>
-                            <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Min Entry</div>
-                                <div id="min-entry" style="font-size: 1.5rem; font-weight: bold;">0.001 ETH</div>
+                            <div class="stat-box">
+                                <div class="stat-label">Min Entry</div>
+                                <div id="min-entry" class="stat-value">0.0001 ETH</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Contract Information Panel -->
-                <div class="contest-info-panel" style="border: 2px solid rgba(99, 102, 241, 0.3);">
-                    <details style="cursor: pointer;">
-                        <summary style="font-weight: 600; font-size: 1.1rem; padding: 0.5rem; display: flex; align-items: center; gap: 0.5rem; list-style: none;">
-                            <span style="transition: transform 0.2s;">▶</span>
-                            <span>📋 Contract Information</span>
-                        </summary>
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--md-sys-color-outline);">
-                            <div id="board-contract-info" style="padding: 1.5rem; background: rgba(99, 102, 241, 0.1); border-radius: 12px; border: 2px solid rgba(99, 102, 241, 0.3);">
-                                <h4 style="color: #6366f1; margin-bottom: 1rem; font-size: 1rem;">Discussion Board Contract</h4>
-                                <div id="board-contract-details" style="font-family: monospace; font-size: 0.875rem;">Loading...</div>
-                            </div>
-                            <div id="discussion-contract-info" style="padding: 1.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 12px; border: 2px solid rgba(139, 92, 246, 0.3);">
-                                <h4 style="color: #8b5cf6; margin-bottom: 1rem; font-size: 1rem;">Discussion Blueprint Contract</h4>
-                                <div id="discussion-contract-details" style="font-family: monospace; font-size: 0.875rem;">Loading...</div>
-                            </div>
-                        </div>
-                    </details>
-                </div>
-
-                <!-- Create Discussion Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #10b981;">
-                    <button id="toggle-create-form" style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: 12px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                        <span style="font-size: 1.5rem;">➕</span>
-                        <span>Create New Discussion</span>
-                    </button>
+                <!-- PRIMARY VIEW AREA (State-driven: Board Table OR Discussion Detail) -->
+                <div class="primary-view-area">
                     
-                    <div id="create-form-container" class="create-form-container hidden" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px dashed #10b981;">
-                        <h2 style="color: #10b981; margin-bottom: 1.5rem; font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                            <span>✍️</span>
-                            <span>Create Discussion</span>
-                        </h2>
-                        <form id="create-form" class="discussion-form">
-                            <div class="form-group" style="margin-bottom: 1.5rem;">
-                                <label for="discussion-subject" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                                    <span>Subject</span>
-                                    <span id="subject-counter" style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">0/200</span>
-                                </label>
-                                <input type="text" id="discussion-subject" name="subject" placeholder="Enter discussion subject..." maxlength="200" required style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1rem;">
+                    <!-- BOARD VIEW (Level 1) -->
+                    <div id="board-view" class="view-container">
+                        
+                        <!-- Create Discussion Button -->
+                        <div class="view-header">
+                            <h2 class="view-title">Discussions</h2>
+                            <button id="create-discussion-btn" class="btn-primary">
+                                ➕ Create Discussion
+                            </button>
+                        </div>
+
+                        <!-- Create Discussion Form (Hidden by default) -->
+                        <div id="create-discussion-form-container" class="form-panel hidden">
+                            <div class="form-panel-header">
+                                <h3>✍️ Create New Discussion</h3>
+                                <button id="close-create-form" class="btn-close">✖</button>
                             </div>
 
-                            <div class="form-group" style="margin-bottom: 1.5rem;">
-                                <label for="discussion-body" style="font-weight: 600; font-size: 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                            <form id="create-form" class="discussion-form">
+                                <div class="form-group">
+                                    <label for="discussion-subject">
+                                        <span>Subject</span>
+                                        <span id="subject-counter" class="char-counter">0/200</span>
+                                    </label>
+                                    <input type="text" id="discussion-subject" name="subject" 
+                                           placeholder="Enter discussion subject..." maxlength="200" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="discussion-body">
                                     <span>Description</span>
-                                    <span id="body-counter" style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">0/1000</span>
+                                        <span id="body-counter" class="char-counter">0/1000</span>
                                 </label>
-                                <textarea id="discussion-body" name="body" placeholder="Describe your discussion topic..." maxlength="1000" rows="4" required style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1rem; resize: vertical; font-family: inherit;"></textarea>
+                                    <textarea id="discussion-body" name="body" 
+                                              placeholder="Describe your discussion topic..." 
+                                              maxlength="1000" rows="4" required></textarea>
                             </div>
 
-                            <div class="form-group" style="margin-bottom: 1.5rem;">
+                                <div class="form-group">
                                 <div id="initial-value-input"></div>
-                                <div id="value-warning" class="value-warning" style="margin-top: 0.5rem;"></div>
+                                    <div id="value-warning" class="value-warning"></div>
                             </div>
 
-                            <details style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(99, 102, 241, 0.05); border-radius: 12px; border: 2px solid rgba(99, 102, 241, 0.2); cursor: pointer;">
-                                <summary style="font-weight: 600; padding: 0.5rem; list-style: none; display: flex; align-items: center; gap: 0.5rem;">
-                                    <span style="transition: transform 0.2s;">▶</span>
+                                <details class="advanced-config">
+                                    <summary>
+                                        <span>▶</span>
                                     <span>⚙️ Advanced Configuration (Optional)</span>
                                 </summary>
-                                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(99, 102, 241, 0.2);">
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                                    <div class="advanced-config-content">
+                                        <div class="config-grid">
+                                            <div class="form-group">
+                                                <label for="max-messages">Max Messages (1-1000)</label>
+                                                <input type="number" id="max-messages" name="max_messages" 
+                                                       value="100" min="1" max="1000" required>
+                                            </div>
                                         <div class="form-group">
-                                            <label for="max-messages" style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Max Messages (1-1000)</label>
-                                            <input type="number" id="max-messages" name="max_messages" value="100" min="1" max="1000" required style="width: 100%; padding: 0.75rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface);">
+                                                <label for="max-message-length">Max Length (1-500)</label>
+                                                <input type="number" id="max-message-length" name="max_message_length" 
+                                                       value="200" min="1" max="500" required>
+                                            </div>
                                         </div>
                                         <div class="form-group">
-                                            <label for="max-message-length" style="font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">Max Length (1-500)</label>
-                                            <input type="number" id="max-message-length" name="max_message_length" value="200" min="1" max="500" required style="width: 100%; padding: 0.75rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface);">
-                                        </div>
-                                    </div>
-                                    <div class="form-group">
-                                        <div id="min-donation-input"></div>
+                                            <div id="min-donation-input"></div>
                                     </div>
                                 </div>
                             </details>
 
-                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem;">
-                                <button type="button" id="cancel-create-btn" style="padding: 1rem; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                                <div class="form-actions">
+                                    <button type="button" id="cancel-create-btn" class="btn-secondary">
                                     Cancel
                                 </button>
-                                <button type="submit" id="create-submit-btn" style="padding: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; border-radius: var(--md-sys-shape-corner-small); font-weight: 600; font-size: 1rem; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                                    <button type="submit" id="create-submit-btn" class="btn-submit">
                                     🚀 Create Discussion
                                 </button>
                             </div>
                         </form>
-                    </div>
                 </div>
 
-                <!-- How It Works Panel -->
-                <div class="contest-info-panel">
-                    <details open style="cursor: pointer;">
-                        <summary style="font-weight: 600; font-size: 1.25rem; padding: 0.5rem; list-style: none; display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="transition: transform 0.2s;">▼</span>
-                            <span>📖 How It Works</span>
-                        </summary>
-                        <div style="margin-top: 1.5rem;">
-                            <div style="display: grid; gap: 1rem;">
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; min-width: 2.5rem;">1</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Create Discussions</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Up to 100 discussions, each supporting 100 messages</span>
+                        <!-- Filter & Sort Controls -->
+                        <div class="table-controls">
+                            <div class="filter-tabs">
+                                <button class="tab active" data-filter="all">All</button>
+                                <button class="tab" data-filter="active">Active</button>
+                                <button class="tab" data-filter="inactive">Stale/Inactive</button>
                                     </div>
-                                </div>
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6; min-width: 2.5rem;">2</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Post Messages</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Include ETH donations with your messages to support the discussion</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #10b981; min-width: 2.5rem;">3</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Priority System</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">When full, higher donations replace lower ones - skin in the game!</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(251, 191, 36, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">4</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Activity Timeout</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Discussions become inactive after 7 days without messages</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 4px solid #ef4444;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #ef4444; min-width: 2.5rem;">5</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Pool Distribution</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">When terminated, the ETH pool splits equally among unique message authors</span>
-                                    </div>
-                                </div>
+                            <div class="sort-controls">
+                                <label for="board-sort-select">Sort by:</label>
+                                <select id="board-sort-select">
+                                    <option value="recent">Most Recent</option>
+                                    <option value="activity">Last Activity</option>
+                                    <option value="pool">Highest Pool</option>
+                                    <option value="messages">Most Messages</option>
+                                </select>
                             </div>
-                        </div>
-                    </details>
                 </div>
 
-                <!-- Filter and Sort Controls -->
-                <div class="contest-info-panel" style="padding: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button class="tab active" data-filter="all" style="padding: 0.75rem 1.5rem; background: var(--md-sys-color-primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">All</button>
-                            <button class="tab" data-filter="active" style="padding: 0.75rem 1.5rem; background: rgba(16, 185, 129, 0.1); color: var(--md-sys-color-on-surface); border: 2px solid #10b981; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Active</button>
-                            <button class="tab" data-filter="inactive" style="padding: 0.75rem 1.5rem; background: rgba(239, 68, 68, 0.1); color: var(--md-sys-color-on-surface); border: 2px solid #ef4444; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Inactive</button>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <label for="sort-select" style="font-weight: 600; color: var(--md-sys-color-on-surface-variant);">Sort:</label>
-                            <select id="sort-select" style="padding: 0.75rem 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: 8px; color: var(--md-sys-color-on-surface); font-weight: 600; cursor: pointer;">
-                                <option value="recent">Recent</option>
-                                <option value="activity">Activity</option>
-                                <option value="pool">Pool Size</option>
-                                <option value="messages">Messages</option>
-                            </select>
-                        </div>
-                    </div>
+                        <!-- Board Table Container -->
+                        <div id="board-table-container" class="table-view"></div>
                 </div>
 
-                <!-- Discussions Grid -->
-                <div style="min-height: 300px;">
-                    <div id="discussions-list" class="discussions-grid">
-                        <div style="text-align: center; padding: 3rem; color: var(--md-sys-color-on-surface-variant);">
-                            <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-                            <div style="font-size: 1.1rem; font-weight: 600;">Loading discussions...</div>
-                        </div>
+                    <!-- DISCUSSION VIEW (Level 2) - Initially Hidden -->
+                    <div id="discussion-view" class="view-container hidden">
+                        <!-- Discussion detail view rendered here by DiscussionDetailView component -->
                     </div>
+
                 </div>
+
+                <!-- MECHANICS PANEL (Collapsible) -->
+                <div id="mechanics-panel" class="info-panel-container"></div>
+
+                <!-- TECHNICAL PANEL (Collapsible) -->
+                <div id="technical-panel" class="info-panel-container"></div>
+
             </div>
         </main>
 
-        <div id="toast-container" class="toast-container"></div>
-        <canvas id="effects-canvas" class="effects-canvas"></canvas>
+        <!-- Toast Container -->
+        <div id="toast-container"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <!-- Discussion Detail Modal -->
-    <div id="discussion-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 1000; backdrop-filter: blur(4px); overflow-y: auto;">
-        <div style="max-width: 900px; margin: 2rem auto; padding: 2rem; background: var(--md-sys-color-surface); border-radius: 24px; box-shadow: 0 24px 48px rgba(0, 0, 0, 0.3);">
-            <!-- Modal Header -->
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
-                <div style="flex: 1;">
-                    <h2 id="modal-subject" style="font-size: 1.75rem; font-weight: 700; color: var(--md-sys-color-primary); margin-bottom: 0.5rem;">Discussion Title</h2>
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
-                        <span id="modal-creator">Creator: ...</span>
-                        <span id="modal-created">Created: ...</span>
-                    </div>
-                </div>
-                <button id="close-modal" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--md-sys-color-on-surface); padding: 0; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s;">×</button>
-            </div>
-
-            <!-- Stats Grid -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                <div style="padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 12px; text-align: center;">
-                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Pool</div>
-                    <div id="modal-pool" style="font-size: 1.5rem; font-weight: 700; color: #6366f1;">0 ETH</div>
-                </div>
-                <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 12px; text-align: center;">
-                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Messages</div>
-                    <div id="modal-messages" style="font-size: 1.5rem; font-weight: 700; color: #10b981;">0</div>
-                </div>
-                <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 12px; text-align: center;">
-                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Survivors</div>
-                    <div id="modal-survivors" style="font-size: 1.5rem; font-weight: 700; color: #f59e0b;">0</div>
-                </div>
-                <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 12px; text-align: center;">
-                    <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Status</div>
-                    <div id="modal-status" style="font-size: 1.5rem; font-weight: 700; color: #8b5cf6;">Active</div>
-                </div>
-            </div>
-
-            <!-- Description -->
-            <div style="margin-bottom: 2rem; padding: 1.5rem; background: var(--md-sys-color-surface-variant); border-radius: 16px;">
-                <h3 style="font-size: 1rem; font-weight: 600; color: var(--md-sys-color-on-surface-variant); margin-bottom: 1rem;">Description</h3>
-                <p id="modal-body" style="color: var(--md-sys-color-on-surface); line-height: 1.6; white-space: pre-wrap;">Loading...</p>
-            </div>
-
-            <!-- Messages Section -->
-            <div style="margin-bottom: 2rem;">
-                <h3 style="font-size: 1.25rem; font-weight: 600; color: var(--md-sys-color-on-surface); margin-bottom: 1rem;">💬 Messages</h3>
-                <div id="modal-messages-list" style="max-height: 400px; overflow-y: auto;">
-                    <p style="text-align: center; color: var(--md-sys-color-on-surface-variant); padding: 2rem;">Loading messages...</p>
-                </div>
-            </div>
-
-            <!-- Post Message Form -->
-            <div style="padding: 1.5rem; background: rgba(99, 102, 241, 0.05); border-radius: 16px; border: 2px solid rgba(99, 102, 241, 0.2);">
-                <h3 style="font-size: 1rem; font-weight: 600; color: var(--md-sys-color-on-surface); margin-bottom: 1rem;">📝 Post a Message</h3>
-                <textarea id="message-content" placeholder="Write your message..." style="width: 100%; min-height: 100px; padding: 1rem; border: 2px solid var(--md-sys-color-outline); border-radius: 12px; font-family: inherit; font-size: 1rem; resize: vertical; margin-bottom: 1rem;"></textarea>
-                <div style="display: flex; gap: 1rem; align-items: center;">
-                    <input type="number" id="message-donation" placeholder="Donation (ETH)" step="0.001" min="0" style="flex: 1; padding: 0.75rem; border: 2px solid var(--md-sys-color-outline); border-radius: 12px; font-size: 1rem;">
-                    <button id="post-message-btn" style="padding: 0.75rem 2rem; background: var(--md-sys-color-primary); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-size: 1rem;">Post Message</button>
-                </div>
-                <p style="margin-top: 0.5rem; font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">
-                    Min donation: <span id="modal-min-donation">Loading...</span> ETH
-                </p>
-            </div>
-
-            <!-- Contract Address -->
-            <div style="margin-top: 2rem; padding: 1rem; background: rgba(0, 0, 0, 0.2); border-radius: 12px; font-family: monospace; font-size: 0.875rem;">
-                <strong>Contract:</strong> <span id="modal-address">...</span>
-                <a id="modal-etherscan" href="#" target="_blank" style="margin-left: 1rem; color: var(--md-sys-color-primary);">View on Etherscan →</a>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { HeaderLoader } from './js/presentation/components/header-loader.js';
-        await HeaderLoader.load('discussions');
+    <!-- Load header -->
+    <script>
+        fetch('header.html')
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('app').insertAdjacentHTML('afterbegin', html);
+            })
+            .catch(err => console.error('Failed to load header:', err));
     </script>
+
+    <!-- Load app -->
     <script type="module" src="js/discussions-app.js"></script>
 </body>
 </html>
