@@ -56,10 +56,10 @@
                             type="number" 
                             id="time-to-live" 
                             placeholder="Enter duration in seconds"
-                            min="60"
+                            min="1"
                         />
                         <div class="input-hint">
-                            How long the future will remain active (minimum 60 seconds)
+                            How long the future will remain active (minimum 1 second)
                         </div>
                     </div>
 
@@ -89,12 +89,18 @@
                     </div>
 
                     <button id="create-future-btn" class="btn-play" disabled>
-                        Create Future (Coming Soon)
+                        Create Future
                     </button>
 
                     <div class="input-hint" style="text-align: center; margin-top: 1rem;">
-                        ℹ️ Future contract deployment coming soon. Currently showing ERF calculations from our on-chain tool.
+                        💡 Connect your wallet to deploy Gaussian future contracts
                     </div>
+                </div>
+
+                <!-- Deployed Futures Section -->
+                <div id="deployed-contracts" class="blockchain-data hidden" style="margin-top: 2rem;">
+                    <h3>📋 Your Deployed Futures</h3>
+                    <!-- Deployed contracts will be added here dynamically -->
                 </div>
 
                 <!-- ERF Calculator Info -->
