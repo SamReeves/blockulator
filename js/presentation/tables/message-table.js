@@ -177,6 +177,15 @@ export class MessageTable {
                 <td class="col-author">
                     <code title="${message.author}">${authorShort}</code>
                     ${isCurrentUser ? '<span class="badge-you">YOU</span>' : ''}
+                    <button class="btn-copy-inline btn-copy-author" data-copy="${message.author}" title="Copy address">
+                        📋
+                    </button>
+                    <a href="https://sepolia.etherscan.io/address/${message.author}" 
+                       target="_blank" 
+                       class="btn-etherscan-inline" 
+                       title="View on Etherscan">
+                        ↗
+                    </a>
                 </td>
                 <td class="col-message">
                     <div class="message-content ${isLong ? 'expandable' : ''}">
@@ -224,6 +233,16 @@ export class MessageTable {
      * Attach listeners to message rows
      */
     attachRowEventListeners() {
+        // Copy author buttons
+        const copyButtons = this.containerElement.querySelectorAll('.btn-copy-author');
+        copyButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const text = button.dataset.copy;
+                await this.copyToClipboard(text);
+            });
+        });
+
         // Splash buttons
         const splashButtons = this.containerElement.querySelectorAll('.btn-splash');
         splashButtons.forEach(button => {
@@ -360,6 +379,36 @@ export class MessageTable {
         if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
         if (seconds < 604800) return `${Math.floor(seconds / 86400)}d ago`;
         return `${Math.floor(seconds / 604800)}w ago`;
+    }
+
+    /**
+     * Copy text to clipboard
+     */
+    async copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            eventBus.emit(EVENTS.TOAST, {
+                message: '📋 Copied to clipboard!',
+                type: 'success'
+            });
+        } catch (error) {
+            console.error('Failed to copy to clipboard:', error);
+            // Fallback
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                eventBus.emit(EVENTS.TOAST, {
+                    message: '📋 Copied to clipboard!',
+                    type: 'success'
+                });
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+            }
+            document.body.removeChild(textArea);
+        }
     }
 
     /**

@@ -410,13 +410,5 @@ class DiscussionsApp {
     }
 }
 
-// Initialize app when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        const app = new DiscussionsApp();
-        app.init();
-    });
-} else {
-    const app = new DiscussionsApp();
-    app.init();
-}
+// Export the class for manual initialization
+export { DiscussionsApp };

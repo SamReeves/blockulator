@@ -1,0 +1,13 @@
+{
+  "network": "sepolia",
+  "timestamp": "2025-11-07T23:23:16.789Z",
+  "deployer": "0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4",
+  "contracts": {
+    "eulerianFutureBlueprint": "0xBa141CF8c6f1b0f13716455e3B06cD2738a7FFC1",
+    "futureFactory": "0x04e493e377F681b947595243255C0d9a925ac153"
+  },
+  "transactions": {
+    "blueprint": "0x725cfc15fc36379cc7fdf1adfda6e60713138d2eb1339aa4a143806a4783d8ed",
+    "factory": "0xa3e8b8f897cf0e40af97f413a41bfe086c900e414a1fc811b93c6b048d98102b"
+  }
+}

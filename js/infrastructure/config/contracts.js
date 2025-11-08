@@ -23,6 +23,10 @@ const SEPOLIA_ADDRESSES = {
     DISCUSSION_BOARD: '0xb216dfcDDB1A465675Ab1A79CA519A7e00fd8D63',
     DISCUSSION_BLUEPRINT: '0x057bE4BD7892f7f85538a33567f3C8e2E9A39413', // Not needed by frontend
     
+    // Futures Market
+    FUTURE_FACTORY: '0x8cf41fbE9abE00e47fDed94FdbdC75C2d07f8193',
+    EULERIAN_FUTURE_BLUEPRINT: '0x2E942C37B0ED14017E502E2aFB038E8657eD5F67', // Not needed by frontend
+    
     // Tools (Mathematical Constant Calculators)
     E_CALCULATOR: '0x0df17535A8C9B68C426F4bf872E3F4EE1c57Aab8',
     PI_CALCULATOR: '0xeBFaB280b828153b0419bFc866BF8639b485C1da',
@@ -55,6 +59,10 @@ const MAINNET_ADDRESSES = {
     // Discussions
     DISCUSSION_BOARD: '0x0000000000000000000000000000000000000000',
     DISCUSSION_BLUEPRINT: '0x0000000000000000000000000000000000000000',
+    
+    // Futures Market
+    FUTURE_FACTORY: '0x0000000000000000000000000000000000000000',
+    EULERIAN_FUTURE_BLUEPRINT: '0x0000000000000000000000000000000000000000',
     
     // Tools (Mathematical Constant Calculators)
     E_CALCULATOR: '0x0000000000000000000000000000000000000000',
@@ -94,6 +102,8 @@ export const CONTRACT_SOURCES = {
     SATAN_MOLOCH_BAAL: 'contracts/src/games/satan_moloch_baal.vy',
     DISCUSSION_BOARD: 'contracts/src/discussions/board.vy',
     DISCUSSION_BLUEPRINT: 'contracts/src/discussions/discussion.vy',
+    FUTURE_FACTORY: 'contracts/src/market/future_factory.vy',
+    EULERIAN_FUTURE_BLUEPRINT: 'contracts/src/market/eulerian_future.vy',
     E_CALCULATOR: 'contracts/src/tools/constants/e.vy',
     PI_CALCULATOR: 'contracts/src/tools/constants/pi.vy',
     TAU_CALCULATOR: 'contracts/src/tools/constants/tau.vy',
@@ -122,6 +132,8 @@ export const CONTRACT_ABIS = {
     SATAN_MOLOCH_BAAL: 'contracts/build/abis/satan-moloch-baal.json',
     DISCUSSION_BOARD: 'contracts/build/abis/board.json',
     DISCUSSION_BLUEPRINT: 'contracts/build/abis/discussion.json',
+    FUTURE_FACTORY: 'contracts/build/abis/future-factory.json',
+    EULERIAN_FUTURE_BLUEPRINT: 'contracts/build/abis/eulerian-future.json',
     E_CALCULATOR: 'contracts/build/abis/e-calculator.json',
     PI_CALCULATOR: 'contracts/build/abis/pi-calculator.json',
     TAU_CALCULATOR: 'contracts/build/abis/tau-calculator.json',

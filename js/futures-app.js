@@ -1,1059 +1,518 @@
 /**
- * Futures App
- * Interface for creating and managing Gaussian futures
+ * Futures App Entry Point
+ * Bootstraps the futures marketplace application with ViewRouter architecture
  */
 
-import { web3Provider } from './web3-provider.js';
-import { eventBus, EVENTS } from './ui/events.js';
-import { initConfetti } from './ui/confetti-animation.js';
-import { ContractLoader } from './core/contract-loader.js';
-import { ContractDeployer } from './core/contract-deployer.js';
-import { CONTRACT_ADDRESSES } from '../contracts/deployments/addresses.js';
-import { config } from './config.js';
+import { web3Provider } from './infrastructure/blockchain/web3-provider.js';
+import { eventBus, EVENTS } from './infrastructure/events/event-bus.js';
+import { WalletConnectComponent, ToastComponent } from './presentation/components/index.js';
+import { initConfetti } from './presentation/effects/confetti-animation.js';
+import { FutureFactory } from './domain/futures/future-factory.js';
+import { ViewRouter, ViewState } from './presentation/router/view-router.js';
+import { MarketTable } from './presentation/tables/market-table.js';
+import { FutureDetailView } from './presentation/futures/future-detail-view.js';
+import { CreateFutureForm } from './presentation/futures/create-future-form.js';
+import { CONTRACT_ADDRESSES } from './infrastructure/config/contracts.js';
 
 class FuturesApp {
     constructor() {
-        console.log('🚀 FuturesApp initializing...');
-        this.currentValue = '';
-        this.currentTTL = '';
-        this.deployedFutures = [];
-        this.init();
+        this.web3Provider = web3Provider;
+        this.factory = null;
+        this.viewRouter = null;
+        this.marketTable = null;
+        this.currentFutureView = null;
+        this.createForm = null;
+        this.walletComponent = null;
+        this.toastComponent = null;
+        this.factoryAbi = null;
+        this.futureAbi = null;
     }
 
-    /**
-     * Initialize the application
-     */
     async init() {
-        this.setupUIListeners();
-        this.setupWalletListeners();
-        this.setupToastSystem();
-        this.setupCanvas();
-        
-        // Load deployment history
-        this.loadFuturesHistory();
-        
-        console.log('✅ Futures app initialized');
-    }
+        console.log('📈 Initializing Futures Marketplace app...');
 
+        try {
+            // Check for existing wallet connection FIRST
+            await this.web3Provider.checkConnection();
 
-    /**
-     * Format address for display
-     */
-    formatAddress(address) {
-        if (!address) return '';
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
+            // Initialize wallet component
+            this.walletComponent = new WalletConnectComponent(this.web3Provider);
+            this.walletComponent.render();
 
-    /**
-     * Setup UI event listeners
-     */
-    setupUIListeners() {
-        console.log('🔧 Setting up UI listeners...');
-        
-        // Connect wallet button
-        const connectBtn = document.getElementById('connect-wallet');
-        if (connectBtn) {
-            connectBtn.addEventListener('click', () => {
-                console.log('🔘 Connect wallet button clicked!');
-                this.handleConnectWallet();
-            });
-        }
+            // Initialize toast notifications
+            this.toastComponent = new ToastComponent();
 
-        // Value input
-        const valueInput = document.getElementById('future-value');
-        if (valueInput) {
-            valueInput.addEventListener('input', (e) => {
-                this.currentValue = e.target.value;
-            });
-        }
+            // Initialize confetti
+            initConfetti();
 
-        // TTL input
-        const ttlInput = document.getElementById('time-to-live');
-        if (ttlInput) {
-            ttlInput.addEventListener('input', (e) => {
-                this.currentTTL = e.target.value;
-            });
-        }
+            // Load ABIs
+            await this.loadAbis();
 
-        // Quick time buttons - ADD to current value
-        const timeButtons = document.querySelectorAll('.quick-amount-btn[data-time]');
-        timeButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const timeToAdd = parseInt(e.target.dataset.time);
-                if (ttlInput) {
-                    const currentValue = parseInt(ttlInput.value) || 0;
-                    const newValue = currentValue + timeToAdd;
-                    ttlInput.value = newValue;
-                    this.currentTTL = newValue.toString();
-                }
-            });
-        });
+            // Load factory contract
+            await this.loadFactory();
 
-        // Create future button
-        const createBtn = document.getElementById('create-future-btn');
-        if (createBtn) {
-            createBtn.addEventListener('click', () => {
-                this.handleCreateFuture();
-            });
-        }
+            // Initialize ViewRouter
+            this.viewRouter = new ViewRouter();
+            this.viewRouter.subscribe((data) => this.onRouteChange(data));
 
-        // Load contract button
-        const loadContractBtn = document.getElementById('load-contract-btn');
-        if (loadContractBtn) {
-            loadContractBtn.addEventListener('click', () => {
-                this.handleLoadContract();
-            });
-        }
+            // Initialize components
+            await this.initializeComponents();
 
-        // Transfer ownership button
-        const transferBtn = document.getElementById('transfer-ownership-btn');
-        if (transferBtn) {
-            transferBtn.addEventListener('click', () => {
-                this.handleTransferOwnership();
-            });
-        }
-
-        // View Bytecode button
-        const viewBytecodeBtn = document.getElementById('view-bytecode-btn');
-        if (viewBytecodeBtn) {
-            viewBytecodeBtn.addEventListener('click', () => {
-                this.handleViewBytecode();
-            });
-        }
-
-        // View ABI button
-        const viewAbiBtn = document.getElementById('view-abi-btn');
-        if (viewAbiBtn) {
-            viewAbiBtn.addEventListener('click', () => {
-                this.handleViewAbi();
-            });
-        }
-
-        // Draw the distribution graph
-        this.drawDistributionGraph();
-
-        // Setup copy buttons
-        this.setupCopyButtons();
-    }
-
-    /**
-     * Setup copy to clipboard functionality
-     */
-    setupCopyButtons() {
-        document.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('copy-btn')) {
-                const button = e.target;
+            // Setup event listeners
+            this.setupEventListeners();
                 
-                // Get the text to copy
-                let textToCopy = '';
-                if (button.dataset.copyText) {
-                    // Direct text from data attribute
-                    textToCopy = button.dataset.copyText;
-                } else if (button.dataset.copy) {
-                    // Copy from element by ID
-                    const element = document.getElementById(button.dataset.copy);
-                    textToCopy = element ? element.textContent : '';
-                } else if (button.dataset.copyTarget) {
-                    // Copy from target element
-                    const element = document.getElementById(button.dataset.copyTarget);
-                    textToCopy = element ? element.textContent : '';
-                }
+            // Setup factory event subscriptions
+            this.setupFactoryEvents();
 
-                if (!textToCopy || textToCopy === '-' || textToCopy === 'Loading...') {
-                    return;
-                }
+            // Initial render (Market View)
+            await this.renderCurrentView();
 
-                try {
-                    await navigator.clipboard.writeText(textToCopy);
-                    
-                    // Visual feedback
-                    const originalText = button.textContent;
-                    button.textContent = '✅';
-                    button.classList.add('copied');
-                    
-                    setTimeout(() => {
-                        button.textContent = originalText;
-                        button.classList.remove('copied');
-                    }, 1500);
+            console.log('✅ Futures Marketplace app initialized');
 
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: 'Copied to clipboard',
-                        type: 'success'
-                    });
                 } catch (error) {
-                    console.error('Failed to copy:', error);
+            console.error('Failed to initialize app:', error);
                     eventBus.emit(EVENTS.TOAST, {
-                        message: 'Failed to copy to clipboard',
+                message: 'Failed to initialize application',
                         type: 'error'
                     });
                 }
             }
-        });
+
+    async loadAbis() {
+        try {
+            // Load Future Factory ABI
+            const factoryResponse = await fetch('/contracts/build/abis/future-factory.json');
+            if (!factoryResponse.ok) {
+                throw new Error('Factory ABI not found');
+            }
+            this.factoryAbi = await factoryResponse.json();
+
+            // Load Eulerian Future ABI
+            const futureResponse = await fetch('/contracts/build/abis/eulerian-future.json');
+            if (!futureResponse.ok) {
+                throw new Error('Future ABI not found');
+            }
+            this.futureAbi = await futureResponse.json();
+
+            console.log('✅ ABIs loaded');
+        } catch (error) {
+            console.error('Failed to load ABIs:', error);
+            throw error;
+        }
     }
 
+    async loadFactory() {
+        const FACTORY_ADDRESS = CONTRACT_ADDRESSES.FUTURE_FACTORY || '0x0000000000000000000000000000000000000000';
 
-    /**
-     * Setup wallet event listeners
-     */
-    setupWalletListeners() {
-        eventBus.on(EVENTS.WALLET_CONNECTED, async (data) => {
-            await this.updateWalletUI(data.address);
-            
-            // Enable create button when wallet connected
-            const createBtn = document.getElementById('create-future-btn');
-            if (createBtn) {
-                createBtn.disabled = false;
-            }
+        console.log('📍 Loading factory with address:', FACTORY_ADDRESS);
+        console.log('📍 Wallet Network ChainId:', this.web3Provider.chainId);
+        console.log('📍 Connected:', this.web3Provider.isConnected());
+        console.log('📍 Expected Network: Sepolia (11155111)');
 
-            // Enable load contract button
-            const loadBtn = document.getElementById('load-contract-btn');
-            if (loadBtn) {
-                loadBtn.disabled = false;
-            }
+        if (!FACTORY_ADDRESS || FACTORY_ADDRESS === '0x0000000000000000000000000000000000000000') {
+            eventBus.emit(EVENTS.TOAST, {
+                message: '⚠️ Future Factory not yet deployed. Check back soon!',
+                type: 'warning'
+            });
+            throw new Error('Future Factory address not configured');
+        }
+
+        // Check if wallet is on wrong network
+        if (this.web3Provider.isConnected() && this.web3Provider.chainId !== 11155111) {
+            const networkName = this.web3Provider.getNetworkName();
+            eventBus.emit(EVENTS.TOAST, {
+                message: `⚠️ Wrong network! Please switch to Sepolia. Currently on: ${networkName}`,
+                type: 'error'
+            });
+            console.error('❌ Wrong network. Expected Sepolia (11155111), got:', this.web3Provider.chainId);
+        }
+
+        this.factory = new FutureFactory(
+            this.web3Provider,
+            FACTORY_ADDRESS,
+            this.factoryAbi
+        );
+
+        await this.factory.init();
+        console.log('✅ Factory contract initialized at:', FACTORY_ADDRESS);
+    }
+
+    async initializeComponents() {
+        // Initialize Market Table (Level 1)
+        this.marketTable = new MarketTable(
+            this.factory,
+            this.web3Provider,
+            this.futureAbi
+        );
+
+        const marketTableContainer = document.getElementById('market-table-container');
+        if (marketTableContainer) {
+            this.marketTable.setContainer(marketTableContainer);
+        }
+
+        // Initialize Create Form
+        this.createForm = new CreateFutureForm(this.factory, this.web3Provider);
+        this.createForm.init();
+
+        console.log('✅ Components initialized');
+    }
+
+    setupEventListeners() {
+        // Wallet changes
+        eventBus.on(EVENTS.WALLET_CONNECTED, async () => {
+            console.log('Wallet connected, refreshing...');
+            await this.onWalletChanged();
         });
 
         eventBus.on(EVENTS.WALLET_DISCONNECTED, async () => {
-            await this.updateWalletUI(null);
-            
-            // Disable create button when wallet disconnected
-            const createBtn = document.getElementById('create-future-btn');
-            if (createBtn) {
-                createBtn.disabled = true;
-            }
-
-            // Disable load contract button
-            const loadBtn = document.getElementById('load-contract-btn');
-            if (loadBtn) {
-                loadBtn.disabled = true;
-            }
-
-            // Disable transfer button
-            const transferBtn = document.getElementById('transfer-ownership-btn');
-            if (transferBtn) {
-                transferBtn.disabled = true;
-            }
+            console.log('Wallet disconnected, refreshing...');
+            await this.onWalletChanged();
         });
 
-        eventBus.on(EVENTS.WALLET_CHANGED, async (data) => {
-            await this.updateWalletUI(data.address);
-        });
+        // Future created
+        eventBus.on('FUTURE_CREATED', async () => {
+            console.log('Future created, refreshing...');
+            
+            // Hide create form
+            const formContainer = document.getElementById('create-future-form-container');
+            if (formContainer) {
+                formContainer.classList.add('hidden');
+            }
+            
+            // Refresh market table if in market view
+            if (this.viewRouter.isViewingBoard()) {
+                await this.marketTable.refresh();
     }
-
-    /**
-     * Setup toast notification system
-     */
-    setupToastSystem() {
-        eventBus.on(EVENTS.TOAST, (data) => {
-            this.showToast(data.message, data.type);
-        });
-    }
-
-    /**
-     * Setup canvas for animations
-     */
-    setupCanvas() {
-        const canvas = document.getElementById('effects-canvas');
-        if (!canvas) return;
-        
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
         });
 
-        window.effectsCanvas = canvas;
-        window.effectsCtx = canvas.getContext('2d');
-        
-        // Initialize confetti
-        initConfetti();
-    }
-
-    /**
-     * Handle wallet connection
-     */
-    async handleConnectWallet() {
-        console.log('🔌 handleConnectWallet called');
-        const success = await web3Provider.connect();
-        if (success) {
-            console.log('Wallet connected successfully');
-        }
-    }
-
-    /**
-     * Update wallet UI
-     */
-    async updateWalletUI(address) {
-        const connectBtn = document.getElementById('connect-wallet');
-        const walletInfo = document.getElementById('wallet-info');
-        const walletAddress = document.getElementById('wallet-address');
-        const walletBalance = document.getElementById('wallet-balance');
-        const walletNetwork = document.getElementById('wallet-network');
-        const readonlyBadge = document.getElementById('readonly-badge');
-
-        if (address) {
-            // Connected mode
-            connectBtn?.classList.add('hidden');
-            walletInfo?.classList.remove('hidden');
-            readonlyBadge?.classList.add('hidden');
-            
-            if (walletAddress) {
-                walletAddress.textContent = web3Provider.formatAddress(address);
-            }
-
-            // Update balance
-            if (walletBalance) {
-                const balance = await web3Provider.getBalance();
-                walletBalance.textContent = `${parseFloat(balance).toFixed(4)} ETH`;
-            }
-
-            // Update network
-            if (walletNetwork) {
-                walletNetwork.textContent = web3Provider.getNetworkName();
-            }
-        } else {
-            // Read-only mode
-            connectBtn?.classList.remove('hidden');
-            walletInfo?.classList.add('hidden');
-            readonlyBadge?.classList.remove('hidden');
-        }
-    }
-
-    /**
-     * Show toast notification
-     */
-    showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-        container.appendChild(toast);
-
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            toast.style.animation = 'toastIn 0.3s ease reverse';
-            setTimeout(() => {
-                if (container.contains(toast)) {
-                    container.removeChild(toast);
-                }
-            }, 300);
-        }, 3000);
-    }
-
-    /**
-     * Handle creating a new Gaussian future
-     */
-    async handleCreateFuture() {
-        if (!web3Provider.isConnected()) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet to create a future',
-                type: 'warning'
-            });
-            return;
-        }
-
-        const valueInput = document.getElementById('future-value');
-        const ttlInput = document.getElementById('time-to-live');
-        
-        if (!valueInput.value || !ttlInput.value) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter both value and time to live',
-                type: 'error'
-            });
-            return;
-        }
-
-        try {
-            const value = ethers.BigNumber.from(valueInput.value);
-            const epoch = parseInt(ttlInput.value);
-
-            // Validate
-            if (epoch <= 0) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: 'Time to live must be greater than zero',
-                    type: 'error'
-                });
-                return;
-            }
-
-            // Estimate gas first
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Estimating deployment cost...',
-                type: 'info'
-            });
-
-            const estimatedGas = await ContractDeployer.estimateDeploymentGas(
-                'gaussian-future',
-                web3Provider,
-                [epoch],  // Constructor args: _lifetime
-                { value }
-            );
-
-            if (estimatedGas) {
-                const gasPrice = await web3Provider.getProvider().getGasPrice();
-                const gasCost = estimatedGas.mul(gasPrice);
-                const totalCost = gasCost.add(value);
-                
-                console.log(`Estimated gas: ${ethers.utils.formatEther(gasCost)} ETH`);
-                console.log(`Future value: ${ethers.utils.formatEther(value)} ETH`);
-                console.log(`Total cost: ${ethers.utils.formatEther(totalCost)} ETH`);
-            }
-
-            // Deploy
-            const createBtn = document.getElementById('create-future-btn');
-            createBtn.disabled = true;
-            createBtn.textContent = 'Deploying...';
-
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Deploying Gaussian Future contract...',
-                type: 'info'
-            });
-
-            const { contract, address, deployTransaction } = await ContractDeployer.deploy(
-                'gaussian-future',
-                web3Provider,
-                [epoch],  // Constructor args: _lifetime
-                { value }  // Send ETH with deployment
-            );
-
-            // Track the deployed future
-            this.deployedFutures.push({
-                address,
-                epoch,
-                value: value.toString(),
-                deployedAt: Math.floor(Date.now() / 1000),
-                txHash: deployTransaction.hash
-            });
-
-            // Save to localStorage
-            this.saveFuturesHistory();
-
-            // Show success
-            eventBus.emit(EVENTS.TOAST, {
-                message: `🎉 Future deployed at ${address}`,
-                type: 'success'
-            });
-
-            eventBus.emit(EVENTS.CONFETTI);
-
-            // Show deployed contract info
-            this.showDeployedContract(address, epoch, value, deployTransaction.hash);
-
-            // Reset form
-            valueInput.value = '';
-            ttlInput.value = '';
-            this.currentValue = '';
-            this.currentTTL = '';
-            this.updatePreview();
-
-        } catch (error) {
-            console.error('Failed to deploy future:', error);
-            
-            let message = 'Failed to deploy future';
-            if (error.message.includes('user rejected')) {
-                message = 'Deployment cancelled';
-            } else if (error.message.includes('insufficient funds')) {
-                message = 'Insufficient funds for deployment';
-            }
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message,
-                type: 'error'
-            });
-        } finally {
-            const createBtn = document.getElementById('create-future-btn');
-            if (createBtn) {
-                createBtn.disabled = false;
-                createBtn.textContent = 'Create Future';
-            }
-        }
-    }
-
-    /**
-     * Save deployment history to localStorage
-     */
-    saveFuturesHistory() {
-        try {
-            localStorage.setItem('deployedFutures', JSON.stringify(this.deployedFutures));
-        } catch (error) {
-            console.error('Failed to save futures history:', error);
-        }
-    }
-
-    /**
-     * Load deployment history from localStorage
-     */
-    loadFuturesHistory() {
-        try {
-            const saved = localStorage.getItem('deployedFutures');
-            if (saved) {
-                this.deployedFutures = JSON.parse(saved);
-                this.displayFuturesHistory();
-            }
-        } catch (error) {
-            console.error('Failed to load futures history:', error);
-        }
-    }
-
-    /**
-     * Display deployed contract info
-     */
-    showDeployedContract(address, epoch, value, txHash) {
-        const container = document.getElementById('deployed-contracts');
-        if (!container) return;
-
-        const contractDiv = document.createElement('div');
-        contractDiv.className = 'deployed-contract';
-        contractDiv.innerHTML = `
-            <h4>✅ Future Contract Deployed</h4>
-            <div class="contract-details">
-                <div class="detail-row">
-                    <span class="detail-label">Address:</span>
-                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                        <a href="${config.blockExplorer}/address/${address}" 
-                           target="_blank" 
-                           class="contract-address"
-                           style="color: white;">${address}</a>
-                        <button class="copy-btn" data-copy-text="${address}" title="Copy to clipboard">📋</button>
-                    </div>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Value:</span>
-                    <span>${ethers.utils.formatEther(value)} ETH</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Duration:</span>
-                    <span>${epoch} seconds (${(epoch / 86400).toFixed(1)} days)</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-label">Transaction:</span>
-                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                        <a href="${config.blockExplorer}/tx/${txHash}" 
-                           target="_blank" 
-                           class="contract-address"
-                           style="color: white;">${txHash}</a>
-                        <button class="copy-btn" data-copy-text="${txHash}" title="Copy to clipboard">📋</button>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        container.prepend(contractDiv);
-        container.classList.remove('hidden');
-    }
-
-    /**
-     * Display futures deployment history
-     */
-    displayFuturesHistory() {
-        const container = document.getElementById('deployed-contracts');
-        if (!container || this.deployedFutures.length === 0) return;
-
-        container.classList.remove('hidden');
-        
-        this.deployedFutures.forEach(future => {
-            this.showDeployedContract(
-                future.address,
-                future.epoch,
-                ethers.BigNumber.from(future.value),
-                future.txHash
-            );
+        // Future selected
+        eventBus.on('FUTURE_SELECTED', async (future) => {
+            console.log('Future selected:', future);
+            this.viewRouter.navigateToDiscussion(future); // Reuse discussion navigation
         });
-    }
-
-    /**
-     * Handle loading contract information
-     */
-    async handleLoadContract() {
-        const contractAddress = document.getElementById('contract-address')?.value;
-        
-        if (!contractAddress || !ethers.utils.isAddress(contractAddress)) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter a valid contract address',
-                type: 'error'
-            });
-            return;
-        }
-
-        try {
-            // Load the contract ABI
-            const response = await fetch('/contracts/build/bytecode/gaussian-future.json');
-            const { abi } = await response.json();
             
-            // Create contract instance
-            const provider = web3Provider.getProvider();
-            const contract = new ethers.Contract(contractAddress, abi, provider);
+        // Navigate to market
+        eventBus.on('NAVIGATE_TO_MARKET', () => {
+            console.log('Navigating to market...');
+            this.viewRouter.navigateToBoard(); // Reuse board navigation
+        });
 
-            // Fetch contract data
-            const [owner, initialValue, balance, timeRemaining, startTime, lifetime, mean, lastT, lastCdf] = 
-                await Promise.all([
-                    contract.current_owner(),
-                    contract.initial_value(),
-                    contract.get_balance(),
-                    contract.time_remaining(),
-                    contract.start_time(),
-                    contract.lifetime(),
-                    contract.mean(),
-                    contract.last_t(),
-                    contract.last_tail()
-                ]);
-
-            // Calculate current time position
-            const elapsed = lastT.toNumber();
-            const total = lifetime.toNumber();
-            const percentComplete = (elapsed / total * 100).toFixed(1);
-
-            // Format time remaining
-            const timeRemainingSeconds = timeRemaining.toNumber();
-            const hours = Math.floor(timeRemainingSeconds / 3600);
-            const minutes = Math.floor((timeRemainingSeconds % 3600) / 60);
-            const timeStr = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-
-            // Calculate expected payout (simplified - actual would need CDF calculation)
-            const currentTime = Math.floor(Date.now() / 1000);
-            const contractStartTime = startTime.toNumber();
-            const elapsedNow = currentTime - contractStartTime;
-            const distanceFromMean = Math.abs(elapsedNow - mean.toNumber());
+        // Navigate to board (alias for market)
+        eventBus.on('NAVIGATE_TO_BOARD', () => {
+            console.log('Navigating to market...');
+            this.viewRouter.navigateToBoard();
+        });
             
-            // Simple payout estimate (this is approximate)
-            const maxPayout = balance.mul(30).div(100); // Assume max ~30% of remaining
-            const payoutFactor = Math.max(0, 1 - (distanceFromMean / mean.toNumber()));
-            const estimatedPayout = maxPayout.mul(Math.floor(payoutFactor * 100)).div(100);
+        // Create future button
+        const createBtn = document.getElementById('create-future-btn');
+        const formContainer = document.getElementById('create-future-form-container');
+        const closeFormBtn = document.getElementById('close-create-form');
+        const cancelBtn = document.getElementById('cancel-create-btn');
 
-            // Display information
-            document.getElementById('info-owner').textContent = owner;
-            document.getElementById('info-owner').style.color = 'white';
-            document.getElementById('info-value').textContent = `${ethers.utils.formatEther(initialValue)} ETH`;
-            document.getElementById('info-balance').textContent = `${ethers.utils.formatEther(balance)} ETH`;
-            document.getElementById('info-time').textContent = timeStr;
-            document.getElementById('info-position').textContent = `${percentComplete}% (${elapsed}s / ${total}s)`;
-            document.getElementById('info-payout').textContent = `~${ethers.utils.formatEther(estimatedPayout)} ETH`;
-
-            document.getElementById('contract-info').classList.remove('hidden');
-            
-            // Show copy button for owner address
-            document.getElementById('copy-owner').classList.remove('hidden');
-
-            // Enable transfer button if connected and owner
-            if (web3Provider.isConnected()) {
-                const userAddress = await web3Provider.getAddress();
-                const isOwner = userAddress.toLowerCase() === owner.toLowerCase();
-                document.getElementById('transfer-ownership-btn').disabled = !isOwner;
-                
-                if (!isOwner) {
+        if (createBtn && formContainer) {
+            createBtn.addEventListener('click', () => {
+                // Check wallet connection
+                if (!this.web3Provider.currentAddress) {
                     eventBus.emit(EVENTS.TOAST, {
-                        message: 'You are not the owner of this contract',
+                        message: 'Please connect your wallet first',
                         type: 'warning'
                     });
+                    return;
                 }
-            }
+                
+                formContainer.classList.toggle('hidden');
+            });
+        }
 
-        } catch (error) {
-            console.error('Failed to load contract:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load contract information',
-                type: 'error'
+        if (closeFormBtn && formContainer) {
+            closeFormBtn.addEventListener('click', () => {
+                formContainer.classList.add('hidden');
+            });
+        }
+
+        if (cancelBtn && formContainer) {
+            cancelBtn.addEventListener('click', () => {
+                formContainer.classList.add('hidden');
+                document.getElementById('create-future-form')?.reset();
+            });
+        }
+
+        // Filter tabs
+        const filterTabs = document.querySelectorAll('.filter-tabs .tab');
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', async (e) => {
+                // Update active state
+                filterTabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+
+                // Update filter
+                const filter = e.target.dataset.filter;
+                await this.marketTable.setFilter(filter);
+            });
+        });
+
+        // Sort select
+        const sortSelect = document.getElementById('market-sort-select');
+        if (sortSelect) {
+            sortSelect.addEventListener('change', async (e) => {
+                await this.marketTable.setSortBy(e.target.value);
+            });
+        }
+
+        // Direct transfer form
+        const transferForm = document.getElementById('direct-transfer-form');
+        if (transferForm) {
+            transferForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await this.handleDirectTransfer();
+            });
+        }
+
+        // Etherscan link
+        const etherscanLink = document.getElementById('view-factory-etherscan');
+        if (etherscanLink) {
+            etherscanLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const networkId = this.web3Provider.networkId;
+                const factoryAddress = this.factory.contractAddress;
+                const baseUrl = networkId === 11155111 ? 'https://sepolia.etherscan.io' : 'https://etherscan.io';
+                window.open(`${baseUrl}/address/${factoryAddress}`, '_blank');
             });
         }
     }
 
-    /**
-     * Handle transferring ownership and claiming payout
-     */
-    async handleTransferOwnership() {
-        if (!web3Provider.isConnected()) {
+    setupFactoryEvents() {
+        // Listen to factory contract events
+        this.factory.subscribeToEvents({
+            FutureCreated: async (event) => {
+                console.log('New future created:', event);
+                
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `📈 New future created!`,
+                    type: 'info'
+                });
+
+                // Refresh current view
+                await this.refreshCurrentView();
+            },
+
+            FutureListed: async (event) => {
+                console.log('Future listed:', event);
+
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet first',
+                    message: `📋 Future listed for sale`,
+                type: 'info'
+            });
+
+                // Refresh current view
+                await this.refreshCurrentView();
+            },
+
+            FutureSold: async (event) => {
+                console.log('Future sold:', event);
+                
+                const price = ethers.utils.formatEther(event.price);
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `💰 Future sold for ${parseFloat(price).toFixed(4)} ETH`,
+                    type: 'success'
+                });
+
+                // Refresh current view
+                await this.refreshCurrentView();
+            },
+
+            FutureDelisted: async (event) => {
+                console.log('Future delisted:', event);
+            
+            eventBus.emit(EVENTS.TOAST, {
+                    message: '📤 Future removed from marketplace',
+                type: 'info'
+            });
+
+                // Refresh current view
+                await this.refreshCurrentView();
+            },
+
+            FutureReplaced: async (event) => {
+                console.log('Future replaced:', event);
+
+            eventBus.emit(EVENTS.TOAST, {
+                    message: '🔄 Future replaced',
+                    type: 'info'
+            });
+
+                // Refresh current view
+                await this.refreshCurrentView();
+            }
+        });
+    }
+
+    /**
+     * Route change handler
+     */
+    async onRouteChange(data) {
+        console.log('Route changed:', data);
+        await this.renderCurrentView();
+    }
+
+    /**
+     * Render current view based on router state
+     */
+    async renderCurrentView() {
+        const state = this.viewRouter.getState();
+
+        // Show/hide view containers
+        const marketView = document.getElementById('market-view');
+        const futureView = document.getElementById('future-view');
+
+        if (state.state === ViewState.BOARD_VIEW) {
+            // Show market view
+            if (marketView) marketView.classList.remove('hidden');
+            if (futureView) futureView.classList.add('hidden');
+
+            // Render market table (this also updates stats)
+            await this.marketTable.render();
+
+        } else if (state.state === ViewState.DISCUSSION_VIEW) {
+            // Show future view
+            if (marketView) marketView.classList.add('hidden');
+            if (futureView) futureView.classList.remove('hidden');
+
+            // Render future detail view
+            await this.renderFutureView(state.discussion);
+        }
+    }
+
+    /**
+     * Render future detail view (Level 2)
+     */
+    async renderFutureView(future) {
+        const container = document.getElementById('future-view');
+        if (!container) return;
+
+        try {
+            this.currentFutureView = new FutureDetailView(
+                future,
+                this.factory,
+                this.web3Provider,
+                this.futureAbi
+            );
+
+            this.currentFutureView.setContainer(container);
+            await this.currentFutureView.render();
+
+        } catch (error) {
+            console.error('Failed to render future view:', error);
+            container.innerHTML = `
+                <div class="error-state">
+                    <p>Failed to load future details</p>
+                    <button onclick="eventBus.emit('NAVIGATE_TO_MARKET')">← Back to Market</button>
+                </div>
+            `;
+        }
+    }
+
+    /**
+     * Handle direct transfer of a future
+     */
+    async handleDirectTransfer() {
+        const futureAddress = document.getElementById('transfer-future-address').value.trim();
+        const newOwner = document.getElementById('transfer-new-owner').value.trim();
+
+        if (!this.web3Provider.currentAddress) {
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Please connect your wallet',
                 type: 'warning'
             });
             return;
         }
 
-        const contractAddress = document.getElementById('contract-address')?.value;
-        const newOwnerAddress = document.getElementById('new-owner-address')?.value;
-
-        if (!contractAddress || !ethers.utils.isAddress(contractAddress)) {
+        if (!futureAddress || !ethers.utils.isAddress(futureAddress)) {
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter a valid contract address',
+                message: 'Invalid future contract address',
                 type: 'error'
             });
             return;
         }
 
-        if (!newOwnerAddress || !ethers.utils.isAddress(newOwnerAddress)) {
+        if (!newOwner || !ethers.utils.isAddress(newOwner)) {
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter a valid new owner address',
+                message: 'Invalid new owner address',
                 type: 'error'
             });
             return;
         }
 
         try {
-            // Load the contract ABI
-            const response = await fetch('/contracts/build/bytecode/gaussian-future.json');
-            const { abi } = await response.json();
-            
-            // Create contract instance with signer
-            const signer = web3Provider.getSigner();
-            const contract = new ethers.Contract(contractAddress, abi, signer);
+            // Create EulerianFuture instance
+            const { EulerianFuture } = await import('./domain/futures/eulerian-future.js');
+            const future = new EulerianFuture(this.web3Provider, futureAddress, this.futureAbi);
+            await future.init();
 
-            // Check ownership
-            const currentOwner = await contract.current_owner();
-            const userAddress = await web3Provider.getAddress();
-            
-            if (currentOwner.toLowerCase() !== userAddress.toLowerCase()) {
+            // Check if user is owner
+            const currentOwner = await future.getCurrentOwner();
+            if (currentOwner.toLowerCase() !== this.web3Provider.currentAddress.toLowerCase()) {
                 eventBus.emit(EVENTS.TOAST, {
-                    message: 'You are not the owner of this contract',
+                    message: 'You are not the owner of this future',
                     type: 'error'
                 });
                 return;
             }
 
-            // Get balance before transfer
-            const balanceBefore = await contract.get_balance();
-
+            // Attempt transfer
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Transferring ownership...',
+                message: 'Initiating transfer...',
                 type: 'info'
             });
 
-            // Call transfer function
-            const tx = await contract.transfer(newOwnerAddress);
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Transaction sent, waiting for confirmation...',
-                type: 'info'
-            });
-
-            const receipt = await tx.wait();
-
-            // Get balance after transfer to calculate payout
-            const balanceAfter = await contract.get_balance();
-            const payout = balanceBefore.sub(balanceAfter);
+            await future.transfer(newOwner);
 
             eventBus.emit(EVENTS.TOAST, {
-                message: `✅ Transfer complete! You received ${ethers.utils.formatEther(payout)} ETH`,
+                message: 'Transfer successful! Payout sent to your wallet.',
                 type: 'success'
             });
 
-            eventBus.emit(EVENTS.CONFETTI);
+            // Clear form
+            document.getElementById('direct-transfer-form').reset();
 
-            // Refresh contract info
-            await this.handleLoadContract();
-
-            // Clear new owner input
-            document.getElementById('new-owner-address').value = '';
-
-        } catch (error) {
-            console.error('Failed to transfer ownership:', error);
-            
-            let message = 'Failed to transfer ownership';
-            if (error.message.includes('user rejected')) {
-                message = 'Transaction cancelled';
-            } else if (error.message.includes('expired')) {
-                message = 'Contract has expired';
+            // Refresh market if visible
+            if (this.viewRouter.isViewingBoard()) {
+                await this.marketTable.refresh();
             }
-            
-            eventBus.emit(EVENTS.TOAST, {
-                message,
-                type: 'error'
-            });
-        }
-    }
 
-    /**
-     * Handle viewing bytecode
-     */
-    async handleViewBytecode() {
-        try {
-            const response = await fetch('/contracts/build/bytecode/gaussian-future.json');
-            const data = await response.json();
-            
-            const bytecode = data.bytecode;
-            
-            // Create a new window with formatted content
-            const newWindow = window.open('', '_blank');
-            newWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Gaussian Future - Bytecode</title>
-                    <style>
-                        body {
-                            font-family: monospace;
-                            padding: 20px;
-                            background: #1a1a1a;
-                            color: #00ff00;
-                            line-height: 1.6;
-                        }
-                        h1 {
-                            color: #00ff00;
-                            border-bottom: 2px solid #00ff00;
-                            padding-bottom: 10px;
-                        }
-                        .bytecode {
-                            background: #000;
-                            padding: 20px;
-                            border-radius: 8px;
-                            word-break: break-all;
-                            font-size: 12px;
-                            max-height: 80vh;
-                            overflow-y: auto;
-                        }
-                        .stats {
-                            margin: 20px 0;
-                            padding: 15px;
-                            background: rgba(0, 255, 0, 0.1);
-                            border-radius: 8px;
-                        }
-                        button {
-                            background: #00ff00;
-                            color: #000;
-                            border: none;
-                            padding: 10px 20px;
-                            border-radius: 4px;
-                            cursor: pointer;
-                            font-family: monospace;
-                            font-weight: bold;
-                            margin-top: 10px;
-                        }
-                        button:hover {
-                            background: #00cc00;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1>📦 Gaussian Future - Compiled Bytecode</h1>
-                    <div class="stats">
-                        <strong>Size:</strong> ${(bytecode.length - 2) / 2} bytes<br>
-                        <strong>Max Contract Size:</strong> 24,576 bytes<br>
-                        <strong>Status:</strong> ${(bytecode.length - 2) / 2 <= 24576 ? '✅ Within EVM Limits' : '❌ Exceeds Limits'}
-                        <br><br>
-                        <button onclick="navigator.clipboard.writeText('${bytecode}').then(() => alert('Bytecode copied to clipboard!'))">
-                            📋 Copy Bytecode
-                        </button>
-                    </div>
-                    <div class="bytecode">${bytecode}</div>
-                </body>
-                </html>
-            `);
-            newWindow.document.close();
         } catch (error) {
-            console.error('Failed to load bytecode:', error);
+            console.error('Transfer failed:', error);
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load bytecode',
+                message: error.message || 'Transfer failed',
                 type: 'error'
             });
         }
     }
 
     /**
-     * Handle viewing ABI
+     * Refresh current view
      */
-    async handleViewAbi() {
-        try {
-            const response = await fetch('/contracts/build/abis/gaussian-future.json');
-            const abi = await response.json();
-            
-            const formattedAbi = JSON.stringify(abi, null, 2);
-            
-            // Create a new window with formatted content
-            const newWindow = window.open('', '_blank');
-            newWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Gaussian Future - ABI</title>
-                    <style>
-                        body {
-                            font-family: monospace;
-                            padding: 20px;
-                            background: #1a1a1a;
-                            color: #00ff00;
-                            line-height: 1.6;
-                        }
-                        h1 {
-                            color: #00ff00;
-                            border-bottom: 2px solid #00ff00;
-                            padding-bottom: 10px;
-                        }
-                        .abi {
-                            background: #000;
-                            padding: 20px;
-                            border-radius: 8px;
-                            font-size: 12px;
-                            max-height: 80vh;
-                            overflow-y: auto;
-                            white-space: pre-wrap;
-                        }
-                        .stats {
-                            margin: 20px 0;
-                            padding: 15px;
-                            background: rgba(0, 255, 0, 0.1);
-                            border-radius: 8px;
-                        }
-                        button {
-                            background: #00ff00;
-                            color: #000;
-                            border: none;
-                            padding: 10px 20px;
-                            border-radius: 4px;
-                            cursor: pointer;
-                            font-family: monospace;
-                            font-weight: bold;
-                            margin-top: 10px;
-                        }
-                        button:hover {
-                            background: #00cc00;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <h1>📋 Gaussian Future - ABI (Application Binary Interface)</h1>
-                    <div class="stats">
-                        <strong>Functions:</strong> ${abi.filter(item => item.type === 'function').length}<br>
-                        <strong>Constructor:</strong> ${abi.filter(item => item.type === 'constructor').length}<br>
-                        <strong>Fallback:</strong> ${abi.filter(item => item.type === 'fallback').length}
-                        <br><br>
-                        <button onclick="navigator.clipboard.writeText(\`${formattedAbi.replace(/`/g, '\\`')}\`).then(() => alert('ABI copied to clipboard!'))">
-                            📋 Copy ABI
-                        </button>
-                    </div>
-                    <div class="abi">${formattedAbi}</div>
-                </body>
-                </html>
-            `);
-            newWindow.document.close();
-        } catch (error) {
-            console.error('Failed to load ABI:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load ABI',
-                type: 'error'
-            });
-        }
-    }
+    async refreshCurrentView() {
+        const state = this.viewRouter.getState();
 
-    /**
-     * Draw the Gaussian distribution graph
-     */
-    drawDistributionGraph() {
-        const canvas = document.getElementById('distribution-graph');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width;
-        const height = canvas.height;
-        const padding = 40;
-        const graphWidth = width - 2 * padding;
-        const graphHeight = height - 2 * padding;
-
-        // Clear canvas
-        ctx.clearRect(0, 0, width, height);
-
-        // Gaussian parameters
-        const mean = 0.5; // Center at 50% of time
-        const stdDev = 0.144; // ~1/sqrt(12) for uniform distribution
-
-        // Function to calculate Gaussian PDF
-        const gaussian = (x) => {
-            const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(stdDev, 2));
-            return Math.exp(exponent) / (stdDev * Math.sqrt(2 * Math.PI));
-        };
-
-        // Find max value for scaling
-        const maxY = gaussian(mean);
-
-        // Draw axes
-        ctx.strokeStyle = '#888';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(padding, padding);
-        ctx.lineTo(padding, height - padding);
-        ctx.lineTo(width - padding, height - padding);
-        ctx.stroke();
-
-        // Draw the Gaussian curve
-        ctx.strokeStyle = '#4CAF50';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-
-        for (let i = 0; i <= 200; i++) {
-            const t = i / 200; // Time from 0 to 1
-            const y = gaussian(t);
-            const x = padding + t * graphWidth;
-            const yPos = height - padding - (y / maxY) * graphHeight;
-            
-            if (i === 0) {
-                ctx.moveTo(x, yPos);
-            } else {
-                ctx.lineTo(x, yPos);
+        if (state.state === ViewState.BOARD_VIEW) {
+            // MarketTable.refresh() handles both table and stats
+            await this.marketTable.refresh();
+        } else if (state.state === ViewState.DISCUSSION_VIEW) {
+            if (this.currentFutureView) {
+                await this.currentFutureView.refresh();
             }
         }
-        ctx.stroke();
+    }
 
-        // Fill area under curve
-        ctx.fillStyle = 'rgba(76, 175, 80, 0.2)';
-        ctx.beginPath();
-        ctx.moveTo(padding, height - padding);
-        for (let i = 0; i <= 200; i++) {
-            const t = i / 200;
-            const y = gaussian(t);
-            const x = padding + t * graphWidth;
-            const yPos = height - padding - (y / maxY) * graphHeight;
-            ctx.lineTo(x, yPos);
-        }
-        ctx.lineTo(width - padding, height - padding);
-        ctx.closePath();
-        ctx.fill();
-
-        // Mark the mean
-        const meanX = padding + mean * graphWidth;
-        ctx.strokeStyle = '#FFC107';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(meanX, padding);
-        ctx.lineTo(meanX, height - padding);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Labels
-        ctx.fillStyle = '#ddd';
-        ctx.font = '14px monospace';
-        ctx.textAlign = 'center';
+    async onWalletChanged() {
+        // Reinitialize factory with new signer
+        await this.loadFactory();
         
-        // X-axis labels
-        ctx.fillText('Start', padding, height - 10);
-        ctx.fillText('Midpoint', meanX, height - 10);
-        ctx.fillText('End', width - padding, height - 10);
-        
-        // Y-axis label
-        ctx.save();
-        ctx.translate(15, height / 2);
-        ctx.rotate(-Math.PI / 2);
-        ctx.fillText('Payout Rate', 0, 0);
-        ctx.restore();
-
-        // Title
-        ctx.font = 'bold 16px monospace';
-        ctx.fillText('Value Distribution Over Time', width / 2, 25);
+        // Refresh current view
+        await this.refreshCurrentView();
     }
 }
 
-// Initialize app when DOM is loaded
-console.log('📦 futures-app.js loaded, document.readyState:', document.readyState);
-
-if (document.readyState === 'loading') {
-    console.log('⏳ Waiting for DOMContentLoaded...');
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('✅ DOMContentLoaded fired, initializing FuturesApp...');
-        new FuturesApp();
-    });
-} else {
-    console.log('✅ DOM already ready, initializing FuturesApp...');
-    new FuturesApp();
-}
-
+// Export the class for manual initialization
+export { FuturesApp };

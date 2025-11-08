@@ -159,8 +159,16 @@ export class DiscussionDetailView {
                         <div class="metadata-row">
                             <div class="metadata-item">
                                 <span class="metadata-label">Creator:</span>
-                                <code>${creatorShort}</code>
-                                <span class="metadata-full" title="${this.discussionData.creator}">(${this.discussionData.creator})</span>
+                                <code title="${this.discussionData.creator}">${creatorShort}</code>
+                                <button class="btn-copy-inline" data-copy="${this.discussionData.creator}" title="Copy address">
+                                    📋
+                                </button>
+                                <a href="https://sepolia.etherscan.io/address/${this.discussionData.creator}" 
+                                   target="_blank" 
+                                   class="btn-etherscan-inline" 
+                                   title="View on Etherscan">
+                                    ↗
+                                </a>
                             </div>
                             <div class="metadata-item">
                                 <span class="metadata-label">Created:</span>
@@ -168,7 +176,16 @@ export class DiscussionDetailView {
                             </div>
                             <div class="metadata-item">
                                 <span class="metadata-label">Contract:</span>
-                                <code>${this.discussionData.address.slice(0, 10)}...</code>
+                                <code title="${this.discussionData.address}">${this.discussionData.address.slice(0, 10)}...</code>
+                                <button class="btn-copy-inline" data-copy="${this.discussionData.address}" title="Copy address">
+                                    📋
+                                </button>
+                                <a href="https://sepolia.etherscan.io/address/${this.discussionData.address}" 
+                                   target="_blank" 
+                                   class="btn-etherscan-inline" 
+                                   title="View on Etherscan">
+                                    ↗
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -265,6 +282,15 @@ export class DiscussionDetailView {
             });
         }
 
+        // Copy buttons
+        const copyButtons = this.containerElement.querySelectorAll('.btn-copy-inline');
+        copyButtons.forEach(button => {
+            button.addEventListener('click', async () => {
+                const text = button.dataset.copy;
+                await this.copyToClipboard(text);
+            });
+        });
+
         // Toggle post form
         const toggleButton = this.containerElement.querySelector('#toggle-post-form');
         const formContainer = this.containerElement.querySelector('#post-message-form-container');
@@ -351,6 +377,36 @@ export class DiscussionDetailView {
         // Update section title
         const sectionTitle = this.containerElement.querySelector('.section-title');
         if (sectionTitle) sectionTitle.textContent = `Messages (${this.discussionData.messageCount})`;
+    }
+
+    /**
+     * Copy text to clipboard
+     */
+    async copyToClipboard(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+            eventBus.emit(EVENTS.TOAST, {
+                message: '📋 Copied to clipboard!',
+                type: 'success'
+            });
+        } catch (error) {
+            console.error('Failed to copy to clipboard:', error);
+            // Fallback
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                eventBus.emit(EVENTS.TOAST, {
+                    message: '📋 Copied to clipboard!',
+                    type: 'success'
+                });
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+            }
+            document.body.removeChild(textArea);
+        }
     }
 
     /**

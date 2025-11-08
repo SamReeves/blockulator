@@ -1,7 +1,7 @@
 {
-  "contractName": "BOARD",
-  "contractFile": "board.vy",
-  "abiPath": "contracts/build/abis/board.json",
-  "bytecodePath": "contracts/build/bytecode/board.json",
-  "timestamp": "2025-11-07T21:12:20Z"
+  "contractName": "FUTURE_FACTORY",
+  "contractFile": "future_factory.vy",
+  "abiPath": "contracts/build/abis/future-factory.json",
+  "bytecodePath": "contracts/build/bytecode/future-factory.json",
+  "timestamp": "2025-11-08T00:16:17Z"
 }
