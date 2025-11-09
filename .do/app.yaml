@@ -4,6 +4,5 @@ static_sites:
   github:
     branch: testnet
     deploy_on_push: true
-  build_command: cp -r . _static
+  build_command: mkdir _static && cp *.html *.css *.png _static/ && cp -r js styles contracts _static/
   output_dir: _static
-  catchall_document: index.html
