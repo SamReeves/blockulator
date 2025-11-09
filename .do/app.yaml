@@ -3,14 +3,14 @@ name: whalegames
 static_sites:
   - name: whalegames-frontend
     github:
-      branch: master
+      branch: testnet
       deploy_on_push: true
     
-    # No build phase needed - just serve the files
-    build_command: ""
+    # Build command to prepare static files
+    build_command: npm run build
     
-    # Serve from root directory
-    output_dir: /
+    # Output directory where build files are located
+    output_dir: dist
     
     # Routes and error pages
     routes:
