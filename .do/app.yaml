@@ -4,8 +4,5 @@ static_sites:
   github:
     branch: testnet
     deploy_on_push: true
-  build_command: node scripts/build.js
+  build_command: mkdir dist && find . -maxdepth 1 -type f -exec cp {} dist/ \; && cp -r js styles contracts dist/
   output_dir: dist
-  error_document: index.html
-  routes:
-  - path: /
