@@ -3,16 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WhaleGames - Blockchain games on Sepolia testnet">
-    <title>WhaleGames - Games</title>
+    <meta name="description" content="WhaleGames - Blockchain games, tools, discussions, and futures on Sepolia testnet">
+    <title>WhaleGames</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐋</text></svg>">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div id="app">
-        <!-- Header loaded dynamically -->
+        <!-- Header - Loaded once, never reloaded -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1 class="app-title">🐋 WhaleGames</h1>
+                <span class="testnet-badge">TESTNET</span>
+                <span id="readonly-badge" class="readonly-badge hidden">Browsing</span>
+            </div>
+            <nav class="header-nav">
+                <a href="#/games" class="nav-link" data-route="games">Games</a>
+                <a href="#/tools" class="nav-link" data-route="tools">Calculator</a>
+                <a href="#/discussions" class="nav-link" data-route="discussions">Discussions</a>
+                <a href="#/factory" class="nav-link" data-route="factory">Factory</a>
+                <a href="https://sepolia-faucet.pk910.de/" class="nav-link" target="_blank">Faucet</a>
+            </nav>
+            <div class="header-right">
+                <button id="connect-wallet" class="btn-connect">Connect</button>
+                <div id="wallet-info" class="wallet-info hidden">
+                    <div class="wallet-line">
+                        <span id="wallet-address" class="wallet-value"></span>
+                        <button id="copy-address" class="copy-btn">📋</button>
+                    </div>
+                    <div class="wallet-line">
+                        <span id="wallet-balance" class="wallet-value"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-        <main id="content" class="content">
+        <!-- Main Content Area - Contains all views -->
+        <main id="main-content">
+            
+            <!-- GAMES VIEW -->
+            <div id="games-view" class="view-container hidden" data-view="games">
+                <div id="content" class="content">
             <div class="game-list">
                 <button class="game-card" data-game="pissing-contest" data-emoji="💦">
                     <h3>💦 Pissing Contest</h3>
@@ -56,17 +87,442 @@
                 <button id="back-to-games" class="btn-back">← Back</button>
                 <div id="game-container"></div>
             </div>
+                </div>
+            </div>
+
+            <!-- TOOLS VIEW -->
+            <div id="tools-view" class="view-container hidden" data-view="tools">
+                <div id="tools-content" class="content">
+                    <div id="tool-container"></div>
+                </div>
+            </div>
+
+            <!-- DISCUSSIONS VIEW -->
+            <div id="discussions-view" class="view-container hidden" data-view="discussions">
+                <div id="discussions-content" class="content">
+                    <div class="discussions-layout">
+                        
+                        <!-- PRIMARY VIEW AREA (State-driven: Board Table OR Discussion Detail) -->
+                        <div class="primary-view-area">
+                            
+                            <!-- BOARD VIEW (Level 1) -->
+                            <div id="board-view" class="view-container">
+                                
+                                <!-- Create Discussion Button -->
+                                <div class="view-header">
+                                    <h2 class="view-title">Discussions</h2>
+                                    <button id="create-discussion-btn" class="btn-primary">
+                                        ➕ Create Discussion
+                                    </button>
+                                </div>
+
+                                <!-- Create Discussion Form (Hidden by default) -->
+                                <div id="create-discussion-form-container" class="form-panel hidden">
+                                    <div class="form-panel-header">
+                                        <h3>✍️ Create New Discussion</h3>
+                                        <button id="close-create-form" class="btn-close">✖</button>
+                                    </div>
+
+                                    <form id="create-form" class="discussion-form">
+                                        <div class="form-group">
+                                            <label for="discussion-subject">
+                                                <span>Subject</span>
+                                                <span id="subject-counter" class="char-counter">0/200</span>
+                                            </label>
+                                            <input type="text" id="discussion-subject" name="subject" 
+                                                   placeholder="Enter discussion subject..." maxlength="200" required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="discussion-body">
+                                            <span>Description</span>
+                                                <span id="body-counter" class="char-counter">0/1000</span>
+                                        </label>
+                                            <textarea id="discussion-body" name="body" 
+                                                      placeholder="Describe your discussion topic..." 
+                                                      maxlength="1000" rows="4" required></textarea>
+                                    </div>
+
+                                        <div class="form-group">
+                                        <div id="initial-value-input"></div>
+                                            <div id="value-warning" class="value-warning"></div>
+                                    </div>
+
+                                        <details class="advanced-config">
+                                            <summary>
+                                                <span>▶</span>
+                                            <span>⚙️ Advanced Configuration (Optional)</span>
+                                        </summary>
+                                            <div class="advanced-config-content">
+                                                <div class="config-grid">
+                                                    <div class="form-group">
+                                                        <label for="max-messages">Max Messages (1-1000)</label>
+                                                        <input type="number" id="max-messages" name="max_messages" 
+                                                               value="100" min="1" max="1000" required>
+                                                    </div>
+                                                <div class="form-group">
+                                                        <label for="max-message-length">Max Length (1-500)</label>
+                                                        <input type="number" id="max-message-length" name="max_message_length" 
+                                                               value="200" min="1" max="500" required>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div id="min-donation-input"></div>
+                                            </div>
+                                        </div>
+                                    </details>
+
+                                        <div class="form-actions">
+                                            <button type="button" id="cancel-create-btn" class="btn-secondary">
+                                            Cancel
+                                        </button>
+                                            <button type="submit" id="create-submit-btn" class="btn-submit">
+                                            🚀 Create Discussion
+                                        </button>
+                                    </div>
+                                </form>
+                        </div>
+
+                                <!-- Filter & Sort Controls -->
+                                <div class="table-controls">
+                                    <div class="filter-tabs">
+                                        <button class="tab active" data-filter="all">All</button>
+                                        <button class="tab" data-filter="active">Active</button>
+                                        <button class="tab" data-filter="inactive">Stale/Inactive</button>
+                                            </div>
+                                    <div class="sort-controls">
+                                        <label for="board-sort-select">Sort by:</label>
+                                        <select id="board-sort-select">
+                                            <option value="recent">Most Recent</option>
+                                            <option value="activity">Last Activity</option>
+                                            <option value="pool">Highest Pool</option>
+                                            <option value="messages">Most Messages</option>
+                                        </select>
+                                    </div>
+                        </div>
+
+                                <!-- Board Table Container -->
+                                <div id="board-table-container" class="table-view"></div>
+                        </div>
+
+                            <!-- DISCUSSION VIEW (Level 2) - Initially Hidden -->
+                            <div id="discussion-view" class="view-container hidden">
+                                <!-- Discussion detail view rendered here by DiscussionDetailView component -->
+                            </div>
+
+                        </div>
+
+                        <!-- CONTRACT INFO SECTION -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>📜 Smart Contracts</h3>
+                                <p class="section-subtitle">On-chain discussion board with algorithmic curation</p>
+                            </div>
+                            <div id="discussions-contract-info" class="contracts-grid">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- MECHANICS PANEL (Collapsible) -->
+                        <div id="mechanics-panel" class="info-panel-container"></div>
+
+                        <!-- TECHNICAL PANEL (Collapsible) -->
+                        <div id="technical-panel" class="info-panel-container"></div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- FACTORY VIEW -->
+            <div id="factory-view" class="view-container hidden" data-view="factory">
+                <div id="factory-content" class="content">
+                    <div class="discussions-layout">
+                        
+                        <!-- Elegant Page Header -->
+                        <div class="factory-page-header">
+                            <div class="factory-header-content">
+                                <h1 class="factory-title">🎯 Eulerian Futures</h1>
+                                <p class="factory-subtitle">Time-weighted payout contracts with customizable distributions</p>
+                            </div>
+                            <button id="create-future-btn" class="btn-primary btn-large">
+                                ➕ Create Future
+                            </button>
+                        </div>
+                        
+                        <!-- PRIMARY VIEW AREA (State-driven: Market Table OR Future Detail) -->
+                        <div class="primary-view-area">
+                            
+                            <!-- MARKET VIEW (Level 1) -->
+                            <div id="market-view" class="view-container">
+
+                                <!-- Create Future Form (Hidden by default) -->
+                                <div id="create-future-form-container" class="form-panel hidden">
+                                    <div class="form-panel-header">
+                                        <h3>🚀 Create New Future</h3>
+                                        <button id="close-create-form" class="btn-close">✖</button>
+                                    </div>
+
+                                    <form id="create-future-form" class="discussion-form">
+                                        <div class="form-group">
+                                            <label for="distribution-type">
+                                                <span>Distribution Type</span>
+                                            </label>
+                                            <select id="distribution-type" name="distribution_type" required>
+                                                <option value="0">Uniform - Constant rate</option>
+                                                <option value="1">Gaussian - Bell curve (peak at midpoint)</option>
+                                                <option value="2">Exponential Decay - Early payouts favored</option>
+                                                <option value="3">Exponential Growth - Late payouts favored</option>
+                                                <option value="4">Linear Decay - Triangular (high at start)</option>
+                                                <option value="5">Inverted Gaussian - U-shape (high at extremes)</option>
+                                                <option value="6">Linear Growth - Triangular (low at start, high at end)</option>
+                                            </select>
+                                            <div id="distribution-description" class="form-hint">
+                                                Predictable, constant rate. Value declines linearly from 100% to 0%.
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="lifetime">
+                                                <span>Lifetime (minutes to years)</span>
+                                                <span id="lifetime-display" class="char-counter">1 hour</span>
+                                            </label>
+                                            <input type="range" id="lifetime" name="lifetime" 
+                                                   min="0" max="1000" value="300" step="1">
+                                            <div class="form-hint">
+                                                Minimum: 5 minutes | Maximum: 1000 years (logarithmic scale)
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div id="initial-value-input"></div>
+                                            <div id="value-warning" class="value-warning"></div>
+                                            <div class="form-hint">
+                                                1% creation fee. Remaining value goes into the future contract.
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div id="valuation-preview" class="valuation-preview">
+                                                <canvas id="distribution-chart"></canvas>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-actions">
+                                            <button type="button" id="cancel-create-btn" class="btn-secondary">
+                                                Cancel
+                                            </button>
+                                            <button type="submit" id="create-submit-btn" class="btn-submit">
+                                                🚀 Create Future
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Filter & Sort Controls -->
+                                <div class="table-controls">
+                                    <div class="filter-tabs">
+                                        <button class="tab active" data-filter="all">All</button>
+                                        <button class="tab" data-filter="listed">Listed</button>
+                                        <button class="tab" data-filter="my-futures">My Futures</button>
+                                        <button class="tab" data-filter="uniform">Uniform</button>
+                                        <button class="tab" data-filter="gaussian">Gaussian</button>
+                                        <button class="tab" data-filter="decay">Exp Decay</button>
+                                        <button class="tab" data-filter="growth">Exp Growth</button>
+                                        <button class="tab" data-filter="linear-decay">Linear↓</button>
+                                        <button class="tab" data-filter="inverted">Inverted</button>
+                                        <button class="tab" data-filter="linear-growth">Linear↑</button>
+                                    </div>
+                                    <div class="sort-controls">
+                                        <label for="market-sort-select">Sort by:</label>
+                                        <select id="market-sort-select">
+                                            <option value="recent">Most Recent</option>
+                                            <option value="expiry">Soonest Expiry</option>
+                                            <option value="value">Highest Value</option>
+                                            <option value="expected">Expected Value</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Market Table Container -->
+                                <div id="market-table-container" class="table-view"></div>
+                            </div>
+
+                            <!-- FUTURE DETAIL VIEW (Level 2) - Initially Hidden -->
+                            <div id="future-view" class="view-container hidden">
+                                <!-- Future detail view rendered here by FutureDetailView component -->
+                            </div>
+
+                        </div>
+
+                        <!-- DIRECT TRANSFER TOOL -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>🔄 Direct Transfer Tool</h3>
+                                <p class="section-subtitle">Transfer ownership of unlocked futures without the marketplace</p>
+                            </div>
+                            <div class="transfer-tool-panel">
+                                <form id="direct-transfer-form" class="transfer-form">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="transfer-future-address">Future Contract Address</label>
+                                            <input type="text" id="transfer-future-address" placeholder="0x..." required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="transfer-new-owner">New Owner Address</label>
+                                            <input type="text" id="transfer-new-owner" placeholder="0x..." required>
+                                        </div>
+                                        <div class="form-group form-group-button">
+                                            <button type="submit" class="btn-primary">Transfer Ownership</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-hint">
+                                        ⚠️ Only unlocked futures can be transferred directly. Listed futures must be delisted first.
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- HOW IT WORKS SECTION -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>📖 How It Works</h3>
+                            </div>
+                            <div class="how-it-works-grid">
+                                <div class="work-step">
+                                    <div class="step-number">1</div>
+                                    <h4>Create</h4>
+                                    <p>Deploy a future with ETH and choose a distribution type (Uniform, Gaussian, Exponential, etc.) and lifetime (5 minutes to 1000 years).</p>
+                                </div>
+                                <div class="work-step">
+                                    <div class="step-number">2</div>
+                                    <h4>Hold or Trade</h4>
+                                    <p>List your future on the marketplace or transfer it directly to another address. Each transfer pays out accumulated value.</p>
+                                </div>
+                                <div class="work-step">
+                                    <div class="step-number">3</div>
+                                    <h4>Extract Value</h4>
+                                    <p>Transfer ownership to claim payout based on the distribution curve. The new owner receives the contract with reduced balance.</p>
+                                </div>
+                                <div class="work-step">
+                                    <div class="step-number">4</div>
+                                    <h4>Repeat or Expire</h4>
+                                    <p>The new owner can transfer again. After expiry, the final owner claims all remaining ETH.</p>
+                                </div>
+                            </div>
+                            <div class="key-features">
+                                <div class="feature">
+                                    <span class="feature-icon">✅</span>
+                                    <div>
+                                        <strong>Deterministic</strong>
+                                        <p>Calculate exact payouts before transferring</p>
+                                    </div>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">🔒</span>
+                                    <div>
+                                        <strong>Trustless</strong>
+                                        <p>All logic enforced by smart contracts</p>
+                                    </div>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">📊</span>
+                                    <div>
+                                        <strong>Flexible</strong>
+                                        <p>7 distribution types for different strategies</p>
+                                    </div>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">💹</span>
+                                    <div>
+                                        <strong>Tradeable</strong>
+                                        <p>Marketplace with fair value pricing</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TECHNICAL DETAILS SECTION -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>⚙️ Technical Details</h3>
+                            </div>
+                            <div class="technical-grid">
+                                <div class="technical-item">
+                                    <h4>Distribution Types</h4>
+                                    <ul>
+                                        <li><strong>Uniform (Type 0):</strong> Constant payout rate, linear accumulation</li>
+                                        <li><strong>Gaussian (Type 1):</strong> Bell curve, peak value at midpoint</li>
+                                        <li><strong>Exponential Decay (Type 2):</strong> Front-loaded, 95% paid by ~60% of lifetime</li>
+                                        <li><strong>Exponential Growth (Type 3):</strong> Back-loaded, 95% paid in final ~40%</li>
+                                        <li><strong>Linear Decay (Type 4):</strong> Triangular, high at start, accelerating accumulation</li>
+                                        <li><strong>Inverted Gaussian (Type 5):</strong> U-shaped, high at extremes</li>
+                                        <li><strong>Linear Growth (Type 6):</strong> Triangular, low at start, decelerating accumulation</li>
+                                    </ul>
+                                </div>
+                                <div class="technical-item">
+                                    <h4>Contract Parameters</h4>
+                                    <ul>
+                                        <li><strong>Lifetime Range:</strong> 300 seconds (5 min) to 31.5B seconds (1000 years)</li>
+                                        <li><strong>Creation Fee:</strong> 1% of deposited value</li>
+                                        <li><strong>Marketplace Fee:</strong> 1% of sale price (buy transactions only)</li>
+                                        <li><strong>Minimum Value:</strong> Any amount ≥ 0.0001 ETH</li>
+                                    </ul>
+                                </div>
+                                <div class="technical-item">
+                                    <h4>Payout Formula</h4>
+                                    <p>Payout calculation uses the probability density function (PDF) of each distribution type:</p>
+                                    <code>payout = balance × ∫[pdf(t)] dt</code>
+                                    <p>Where t is the time since creation. The remaining balance after transfer is:</p>
+                                    <code>new_balance = balance - payout</code>
+                                </div>
+                                <div class="technical-item">
+                                    <h4>Marketplace Mechanics</h4>
+                                    <ul>
+                                        <li><strong>Listing:</strong> Futures are "locked" when listed, preventing direct transfers</li>
+                                        <li><strong>Buying:</strong> Automatically unlocks and transfers to buyer</li>
+                                        <li><strong>Delisting:</strong> Unlocks the future for direct transfers</li>
+                                        <li><strong>Fair Pricing:</strong> Expected value calculated as balance × remaining_time_factor</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTRACT INFO SECTION -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>📜 Smart Contracts</h3>
+                                <p class="section-subtitle">Eulerian futures marketplace with time-weighted payouts</p>
+                            </div>
+                            <div id="factory-contract-info" class="contracts-grid">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </main>
 
+        <!-- Shared Components (loaded once) -->
         <div id="toast-container" class="toast-container"></div>
         <canvas id="effects-canvas" class="effects-canvas"></canvas>
     </div>
 
+    <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- Single Entry Point - Bootstrap the entire SPA -->
     <script type="module">
-        import { HeaderLoader } from './js/presentation/components/header-loader.js';
-        await HeaderLoader.load('games');
+        import { MasterApp } from './js/application/master-app.js';
+        
+        const app = new MasterApp();
+        app.init().then(() => {
+            console.log('🐋 WhaleGames SPA ready!');
+        }).catch(err => {
+            console.error('Failed to initialize app:', err);
+        });
     </script>
-    <script type="module" src="js/main.js"></script>
 </body>
 </html>

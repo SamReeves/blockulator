@@ -1,5 +1,5 @@
 #pragma enable-decimals
-# @version 0.4.0
+# @version 0.4.3
 # @author L1Ca$h
 
 # Lookup table for calculating ln(x) using digit-by-digit extraction

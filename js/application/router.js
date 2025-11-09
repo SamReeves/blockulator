@@ -7,12 +7,13 @@
 import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
 
 export class Router {
-    constructor(moduleRegistry, web3Provider) {
+    constructor(moduleRegistry, web3Provider, containerSelector = null) {
         this.moduleRegistry = moduleRegistry;
         this.web3Provider = web3Provider;
         this.currentModule = null;
         this.pageType = null;
         this.config = null;
+        this.containerSelector = containerSelector; // Optional: scope to specific view
         
         this.detectPageType();
     }
@@ -21,9 +22,18 @@ export class Router {
      * Detect page type from DOM
      */
     detectPageType() {
-        const isGamePage = !!document.getElementById('game-container');
-        const isToolPage = !!document.getElementById('tool-container');
-        const isFuturePage = !!document.getElementById('futures-container');
+        // Scope queries to container if provided
+        const root = this.containerSelector 
+            ? document.querySelector(this.containerSelector) 
+            : document;
+        
+        if (!root) {
+            console.error('❌ Container not found:', this.containerSelector);
+            return;
+        }
+        
+        const isGamePage = !!root.querySelector('#game-container');
+        const isToolPage = !!root.querySelector('#tool-container');
         
         if (isGamePage) {
             this.pageType = 'game';
@@ -46,13 +56,7 @@ export class Router {
                 cardSelector: '.tool-card',
                 dataAttr: 'tool'
             };
-            console.log('📦 Detected: Tools page');
-        } else if (isFuturePage) {
-            this.pageType = 'future';
-            this.config = {
-                containerSelector: '#futures-container'
-            };
-            console.log('📦 Detected: Futures page');
+            console.log('📦 Detected: Calculator page');
         } else {
             console.error('❌ Unable to detect page type');
         }
@@ -84,7 +88,11 @@ export class Router {
      * Load tools page (scientific calculator or specific tool via URL param)
      */
     async loadToolsPage() {
-        const container = document.querySelector(this.config.containerSelector);
+        const root = this.containerSelector 
+            ? document.querySelector(this.containerSelector) 
+            : document;
+            
+        const container = root.querySelector(this.config.containerSelector);
         
         if (!container) {
             console.error('Tool container not found');
@@ -124,8 +132,12 @@ export class Router {
      * Setup list-detail navigation pattern
      */
     setupListDetailNavigation() {
+        const root = this.containerSelector 
+            ? document.querySelector(this.containerSelector) 
+            : document;
+        
         // Card click handlers
-        const cards = document.querySelectorAll(this.config.cardSelector);
+        const cards = root.querySelectorAll(this.config.cardSelector);
         cards.forEach(card => {
             card.addEventListener('click', () => {
                 const moduleName = card.dataset[this.config.dataAttr];
@@ -136,7 +148,7 @@ export class Router {
         });
 
         // Back button handler
-        const backButton = document.getElementById(this.config.backButtonId);
+        const backButton = root.querySelector('#' + this.config.backButtonId);
         if (backButton) {
             backButton.addEventListener('click', () => {
                 this.navigateBack();
@@ -152,6 +164,10 @@ export class Router {
     async navigateTo(moduleName) {
         console.log(`🧭 Navigating to: ${moduleName}`);
 
+        const root = this.containerSelector 
+            ? document.querySelector(this.containerSelector) 
+            : document;
+
         // Cleanup previous module
         if (this.currentModule) {
             if (this.currentModule.destroy) {
@@ -161,13 +177,13 @@ export class Router {
         }
 
         // Clear detail container
-        const detailContainer = document.querySelector(this.config.detailSelector);
+        const detailContainer = root.querySelector(this.config.detailSelector);
         if (detailContainer) {
             detailContainer.innerHTML = '';
         }
 
         // Hide list, show detail
-        const listEl = document.querySelector(this.config.listSelector);
+        const listEl = root.querySelector(this.config.listSelector);
         if (listEl) listEl.style.display = 'none';
         if (detailContainer) {
             detailContainer.classList.remove('hidden');
@@ -199,6 +215,10 @@ export class Router {
     navigateBack() {
         console.log('🔙 Navigating back to list');
 
+        const root = this.containerSelector 
+            ? document.querySelector(this.containerSelector) 
+            : document;
+
         // Cleanup current module
         if (this.currentModule) {
             if (this.currentModule.destroy) {
@@ -208,8 +228,8 @@ export class Router {
         }
 
         // Show list, hide detail
-        const listEl = document.querySelector(this.config.listSelector);
-        const detailEl = document.querySelector(this.config.detailSelector);
+        const listEl = root.querySelector(this.config.listSelector);
+        const detailEl = root.querySelector(this.config.detailSelector);
         
         if (listEl) listEl.style.display = 'grid';
         if (detailEl) {

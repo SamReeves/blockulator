@@ -1,7 +1,7 @@
 {
-  "contractName": "FUTURE_FACTORY",
-  "contractFile": "future_factory.vy",
-  "abiPath": "contracts/build/abis/future-factory.json",
-  "bytecodePath": "contracts/build/bytecode/future-factory.json",
-  "timestamp": "2025-11-08T00:16:17Z"
+  "contractName": "LN_CALCULATOR",
+  "contractFile": "ln.vy",
+  "abiPath": "contracts/build/abis/ln.json",
+  "bytecodePath": "contracts/build/bytecode/ln.json",
+  "timestamp": "2025-11-09T19:25:11Z"
 }

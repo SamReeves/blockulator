@@ -14,7 +14,8 @@ import { DiscussionDetailView } from './presentation/views/discussion-detail-vie
 import { CreateForm } from './presentation/discussions/create-form.js';
 import { MechanicsPanel } from './presentation/panels/mechanics-panel.js';
 import { TechnicalPanel } from './presentation/panels/technical-panel.js';
-import { CONTRACT_ADDRESSES } from './infrastructure/config/contracts.js';
+import { GameRenderer } from './presentation/renderers/game-renderer.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from './infrastructure/config/contracts.js';
 
 class DiscussionsApp {
     constructor() {
@@ -49,6 +50,21 @@ class DiscussionsApp {
             // Initialize confetti
             initConfetti();
 
+            // Initialize view-specific components
+            await this.initViewOnly();
+        } catch (error) {
+            console.error('Failed to initialize discussions app:', error);
+        }
+    }
+
+    /**
+     * Initialize only view-specific components (for SPA integration)
+     * Assumes shared components (wallet, toast, confetti) are already initialized
+     */
+    async initViewOnly() {
+        console.log('🎙️ Initializing Discussion Board view...');
+
+        try {
             // Load ABIs
             await this.loadAbis();
 
@@ -71,15 +87,71 @@ class DiscussionsApp {
             // Initial render (Board View)
             await this.renderCurrentView();
 
-            console.log('✅ Discussion Board app initialized');
+            // Render contract info section
+            this.renderContractInfo();
+
+            console.log('✅ Discussion Board view initialized');
 
         } catch (error) {
-            console.error('Failed to initialize app:', error);
+            console.error('Failed to initialize discussions view:', error);
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to initialize application',
+                message: 'Failed to initialize discussions',
                 type: 'error'
             });
         }
+    }
+
+    /**
+     * Render contract info section with links to contracts
+     */
+    renderContractInfo() {
+        const container = document.getElementById('discussions-contract-info');
+        if (!container) return;
+
+        container.innerHTML = '';
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+        container.style.gap = '1rem';
+
+        // Board Contract
+        const boardInfo = document.createElement('div');
+        boardInfo.className = 'contract-info-card';
+        boardInfo.innerHTML = `
+            <div class="contract-card-header">
+                <h4>🗂️ Discussion Board (Factory)</h4>
+                <p class="contract-card-description">Creates and manages all discussion instances</p>
+            </div>
+        `;
+        boardInfo.appendChild(GameRenderer.createContractInfo(
+            CONTRACT_ADDRESSES.DISCUSSION_BOARD,
+            CONTRACT_SOURCES.DISCUSSION_BOARD,
+            CONTRACT_ABIS.DISCUSSION_BOARD
+        ));
+        container.appendChild(boardInfo);
+
+        // Blueprint Contract
+        const blueprintInfo = document.createElement('div');
+        blueprintInfo.className = 'contract-info-card';
+        blueprintInfo.innerHTML = `
+            <div class="contract-card-header">
+                <h4>📋 Discussion Blueprint</h4>
+                <p class="contract-card-description">Template for individual discussion contracts</p>
+            </div>
+        `;
+        blueprintInfo.appendChild(GameRenderer.createContractInfo(
+            CONTRACT_ADDRESSES.DISCUSSION_BLUEPRINT,
+            CONTRACT_SOURCES.DISCUSSION_BLUEPRINT,
+            CONTRACT_ABIS.DISCUSSION_BLUEPRINT
+        ));
+        container.appendChild(blueprintInfo);
+    }
+
+    /**
+     * Refresh data when returning to view
+     */
+    async refresh() {
+        console.log('🔄 Refreshing discussions...');
+        await this.renderCurrentView();
     }
 
     async loadAbis() {

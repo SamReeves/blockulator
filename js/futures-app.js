@@ -12,7 +12,8 @@ import { ViewRouter, ViewState } from './presentation/router/view-router.js';
 import { MarketTable } from './presentation/tables/market-table.js';
 import { FutureDetailView } from './presentation/futures/future-detail-view.js';
 import { CreateFutureForm } from './presentation/futures/create-future-form.js';
-import { CONTRACT_ADDRESSES } from './infrastructure/config/contracts.js';
+import { GameRenderer } from './presentation/renderers/game-renderer.js';
+import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from './infrastructure/config/contracts.js';
 
 class FuturesApp {
     constructor() {
@@ -45,6 +46,22 @@ class FuturesApp {
             // Initialize confetti
             initConfetti();
 
+            // Initialize view-specific components
+            await this.initViewOnly();
+
+        } catch (error) {
+            console.error('Failed to initialize futures app:', error);
+        }
+    }
+
+    /**
+     * Initialize only view-specific components (for SPA integration)
+     * Assumes shared components (wallet, toast, confetti) are already initialized
+     */
+    async initViewOnly() {
+        console.log('📈 Initializing Futures Marketplace view...');
+
+        try {
             // Load ABIs
             await this.loadAbis();
 
@@ -67,16 +84,72 @@ class FuturesApp {
             // Initial render (Market View)
             await this.renderCurrentView();
 
-            console.log('✅ Futures Marketplace app initialized');
+            // Render contract info section
+            this.renderContractInfo();
 
-                } catch (error) {
-            console.error('Failed to initialize app:', error);
-                    eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to initialize application',
-                        type: 'error'
-                    });
-                }
-            }
+            console.log('✅ Futures Marketplace view initialized');
+
+        } catch (error) {
+            console.error('Failed to initialize futures view:', error);
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Failed to initialize futures',
+                type: 'error'
+            });
+        }
+    }
+
+    /**
+     * Render contract info section with links to contracts
+     */
+    renderContractInfo() {
+        const container = document.getElementById('factory-contract-info');
+        if (!container) return;
+
+        container.innerHTML = '';
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+        container.style.gap = '1rem';
+
+        // Factory Contract
+        const factoryInfo = document.createElement('div');
+        factoryInfo.className = 'contract-info-card';
+        factoryInfo.innerHTML = `
+            <div class="contract-card-header">
+                <h4>🏭 Future Factory</h4>
+                <p class="contract-card-description">Creates and manages Eulerian future contracts</p>
+            </div>
+        `;
+        factoryInfo.appendChild(GameRenderer.createContractInfo(
+            CONTRACT_ADDRESSES.FUTURE_FACTORY,
+            CONTRACT_SOURCES.FUTURE_FACTORY,
+            CONTRACT_ABIS.FUTURE_FACTORY
+        ));
+        container.appendChild(factoryInfo);
+
+        // Blueprint Contract
+        const blueprintInfo = document.createElement('div');
+        blueprintInfo.className = 'contract-info-card';
+        blueprintInfo.innerHTML = `
+            <div class="contract-card-header">
+                <h4>📋 Eulerian Future Blueprint</h4>
+                <p class="contract-card-description">Template for individual future contracts with time-weighted payouts</p>
+            </div>
+        `;
+        blueprintInfo.appendChild(GameRenderer.createContractInfo(
+            CONTRACT_ADDRESSES.EULERIAN_FUTURE_BLUEPRINT,
+            CONTRACT_SOURCES.EULERIAN_FUTURE_BLUEPRINT,
+            CONTRACT_ABIS.EULERIAN_FUTURE_BLUEPRINT
+        ));
+        container.appendChild(blueprintInfo);
+    }
+
+    /**
+     * Refresh data when returning to view
+     */
+    async refresh() {
+        console.log('🔄 Refreshing futures...');
+        await this.renderCurrentView();
+    }
 
     async loadAbis() {
         try {

@@ -1066,6 +1066,7 @@ body {
     background: var(--md-sys-color-surface-variant);
     border-radius: var(--md-sys-shape-corner-medium);
     padding: var(--md-sys-spacing-4);
+    border: 1px solid var(--md-sys-color-outline);
 }
 
 .contract-info-card h4 {
@@ -1073,6 +1074,31 @@ body {
     color: var(--md-sys-color-on-surface);
     font-size: 1rem;
     font-weight: 600;
+}
+
+.contract-card-header {
+    margin-bottom: var(--md-sys-spacing-3);
+    padding-bottom: var(--md-sys-spacing-3);
+    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.contract-card-header h4 {
+    margin: 0 0 var(--md-sys-spacing-1) 0;
+    color: var(--md-sys-color-primary);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.contract-card-description {
+    margin: 0;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.875rem;
+}
+
+.contracts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--md-sys-spacing-4);
 }
 
 .loading-contract-info {
