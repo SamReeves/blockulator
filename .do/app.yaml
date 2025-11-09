@@ -5,18 +5,10 @@ static_sites:
     github:
       branch: testnet
       deploy_on_push: true
-    
-    # No build phase needed - just serve the files
-    build_command: ""
-    
-    # Serve from root directory
-    output_dir: /
-    
-    # Routes and error pages
+    build_command: node scripts/build.js
+    output_dir: dist
     routes:
       - path: /
     error_document: index.html
-    
-    # Environment (client-side only)
     envs: []
 
