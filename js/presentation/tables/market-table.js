@@ -278,9 +278,6 @@ export class MarketTable {
                 <td class="owner">${ownerShort}</td>
                 <td>${statusBadge}</td>
                 <td class="actions">
-                    <button class="btn-small btn-info" data-action="view" data-address="${future.address}">
-                        View
-                    </button>
                     ${actionButtons}
                 </td>
             </tr>
@@ -311,19 +308,6 @@ export class MarketTable {
      * Attach event listeners
      */
     attachEventListeners() {
-        // View buttons
-        const viewButtons = this.containerElement.querySelectorAll('[data-action="view"]');
-        viewButtons.forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const address = btn.dataset.address;
-                const future = this.futures.find(f => f.address === address);
-                if (future) {
-                    eventBus.emit('FUTURE_SELECTED', future);
-                }
-            });
-        });
-
         // List buttons
         const listButtons = this.containerElement.querySelectorAll('[data-action="list"]');
         listButtons.forEach(btn => {

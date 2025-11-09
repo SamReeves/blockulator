@@ -376,9 +376,25 @@ export class FutureDetailView {
             return;
         }
 
-        // Ensure lifetime is calculated
-        const lifetime = this.futureData.lifetime || (this.futureData.expiryTime - this.futureData.creationTime);
-        const timeRemaining = this.futureData.timeRemaining !== undefined ? this.futureData.timeRemaining : lifetime;
+        // ALWAYS calculate lifetime from factory's creationTime and expiryTime
+        // Don't trust the contract's lifetime value as it might be stale or different
+        const creationTimeNum = typeof this.futureData.creationTime === 'number' 
+            ? this.futureData.creationTime 
+            : (ethers.BigNumber.isBigNumber(this.futureData.creationTime) 
+                ? this.futureData.creationTime.toNumber() 
+                : Number(this.futureData.creationTime));
+                
+        const expiryTimeNum = typeof this.futureData.expiryTime === 'number'
+            ? this.futureData.expiryTime
+            : (ethers.BigNumber.isBigNumber(this.futureData.expiryTime)
+                ? this.futureData.expiryTime.toNumber()
+                : Number(this.futureData.expiryTime));
+        
+        const lifetime = expiryTimeNum - creationTimeNum;
+        
+        // Calculate time remaining from current timestamp
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const timeRemaining = Math.max(0, expiryTimeNum - currentTimestamp);
         
         console.log('Rendering chart with data:', {
             lifetime: lifetime,
@@ -415,13 +431,39 @@ export class FutureDetailView {
         const points = 100;
         const labels = [];
         const values = [];
+        
+        // Use the already-calculated values
+        const creationTime = creationTimeNum;
+        const expiryTime = expiryTimeNum;
+        
+        // Debug: Log the actual values
+        console.log('🔍 Chart Debug:', {
+            creationTime,
+            expiryTime,
+            lifetime,
+            creationDate: new Date(creationTime * 1000).toLocaleString(),
+            expiryDate: new Date(expiryTime * 1000).toLocaleString(),
+            lifetimeHours: lifetime / 3600
+        });
 
         for (let i = 0; i <= points; i++) {
             const t = (i / points) * lifetime;
-            // Show labels at start, 25%, 50%, 75%, and end for better spacing
+            
+            // Calculate the actual timestamp for this point
+            const timestamp = creationTime + t;
+            const date = new Date(timestamp * 1000);
+            
+            // Show labels only at beginning, middle, and end
             let tLabel = '';
-            if (i === 0 || i === 25 || i === 50 || i === 75 || i === 100) {
-                tLabel = this.formatDuration(t);
+            if (i === 0 || i === 50 || i === 100) {
+                // Format as date/time
+                tLabel = date.toLocaleString('en-US', { 
+                    year: 'numeric',
+                    month: 'short', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
             }
             labels.push(tLabel);
             
@@ -481,6 +523,41 @@ export class FutureDetailView {
         // Create new chart with "current time" marker
         const currentTimeIndex = Math.floor((currentTime / lifetime) * points);
         
+        // Plugin to draw vertical line at current time
+        const verticalLinePlugin = {
+            id: 'verticalLine',
+            afterDraw: (chart) => {
+                if (chart.tooltip?._active?.length) {
+                    return; // Don't draw if tooltip is active
+                }
+                
+                const ctx = chart.ctx;
+                const x = chart.scales.x;
+                const y = chart.scales.y;
+                
+                // Calculate x position for current time
+                const xPos = x.getPixelForValue(currentTimeIndex);
+                
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(xPos, y.top);
+                ctx.lineTo(xPos, y.bottom);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = 'red';
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.restore();
+                
+                // Add label
+                ctx.save();
+                ctx.font = 'bold 12px sans-serif';
+                ctx.fillStyle = 'red';
+                ctx.textAlign = 'center';
+                ctx.fillText('Now', xPos, y.top - 5);
+                ctx.restore();
+            }
+        };
+        
         this.chart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -517,7 +594,12 @@ export class FutureDetailView {
                     x: {
                         title: {
                             display: true,
-                            text: 'Time Since Creation'
+                            text: 'Timeline (Creation → End)'
+                        },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 45
                         }
                     }
                 },
@@ -536,7 +618,8 @@ export class FutureDetailView {
                         }
                     }
                 }
-            }
+            },
+            plugins: [verticalLinePlugin]
         });
     }
 

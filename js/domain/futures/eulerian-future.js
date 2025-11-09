@@ -70,15 +70,33 @@ export class EulerianFuture {
     }
 
     /**
-     * Get distribution parameters
-     * Returns: (start_time, lifetime, last_activity)
+     * Get time parameters from the contract
+     * NOTE: get_distribution_params() returns (mean, stddev, lambda_param), NOT time values!
+     * We need to call start_time() and lifetime() directly from public variables.
      */
     async getDistributionParams() {
+        const [startTime, lifetime, lastT] = await Promise.all([
+            this.contract.start_time(),
+            this.contract.lifetime(),
+            this.contract.last_t()
+        ]);
+        return {
+            startTime: startTime.toNumber(),
+            lifetime: lifetime.toNumber(),
+            lastActivity: lastT.toNumber()
+        };
+    }
+
+    /**
+     * Get actual distribution parameters (mean, stddev, lambda)
+     * These are the mathematical parameters for the distribution curve, NOT time values
+     */
+    async getDistributionCurveParams() {
         const params = await this.contract.get_distribution_params();
         return {
-            startTime: params[0].toNumber(),
-            lifetime: params[1].toNumber(),
-            lastActivity: params[2]
+            mean: params[0],      // Mean (for Gaussian distributions)
+            stddev: params[1],    // Standard deviation (for Gaussian distributions)  
+            lambda: params[2]     // Lambda parameter (for exponential distributions)
         };
     }
 
