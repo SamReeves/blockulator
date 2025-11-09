@@ -43,59 +43,36 @@ export class LastCall extends Game {
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
                 <div class="game-sections">
-                    <!-- Countdown Display -->
-                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; position: relative; overflow: hidden;">
-                        <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">⏰</div>
-                        <h3 style="color: white; position: relative; z-index: 1;">⏱️ ROUND COUNTDOWN</h3>
-                        <div style="text-align: center; padding: 2rem 0; position: relative; z-index: 1;">
-                            <div id="countdown" style="font-size: 3rem; font-weight: bold; font-family: monospace; margin-bottom: 1rem; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">
+                    <!-- Compact Round Status -->
+                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                        <div style="text-align: center; padding: 1.5rem 0;">
+                            <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem;">⏱️ TIME REMAINING</div>
+                            <div id="countdown" style="font-size: 2.5rem; font-weight: bold; font-family: monospace; margin-bottom: 0.75rem;">
                                 --:--:--
                             </div>
-                            <div id="countdown-status" style="font-size: 1rem; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px;">
-                                Time until round ends
-                            </div>
-                            <button id="end-round-btn" style="margin-top: 1.5rem; padding: 0.75rem 2rem; background: rgba(255,255,255,0.2); border: 2px solid white; color: white; border-radius: 8px; font-weight: bold; cursor: pointer; display: none; backdrop-filter: blur(10px); transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                                🏁 End Round & Claim Prize
+                            <div id="countdown-status" style="font-size: 0.875rem; opacity: 0.9;">Round ends when time expires</div>
+                            <button id="end-round-btn" style="margin-top: 1rem; padding: 0.5rem 1.5rem; background: rgba(255,255,255,0.2); border: 2px solid white; color: white; border-radius: 8px; font-size: 0.875rem; font-weight: bold; cursor: pointer; display: none;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                                🏁 End & Claim
                             </button>
                         </div>
-                    </div>
-
-                    <!-- Current Winner Display -->
-                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; position: relative; overflow: hidden;">
-                        <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">🏆</div>
-                        <h3 style="color: white; position: relative; z-index: 1;">🏆 CURRENT WINNER</h3>
-                        <div style="text-align: center; padding: 2rem 0; position: relative; z-index: 1;">
-                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Last Donor (Winning Position)</div>
-                            <div id="current-winner" style="font-family: monospace; font-size: 1.25rem; font-weight: bold; word-break: break-all; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(10px);">
+                        <div style="border-top: 1px solid rgba(255,255,255,0.2); padding: 1rem 0;">
+                            <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-align: center;">🏆 CURRENT WINNER</div>
+                            <div id="current-winner" style="font-family: monospace; font-size: 1rem; font-weight: bold; text-align: center; margin-bottom: 1rem;">
                                 No one yet
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
-                                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">POT VALUE</div>
-                                    <div id="pot-value" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; font-size: 0.875rem;">
+                                <div style="text-align: center;">
+                                    <div style="opacity: 0.8; font-size: 0.7rem; margin-bottom: 0.25rem;">POT</div>
+                                    <div id="pot-value" style="font-weight: bold;">0</div>
                                 </div>
-                                <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">WINNER GETS (99%)</div>
-                                    <div id="winner-prize" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                                <div style="text-align: center;">
+                                    <div style="opacity: 0.8; font-size: 0.7rem; margin-bottom: 0.25rem;">PRIZE</div>
+                                    <div id="winner-prize" style="font-weight: bold;">0</div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Game Info -->
-                    <div class="contest-info-panel" style="border: 2px solid #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span>📊</span>
-                            <span>Round Info</span>
-                        </h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                            <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Round Number</div>
-                                <div id="round-number" style="font-size: 1.5rem; font-weight: bold;">1</div>
-                            </div>
-                            <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Round Duration</div>
-                                <div style="font-size: 1.5rem; font-weight: bold;">10 days</div>
+                                <div style="text-align: center;">
+                                    <div style="opacity: 0.8; font-size: 0.7rem; margin-bottom: 0.25rem;">ROUND</div>
+                                    <div id="round-number" style="font-weight: bold;">#1</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -113,60 +90,33 @@ export class LastCall extends Game {
                                 🎮 Donate (Become Last!)
                             </button>
                             
-                            <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); border-radius: 12px; border-left: 4px solid #ef4444;">
-                                <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
-                                    <span style="font-size: 1.5rem;">⏰</span>
-                                    <strong style="font-size: 1.1rem; color: #ef4444;">Race Against Time!</strong>
-                                </div>
-                                <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
-                                    <li>Each donation resets the 10-day countdown</li>
-                                    <li>Be the LAST person to donate before time expires</li>
-                                    <li>Winner takes 99% of the entire pot</li>
-                                    <li>All donations accumulate - no refunds!</li>
-                                </ul>
+                            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444; font-size: 0.875rem;">
+                                <strong style="color: #ef4444;">⏰ Strategy:</strong> Be LAST when timer expires. Each donation resets the countdown. Winner gets 99%!
                             </div>
                         </div>
                     </div>
 
-                    <!-- How It Works Panel -->
-                    <div class="contest-info-panel">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span>📖</span>
-                            <span>How To Win</span>
-                        </h3>
-                        <div style="margin-top: 1rem;">
-                            <div style="display: grid; gap: 1rem;">
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 4px solid #ef4444;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #ef4444; min-width: 2.5rem;">1</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Donate Strategically</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Send any amount to become the current winner and reset the countdown</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">2</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Watch The Clock</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Monitor the countdown - you need to be the last donor when time expires</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #10b981; min-width: 2.5rem;">3</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Claim Your Prize</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">After the countdown hits zero, end the round to claim 99% of the pot!</span>
-                                    </div>
-                                </div>
-                                <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                    <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; min-width: 2.5rem;">💡</div>
-                                    <div>
-                                        <strong style="display: block; margin-bottom: 0.25rem; color: #3b82f6;">Pro Tip</strong>
-                                        <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Timing is everything! Wait too long and someone else might snipe the win. Act too early and you'll reset the clock for others.</span>
-                                    </div>
-                                </div>
+                    <!-- How It Works - Collapsible -->
+                    <details class="contest-info-panel" style="cursor: pointer;">
+                        <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+                            <span>▶</span>
+                            <span>📖 How To Win</span>
+                        </summary>
+                        <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
+                            <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 3px solid #ef4444; margin-bottom: 0.5rem;">
+                                <strong>1. Donate</strong> - Become current winner, reset the 10-day countdown
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b; margin-bottom: 0.5rem;">
+                                <strong>2. Watch</strong> - Be LAST donor when time expires
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 0.5rem;">
+                                <strong>3. Claim</strong> - End round after countdown to win 99%!
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <strong>💡 Tip:</strong> Timing is everything! Not too early, not too late.
                             </div>
                         </div>
-                    </div>
+                    </details>
                 </div>
         `;
         

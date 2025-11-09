@@ -61,21 +61,125 @@ export class PissingContest extends Game {
                     </div>
                 </div>
 
-                <!-- Your Status Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📊</span>
-                        <span>Your Status</span>
+                <!-- Compact Stats & Info Tabs -->
+                <div class="contest-info-panel">
+                    <div style="display: flex; gap: 0.5rem; border-bottom: 2px solid var(--md-sys-color-outline); margin-bottom: 1rem; flex-wrap: wrap;">
+                        <button class="tab-btn active" data-tab="current" style="padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid #3b82f6; cursor: pointer; font-weight: bold; color: #3b82f6;">
+                            📊 Current Round
+                        </button>
+                        <button class="tab-btn" data-tab="stats" style="padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; color: var(--md-sys-color-on-surface-variant);">
+                            📈 Your Stats
+                        </button>
+                        <button class="tab-btn" data-tab="history" style="padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; color: var(--md-sys-color-on-surface-variant);">
+                            🏆 History
+                        </button>
+                        <button class="tab-btn" data-tab="global" style="padding: 0.75rem 1rem; background: none; border: none; border-bottom: 3px solid transparent; cursor: pointer; color: var(--md-sys-color-on-surface-variant);">
+                            🌍 Global
+                        </button>
+                    </div>
+                    
+                    <!-- Current Round Tab -->
+                    <div id="tab-current" class="tab-content">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                            <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Your Donation</div>
+                                <div id="your-donation" style="font-size: 1rem; font-weight: bold;">0 wei</div>
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Status</div>
+                                <div id="your-status" style="font-size: 1rem; font-weight: bold;">Not playing</div>
+                            </div>
+                        </div>
+                        <div id="leaderboard-position" style="margin-top: 0.75rem; padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; text-align: center;">
+                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Position</div>
+                            <div style="font-size: 1.5rem; font-weight: bold; color: #8b5cf6;">-</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Your Stats Tab -->
+                    <div id="tab-stats" class="tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+                            <div style="padding: 0.75rem; background: rgba(236, 72, 153, 0.1); border-radius: 8px; border-left: 3px solid #ec4899;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Lifetime Donated</div>
+                                <div id="lifetime-donated" style="font-size: 1rem; font-weight: bold;">0 wei</div>
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(236, 72, 153, 0.1); border-radius: 8px; border-left: 3px solid #ec4899;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Lifetime Won</div>
+                                <div id="lifetime-won" style="font-size: 1rem; font-weight: bold;">0 wei</div>
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Rounds Won</div>
+                                <div id="rounds-won" style="font-size: 1rem; font-weight: bold;">0</div>
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(251, 191, 36, 0.1); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Rounds Played</div>
+                                <div id="rounds-participated" style="font-size: 1rem; font-weight: bold;">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- History Tab -->
+                    <div id="tab-history" class="tab-content" style="display: none;">
+                        <div id="winners-history" style="max-height: 300px; overflow-y: auto;">
+                            <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                                Loading history...
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Global Stats Tab -->
+                    <div id="tab-global" class="tab-content" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 0.75rem;">
+                            <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 3px solid #10b981;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Total Rounds</div>
+                                <div id="total-rounds" style="font-size: 1rem; font-weight: bold;">0</div>
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 3px solid #10b981;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">Total Donated</div>
+                                <div id="total-donated" style="font-size: 1rem; font-weight: bold;">0 wei</div>
+                            </div>
+                        </div>
+                        <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 3px solid #10b981;">
+                            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem; text-transform: uppercase;">All-Time Record</div>
+                            <div id="highest-donation" style="font-size: 1rem; font-weight: bold; margin-bottom: 0.25rem;">0 wei</div>
+                            <div style="font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);">
+                                By: <span id="highest-donor">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Panel (only visible to owner) -->
+                <div id="admin-panel" class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); display: none;">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ef4444; margin-bottom: 0.75rem;">
+                        <span>⚙️</span>
+                        <span>Admin Panel</span>
                     </h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
-                        <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Your Donation</div>
-                            <div id="your-donation" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 0.75rem; font-size: 0.875rem;">
+                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Status</div>
+                            <div id="contract-paused" style="font-weight: bold;">No</div>
                         </div>
-                        <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Status</div>
-                            <div id="your-status" style="font-size: 1.25rem; font-weight: bold;">Not playing</div>
+                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Fee</div>
+                            <div id="config-fee" style="font-weight: bold;">-</div>
                         </div>
+                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Min</div>
+                            <div id="config-min" style="font-weight: bold;">-</div>
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px;">
+                            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Max</div>
+                            <div id="config-max" style="font-weight: bold;">-</div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;">
+                        <button id="toggle-pause-btn" class="btn-secondary" style="padding: 0.5rem; font-size: 0.875rem;">
+                            🔄 Pause
+                        </button>
+                        <button id="end-round-early-btn" class="btn-secondary" style="padding: 0.5rem; font-size: 0.875rem;">
+                            🏁 End Early
+                        </button>
                     </div>
                 </div>
 
@@ -107,45 +211,27 @@ export class PissingContest extends Game {
                     </div>
                 </div>
 
-                <!-- How It Works Panel -->
-                <div class="contest-info-panel">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📖</span>
-                        <span>How It Works</span>
-                    </h3>
-                    <div style="margin-top: 1rem;">
-                        <div style="display: grid; gap: 1rem;">
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; min-width: 2.5rem;">1</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Make Your Donation</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Send any amount of wei to enter the current round</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6; min-width: 2.5rem;">2</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Compete for the Lead</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">The HIGHEST single donation becomes the leader</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #10b981; min-width: 2.5rem;">3</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Round Completion</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">When max donations is reached, the round ends automatically</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(251, 191, 36, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">4</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Winner Takes the Pot</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">The leader wins 99% of the total prize pool!</span>
-                                </div>
-                            </div>
+                <!-- How It Works - Collapsible -->
+                <details class="contest-info-panel" style="cursor: pointer;">
+                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+                        <span id="how-it-works-toggle">▶</span>
+                        <span>📖 How It Works</span>
+                    </summary>
+                    <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
+                        <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6; margin-bottom: 0.5rem;">
+                            <strong>1. Donate</strong> - Send any amount to enter the round
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6; margin-bottom: 0.5rem;">
+                            <strong>2. Compete</strong> - Highest single donation leads
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 0.5rem;">
+                            <strong>3. Round Ends</strong> - When max donations reached
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(251, 191, 36, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                            <strong>4. Winner Gets 99%</strong> - Leader wins the pot!
                         </div>
                     </div>
-                </div>
+                </details>
             </div>
         `;
         
@@ -169,6 +255,35 @@ export class PissingContest extends Game {
         if (donateButton) {
             donateButton.addEventListener('click', () => this.donate());
         }
+        
+        // Setup tab switching
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+                
+                // Update buttons
+                tabButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.style.borderBottom = '3px solid transparent';
+                    b.style.fontWeight = 'normal';
+                    b.style.color = 'var(--md-sys-color-on-surface-variant)';
+                });
+                btn.classList.add('active');
+                btn.style.borderBottom = '3px solid #3b82f6';
+                btn.style.fontWeight = 'bold';
+                btn.style.color = '#3b82f6';
+                
+                // Update content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.style.display = 'none';
+                });
+                const targetTab = document.getElementById(`tab-${tabName}`);
+                if (targetTab) {
+                    targetTab.style.display = 'block';
+                }
+            });
+        });
     }
 
     async donate() {
@@ -254,11 +369,66 @@ export class PissingContest extends Game {
                         ? (isWinning ? '🥇 Leading!' : '📊 Playing')
                         : 'Not playing'
                 );
+                
+                // Get user lifetime stats
+                const userStats = await this.contract.get_user_stats(this.web3Provider.currentAddress);
+                DOMHelpers.updateInfo('lifetime-donated', DOMHelpers.formatWei(userStats[0]));
+                DOMHelpers.updateInfo('lifetime-won', DOMHelpers.formatWei(userStats[1]));
+                DOMHelpers.updateInfo('rounds-won', userStats[2].toString());
+                DOMHelpers.updateInfo('rounds-participated', userStats[3].toString());
+                
+                // Update leaderboard position
+                const positionElement = document.getElementById('leaderboard-position');
+                if (positionElement) {
+                    if (userDonation.gt(0)) {
+                        positionElement.innerHTML = `
+                            <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">Your Current Position</div>
+                            <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6;">
+                                ${isWinning ? '🥇 #1 - LEADING!' : '📊 Competing'}
+                            </div>
+                            <div style="font-size: 0.875rem; margin-top: 0.5rem;">
+                                Your donation: ${DOMHelpers.formatWei(userDonation)}
+                            </div>
+                        `;
+                    } else {
+                        positionElement.innerHTML = `
+                            <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">Your Current Position</div>
+                            <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6;">-</div>
+                            <div style="font-size: 0.875rem; margin-top: 0.5rem; color: var(--md-sys-color-on-surface-variant);">
+                                Not participating this round
+                            </div>
+                        `;
+                    }
+                }
             } else {
                 // Read-only mode - show placeholder
                 DOMHelpers.updateInfo('your-donation', '👀 Read-only mode');
                 DOMHelpers.updateInfo('your-status', 'Connect to play');
+                DOMHelpers.updateInfo('lifetime-donated', 'Connect wallet');
+                DOMHelpers.updateInfo('lifetime-won', 'Connect wallet');
+                DOMHelpers.updateInfo('rounds-won', '-');
+                DOMHelpers.updateInfo('rounds-participated', '-');
             }
+            
+            // Global stats - available to everyone
+            const globalStats = await this.contract.get_global_stats();
+            DOMHelpers.updateInfo('total-rounds', globalStats[0].toString());
+            DOMHelpers.updateInfo('highest-donation', DOMHelpers.formatWei(globalStats[1]));
+            DOMHelpers.updateInfo('highest-donor', 
+                globalStats[2] === '0x0000000000000000000000000000000000000000'
+                    ? 'No donations yet'
+                    : DOMHelpers.formatAddress(globalStats[2])
+            );
+            
+            // Calculate total donated (we don't have this directly, so use contract balance as proxy)
+            const contractBalance = await this.contract.get_contract_balance();
+            DOMHelpers.updateInfo('total-donated', DOMHelpers.formatWei(contractBalance));
+            
+            // Load winners history
+            await this.loadWinnersHistory();
+            
+            // Check if current user is owner and show admin panel
+            await this.checkAdminAccess();
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
@@ -266,6 +436,178 @@ export class PissingContest extends Game {
                 message: 'Failed to load game state. Check console for details.',
                 type: 'error'
             });
+        }
+    }
+    
+    async loadWinnersHistory() {
+        try {
+            const winners = await this.contract.get_recent_winners(10);
+            const historyContainer = document.getElementById('winners-history');
+            
+            if (!historyContainer) return;
+            
+            if (!winners || winners.length === 0) {
+                historyContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                        No completed rounds yet
+                    </div>
+                `;
+                return;
+            }
+            
+            // Get detailed info for each winner
+            const winnerDetails = await Promise.all(
+                winners.slice().reverse().map(async (winner, index) => {
+                    const roundNumber = winners.length - index;
+                    try {
+                        const roundResult = await this.contract.get_round_result(roundNumber);
+                        return {
+                            roundNumber,
+                            winner: roundResult[0],
+                            prize: roundResult[1],
+                            totalDonations: roundResult[2],
+                            donationCount: roundResult[3],
+                            largestDonation: roundResult[4]
+                        };
+                    } catch (e) {
+                        return null;
+                    }
+                })
+            );
+            
+            historyContainer.innerHTML = winnerDetails
+                .filter(detail => detail !== null)
+                .map((detail, index) => {
+                    const isRecent = index === 0;
+                    return `
+                        <div style="padding: 0.75rem; background: ${isRecent ? 'rgba(245, 158, 11, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isRecent ? '#f59e0b' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                <div>
+                                    <strong style="font-size: 0.875rem;">${isRecent ? '🏆 ' : ''}#${detail.roundNumber}</strong>
+                                    <div style="font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);">
+                                        ${DOMHelpers.formatAddress(detail.winner)}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: bold; font-size: 0.875rem;">
+                                        ${DOMHelpers.formatWei(detail.prize)}
+                                    </div>
+                                    <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
+                                        ${detail.donationCount} plays
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('') || `
+                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                        No round details available
+                    </div>
+                `;
+                
+        } catch (error) {
+            console.error('Failed to load winners history:', error);
+            const historyContainer = document.getElementById('winners-history');
+            if (historyContainer) {
+                historyContainer.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                        Failed to load history
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    async checkAdminAccess() {
+        try {
+            const config = await this.contract.get_config();
+            const owner = config[0];
+            const adminPanel = document.getElementById('admin-panel');
+            
+            if (!adminPanel) return;
+            
+            // Show admin panel if current user is owner
+            if (this.web3Provider?.currentAddress && 
+                this.web3Provider.currentAddress.toLowerCase() === owner.toLowerCase()) {
+                adminPanel.style.display = 'block';
+                
+                // Update config display
+                const paused = config[4];
+                const feeBp = config[1];
+                const maxDonations = config[2];
+                const minDonation = config[3];
+                
+                DOMHelpers.updateInfo('contract-paused', paused ? 'Yes ⚠️' : 'No ✅');
+                DOMHelpers.updateInfo('config-fee', `${(feeBp / 100).toFixed(2)}%`);
+                DOMHelpers.updateInfo('config-min', DOMHelpers.formatWei(minDonation));
+                DOMHelpers.updateInfo('config-max', maxDonations.toString());
+                
+                // Setup admin button listeners
+                this.setupAdminListeners();
+            } else {
+                adminPanel.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Failed to check admin access:', error);
+        }
+    }
+    
+    setupAdminListeners() {
+        const togglePauseBtn = document.getElementById('toggle-pause-btn');
+        const endRoundBtn = document.getElementById('end-round-early-btn');
+        
+        if (togglePauseBtn) {
+            togglePauseBtn.replaceWith(togglePauseBtn.cloneNode(true));
+            document.getElementById('toggle-pause-btn').addEventListener('click', () => this.togglePause());
+        }
+        
+        if (endRoundBtn) {
+            endRoundBtn.replaceWith(endRoundBtn.cloneNode(true));
+            document.getElementById('end-round-early-btn').addEventListener('click', () => this.endRoundEarly());
+        }
+    }
+    
+    async togglePause() {
+        if (!this.requiresWallet('toggle pause')) return;
+        
+        try {
+            await TransactionHandler.execute(
+                this.contract.toggle_pause(),
+                { game: 'pissing-contest', action: 'toggle_pause' }
+            );
+            
+            eventBus.emit(EVENTS.TOAST, {
+                message: '✅ Pause status toggled',
+                type: 'success'
+            });
+            
+            await this.refreshState();
+        } catch (error) {
+            console.error('Toggle pause failed:', error);
+        }
+    }
+    
+    async endRoundEarly() {
+        if (!this.requiresWallet('end round early')) return;
+        
+        if (!confirm('Are you sure you want to end the current round early?')) {
+            return;
+        }
+        
+        try {
+            await TransactionHandler.execute(
+                this.contract.end_round_early(),
+                { game: 'pissing-contest', action: 'end_round_early' }
+            );
+            
+            eventBus.emit(EVENTS.TOAST, {
+                message: '✅ Round ended early',
+                type: 'success'
+            });
+            
+            await this.refreshState();
+        } catch (error) {
+            console.error('End round early failed:', error);
         }
     }
 

@@ -67,12 +67,57 @@ export class Router {
             return;
         }
 
-        // Setup navigation for list-detail pages (games/tools)
-        if (this.pageType === 'game' || this.pageType === 'tool') {
+        // Setup navigation for list-detail pages (games only)
+        if (this.pageType === 'game') {
             this.setupListDetailNavigation();
         }
         
+        // Tools page auto-loads scientific calculator
+        if (this.pageType === 'tool') {
+            this.loadToolsPage();
+        }
+        
         console.log('✅ Router initialized');
+    }
+
+    /**
+     * Load tools page (scientific calculator or specific tool via URL param)
+     */
+    async loadToolsPage() {
+        const container = document.querySelector(this.config.containerSelector);
+        
+        if (!container) {
+            console.error('Tool container not found');
+            return;
+        }
+        
+        // Check for URL parameter to load specific tool
+        const urlParams = new URLSearchParams(window.location.search);
+        const toolParam = urlParams.get('tool');
+        
+        let moduleName = 'scientific-calculator'; // default
+        
+        if (toolParam && this.moduleRegistry.has(toolParam)) {
+            moduleName = toolParam;
+            console.log(`🔧 Loading individual calculator: ${moduleName}`);
+        } else {
+            console.log('🧮 Loading scientific calculator');
+        }
+        
+        try {
+            this.currentModule = await this.moduleRegistry.load(
+                moduleName,
+                container,
+                this.web3Provider
+            );
+            console.log(`✅ ${moduleName} loaded`);
+        } catch (error) {
+            console.error(`Failed to load ${moduleName}:`, error);
+            eventBus.emit(EVENTS.TOAST, {
+                message: 'Failed to load calculator',
+                type: 'error'
+            });
+        }
     }
 
     /**

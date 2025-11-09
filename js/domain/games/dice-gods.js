@@ -75,7 +75,7 @@ export class DiceGods extends Game {
                                 <li>Pick a number that others will AVOID</li>
                                 <li>The LEAST popular choice wins</li>
                                 <li>Think opposite - be unpredictable!</li>
-                                <li>Winners split the pot equally</li>
+                                <li><strong>Earlier plays get MORE weight!</strong> Position matters for payouts</li>
                             </ul>
                         </div>
                     </div>
@@ -120,7 +120,7 @@ export class DiceGods extends Game {
                                 <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">4</div>
                                 <div>
                                     <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Winners Claim Prize</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Those who picked the LEAST popular number split 99% of the pot!</span>
+                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Those who picked the LEAST popular number win! Payouts are weighted by position (play #1 gets 10x weight, #2 gets 9x, down to #10 at 1x) AND by donation amount. Early + big = best!</span>
                                 </div>
                             </div>
                         </div>
@@ -254,6 +254,18 @@ export class DiceGods extends Game {
                 💡 <strong>Strategy:</strong> The number with the FEWEST votes wins!
                 Earlier plays with higher donations get more of the pot.
             </p>
+            
+            <details style="margin-top: 1.5rem; cursor: pointer;">
+                <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; font-weight: bold; font-size: 1.1rem;">
+                    <span>▶</span>
+                    <span>🎮 Current Round Plays</span>
+                </summary>
+                <div id="current-plays-list" style="margin-top: 0.75rem; max-height: 400px; overflow-y: auto;">
+                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                        Loading plays...
+                    </div>
+                </div>
+            </details>
         `;
         
         return panel;
@@ -361,9 +373,11 @@ export class DiceGods extends Game {
             }
 
             this.updateDistributionBars(numberCounts);
+            
+            const currentPlays = await this.contract.get_plays();
+            this.updateCurrentPlaysList(currentPlays);
 
             if (this.web3Provider?.currentAddress) {
-                const currentPlays = await this.contract.get_plays();
                 const userPlay = currentPlays.find(play => 
                     play.player.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()
                 );
@@ -411,6 +425,56 @@ export class DiceGods extends Game {
                     </div>
                     <div class="dist-count">${count}</div>
                     ${isWinning && count > 0 ? '<span class="winning-badge">🏆</span>' : ''}
+                </div>
+            `;
+        }).join('');
+    }
+    
+    updateCurrentPlaysList(plays) {
+        const listContainer = document.getElementById('current-plays-list');
+        if (!listContainer) return;
+        
+        if (!plays || plays.length === 0) {
+            listContainer.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                    No plays yet in this round
+                </div>
+            `;
+            return;
+        }
+        
+        const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        
+        listContainer.innerHTML = plays.map((play, index) => {
+            const playIndex = typeof play.play_index === 'number' ? play.play_index : play.play_index.toNumber();
+            const number = typeof play.number === 'number' ? play.number : play.number.toNumber();
+            const weight = 11 - playIndex; // Position weight: first play gets 10x, last gets 1x
+            const isCurrentUser = this.web3Provider?.currentAddress && 
+                                  play.player.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+            
+            return `
+                <div style="padding: 0.75rem; background: ${isCurrentUser ? 'rgba(59, 130, 246, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isCurrentUser ? '#3b82f6' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="font-size: 1.5rem;">${diceEmojis[number - 1]}</span>
+                            <div>
+                                <div style="font-weight: bold; font-size: 0.875rem; color: var(--md-sys-color-on-surface);">
+                                    #${playIndex} ${isCurrentUser ? '(You)' : ''}
+                                </div>
+                                <div style="font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);">
+                                    ${DOMHelpers.formatAddress(play.player)}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: bold; font-size: 0.875rem; color: var(--md-sys-color-on-surface);">
+                                ${DOMHelpers.formatWei(play.amount)}
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
+                                ${weight}x
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
         }).join('');

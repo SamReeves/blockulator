@@ -118,6 +118,20 @@ export class MessageBoard extends Game {
                     </div>
                 </div>
 
+                <!-- Owner Panel (only visible to owner) -->
+                <div id="owner-panel" class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); display: none;">
+                    <h3 style="display: flex; align-items: center; justify-content: space-between; color: #ef4444; margin-bottom: 0.75rem;">
+                        <span style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>⚙️</span>
+                            <span>Owner</span>
+                        </span>
+                        <span id="contract-balance" style="font-weight: bold; font-size: 1rem;">0 wei</span>
+                    </h3>
+                    <button id="withdraw-btn" class="btn-secondary" style="width: 100%; padding: 0.5rem; font-size: 0.875rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+                        💰 Withdraw Fees
+                    </button>
+                </div>
+
                 <!-- Messages Feed -->
                 <div class="contest-info-panel" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);">
                     <h3 style="display: flex; align-items: center; gap: 0.5rem;">
@@ -254,12 +268,65 @@ export class MessageBoard extends Game {
             
             await this.loadMessages(count.toNumber());
             
+            // Check owner status and update owner panel
+            await this.checkOwnerAccess();
+            
         } catch (error) {
             console.error('Failed to load state:', error);
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Failed to load message board state',
                 type: 'error'
             });
+        }
+    }
+    
+    async checkOwnerAccess() {
+        try {
+            const owner = await this.contract.owner();
+            const ownerPanel = document.getElementById('owner-panel');
+            
+            if (!ownerPanel) return;
+            
+            // Show owner panel if current user is owner
+            if (this.web3Provider?.currentAddress && 
+                this.web3Provider.currentAddress.toLowerCase() === owner.toLowerCase()) {
+                ownerPanel.style.display = 'block';
+                
+                // Get contract balance
+                const balance = await this.web3Provider.provider.getBalance(this.contract.address);
+                DOMHelpers.updateInfo('contract-balance', DOMHelpers.formatWei(balance));
+                
+                // Setup withdraw button listener
+                const withdrawBtn = document.getElementById('withdraw-btn');
+                if (withdrawBtn) {
+                    withdrawBtn.replaceWith(withdrawBtn.cloneNode(true));
+                    document.getElementById('withdraw-btn').addEventListener('click', () => this.withdraw());
+                }
+            } else {
+                ownerPanel.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Failed to check owner access:', error);
+        }
+    }
+    
+    async withdraw() {
+        if (!this.requiresWallet('withdraw fees')) return;
+        
+        try {
+            await TransactionHandler.execute(
+                this.contract.withdraw(),
+                { game: 'message-board', action: 'withdraw' }
+            );
+            
+            eventBus.emit(EVENTS.TOAST, {
+                message: '✅ Fees withdrawn successfully',
+                type: 'success'
+            });
+            
+            await this.refreshState();
+        } catch (error) {
+            console.error('Withdraw failed:', error);
         }
     }
 

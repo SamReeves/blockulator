@@ -107,45 +107,27 @@ export class PayItForward extends Game {
                     </div>
                 </div>
 
-                <!-- How It Works Panel -->
-                <div class="contest-info-panel">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🔗</span>
-                        <span>The Chain of Generosity</span>
-                    </h3>
-                    <div style="margin-top: 1rem;">
-                        <div style="display: grid; gap: 1rem;">
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #10b981; min-width: 2.5rem;">1</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">First Donor</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Makes initial donation, becomes the pending donor awaiting reward</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; min-width: 2.5rem;">2</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Second Donor</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Receives first donor's amount immediately, becomes new pending donor</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6; min-width: 2.5rem;">3</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Chain Continues</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Each new donor receives the previous pending amount and keeps the chain alive</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(251, 191, 36, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">⚠️</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: #f59e0b;">Important Note</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Your donation remains pending until the next person donates. Be patient!</span>
-                                </div>
-                            </div>
+                <!-- How It Works - Collapsible -->
+                <details class="contest-info-panel" style="cursor: pointer;">
+                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+                        <span>▶</span>
+                        <span>🔗 The Chain of Generosity</span>
+                    </summary>
+                    <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
+                        <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 0.5rem;">
+                            <strong>1. First Donor</strong> - Makes donation, becomes pending donor awaiting reward
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6; margin-bottom: 0.5rem;">
+                            <strong>2. Second Donor</strong> - Receives first donor's amount, becomes new pending
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6; margin-bottom: 0.5rem;">
+                            <strong>3. Chain Continues</strong> - Each new donor receives previous pending amount
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(251, 191, 36, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                            <strong>⚠️ Note:</strong> Your donation stays pending until next person donates!
                         </div>
                     </div>
-                </div>
+                </details>
             </div>
         `;
         

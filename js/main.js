@@ -30,6 +30,7 @@ import { LnCalculator } from './domain/calculators/ln-calculator.js';
 import { Log2Calculator } from './domain/calculators/log2-calculator.js';
 import { Log10Calculator } from './domain/calculators/log10-calculator.js';
 import { ErfCalculator } from './domain/calculators/erf-calculator.js';
+import { ScientificCalculator } from './tools/scientific-calculator.js';
 
 // Create and initialize application
 const app = new AppController();
@@ -48,6 +49,7 @@ app.registerModule('satan-moloch-baal', SatanMolochBaal, 'game');    // ✅ NEW 
 
 // Register CALCULATORS (all migrated to layered architecture ✅)
 console.log('🔧 Registering calculators...');
+app.registerModule('scientific-calculator', ScientificCalculator, 'calculator'); // ✅ UNIFIED CALCULATOR
 app.registerModule('pi-calculator', PiCalculator, 'calculator');      // ✅ MIGRATED
 app.registerModule('e-calculator', ECalculator, 'calculator');        // ✅ MIGRATED
 app.registerModule('tau-calculator', TauCalculator, 'calculator');    // ✅ MIGRATED

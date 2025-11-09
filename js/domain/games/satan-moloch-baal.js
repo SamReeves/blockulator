@@ -184,45 +184,27 @@ export class SatanMolochBaal extends Game {
                     </div>
                 </div>
 
-                <!-- How It Works -->
-                <div class="contest-info-panel">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📖</span>
-                        <span>The Ritual</span>
-                    </h3>
-                    <div style="margin-top: 1rem;">
-                        <div style="display: grid; gap: 1rem;">
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 4px solid #ef4444;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #ef4444; min-width: 2.5rem;">1</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Choose Your Demon</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Vote for Satan, Moloch, or Baal - pledge your allegiance</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">2</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Burn Your ETH</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">All donations are sent to address(0) - the eternal void. Your ETH is destroyed forever</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6; min-width: 2.5rem;">3</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Become Champion</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">The highest donor per demon becomes their champion - eternal glory</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); border-radius: 8px; border: 2px solid #ef4444;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #ef4444; min-width: 2.5rem;">⚠️</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: #ef4444;">No Rewards - Pure Sacrifice</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">There are NO refunds, NO winners, NO prizes. All ETH is permanently destroyed. This is digital sacrifice to the void.</span>
-                                </div>
-                            </div>
+                <!-- How It Works - Collapsible -->
+                <details class="contest-info-panel" style="cursor: pointer;">
+                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+                        <span>▶</span>
+                        <span>📖 The Ritual</span>
+                    </summary>
+                    <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
+                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 3px solid #ef4444; margin-bottom: 0.5rem;">
+                            <strong>1. Choose Demon</strong> - Satan, Moloch, or Baal - pledge allegiance
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b; margin-bottom: 0.5rem;">
+                            <strong>2. Burn ETH</strong> - Sent to address(0), destroyed forever
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6; margin-bottom: 0.5rem;">
+                            <strong>3. Become Champion</strong> - Highest donor per demon gets eternal glory
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.15); border-radius: 8px; border: 2px solid #ef4444;">
+                            <strong style="color: #ef4444;">⚠️ Pure Sacrifice:</strong> NO refunds, NO winners, NO prizes. ETH is permanently destroyed!
                         </div>
                     </div>
-                </div>
+                </details>
             </div>
         `;
         

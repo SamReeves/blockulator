@@ -71,12 +71,14 @@ export class TimeToMakeTheDonuts extends Game {
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
                                 <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">NEXT PRIZE POT</div>
+                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">CURRENT POT</div>
                                     <div id="pot-value" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                                    <div style="font-size: 0.65rem; opacity: 0.75; margin-top: 0.25rem;">Total in contract</div>
                                 </div>
                                 <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">WINNER GETS (99%)</div>
+                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">FIRST DONOR WINS</div>
                                     <div id="winner-prize" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                                    <div style="font-size: 0.65rem; opacity: 0.75; margin-top: 0.25rem;">99% of pot</div>
                                 </div>
                             </div>
                         </div>
@@ -247,6 +249,16 @@ export class TimeToMakeTheDonuts extends Game {
                 this.contract.get_potential_prize()
             ]);
             
+            console.log('🍩 Donuts Game State:', {
+                currentDay: currentDay.toString(),
+                totalDays: totalDays.toString(),
+                potValue: potValue.toString(),
+                potValueEth: ethers.utils.formatEther(potValue),
+                firstDonorToday: firstDonorToday,
+                isNewDay: isNewDay,
+                potentialPrize: potentialPrize[0].toString()
+            });
+            
             DOMHelpers.updateInfo('current-day', currentDay.toString());
             DOMHelpers.updateInfo('total-days', totalDays.toString());
             DOMHelpers.updateInfo('pot-value', DOMHelpers.formatWei(potValue));
@@ -256,21 +268,47 @@ export class TimeToMakeTheDonuts extends Game {
                 const isZeroAddress = firstDonorToday === '0x0000000000000000000000000000000000000000';
                 
                 if (isZeroAddress) {
-                    donorEl.textContent = 'No one yet - BE FIRST!';
+                    donorEl.innerHTML = `
+                        <div style="padding: 1rem; background: rgba(239, 68, 68, 0.2); border-radius: 12px; border: 2px dashed rgba(255,255,255,0.4);">
+                            <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🎯</div>
+                            <div style="font-size: 1.25rem; font-weight: bold; margin-bottom: 0.5rem;">UNCLAIMED!</div>
+                            <div style="font-size: 0.875rem; opacity: 0.9;">Be the first to donate today and win!</div>
+                        </div>
+                    `;
                 } else {
                     const currentAddress = this.web3Provider?.currentAddress;
                     const isYou = currentAddress && firstDonorToday.toLowerCase() === currentAddress.toLowerCase();
                     
                     if (isYou) {
-                        donorEl.innerHTML = 
-                            `<span style="color: #ffd700;">🎉 YOU! 🎉</span><br><span style="font-size: 0.875rem; opacity: 0.9;">${DOMHelpers.formatAddress(firstDonorToday)}</span>`;
+                        donorEl.innerHTML = `
+                            <div style="padding: 1rem; background: rgba(16, 185, 129, 0.3); border-radius: 12px; border: 2px solid rgba(255,255,255,0.5); animation: pulse 2s infinite;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏆</div>
+                                <div style="font-size: 1.5rem; font-weight: bold; color: #ffd700; text-shadow: 0 2px 8px rgba(0,0,0,0.3); margin-bottom: 0.5rem;">
+                                    🎉 YOU ARE FIRST! 🎉
+                                </div>
+                                <div style="font-size: 0.875rem; font-family: monospace; opacity: 0.95;">${DOMHelpers.formatAddress(firstDonorToday)}</div>
+                                <div style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.9;">You'll win when the next day starts!</div>
+                            </div>
+                        `;
                     } else {
-                        donorEl.textContent = DOMHelpers.formatAddress(firstDonorToday);
+                        donorEl.innerHTML = `
+                            <div style="padding: 0.75rem; background: rgba(255,255,255,0.15); border-radius: 12px;">
+                                <div style="font-size: 0.75rem; opacity: 0.8; margin-bottom: 0.25rem;">Claimed by:</div>
+                                <div style="font-family: monospace; font-size: 1.1rem; font-weight: bold;">${DOMHelpers.formatAddress(firstDonorToday)}</div>
+                                <div style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.8;">Will win tomorrow's pot</div>
+                            </div>
+                        `;
                     }
                 }
             }
             
             DOMHelpers.updateInfo('winner-prize', DOMHelpers.formatWei(potentialPrize[0]));
+            
+            // Show helpful message if pot is empty
+            const potValueEl = document.getElementById('pot-value');
+            if (potValueEl && potValue.eq(0)) {
+                potValueEl.innerHTML = '0 wei<br><span style="font-size: 0.7rem; opacity: 0.8; font-weight: normal;">(Be first to start!)</span>';
+            }
             
             const newDayAlert = document.getElementById('new-day-alert');
             if (newDayAlert) {

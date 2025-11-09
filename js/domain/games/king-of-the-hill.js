@@ -122,13 +122,16 @@ export class KingOfTheHill extends Game {
                         </div>
                     </div>
 
-                    <!-- History Panel -->
-                    <div class="contest-info-panel">
-                        <h3>📜 Recent Kings</h3>
-                        <div id="history" style="max-height: 400px; overflow-y: auto;">
+                    <!-- History Panel - Collapsible -->
+                    <details class="contest-info-panel" style="cursor: pointer;">
+                        <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+                            <span>▶</span>
+                            <span>📜 Recent Kings</span>
+                        </summary>
+                        <div id="history" style="max-height: 300px; overflow-y: auto; margin-top: 0.75rem;">
                             <div class="loading">Loading...</div>
                         </div>
-                    </div>
+                    </details>
                 </div>
         `;
         

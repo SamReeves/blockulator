@@ -101,45 +101,27 @@ export class PayItBackward extends Game {
                     </div>
                 </div>
 
-                <!-- How It Works Panel -->
-                <div class="contest-info-panel">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>🔄</span>
-                        <span>The Backward Chain</span>
-                    </h3>
-                    <div style="margin-top: 1rem;">
-                        <div style="display: grid; gap: 1rem;">
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6; min-width: 2.5rem;">1</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">First Donor</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Donation goes to contract owner (bootstrap), becomes the "last donor"</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(236, 72, 153, 0.05); border-radius: 8px; border-left: 4px solid #ec4899;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #ec4899; min-width: 2.5rem;">2</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Second Donor</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Pays the first donor immediately, becomes the new "last donor"</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #10b981; min-width: 2.5rem;">3</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Chain Continues</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Each donor rewards the one before them and hopes to be rewarded by the next</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; min-width: 2.5rem;">✨</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: #3b82f6;">Key Difference</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Unlike "Pay It Forward", all donations are distributed IMMEDIATELY. No waiting, no pending balance!</span>
-                                </div>
-                            </div>
+                <!-- How It Works - Collapsible -->
+                <details class="contest-info-panel" style="cursor: pointer;">
+                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+                        <span>▶</span>
+                        <span>🔄 The Backward Chain</span>
+                    </summary>
+                    <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
+                        <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6; margin-bottom: 0.5rem;">
+                            <strong>1. First Donor</strong> - Goes to owner (bootstrap), becomes "last donor"
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(236, 72, 153, 0.05); border-radius: 8px; border-left: 3px solid #ec4899; margin-bottom: 0.5rem;">
+                            <strong>2. Second Donor</strong> - Pays first donor immediately, becomes new "last donor"
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 0.5rem;">
+                            <strong>3. Chain Continues</strong> - Each donor rewards previous, hopes to be rewarded by next
+                        </div>
+                        <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                            <strong>✨ Key:</strong> IMMEDIATE distribution. No waiting, no pending balance!
                         </div>
                     </div>
-                </div>
+                </details>
             </div>
         `;
         
