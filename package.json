@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Whale Games - Decentralized discussion boards, futures, and games",
   "scripts": {
-    "build": "bash scripts/build.sh",
+    "build": "node scripts/build.js",
     "verify": "node scripts/verify-contract.js",
     "verify:factory": "node scripts/verify-contract.js 0x8cf41fbE9abE00e47fDed94FdbdC75C2d07f8193 contracts/src/market/future_factory.vy",
     "verify:blueprint": "node scripts/verify-contract.js 0x2E942C37B0ED14017E502E2aFB038E8657eD5F67 contracts/src/market/eulerian_future.vy --blueprint",
