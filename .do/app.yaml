@@ -4,5 +4,6 @@ static_sites:
   github:
     branch: testnet
     deploy_on_push: true
-  build_command: mkdir dist && find . -maxdepth 1 -type f -exec cp {} dist/ \; && cp -r js styles contracts dist/
-  output_dir: dist
+  build_command: cp -r . _static
+  output_dir: _static
+  catchall_document: index.html
