@@ -1,14 +1,11 @@
 name: whalegames
-
 static_sites:
-  - name: whalegames-frontend
-    github:
-      branch: testnet
-      deploy_on_push: true
-    build_command: node scripts/build.js
-    output_dir: dist
-    routes:
-      - path: /
-    error_document: index.html
-    envs: []
-
+- name: whalegames-frontend
+  github:
+    branch: testnet
+    deploy_on_push: true
+  build_command: node scripts/build.js
+  output_dir: dist
+  error_document: index.html
+  routes:
+  - path: /
