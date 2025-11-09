@@ -1,0 +1,1143 @@
+/**
+ * New Component Styles
+ * Styles for Survivor Pool, Expected Value Calculator, Price Suggester, and Termination Dashboard
+ */
+
+/* ============================================================================
+   SURVIVOR POOL CARD
+   ============================================================================ */
+
+.survivor-pool-card {
+    background: var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: var(--md-sys-spacing-4);
+    margin: var(--md-sys-spacing-4) 0;
+    border: 2px solid var(--md-sys-color-outline);
+    transition: all 0.3s var(--md-sys-motion-easing-standard);
+}
+
+.survivor-pool-card.user-is-survivor {
+    border-color: var(--md-sys-color-primary);
+    background: linear-gradient(135deg, rgba(103, 80, 164, 0.15) 0%, rgba(103, 80, 164, 0.05) 100%);
+    box-shadow: 0 4px 16px rgba(103, 80, 164, 0.2);
+}
+
+.survivor-pool-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--md-sys-spacing-3);
+    border-bottom: 2px solid var(--md-sys-color-outline-variant);
+    padding-bottom: var(--md-sys-spacing-2);
+}
+
+.survivor-pool-card .card-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.survivor-pool-card .badge-survivor {
+    background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-tertiary) 100%);
+    color: var(--md-sys-color-on-primary);
+    padding: 0.375rem 0.875rem;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 8px rgba(103, 80, 164, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.survivor-pool-card .pool-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: var(--md-sys-spacing-3);
+    margin-bottom: var(--md-sys-spacing-3);
+}
+
+.survivor-pool-card .stat-large {
+    text-align: center;
+    padding: var(--md-sys-spacing-3);
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    transition: all 0.2s ease;
+}
+
+.survivor-pool-card .stat-large:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.survivor-pool-card .stat-large.highlight {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.15) 0%, rgba(76, 175, 80, 0.05) 100%);
+    border-color: #4caf50;
+}
+
+.survivor-pool-card .stat-label {
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.survivor-pool-card .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.survivor-pool-card .user-payout-highlight {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.25) 0%, rgba(76, 175, 80, 0.1) 100%);
+    padding: var(--md-sys-spacing-3);
+    border-radius: var(--md-sys-shape-corner-small);
+    border-left: 4px solid #4caf50;
+    margin-bottom: var(--md-sys-spacing-3);
+    display: flex;
+    align-items: center;
+    gap: var(--md-sys-spacing-2);
+    animation: slideInFromLeft 0.4s ease-out;
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.survivor-pool-card .highlight-icon {
+    font-size: 2rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.survivor-pool-card .highlight-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.survivor-pool-card .highlight-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2e7d32;
+    font-family: 'Courier New', monospace;
+}
+
+.survivor-pool-card .info-box {
+    background: var(--md-sys-color-surface);
+    padding: var(--md-sys-spacing-3);
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 2px dashed var(--md-sys-color-outline);
+    margin-bottom: var(--md-sys-spacing-3);
+    display: flex;
+    align-items: center;
+    gap: var(--md-sys-spacing-2);
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.survivor-pool-card .info-icon {
+    font-size: 1.5rem;
+}
+
+.survivor-pool-card .survivor-list {
+    margin-top: var(--md-sys-spacing-3);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-sys-shape-corner-small);
+    padding: var(--md-sys-spacing-2);
+    background: var(--md-sys-color-surface);
+}
+
+.survivor-pool-card .survivor-list summary {
+    cursor: pointer;
+    user-select: none;
+    padding: var(--md-sys-spacing-2);
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.survivor-pool-card .survivor-list summary:hover {
+    background: rgba(103, 80, 164, 0.1);
+    border-radius: var(--md-sys-shape-corner-small);
+}
+
+.survivor-pool-card .survivor-list summary .summary-icon {
+    font-size: 1.2rem;
+}
+
+.survivor-pool-card .survivor-addresses {
+    list-style: none;
+    padding: 0;
+    margin: var(--md-sys-spacing-2) 0 0 0;
+}
+
+.survivor-pool-card .survivor-addresses li {
+    padding: var(--md-sys-spacing-2);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: background 0.2s ease;
+}
+
+.survivor-pool-card .survivor-addresses li:last-child {
+    border-bottom: none;
+}
+
+.survivor-pool-card .survivor-addresses li:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.survivor-pool-card .survivor-addresses li.current-user {
+    background: linear-gradient(90deg, rgba(103, 80, 164, 0.1) 0%, transparent 100%);
+    border-left: 3px solid var(--md-sys-color-primary);
+}
+
+.survivor-pool-card .survivor-number {
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+    min-width: 2rem;
+}
+
+.survivor-pool-card .survivor-address {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.survivor-pool-card .survivor-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.survivor-pool-card .btn-copy-tiny,
+.survivor-pool-card .btn-etherscan-tiny {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 0.875rem;
+    opacity: 0.6;
+    transition: all 0.2s ease;
+}
+
+.survivor-pool-card .btn-copy-tiny:hover,
+.survivor-pool-card .btn-etherscan-tiny:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.survivor-pool-card .survivor-info-footer {
+    margin-top: var(--md-sys-spacing-3);
+    padding-top: var(--md-sys-spacing-3);
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.6;
+}
+
+.survivor-pool-card.error {
+    border-color: #ef5350;
+    background: rgba(244, 67, 54, 0.05);
+    text-align: center;
+    padding: var(--md-sys-spacing-5);
+}
+
+.survivor-pool-card.error .error-icon {
+    font-size: 3rem;
+    margin-bottom: var(--md-sys-spacing-2);
+}
+
+.survivor-pool-card.error .btn-retry {
+    margin-top: var(--md-sys-spacing-3);
+    padding: 0.75rem 1.5rem;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-small);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.survivor-pool-card.error .btn-retry:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
+}
+
+/* ============================================================================
+   EXPECTED VALUE CALCULATOR
+   ============================================================================ */
+
+.expected-value-card {
+    background: var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: var(--md-sys-spacing-4);
+    margin: var(--md-sys-spacing-4) 0;
+    border: 2px solid var(--md-sys-color-outline);
+}
+
+.expected-value-card .distribution-badge {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.2) 0%, rgba(33, 150, 243, 0.1) 100%);
+    color: #1976d2;
+    padding: 0.375rem 0.875rem;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border: 1px solid #2196f3;
+}
+
+.expected-value-card .value-breakdown {
+    margin: var(--md-sys-spacing-3) 0;
+}
+
+.expected-value-card .value-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--md-sys-spacing-2);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    transition: background 0.2s ease;
+}
+
+.expected-value-card .value-row:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.expected-value-card .value-row.primary {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.15) 0%, rgba(33, 150, 243, 0.05) 100%);
+    border-left: 4px solid #2196f3;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: var(--md-sys-spacing-3);
+    margin: var(--md-sys-spacing-2) 0;
+    border-radius: var(--md-sys-shape-corner-small);
+}
+
+.expected-value-card .value-row.positive {
+    color: #2e7d32;
+}
+
+.expected-value-card .value-row.negative {
+    color: #d32f2f;
+}
+
+.expected-value-card .value-row.highlight {
+    background: rgba(255, 193, 7, 0.1);
+    font-weight: 600;
+}
+
+.expected-value-card .label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.expected-value-card .label-icon {
+    font-size: 1.2rem;
+}
+
+.expected-value-card .value {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+}
+
+.expected-value-card .time-progress-section {
+    margin: var(--md-sys-spacing-4) 0;
+    padding: var(--md-sys-spacing-3);
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+}
+
+.expected-value-card .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--md-sys-spacing-2);
+}
+
+.expected-value-card .progress-label {
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.expected-value-card .progress-percent {
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.expected-value-card .progress-bar {
+    width: 100%;
+    height: 12px;
+    background: var(--md-sys-color-surface-variant);
+    border-radius: 6px;
+    overflow: visible;
+    margin: var(--md-sys-spacing-2) 0;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.expected-value-card .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50 0%, #8bc34a 50%, #ffc107 100%);
+    border-radius: 6px;
+    transition: width 0.5s var(--md-sys-motion-easing-standard);
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+}
+
+.expected-value-card .progress-marker {
+    position: absolute;
+    top: -8px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.expected-value-card .marker-label {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.expected-value-card .progress-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--md-sys-spacing-2);
+    font-size: 0.875rem;
+}
+
+.expected-value-card .time-label {
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 500;
+}
+
+.expected-value-card .time-remaining {
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+}
+
+.expected-value-card .value-insight {
+    background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+    padding: var(--md-sys-spacing-3);
+    border-radius: var(--md-sys-shape-corner-small);
+    border-left: 4px solid #9c27b0;
+    margin-top: var(--md-sys-spacing-3);
+    display: flex;
+    gap: var(--md-sys-spacing-2);
+}
+
+.expected-value-card .insight-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.expected-value-card .insight-content {
+    flex: 1;
+}
+
+.expected-value-card .insight-content strong {
+    color: var(--md-sys-color-primary);
+}
+
+.expected-value-card .insight-content p {
+    margin: 0.5rem 0 0 0;
+    line-height: 1.6;
+}
+
+.expected-value-card .timing-tips {
+    margin-top: var(--md-sys-spacing-3);
+}
+
+.expected-value-card .timing-tips details {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    padding: var(--md-sys-spacing-2);
+}
+
+.expected-value-card .timing-tips summary {
+    cursor: pointer;
+    user-select: none;
+    padding: var(--md-sys-spacing-2);
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    transition: all 0.2s ease;
+}
+
+.expected-value-card .timing-tips summary:hover {
+    background: rgba(103, 80, 164, 0.1);
+    border-radius: var(--md-sys-shape-corner-small);
+}
+
+.expected-value-card .tips-content {
+    padding: var(--md-sys-spacing-3);
+    margin-top: var(--md-sys-spacing-2);
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.expected-value-card .timing-advice h4 {
+    margin: 0 0 var(--md-sys-spacing-2) 0;
+    color: var(--md-sys-color-primary);
+}
+
+.expected-value-card .advice-tip {
+    margin: 0;
+    padding: var(--md-sys-spacing-2);
+    background: rgba(33, 150, 243, 0.05);
+    border-left: 3px solid #2196f3;
+    border-radius: var(--md-sys-shape-corner-small);
+    line-height: 1.6;
+}
+
+/* ============================================================================
+   PRICE SUGGESTER
+   ============================================================================ */
+
+.price-suggester-card {
+    background: var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: var(--md-sys-spacing-4);
+    margin: var(--md-sys-spacing-4) 0;
+    border: 2px solid var(--md-sys-color-outline);
+}
+
+.price-suggester-card .helper-badge {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+    color: white;
+    padding: 0.375rem 0.875rem;
+    border-radius: 16px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+}
+
+.price-suggester-card .base-value-display {
+    background: var(--md-sys-color-surface);
+    padding: var(--md-sys-spacing-3);
+    border-radius: var(--md-sys-shape-corner-small);
+    text-align: center;
+    margin: var(--md-sys-spacing-3) 0;
+    border: 2px solid var(--md-sys-color-outline-variant);
+}
+
+.price-suggester-card .base-label {
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.price-suggester-card .base-amount {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+    font-family: 'Courier New', monospace;
+    margin: 0.5rem 0;
+}
+
+.price-suggester-card .base-hint {
+    font-size: 0.75rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-style: italic;
+}
+
+.price-suggester-card .pricing-strategies {
+    margin: var(--md-sys-spacing-4) 0;
+}
+
+.price-suggester-card .strategies-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: var(--md-sys-spacing-3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-suggester-card .pricing-row {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    padding: var(--md-sys-spacing-3);
+    margin: var(--md-sys-spacing-2) 0;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.price-suggester-card .pricing-row:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.price-suggester-card .pricing-row.premium {
+    background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 152, 0, 0.05) 100%);
+    border-left: 4px solid #ff9800;
+}
+
+.price-suggester-card .pricing-row.fair {
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%);
+    border-left: 4px solid #2196f3;
+}
+
+.price-suggester-card .pricing-row.discount {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+    border-left: 4px solid #4caf50;
+}
+
+.price-suggester-card .strategy-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--md-sys-spacing-2);
+}
+
+.price-suggester-card .strategy-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+}
+
+.price-suggester-card .strategy-icon {
+    font-size: 1.5rem;
+}
+
+.price-suggester-card .strategy-premium {
+    background: rgba(0, 0, 0, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+}
+
+.price-suggester-card .strategy-price {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--md-sys-spacing-2);
+}
+
+.price-suggester-card .price-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--md-sys-color-primary);
+    font-family: 'Courier New', monospace;
+}
+
+.price-suggester-card .btn-use-price {
+    padding: 0.5rem 1rem;
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-small);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+}
+
+.price-suggester-card .btn-use-price:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(103, 80, 164, 0.4);
+}
+
+.price-suggester-card .btn-use-price.selected {
+    background: #4caf50;
+    animation: successPulse 0.5s ease;
+}
+
+@keyframes successPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.price-suggester-card .strategy-description {
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.5;
+    font-style: italic;
+}
+
+.price-suggester-card .custom-pricing-section {
+    margin-top: var(--md-sys-spacing-4);
+    padding-top: var(--md-sys-spacing-4);
+    border-top: 2px dashed var(--md-sys-color-outline);
+}
+
+.price-suggester-card .custom-pricing-section details {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    padding: var(--md-sys-spacing-2);
+}
+
+.price-suggester-card .custom-pricing-section summary {
+    cursor: pointer;
+    user-select: none;
+    padding: var(--md-sys-spacing-2);
+    font-weight: 600;
+    color: var(--md-sys-color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-suggester-card .custom-pricing-section summary:hover {
+    background: rgba(103, 80, 164, 0.1);
+    border-radius: var(--md-sys-shape-corner-small);
+}
+
+.price-suggester-card .custom-pricing-content {
+    padding: var(--md-sys-spacing-3);
+    margin-top: var(--md-sys-spacing-2);
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.price-suggester-card .custom-input-group label {
+    display: block;
+    margin-bottom: var(--md-sys-spacing-2);
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+}
+
+.price-suggester-card .custom-input-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.75rem;
+}
+
+.price-suggester-card .input-with-button {
+    display: flex;
+    gap: var(--md-sys-spacing-2);
+}
+
+.price-suggester-card .input-with-button input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-small);
+    background: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface);
+    font-size: 1rem;
+    font-family: 'Courier New', monospace;
+}
+
+.price-suggester-card .input-with-button input:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 3px rgba(103, 80, 164, 0.1);
+}
+
+.price-suggester-card .custom-result {
+    margin-top: var(--md-sys-spacing-3);
+    padding: var(--md-sys-spacing-3);
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
+    border-radius: var(--md-sys-shape-corner-small);
+    border-left: 4px solid #4caf50;
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.price-suggester-card .custom-result.hidden {
+    display: none;
+}
+
+.price-suggester-card .custom-result-content {
+    text-align: center;
+}
+
+.price-suggester-card .result-label {
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: 0.5rem;
+}
+
+.price-suggester-card .result-price {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2e7d32;
+    font-family: 'Courier New', monospace;
+    margin: 0.5rem 0;
+}
+
+.price-suggester-card .result-premium {
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: var(--md-sys-spacing-2);
+}
+
+.price-suggester-card .btn-use-custom {
+    margin-top: var(--md-sys-spacing-2);
+}
+
+.price-suggester-card .pricing-tips {
+    margin-top: var(--md-sys-spacing-4);
+    padding: var(--md-sys-spacing-3);
+    background: rgba(33, 150, 243, 0.05);
+    border-radius: var(--md-sys-shape-corner-small);
+    border-left: 4px solid #2196f3;
+    display: flex;
+    gap: var(--md-sys-spacing-2);
+}
+
+.price-suggester-card .tip-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.price-suggester-card .tip-content {
+    flex: 1;
+}
+
+.price-suggester-card .tip-content ul {
+    margin: 0.5rem 0 0 1.5rem;
+    line-height: 1.8;
+}
+
+/* ============================================================================
+   TERMINATION DASHBOARD
+   ============================================================================ */
+
+.termination-dashboard {
+    background: var(--md-sys-color-surface-variant);
+    border-radius: var(--md-sys-shape-corner-medium);
+    padding: var(--md-sys-spacing-4);
+    margin: var(--md-sys-spacing-4) 0;
+    border: 2px solid var(--md-sys-color-outline);
+}
+
+.termination-dashboard .dashboard-header {
+    margin-bottom: var(--md-sys-spacing-4);
+    border-bottom: 2px solid var(--md-sys-color-outline-variant);
+    padding-bottom: var(--md-sys-spacing-3);
+}
+
+.termination-dashboard .dashboard-header h3 {
+    margin: 0 0 var(--md-sys-spacing-2) 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 1.5rem;
+}
+
+.termination-dashboard .dashboard-description {
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.termination-dashboard .terminatable-list {
+    display: grid;
+    gap: var(--md-sys-spacing-3);
+}
+
+.terminatable-card {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    padding: var(--md-sys-spacing-3);
+    border: 2px solid var(--md-sys-color-outline-variant);
+    transition: all 0.3s ease;
+}
+
+.terminatable-card:hover {
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.terminatable-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--md-sys-spacing-3);
+    gap: var(--md-sys-spacing-2);
+}
+
+.terminatable-card .discussion-info {
+    flex: 1;
+}
+
+.terminatable-card .discussion-subject {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    color: var(--md-sys-color-on-surface);
+}
+
+.terminatable-card .discussion-address {
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.terminatable-card .inactive-badge {
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
+    color: #c62828;
+    padding: 0.5rem 1rem;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    border: 1px solid #ef5350;
+}
+
+.terminatable-card .card-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--md-sys-spacing-2);
+    margin-bottom: var(--md-sys-spacing-3);
+    padding: var(--md-sys-spacing-2);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: var(--md-sys-shape-corner-small);
+}
+
+.terminatable-card .stat-item {
+    text-align: center;
+}
+
+.terminatable-card .stat-label {
+    font-size: 0.75rem;
+    color: var(--md-sys-color-on-surface-variant);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.terminatable-card .stat-value {
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+    font-family: 'Courier New', monospace;
+}
+
+.terminatable-card .survivor-alert {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2) 0%, rgba(255, 193, 7, 0.1) 100%);
+    padding: var(--md-sys-spacing-2);
+    border-radius: var(--md-sys-shape-corner-small);
+    border-left: 4px solid #ffc107;
+    margin-bottom: var(--md-sys-spacing-3);
+    display: flex;
+    align-items: center;
+    gap: var(--md-sys-spacing-2);
+    animation: alertPulse 2s infinite;
+}
+
+@keyframes alertPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
+
+.terminatable-card .alert-icon {
+    font-size: 1.5rem;
+}
+
+.terminatable-card .termination-preview {
+    background: var(--md-sys-color-surface-variant);
+    padding: var(--md-sys-spacing-3);
+    border-radius: var(--md-sys-shape-corner-small);
+    margin-bottom: var(--md-sys-spacing-3);
+}
+
+.terminatable-card .preview-label {
+    font-weight: 600;
+    margin-bottom: var(--md-sys-spacing-2);
+    color: var(--md-sys-color-on-surface);
+}
+
+.terminatable-card .preview-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.terminatable-card .preview-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.6;
+}
+
+.terminatable-card .preview-list li:last-child {
+    border-bottom: none;
+}
+
+.terminatable-card .card-actions {
+    display: flex;
+    gap: var(--md-sys-spacing-2);
+    margin-top: var(--md-sys-spacing-3);
+}
+
+.terminatable-card .btn-view-discussion {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface);
+    border: 2px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-small);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.terminatable-card .btn-view-discussion:hover {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border-color: var(--md-sys-color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(103, 80, 164, 0.3);
+}
+
+.terminatable-card .btn-terminate {
+    flex: 2;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+    color: white;
+    border: none;
+    border-radius: var(--md-sys-shape-corner-small);
+    cursor: pointer;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+}
+
+.terminatable-card .btn-terminate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(244, 67, 54, 0.4);
+}
+
+.terminatable-card .btn-terminate:active {
+    transform: translateY(0);
+}
+
+.termination-dashboard .termination-info {
+    margin-top: var(--md-sys-spacing-4);
+    padding: var(--md-sys-spacing-3);
+    background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.05) 100%);
+    border-radius: var(--md-sys-shape-corner-small);
+    border-left: 4px solid #2196f3;
+    display: flex;
+    gap: var(--md-sys-spacing-2);
+}
+
+.termination-dashboard .info-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.termination-dashboard .info-content {
+    flex: 1;
+}
+
+.termination-dashboard .info-content ul {
+    margin: 0.5rem 0 0 1.5rem;
+    line-height: 1.8;
+}
+
+.termination-dashboard.empty {
+    padding: var(--md-sys-spacing-6);
+}
+
+.termination-dashboard .empty-state {
+    text-align: center;
+}
+
+.termination-dashboard .empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--md-sys-spacing-3);
+}
+
+.termination-dashboard .empty-state h3 {
+    margin: 0 0 var(--md-sys-spacing-2) 0;
+    color: var(--md-sys-color-on-surface);
+}
+
+.termination-dashboard .empty-state p {
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ============================================================================
+   RESPONSIVE STYLES
+   ============================================================================ */
+
+@media (max-width: 768px) {
+    .survivor-pool-card .pool-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .expected-value-card .value-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .price-suggester-card .strategy-info,
+    .price-suggester-card .strategy-price {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--md-sys-spacing-2);
+    }
+
+    .terminatable-card .card-header {
+        flex-direction: column;
+    }
+
+    .terminatable-card .card-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .terminatable-card .card-actions {
+        flex-direction: column;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+

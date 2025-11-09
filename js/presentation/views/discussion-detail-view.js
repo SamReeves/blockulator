@@ -5,6 +5,7 @@
 
 import { MessageTable } from '../tables/message-table.js';
 import { PostMessageForm } from '../forms/post-message-form.js';
+import { SurvivorPool } from '../components/survivor-pool.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 
 export class DiscussionDetailView {
@@ -14,6 +15,7 @@ export class DiscussionDetailView {
         this.discussionAbi = discussionAbi;
         this.messageTable = null;
         this.postMessageForm = null;
+        this.survivorPool = null;
         this.containerElement = null;
         this.discussionData = null;
     }
@@ -223,6 +225,9 @@ export class DiscussionDetailView {
                     </div>
                 </div>
 
+                <!-- Survivor Pool Section -->
+                <div id="survivor-pool-container"></div>
+
                 <!-- Post Message Section -->
                 <div class="post-message-section">
                     <button id="toggle-post-form" class="btn-primary">
@@ -244,6 +249,18 @@ export class DiscussionDetailView {
      * Initialize child components
      */
     async initializeComponents() {
+        // Initialize survivor pool
+        this.survivorPool = new SurvivorPool(
+            this.discussionData.instance,
+            this.web3Provider
+        );
+        
+        const survivorPoolContainer = this.containerElement.querySelector('#survivor-pool-container');
+        if (survivorPoolContainer) {
+            this.survivorPool.setContainer(survivorPoolContainer);
+            await this.survivorPool.render();
+        }
+
         // Initialize message table
         this.messageTable = new MessageTable(
             this.discussionData.instance,
@@ -345,6 +362,11 @@ export class DiscussionDetailView {
             
             // Update stats in header
             this.updateHeaderStats();
+            
+            // Refresh survivor pool
+            if (this.survivorPool) {
+                await this.survivorPool.refresh();
+            }
             
             // Refresh message table
             if (this.messageTable) {

@@ -9,4 +9,8 @@ export { ContractHeaderComponent } from './contract-header.js';
 export { LoadingIndicator } from './loading-indicator.js';
 export { HeaderLoader } from './header-loader.js';
 export { ValueInput } from './value-input.js';
+export { SurvivorPool } from './survivor-pool.js';
+export { ExpectedValueCalculator } from './expected-value-calc.js';
+export { PriceSuggester } from './price-suggester.js';
+export { TerminationDashboard } from './termination-dashboard.js';
 
