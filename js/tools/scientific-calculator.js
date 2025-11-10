@@ -91,12 +91,12 @@ export class ScientificCalculator {
         console.log(`📥 Loading ${contractName} contract...`);
         const startTime = performance.now();
         
-        try {
+            try {
             this.contracts[functionKey] = await ContractLoader.load(contractName, this.web3Provider);
             const loadTime = (performance.now() - startTime).toFixed(2);
             console.log(`✅ ${contractName} loaded in ${loadTime}ms`);
-        } catch (error) {
-            console.warn(`Failed to load ${contractName}:`, error);
+            } catch (error) {
+                console.warn(`Failed to load ${contractName}:`, error);
             throw error;
         }
     }
@@ -388,12 +388,12 @@ export class ScientificCalculator {
                 result.textContent = 'Loading contract...';
                 await this.loadContract(this.currentFunction);
             } catch (error) {
-                eventBus.emit(EVENTS.TOAST, {
+            eventBus.emit(EVENTS.TOAST, {
                     message: 'Failed to load contract',
-                    type: 'error'
-                });
+                type: 'error'
+            });
                 result.textContent = 'Error';
-                return;
+            return;
             }
         }
         

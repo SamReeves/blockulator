@@ -85,6 +85,7 @@ export class MasterApp {
         this.masterRouter.registerView('discussions', () => this.initDiscussionsView());
         this.masterRouter.registerView('factory', () => this.initFactoryView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
+        this.masterRouter.registerView('about', () => this.initAboutView());
         
         console.log('✅ All views registered');
     }
@@ -187,6 +188,14 @@ export class MasterApp {
         }
         
         console.log('✅ Badges view initialized');
+    }
+
+    /**
+     * Initialize About view (static page, no lazy loading needed)
+     */
+    async initAboutView() {
+        console.log('📖 About view accessed');
+        // About page is static HTML, no initialization needed
     }
 
     /**
