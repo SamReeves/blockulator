@@ -1,44 +1,23 @@
 /**
- * Error Function (erf) Calculator Tool
- * Calculate erf(x) on-chain for normal distribution calculations
+ * Error Function Calculator Tool
+ * Calculate erf(x) on-chain
  * Domain layer - extends Calculator base class
  */
 
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class ErfCalculator extends Calculator {
-    constructor() {
-        super();
-        this.symbol = 'erf';
-        this.name = 'Error Function';
-        this.constantValue = 1.128379167;
-    }
-
     getContractName() {
         return 'erf-calculator';
     }
 
-    async onAfterInit() {
-        // Load constant value from contract (2/√π)
-        try {
-            const value = await this.contract.get_constant();
-            this.constantValue = parseFloat(ethers.utils.formatUnits(value, 10));
-        } catch (error) {
-            console.log('Using default 2/√π value');
-        }
-    }
-
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: `📐 ${this.symbol}(x) Calculator`,
-            description: `Calculate erf(x) on-chain! The error function is essential for normal distribution calculations, used in statistics, probability theory, and partial differential equations.`,
-            contractAddress: CONTRACT_ADDRESSES.ERF_CALCULATOR,
-            sourceFile: CONTRACT_SOURCES.ERF_CALCULATOR,
-            abiFile: CONTRACT_ABIS.ERF_CALCULATOR
+        const header = this.renderer.createGameHeader({
+            title: `📊 ${this.symbol}(x) Calculator`,
+            description: `Calculate ${this.symbol}(x) on-chain! The error function is essential for probability, statistics, and the normal distribution.`,
+            contractAddress: this.metadata.contractAddress,
+            sourceFile: this.metadata.sourceFile,
+            abiFile: this.metadata.abiFile
         });
         
         const container = document.createElement('div');
@@ -48,22 +27,20 @@ export class ErfCalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
+        controlsDiv.appendChild(this.dom.createInput({
             id: 'input-value',
             label: 'Input (x)',
             type: 'number',
-            placeholder: 'Enter value (e.g., 1.0)',
-            min: -5,
-            max: 5,
+            placeholder: 'Enter value (e.g., 1)',
             step: 0.1
         }));
         
         const hint = document.createElement('div');
         hint.className = 'input-hint';
-        hint.textContent = 'Range: [-5, 5] - practical range for accurate results';
+        hint.textContent = 'Range: (-∞, ∞)';
         controlsDiv.querySelector('.input-group').appendChild(hint);
         
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
             `Calculate ${this.symbol}(x) On-Chain`
         ));
@@ -81,150 +58,37 @@ export class ErfCalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol}(x) =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">
-                    Enter a value and click Calculate to see the result
-                </div>
-                <div class="result-examples">
-                    <p><strong>Quick Examples:</strong></p>
-                    <ul>
-                        <li>erf(0) = 0</li>
-                        <li>erf(0.5) ≈ 0.520</li>
-                        <li>erf(1) ≈ 0.843</li>
-                        <li>erf(2) ≈ 0.995</li>
-                        <li>erf(∞) → 1</li>
-                    </ul>
-                    <p><strong>Normal CDF:</strong> Φ(x) = 0.5 × (1 + erf(x/√2))</p>
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            label: `${this.symbol}(x) =`,
+            examples: [
+                'erf(0) = 0',
+                'erf(1) ≈ 0.843',
+                'erf(∞) → 1'
+            ]
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}</h3>
-            <div class="tool-info">
-                <p><strong>The error function</strong> is defined as erf(x) = (2/√π) ∫₀ˣ e^(-t²) dt</p>
-                <ul>
-                    <li><strong>Normal Distribution:</strong> CDF of standard normal: Φ(x) = 0.5 × (1 + erf(x/√2))</li>
-                    <li><strong>Probability Theory:</strong> Calculate probabilities under Gaussian distributions</li>
-                    <li><strong>Statistics:</strong> P-values, confidence intervals, Z-scores</li>
-                    <li><strong>Physics:</strong> Heat diffusion, quantum mechanics</li>
-                    <li><strong>Signal Processing:</strong> Gaussian filtering and noise analysis</li>
-                </ul>
-                <p class="note">💡 <strong>Fun fact:</strong> Called "error" function because it was first used to analyze errors in astronomical measurements!</p>
-                <p class="note">🔒 <strong>On-chain calculation:</strong> Uses Abramowitz-Stegun approximation with accuracy ~1.5×10⁻⁷.</p>
-                <p class="note">📊 <strong>Properties:</strong> Odd function (erf(-x) = -erf(x)), bounded between -1 and 1</p>
-            </div>
-            
-            <h3>🔧 Use in Your Smart Contract</h3>
-            <div class="tool-info">
-                <p>You can call this calculator from your own smart contracts!</p>
-                <pre><code># Interface for ${this.name} Calculator
-interface ErfCalculator:
-    def calculate(x: decimal) -> decimal: view
-    def get_constant() -> decimal: view
-
-# Use the calculator
-CALC: constant(address) = ${CONTRACT_ADDRESSES.ERF_CALCULATOR}
-
-@external
-@view
-def my_calculation(value: decimal) -> decimal:
-    # Call erf(x) calculator (FREE - no gas cost!)
-    result: decimal = staticcall ErfCalculator(CALC).calculate(value)
-    return result
-
-# Example: Calculate normal distribution CDF
-@external
-@view
-def normal_cdf(z: decimal) -> decimal:
-    # Φ(z) = 0.5 × (1 + erf(z/√2))
-    # For z-score in standard normal distribution
-    z_normalized: decimal = z / 1.4142135624  # divide by √2
-    erf_result: decimal = staticcall ErfCalculator(CALC).calculate(z_normalized)
-    return 0.5 * (1.0 + erf_result)
-</code></pre>
-                <p class="note">✨ <strong>Free to use:</strong> All calculations are view functions with no gas cost!</p>
-                <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.ERF_CALCULATOR}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>erf(x)</strong> is the error function, integral to probability and statistics.</p>`,
+            features: [
+                'Related to normal distribution CDF',
+                'Returns values in range (-1, 1)',
+                'Used in probability calculations',
+                'Essential for statistics and data science'
+            ],
+            notes: [
+                '💡 <strong>Stats Tip:</strong> Normal CDF can be expressed using erf',
+                '🔒 <strong>On-chain calculation:</strong> Uses polynomial approximations for accuracy.'
+            ]
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        const valueInput = document.getElementById('input-value');
-        
-        if (calculateButton && valueInput) {
-            const handleCalculate = () => this.calculate(valueInput.value);
-            calculateButton.addEventListener('click', handleCalculate);
-            valueInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleCalculate();
-            });
-        }
+        this.setupStandardListeners();
     }
 
     async calculate(inputValue) {
-        const x = parseFloat(inputValue);
-        
-        if (isNaN(x)) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please enter a valid number',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        if (x < -5 || x > 5) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Input outside practical range [-5, 5]',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        const calculateButton = document.getElementById('calculate-button');
-        
-        try {
-            if (calculateButton) {
-                calculateButton.disabled = true;
-                calculateButton.textContent = 'Calculating...';
-            }
-            
-            console.log(`Calculating ${this.symbol}(${x}) on-chain`);
-            
-            const xFixed = ethers.utils.parseUnits(x.toString(), 10);
-            const result = await this.contract.calculate(xFixed);
-            const resultDecimal = ethers.utils.formatUnits(result, 10);
-            
-            console.log('Result:', resultDecimal);
-            
-            this.displayResult(resultDecimal, `${this.symbol}(${x}) ≈ ${parseFloat(resultDecimal).toFixed(6)}`);
-            
-        } catch (error) {
-            console.error('Calculation failed:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Calculation failed: ' + (error.reason || error.message),
-                type: 'error'
-            });
-        } finally {
-            if (calculateButton) {
-                calculateButton.disabled = false;
-                calculateButton.textContent = `Calculate ${this.symbol}(x) On-Chain`;
-            }
-        }
+        return await this.executeStandardCalculation(inputValue);
     }
 }
-

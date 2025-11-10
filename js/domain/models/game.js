@@ -2,11 +2,23 @@
  * Game Base Class
  * Domain layer - abstract base for interactive games
  * Extends InteractiveContract with game-specific features
+ * Injects game-specific UI components
  */
 
 import { InteractiveContract } from './interactive-contract.js';
+import { ValueInput } from '../../presentation/components/value-input.js';
+import { AddressBadge } from '../../presentation/components/address-badge.js';
 
 export class Game extends InteractiveContract {
+    constructor() {
+        super();
+        
+        // Inject game-specific components (available to all game subclasses)
+        this.components = {
+            ValueInput,
+            AddressBadge
+        };
+    }
     /**
      * Hook: After initialization, setup game-specific features
      */
@@ -43,27 +55,6 @@ export class Game extends InteractiveContract {
             sourceKey: this.getSourceKey(),
             abiKey: this.getAbiKey()
         };
-    }
-
-    /**
-     * Convert contract name to SCREAMING_SNAKE_CASE for lookups
-     */
-    getAddressKey() {
-        return this.getContractName().toUpperCase().replace(/-/g, '_');
-    }
-
-    /**
-     * Get source file key (same as address key)
-     */
-    getSourceKey() {
-        return this.getAddressKey();
-    }
-
-    /**
-     * Get ABI file key (same as address key)
-     */
-    getAbiKey() {
-        return this.getAddressKey();
     }
 }
 

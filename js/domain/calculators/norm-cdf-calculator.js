@@ -1,33 +1,18 @@
 /**
- * Normal CDF (Φ) Calculator Tool
+ * Normal CDF Calculator Tool
+ * Calculate cumulative distribution function for standard normal distribution
  * Domain layer - extends Calculator base class
  */
 
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class NormCdfCalculator extends Calculator {
-    constructor() {
-        super();
-        this.constantValue = 1.414213562;
-        this.symbol = 'Φ(x)';
-        this.name = 'Normal CDF';
-    }
-
     getContractName() {
         return 'norm-cdf';
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: `📊 ${this.symbol} Normal CDF Calculator`,
-            description: `Calculate normal distribution CDF on-chain! Essential for statistics, z-tests, and probability.`,
-            contractAddress: CONTRACT_ADDRESSES.NORM_CDF,
-            sourceFile: CONTRACT_SOURCES.NORM_CDF,
-            abiFile: CONTRACT_ABIS.NORM_CDF
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const container = document.createElement('div');
         container.className = 'game-interface';
@@ -36,9 +21,9 @@ export class NormCdfCalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
+        controlsDiv.appendChild(this.dom.createInput({
             id: 'input-value',
-            label: 'Z-score (x)',
+            label: 'Z-Score (x)',
             type: 'number',
             placeholder: 'Enter z-score (e.g., 1.96)',
             step: 0.1
@@ -46,12 +31,12 @@ export class NormCdfCalculator extends Calculator {
         
         const hint = document.createElement('div');
         hint.className = 'input-hint';
-        hint.textContent = 'Standard normal distribution (μ=0, σ=1)';
+        hint.textContent = 'Standard normal: mean=0, std=1';
         controlsDiv.querySelector('.input-group').appendChild(hint);
         
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
-            `Calculate ${this.symbol} On-Chain`
+            `Calculate Φ(x) On-Chain`
         ));
         
         container.appendChild(controlsDiv);
@@ -67,70 +52,42 @@ export class NormCdfCalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol} =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">Enter a z-score and click Calculate</div>
-                <div class="result-examples">
-                    <p><strong>Key Values:</strong></p>
-                    <ul>
-                        <li>Φ(0) = 0.5 (50%)</li>
-                        <li>Φ(1) ≈ 0.841 (84.1%)</li>
-                        <li>Φ(1.96) ≈ 0.975 (97.5%)</li>
-                        <li>Φ(-1) ≈ 0.159 (15.9%)</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            title: '📊 Probability',
+            label: 'Φ(x) =',
+            hint: 'Probability that a standard normal variable is ≤ x',
+            examples: [
+                'Φ(0) = 0.5 (50%)',
+                'Φ(1.96) ≈ 0.975 (97.5%)',
+                'Φ(-1.96) ≈ 0.025 (2.5%)'
+            ]
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}</h3>
-            <div class="tool-info">
-                <p><strong>Φ(x)</strong> gives the probability that a standard normal random variable is ≤ x</p>
-                <ul>
-                    <li>Z-tests and confidence intervals</li>
-                    <li>Hypothesis testing in statistics</li>
-                    <li>Uses error function internally</li>
-                    <li>Returns probability between 0 and 1</li>
-                </ul>
-                <p class="note">📍 <strong>Contract:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.NORM_CDF}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>Φ(x)</strong> is the cumulative distribution function (CDF) of the standard normal distribution.</p>`,
+            features: [
+                'Returns probability: P(Z ≤ x)',
+                'Used in hypothesis testing and confidence intervals',
+                'Z-scores measure standard deviations from mean',
+                'Essential for statistical analysis'
+            ],
+            notes: [
+                '💡 <strong>Stats Tip:</strong> 95% of values fall within ±1.96 standard deviations',
+                '🔒 <strong>On-chain calculation:</strong> Uses error function for high accuracy.'
+            ],
+            interfaceName: 'NormCdfCalculator'
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        if (calculateButton) {
-            calculateButton.addEventListener('click', () => this.handleCalculate());
-        }
+        this.setupStandardListeners();
     }
 
-    async handleCalculate() {
-        const input = document.getElementById('input-value').value;
-        if (!input) return;
-        
-        const value = parseFloat(input);
-        await this.calculateValue(value);
-    }
-
-    async calculateValue(value) {
-        // Convert to fixed-point (10 decimals)
-        const valueScaled = Math.floor(value * 1e10);
-        const result = await this.contract.standard_cdf(valueScaled);
-        const resultFormatted = (Number(result) / 1e10).toFixed(10);
-        document.getElementById('result-value').textContent = resultFormatted;
+    async calculate(inputValue) {
+        return await this.executeStandardCalculation(inputValue, {
+            formatResult: (x, result) => `Φ(${x}) ≈ ${parseFloat(result).toFixed(6)} (${(parseFloat(result) * 100).toFixed(2)}%)`
+        });
     }
 }
-

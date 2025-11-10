@@ -2,16 +2,39 @@
  * Interactive Contract Base Class
  * Domain layer - abstract base for all contract interactions
  * Implements template method pattern for consistent contract-based modules
+ * Provides dependency injection and unified metadata access
  */
 
 import { ContractLoader } from '../../infrastructure/blockchain/contract-loader.js';
+import { getContractMetadata } from '../../infrastructure/config/contract-registry.js';
+import { BlockchainMath } from '../../infrastructure/utils/blockchain-math.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
+import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
+import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 
 export class InteractiveContract {
     constructor() {
         this.contract = null;
         this.container = null;
         this.web3Provider = null;
+        
+        // Get metadata from unified registry
+        // Subclass must implement getContractName() before calling super()
+        try {
+            const contractName = this.getContractName();
+            this.metadata = getContractMetadata(contractName);
+        } catch (error) {
+            // Metadata will be set during init if not available in constructor
+            this.metadata = null;
+        }
+        
+        // Dependency injection - all subclasses get these utilities
+        this.math = BlockchainMath;
+        this.events = { bus: eventBus, EVENTS };
+        this.transactionHandler = TransactionHandler;
+        this.dom = DOMHelpers;
+        this.renderer = GameRenderer;
     }
 
     /**
@@ -21,6 +44,12 @@ export class InteractiveContract {
     async init(container, web3Provider) {
         this.container = container;
         this.web3Provider = web3Provider;
+        
+        // Ensure metadata is loaded (in case constructor couldn't get it)
+        if (!this.metadata) {
+            const contractName = this.getContractName();
+            this.metadata = getContractMetadata(contractName);
+        }
         
         await this.onBeforeInit();
         
@@ -94,6 +123,55 @@ export class InteractiveContract {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Convert contract name to SCREAMING_SNAKE_CASE for lookups
+     * Used for address, source, and ABI key generation
+     */
+    getAddressKey() {
+        return this.getContractName().toUpperCase().replace(/-/g, '_');
+    }
+
+    /**
+     * Get source file key (same as address key)
+     */
+    getSourceKey() {
+        return this.getAddressKey();
+    }
+
+    /**
+     * Get ABI file key (same as address key)
+     */
+    getAbiKey() {
+        return this.getAddressKey();
+    }
+
+    /**
+     * Execute operation with button state management
+     * Automatically handles disabled state and loading text
+     * 
+     * @param {string} buttonId - Button element ID
+     * @param {Function} operation - Async operation to execute
+     * @param {Object} states - Optional custom button states
+     * @returns {Promise} Result of operation
+     */
+    async withButtonState(buttonId, operation, states = {}) {
+        const button = document.getElementById(buttonId);
+        if (!button) return await operation();
+        
+        const originalText = button.textContent;
+        const originalDisabled = button.disabled;
+        
+        button.disabled = true;
+        button.textContent = states.loading || 'Processing...';
+        
+        try {
+            return await operation();
+        } finally {
+            button.disabled = originalDisabled;
+            button.textContent = originalText;
+        }
     }
 }
 

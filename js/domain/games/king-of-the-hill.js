@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { KingLadder } from '../../presentation/components/king-ladder.js';
 
 export class KingOfTheHill extends Game {
@@ -27,13 +20,7 @@ export class KingOfTheHill extends Game {
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: '👑 King of the Hill',
-            description: 'Dethrone the king. Win the prize. No refunds.',
-            contractAddress: CONTRACT_ADDRESSES.KING_OF_THE_HILL,
-            sourceFile: CONTRACT_SOURCES.KING_OF_THE_HILL,
-            abiFile: CONTRACT_ABIS.KING_OF_THE_HILL
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -95,7 +82,7 @@ export class KingOfTheHill extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.paymentInput = new ValueInput('throne-payment-input', {
+        this.paymentInput = new this.components.ValueInput('throne-payment-input', {
             label: 'Your Payment',
             hint: 'Pay more to dethrone',
             defaultUnit: 'gwei',
@@ -133,7 +120,7 @@ export class KingOfTheHill extends Game {
         const paymentBN = this.paymentInput.getWeiValue();
         
         if (!paymentBN || paymentBN.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a payment amount',
                 type: 'warning'
             });
@@ -144,7 +131,7 @@ export class KingOfTheHill extends Game {
             const minPayment = await this.contract.get_minimum_payment();
             
             if (paymentBN.lt(minPayment)) {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: `Payment too low. Minimum: ${ethers.utils.formatUnits(minPayment, 'gwei')} GWEI`,
                     type: 'error'
                 });
@@ -156,7 +143,7 @@ export class KingOfTheHill extends Game {
                 { game: 'king-of-the-hill', payment: paymentBN.toString() }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: '👑 You are now KING!',
                 type: 'success'
             });
@@ -200,32 +187,32 @@ export class KingOfTheHill extends Game {
             if (this.kingLadder) {
                 this.kingLadder.updateCurrentKing({
                     address: currentKing,
-                    prize: DOMHelpers.formatWei(currentPrize),
+                    prize: this.dom.formatWei(currentPrize),
                     reignDuration: reignDuration.toNumber(),
                     isYou: isYouKing
                 });
                 this.kingLadder.updateCurrentAddress(this.web3Provider?.currentAddress);
             }
             
-            DOMHelpers.updateInfo('min-payment', DOMHelpers.formatWei(minPayment));
+            this.dom.updateInfo('min-payment', this.dom.formatWei(minPayment));
             
             // Update badges
             const badge = document.getElementById('total-dethrone-badge');
             if (badge) badge.textContent = totalDethronements.toString();
             
             if (userStats) {
-                DOMHelpers.updateInfo('your-crowns', userStats[0].toString());
-                DOMHelpers.updateInfo('your-reign', DOMHelpers.formatDuration(userStats[1].toNumber()));
+                this.dom.updateInfo('your-crowns', userStats[0].toString());
+                this.dom.updateInfo('your-reign', this.dom.formatDuration(userStats[1].toNumber()));
             } else {
-                DOMHelpers.updateInfo('your-crowns', '—');
-                DOMHelpers.updateInfo('your-reign', '—');
+                this.dom.updateInfo('your-crowns', '—');
+                this.dom.updateInfo('your-reign', '—');
             }
             
             await this.loadHistory();
             
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state',
                 type: 'error'
             });
@@ -256,19 +243,19 @@ export class KingOfTheHill extends Game {
             const wasYou = previousKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isYou) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `👑 You won ${DOMHelpers.formatWei(prizeWon)}!`,
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `👑 You won ${this.dom.formatWei(prizeWon)}!`,
                     type: 'success'
                 });
-                eventBus.emit(EVENTS.CONFETTI);
+                this.events.bus.emit(this.events.EVENTS.CONFETTI);
             } else if (wasYou) {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: '⚔️ You were dethroned!',
                     type: 'warning'
                 });
             } else {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `👑 New king: ${DOMHelpers.formatAddress(newKing)}`,
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `👑 New king: ${this.dom.formatAddress(newKing)}`,
                     type: 'info'
                 });
             }

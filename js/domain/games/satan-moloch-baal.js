@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { LazySusan3D } from '../../presentation/components/lazy-susan-3d.js';
 
 export class SatanMolochBaal extends Game {
@@ -35,13 +28,7 @@ export class SatanMolochBaal extends Game {
         this.container.innerHTML = '';
         
         // Header with contract info
-        const header = GameRenderer.createGameHeader({
-            title: '🔥 Satan, Moloch, Baal',
-            description: 'Vote for your demon by burning ETH to the void!',
-            contractAddress: CONTRACT_ADDRESSES.SATAN_MOLOCH_BAAL,
-            sourceFile: CONTRACT_SOURCES.SATAN_MOLOCH_BAAL,
-            abiFile: CONTRACT_ABIS.SATAN_MOLOCH_BAAL
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -121,7 +108,7 @@ export class SatanMolochBaal extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.voteInput = new ValueInput('vote-amount-input', {
+        this.voteInput = new this.components.ValueInput('vote-amount-input', {
             label: 'Amount to Burn',
             hint: 'All goes to the null address - eternal sacrifice!',
             defaultUnit: 'gwei',
@@ -197,7 +184,7 @@ export class SatanMolochBaal extends Game {
         
         const weiAmount = this.voteInput.getWeiValue();
         if (!weiAmount || weiAmount.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a valid amount to burn',
                 type: 'warning'
             });
@@ -213,8 +200,8 @@ export class SatanMolochBaal extends Game {
                 { game: 'satan-moloch-baal', demon: demonKey, wei: weiAmount.toString() }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
-                message: `🔥 Burned ${DOMHelpers.formatWei(weiAmount)} for ${demon.emoji} ${demon.name}!`,
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
+                message: `🔥 Burned ${this.dom.formatWei(weiAmount)} for ${demon.emoji} ${demon.name}!`,
                 type: 'success'
             });
             
@@ -240,19 +227,19 @@ export class SatanMolochBaal extends Game {
             
             // Calculate total burned
             const total = standings.reduce((sum, val) => sum.add(val), standings[0].mul(0));
-            DOMHelpers.updateInfo('total-burned', DOMHelpers.formatWei(total));
+            this.dom.updateInfo('total-burned', this.dom.formatWei(total));
 
             // Update each demon's stats
             this.demons.forEach((demon, i) => {
                 const voteCount = voteCounts[i];
-                DOMHelpers.updateInfo(`${demon.key}-total`, DOMHelpers.formatWei(standings[i]));
-                DOMHelpers.updateInfo(`${demon.key}-votes`, `${voteCount} vote${voteCount.toNumber() === 1 ? '' : 's'}`);
+                this.dom.updateInfo(`${demon.key}-total`, this.dom.formatWei(standings[i]));
+                this.dom.updateInfo(`${demon.key}-votes`, `${voteCount} vote${voteCount.toNumber() === 1 ? '' : 's'}`);
                 
                 const championAddr = bestWorshippers[i * 2];
                 const championDisplay = championAddr === '0x0000000000000000000000000000000000000000' 
                     ? 'None' 
-                    : DOMHelpers.formatAddress(championAddr);
-                DOMHelpers.updateInfo(`${demon.key}-champion`, championDisplay);
+                    : this.dom.formatAddress(championAddr);
+                this.dom.updateInfo(`${demon.key}-champion`, championDisplay);
             });
 
             // User-specific stats
@@ -263,20 +250,20 @@ export class SatanMolochBaal extends Game {
                 ]);
                 
                 this.demons.forEach((demon, i) => {
-                    DOMHelpers.updateInfo(`user-${demon.key}-burned`, DOMHelpers.formatWei(userBurnedPerDemon[i]));
+                    this.dom.updateInfo(`user-${demon.key}-burned`, this.dom.formatWei(userBurnedPerDemon[i]));
                 });
-                DOMHelpers.updateInfo('user-total-burned', DOMHelpers.formatWei(userStats[3]));
+                this.dom.updateInfo('user-total-burned', this.dom.formatWei(userStats[3]));
             } else {
                 // Read-only mode
                 this.demons.forEach(demon => {
-                    DOMHelpers.updateInfo(`user-${demon.key}-burned`, '👀');
+                    this.dom.updateInfo(`user-${demon.key}-burned`, '👀');
                 });
-                DOMHelpers.updateInfo('user-total-burned', 'Connect wallet');
+                this.dom.updateInfo('user-total-burned', 'Connect wallet');
             }
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state.',
                 type: 'error'
             });
@@ -294,7 +281,7 @@ export class SatanMolochBaal extends Game {
             
             if (this.web3Provider.isConnected() && 
                 voter.toLowerCase() === this.web3Provider.currentAddress?.toLowerCase()) {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: `🔥 Your sacrifice to ${demonDisplay} is complete!`,
                     type: 'success'
                 });
@@ -310,13 +297,13 @@ export class SatanMolochBaal extends Game {
                 worshipper.toLowerCase() === this.web3Provider.currentAddress?.toLowerCase();
             
             if (isYou) {
-                eventBus.emit(EVENTS.CONFETTI);
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.CONFETTI);
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: `👑 You are the CHAMPION of ${demonDisplay}!`,
                     type: 'success'
                 });
             } else if (this.web3Provider.isConnected()) {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: `👑 ${demonDisplay} has a new champion!`,
                     type: 'info'
                 });

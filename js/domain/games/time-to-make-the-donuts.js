@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { CountdownWheel } from '../../presentation/components/countdown-wheel.js';
 
 export class TimeToMakeTheDonuts extends Game {
@@ -26,13 +19,7 @@ export class TimeToMakeTheDonuts extends Game {
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: '🍩 Time to Make the Donuts',
-            description: 'Be the FIRST to donate each day! First donor of the day wins yesterday\'s pot (99%)!',
-            contractAddress: CONTRACT_ADDRESSES.TIME_TO_MAKE_THE_DONUTS,
-            sourceFile: CONTRACT_SOURCES.TIME_TO_MAKE_THE_DONUTS,
-            abiFile: CONTRACT_ABIS.TIME_TO_MAKE_THE_DONUTS
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -143,7 +130,7 @@ export class TimeToMakeTheDonuts extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.donationInput = new ValueInput('donation-amount-input', {
+        this.donationInput = new this.components.ValueInput('donation-amount-input', {
             label: 'Donation Amount',
             hint: 'Any amount helps grow the prize pool',
             defaultUnit: 'gwei',
@@ -177,7 +164,7 @@ export class TimeToMakeTheDonuts extends Game {
         const amount = this.donationInput.getWeiValue();
         
         if (!amount || amount.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a donation amount',
                 type: 'warning'
             });
@@ -190,7 +177,7 @@ export class TimeToMakeTheDonuts extends Game {
                 { game: 'time-to-make-the-donuts', amount: amount.toString() }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: '🍩 Donation sent! Check if you won!',
                 type: 'success'
             });
@@ -230,11 +217,11 @@ export class TimeToMakeTheDonuts extends Game {
                 potentialPrize: potentialPrize[0].toString()
             });
             
-            DOMHelpers.updateInfo('current-day', currentDay.toString());
-            DOMHelpers.updateInfo('total-days', totalDays.toString());
-            DOMHelpers.updateInfo('pot-value', DOMHelpers.formatWei(potValue));
-            DOMHelpers.updateInfo('winner-prize', DOMHelpers.formatWei(potentialPrize[0]));
-            DOMHelpers.updateInfo('contract-balance', DOMHelpers.formatWei(potValue));
+            this.dom.updateInfo('current-day', currentDay.toString());
+            this.dom.updateInfo('total-days', totalDays.toString());
+            this.dom.updateInfo('pot-value', this.dom.formatWei(potValue));
+            this.dom.updateInfo('winner-prize', this.dom.formatWei(potentialPrize[0]));
+            this.dom.updateInfo('contract-balance', this.dom.formatWei(potValue));
             
             const donorEl = document.getElementById('first-donor-today');
             if (donorEl) {
@@ -247,16 +234,16 @@ export class TimeToMakeTheDonuts extends Game {
                     const isYou = currentAddress && firstDonorToday.toLowerCase() === currentAddress.toLowerCase();
                     
                     if (isYou) {
-                        donorEl.innerHTML = `<strong style="color: #ffd700;">🏆 YOU!</strong> ${DOMHelpers.formatAddress(firstDonorToday)}`;
+                        donorEl.innerHTML = `<strong style="color: #ffd700;">🏆 YOU!</strong> ${this.dom.formatAddress(firstDonorToday)}`;
                     } else {
-                        donorEl.innerHTML = DOMHelpers.formatAddress(firstDonorToday);
+                        donorEl.innerHTML = this.dom.formatAddress(firstDonorToday);
                     }
                 }
             }
             
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state',
                 type: 'error'
             });
@@ -271,25 +258,25 @@ export class TimeToMakeTheDonuts extends Game {
             
             if (isFirstDonor) {
                 if (isYou) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `🍩 You donated ${DOMHelpers.formatWei(amount)} and were FIRST TODAY!`,
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `🍩 You donated ${this.dom.formatWei(amount)} and were FIRST TODAY!`,
                         type: 'success'
                     });
                 } else {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `⚡ ${DOMHelpers.formatAddress(donor)} was first today!`,
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `⚡ ${this.dom.formatAddress(donor)} was first today!`,
                         type: 'info'
                     });
                 }
             } else {
                 if (isYou) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `You donated ${DOMHelpers.formatWei(amount)} (too late for today!)`,
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `You donated ${this.dom.formatWei(amount)} (too late for today!)`,
                         type: 'info'
                     });
                 } else {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `${DOMHelpers.formatAddress(donor)} donated (not first)`,
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `${this.dom.formatAddress(donor)} donated (not first)`,
                         type: 'info'
                     });
                 }
@@ -302,15 +289,15 @@ export class TimeToMakeTheDonuts extends Game {
             const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isYou) {
-                eventBus.emit(EVENTS.WINNER_DETERMINED, { player: winner, prize });
-                eventBus.emit(EVENTS.CONFETTI);
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `🎉 YOU WON ${DOMHelpers.formatWei(prize)} by being first today!`,
+                this.events.bus.emit(this.events.EVENTS.WINNER_DETERMINED, { player: winner, prize });
+                this.events.bus.emit(this.events.EVENTS.CONFETTI);
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `🎉 YOU WON ${this.dom.formatWei(prize)} by being first today!`,
                     type: 'success'
                 });
             } else {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `Winner: ${DOMHelpers.formatAddress(winner)} won ${DOMHelpers.formatWei(prize)}`,
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `Winner: ${this.dom.formatAddress(winner)} won ${this.dom.formatWei(prize)}`,
                     type: 'info'
                 });
             }

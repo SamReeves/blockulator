@@ -1,27 +1,23 @@
+/**
+ * Factorial Calculator Tool
+ * Calculate n! on-chain
+ * Domain layer - extends Calculator base class
+ */
+
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class FactorialCalculator extends Calculator {
-    constructor() {
-        super();
-        this.constantValue = 1;
-        this.symbol = 'n!';
-        this.name = 'Factorial';
-    }
-
     getContractName() {
         return 'factorial';
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
+        const header = this.renderer.createGameHeader({
             title: `🎲 ${this.symbol} Calculator`,
             description: `Calculate n! on-chain! Factorial is essential for combinatorics, probability, and permutations.`,
-            contractAddress: CONTRACT_ADDRESSES.FACTORIAL,
-            sourceFile: CONTRACT_SOURCES.FACTORIAL,
-            abiFile: CONTRACT_ABIS.FACTORIAL
+            contractAddress: this.metadata.contractAddress,
+            sourceFile: this.metadata.sourceFile,
+            abiFile: this.metadata.abiFile
         });
         
         const container = document.createElement('div');
@@ -31,7 +27,7 @@ export class FactorialCalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
+        controlsDiv.appendChild(this.dom.createInput({
             id: 'input-value',
             label: 'Integer (n)',
             type: 'number',
@@ -46,7 +42,7 @@ export class FactorialCalculator extends Calculator {
         hint.textContent = 'Range: [0, 20] integers only';
         controlsDiv.querySelector('.input-group').appendChild(hint);
         
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
             `Calculate ${this.symbol} On-Chain`
         ));
@@ -64,65 +60,59 @@ export class FactorialCalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol} =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">Enter an integer and click Calculate</div>
-                <div class="result-examples">
-                    <p><strong>Examples:</strong></p>
-                    <ul>
-                        <li>0! = 1</li>
-                        <li>5! = 120</li>
-                        <li>10! = 3,628,800</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            label: `${this.symbol} =`,
+            examples: [
+                '0! = 1',
+                '5! = 120',
+                '10! = 3,628,800'
+            ]
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}</h3>
-            <div class="tool-info">
-                <p><strong>n!</strong> is the product of all positive integers ≤ n</p>
-                <ul>
-                    <li>Permutations: P(n,k) = n!/(n-k)!</li>
-                    <li>Combinations: C(n,k) = n!/(k!(n-k)!)</li>
-                    <li>Essential for probability calculations</li>
-                </ul>
-                <p class="note">📍 <strong>Contract:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.FACTORIAL}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>n!</strong> (n factorial) is the product of all positive integers less than or equal to n.</p>`,
+            features: [
+                '<strong>Combinatorics:</strong> Count permutations and arrangements',
+                '<strong>Probability:</strong> Calculate binomial coefficients',
+                '<strong>Series:</strong> Taylor series and power series expansions',
+                '<strong>Special case:</strong> 0! = 1 by convention'
+            ],
+            notes: [
+                '💡 <strong>Growth:</strong> Factorials grow extremely fast! 20! ≈ 2.4 × 10^18',
+                '🔒 <strong>On-chain calculation:</strong> Optimized iterative multiplication with overflow protection.'
+            ]
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        if (calculateButton) {
-            calculateButton.addEventListener('click', () => this.handleCalculate());
+        this.setupStandardListeners();
+    }
+
+    async calculate(inputValue) {
+        const n = this.validateInput(inputValue, 0, 21);
+        if (n === null) return;
+
+        // Check if integer
+        if (!Number.isInteger(n)) {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
+                message: 'Factorial requires an integer value',
+                type: 'warning'
+            });
+            return;
         }
-    }
 
-    async handleCalculate() {
-        const input = document.getElementById('input-value').value;
-        if (!input) return;
-        
-        const value = Math.floor(parseFloat(input));
-        const result = await this.contract.calculate(value);
-        document.getElementById('result-value').textContent = result.toString();
-    }
-
-    async calculateValue(value) {
-        const result = await this.contract.calculate(Math.floor(value));
-        document.getElementById('result-value').textContent = result.toString();
+        return await this.withButtonState('calculate-button', async () => {
+            console.log(`Calculating ${n}! on-chain`);
+            
+            const result = await this.contract.calculate(n);
+            const resultDecimal = ethers.utils.formatUnits(result, 10);
+            
+            console.log('Result:', resultDecimal);
+            
+            this.displayResult(resultDecimal, `${n}! = ${parseFloat(resultDecimal).toFixed(0)}`);
+            return resultDecimal;
+        }, { loading: 'Calculating...' });
     }
 }

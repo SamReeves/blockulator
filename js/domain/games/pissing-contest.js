@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { BarGraph3D } from '../../presentation/components/bar-graph-3d.js';
 
 export class PissingContest extends Game {
@@ -27,13 +20,7 @@ export class PissingContest extends Game {
 
     render() {
         // Header with contract info
-        const header = GameRenderer.createGameHeader({
-            title: '💦 Pissing Contest',
-            description: 'Send the HIGHEST donation to win the pot!',
-            contractAddress: CONTRACT_ADDRESSES.PISSING_CONTEST,
-            sourceFile: CONTRACT_SOURCES.PISSING_CONTEST,
-            abiFile: CONTRACT_ABIS.PISSING_CONTEST
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -192,7 +179,7 @@ export class PissingContest extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.donationInput = new ValueInput('donate-amount-input', {
+        this.donationInput = new this.components.ValueInput('donate-amount-input', {
             label: 'Donation Amount',
             hint: 'Send the highest amount to lead!',
             defaultUnit: 'gwei',
@@ -237,7 +224,7 @@ export class PissingContest extends Game {
         const weiAmount = this.donationInput.getWeiValue();
         
         if (!weiAmount || weiAmount.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a valid donation amount',
                 type: 'warning'
             });
@@ -284,10 +271,10 @@ export class PissingContest extends Game {
             const totalValue = roundInfo[5];
 
             // Update UI using DOMHelpers - these work in read-only mode
-            DOMHelpers.updateInfo('prize-pool', 
-                DOMHelpers.formatWei(totalValue)
+            this.dom.updateInfo('prize-pool', 
+                this.dom.formatWei(totalValue)
             );
-            DOMHelpers.updateInfo('donations-count', 
+            this.dom.updateInfo('donations-count', 
                 `${donationCount} / ${maxDonations}`
             );
             // Update leader with badge
@@ -315,11 +302,11 @@ export class PissingContest extends Game {
                 const userDonation = userPosition[0];
                 const isWinning = userPosition[1];
 
-                DOMHelpers.updateInfo('your-donation', 
-                    DOMHelpers.formatWei(userDonation)
+                this.dom.updateInfo('your-donation', 
+                    this.dom.formatWei(userDonation)
                 );
                 
-                DOMHelpers.updateInfo('your-status', 
+                this.dom.updateInfo('your-status', 
                     userDonation.gt(0) 
                         ? (isWinning ? '🥇 Leading!' : '📊 Playing')
                         : 'Not playing'
@@ -327,24 +314,24 @@ export class PissingContest extends Game {
                 
                 // Get user lifetime stats
                 const userStats = await this.contract.get_user_stats(this.web3Provider.currentAddress);
-                DOMHelpers.updateInfo('lifetime-donated', DOMHelpers.formatWei(userStats[0]));
-                DOMHelpers.updateInfo('lifetime-won', DOMHelpers.formatWei(userStats[1]));
-                DOMHelpers.updateInfo('rounds-won', userStats[2].toString());
-                DOMHelpers.updateInfo('rounds-participated', userStats[3].toString());
+                this.dom.updateInfo('lifetime-donated', this.dom.formatWei(userStats[0]));
+                this.dom.updateInfo('lifetime-won', this.dom.formatWei(userStats[1]));
+                this.dom.updateInfo('rounds-won', userStats[2].toString());
+                this.dom.updateInfo('rounds-participated', userStats[3].toString());
             } else {
                 // Read-only mode - show placeholder
-                DOMHelpers.updateInfo('your-donation', '👀 Read-only mode');
-                DOMHelpers.updateInfo('your-status', 'Connect to play');
-                DOMHelpers.updateInfo('lifetime-donated', 'Connect wallet');
-                DOMHelpers.updateInfo('lifetime-won', 'Connect wallet');
-                DOMHelpers.updateInfo('rounds-won', '-');
-                DOMHelpers.updateInfo('rounds-participated', '-');
+                this.dom.updateInfo('your-donation', '👀 Read-only mode');
+                this.dom.updateInfo('your-status', 'Connect to play');
+                this.dom.updateInfo('lifetime-donated', 'Connect wallet');
+                this.dom.updateInfo('lifetime-won', 'Connect wallet');
+                this.dom.updateInfo('rounds-won', '-');
+                this.dom.updateInfo('rounds-participated', '-');
             }
             
             // Global stats - available to everyone
             const globalStats = await this.contract.get_global_stats();
-            DOMHelpers.updateInfo('total-rounds', globalStats[0].toString());
-            DOMHelpers.updateInfo('highest-donation', DOMHelpers.formatWei(globalStats[1]));
+            this.dom.updateInfo('total-rounds', globalStats[0].toString());
+            this.dom.updateInfo('highest-donation', this.dom.formatWei(globalStats[1]));
             
             // Update all-time champion with badge
             const championEl = document.getElementById('highest-donor');
@@ -364,7 +351,7 @@ export class PissingContest extends Game {
             
             // Calculate total donated (we don't have this directly, so use contract balance as proxy)
             const contractBalance = await this.contract.get_contract_balance();
-            DOMHelpers.updateInfo('total-donated', DOMHelpers.formatWei(contractBalance));
+            this.dom.updateInfo('total-donated', this.dom.formatWei(contractBalance));
             
             // Load winners history
             await this.loadWinnersHistory();
@@ -377,7 +364,7 @@ export class PissingContest extends Game {
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state. Check console for details.',
                 type: 'error'
             });
@@ -463,7 +450,7 @@ export class PissingContest extends Game {
                 rightDiv.style.cssText = 'text-align: right;';
                 rightDiv.innerHTML = `
                     <div style="font-weight: bold; font-size: 0.875rem;">
-                        ${DOMHelpers.formatWei(detail.prize)}
+                        ${this.dom.formatWei(detail.prize)}
                     </div>
                     <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
                         ${detail.donationCount} plays
@@ -567,10 +554,10 @@ export class PissingContest extends Game {
                 const maxDonations = config[2];
                 const minDonation = config[3];
                 
-                DOMHelpers.updateInfo('contract-paused', paused ? 'Yes ⚠️' : 'No ✅');
-                DOMHelpers.updateInfo('config-fee', `${(feeBp / 100).toFixed(2)}%`);
-                DOMHelpers.updateInfo('config-min', DOMHelpers.formatWei(minDonation));
-                DOMHelpers.updateInfo('config-max', maxDonations.toString());
+                this.dom.updateInfo('contract-paused', paused ? 'Yes ⚠️' : 'No ✅');
+                this.dom.updateInfo('config-fee', `${(feeBp / 100).toFixed(2)}%`);
+                this.dom.updateInfo('config-min', this.dom.formatWei(minDonation));
+                this.dom.updateInfo('config-max', maxDonations.toString());
                 
                 // Setup admin button listeners
                 this.setupAdminListeners();
@@ -606,7 +593,7 @@ export class PissingContest extends Game {
                 { game: 'pissing-contest', action: 'toggle_pause' }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: '✅ Pause status toggled',
                 type: 'success'
             });
@@ -630,7 +617,7 @@ export class PissingContest extends Game {
                 { game: 'pissing-contest', action: 'end_round_early' }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: '✅ Round ended early',
                 type: 'success'
             });
@@ -651,7 +638,7 @@ export class PissingContest extends Game {
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                 if (isYou && isLargest) {
-                    eventBus.emit(EVENTS.TOAST, {
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
                         message: '🏆 You are now leading!',
                         type: 'success'
                     });
@@ -665,21 +652,21 @@ export class PissingContest extends Game {
                 const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                 
                 if (isYou) {
-                    eventBus.emit(EVENTS.CONFETTI);
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `🎉 YOU WON ${DOMHelpers.formatWei(prize)}!`,
+                    this.events.bus.emit(this.events.EVENTS.CONFETTI);
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `🎉 YOU WON ${this.dom.formatWei(prize)}!`,
                         type: 'success'
                     });
                 } else {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `Round ended. Winner: ${DOMHelpers.formatAddress(winner)}`,
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `Round ended. Winner: ${this.dom.formatAddress(winner)}`,
                         type: 'info'
                     });
                 }
             } else {
                 // Read-only mode - just show winner
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `Round ended. Winner: ${DOMHelpers.formatAddress(winner)}`,
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `Round ended. Winner: ${this.dom.formatAddress(winner)}`,
                     type: 'info'
                 });
             }
@@ -688,7 +675,7 @@ export class PissingContest extends Game {
         });
 
         this.contract.on('RoundStarted', async (roundNumber) => {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: `🚀 Round #${roundNumber} started!`,
                 type: 'info'
             });

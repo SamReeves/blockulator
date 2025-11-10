@@ -1,33 +1,18 @@
 /**
- * Arctangent (atan) Calculator Tool
+ * Arctangent Calculator Tool
+ * Calculate atan(x) (inverse tangent) on-chain
  * Domain layer - extends Calculator base class
  */
 
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class AtanCalculator extends Calculator {
-    constructor() {
-        super();
-        this.constantValue = 0.785398163;
-        this.symbol = 'atan(x)';
-        this.name = 'Arctangent';
-    }
-
     getContractName() {
         return 'atan';
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: `📐 ${this.symbol} Calculator`,
-            description: `Calculate arctangent on-chain! Returns angle in radians from any input value.`,
-            contractAddress: CONTRACT_ADDRESSES.ATAN,
-            sourceFile: CONTRACT_SOURCES.ATAN,
-            abiFile: CONTRACT_ABIS.ATAN
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const container = document.createElement('div');
         container.className = 'game-interface';
@@ -36,7 +21,7 @@ export class AtanCalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
+        controlsDiv.appendChild(this.dom.createInput({
             id: 'input-value',
             label: 'Input (x)',
             type: 'number',
@@ -46,12 +31,12 @@ export class AtanCalculator extends Calculator {
         
         const hint = document.createElement('div');
         hint.className = 'input-hint';
-        hint.textContent = 'Returns angle in radians [-π/2, π/2]';
+        hint.textContent = 'Range: [-100, 100]';
         controlsDiv.querySelector('.input-group').appendChild(hint);
         
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
-            `Calculate ${this.symbol} On-Chain`
+            `Calculate ${this.symbol}(x) On-Chain`
         ));
         
         container.appendChild(controlsDiv);
@@ -67,61 +52,40 @@ export class AtanCalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol} =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">Enter a value and click Calculate</div>
-                <div class="result-examples">
-                    <p><strong>Key Values:</strong></p>
-                    <ul>
-                        <li>atan(0) = 0</li>
-                        <li>atan(1) = π/4 ≈ 0.785</li>
-                        <li>atan(-1) = -π/4 ≈ -0.785</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            label: `${this.symbol}(x) =`,
+            examples: [
+                'atan(0) = 0',
+                'atan(1) = π/4 ≈ 0.785',
+                'atan(∞) → π/2'
+            ]
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}</h3>
-            <div class="tool-info">
-                <p><strong>atan(x)</strong> is the inverse tangent function</p>
-                <ul>
-                    <li>Returns angle whose tangent is x</li>
-                    <li>Used in angle calculations and navigation</li>
-                    <li>Completes the inverse trig suite</li>
-                    <li>Essential for 2D graphics and geometry</li>
-                </ul>
-                <p class="note">📍 <strong>Contract:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.ATAN}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>atan(x)</strong> is the arctangent or inverse tangent function.</p>`,
+            features: [
+                'Returns angle in radians: (-π/2, π/2)',
+                'Used to find angles from coordinates',
+                'Essential for 2D/3D rotations',
+                'Common in computer graphics and robotics'
+            ],
+            notes: [
+                '💡 <strong>Tip:</strong> For full circle angles, use atan2(y, x) which handles all quadrants',
+                '🔒 <strong>On-chain calculation:</strong> Uses Taylor series approximations for accuracy.'
+            ]
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        if (calculateButton) {
-            calculateButton.addEventListener('click', () => this.handleCalculate());
-        }
+        this.setupStandardListeners();
     }
 
-    async handleCalculate() {
-        const input = document.getElementById('input-value').value;
-        if (!input) return;
-        
-        const value = parseFloat(input);
-        await this.calculateValue(value);
+    async calculate(inputValue) {
+        return await this.executeStandardCalculation(inputValue, {
+            min: -100,
+            max: 100
+        });
     }
 }
-

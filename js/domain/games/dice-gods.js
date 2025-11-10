@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { DiceThreeD } from '../../presentation/components/dice-3d.js';
 
 export class DiceGods extends Game {
@@ -27,13 +20,7 @@ export class DiceGods extends Game {
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: '🎲 Dice Gods',
-            description: 'Choose the LEAST popular number to win the pot!',
-            contractAddress: CONTRACT_ADDRESSES.DICE_GODS,
-            sourceFile: CONTRACT_SOURCES.DICE_GODS,
-            abiFile: CONTRACT_ABIS.DICE_GODS
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -87,7 +74,7 @@ export class DiceGods extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.donationInput = new ValueInput('play-amount-input', {
+        this.donationInput = new this.components.ValueInput('play-amount-input', {
             label: 'Donation Amount',
             hint: 'Vote with wei for your lucky number',
             defaultUnit: 'gwei',
@@ -210,7 +197,7 @@ export class DiceGods extends Game {
             playButton.style.opacity = '1';
         }
         
-        eventBus.emit(EVENTS.TOAST, {
+        this.events.bus.emit(this.events.EVENTS.TOAST, {
             message: `Number ${number} selected!`,
             type: 'info'
         });
@@ -237,7 +224,7 @@ export class DiceGods extends Game {
     }
     
     renderRoundPanel() {
-        const panel = DOMHelpers.createInfoPanel('🏆 Current Round', [
+        const panel = this.dom.createInfoPanel('🏆 Current Round', [
             { label: 'Round Number', id: 'round-number' },
             { label: 'Plays', id: 'plays-count' },
             { label: 'Prize Pool', id: 'prize-pool' },
@@ -320,7 +307,7 @@ export class DiceGods extends Game {
         if (!this.requiresWallet('play')) return;
         
         if (!this.selectedNumber) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please select a number first',
                 type: 'warning'
             });
@@ -330,7 +317,7 @@ export class DiceGods extends Game {
         const weiAmount = this.donationInput.getWeiValue();
         
         if (!weiAmount || weiAmount.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a valid donation amount',
                 type: 'warning'
             });
@@ -370,9 +357,9 @@ export class DiceGods extends Game {
             const playCount = typeof roundInfo[1] === 'number' ? roundInfo[1] : roundInfo[1].toNumber();
             const totalPot = roundInfo[2];
 
-            DOMHelpers.updateInfo('round-number', `#${roundNumber.toString()}`);
-            DOMHelpers.updateInfo('plays-count', `${playCount} / 10`);
-            DOMHelpers.updateInfo('prize-pool', DOMHelpers.formatWei(totalPot));
+            this.dom.updateInfo('round-number', `#${roundNumber.toString()}`);
+            this.dom.updateInfo('plays-count', `${playCount} / 10`);
+            this.dom.updateInfo('prize-pool', this.dom.formatWei(totalPot));
 
             const numberCounts = await this.contract.get_number_counts();
             
@@ -395,17 +382,17 @@ export class DiceGods extends Game {
                 );
 
                 if (userPlay) {
-                    DOMHelpers.updateInfo('your-donation', DOMHelpers.formatWei(userPlay.amount));
-                    DOMHelpers.updateInfo('your-number', `🎲 ${userPlay.number}`);
+                    this.dom.updateInfo('your-donation', this.dom.formatWei(userPlay.amount));
+                    this.dom.updateInfo('your-number', `🎲 ${userPlay.number}`);
                 } else {
-                    DOMHelpers.updateInfo('your-donation', 'Not playing');
-                    DOMHelpers.updateInfo('your-number', '-');
+                    this.dom.updateInfo('your-donation', 'Not playing');
+                    this.dom.updateInfo('your-number', '-');
                 }
             }
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state',
                 type: 'error'
             });
@@ -474,13 +461,13 @@ export class DiceGods extends Game {
                                     #${playIndex} ${isCurrentUser ? '(You)' : ''}
                                 </div>
                                 <div style="font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);">
-                                    ${DOMHelpers.formatAddress(play.player)}
+                                    ${this.dom.formatAddress(play.player)}
                                 </div>
                             </div>
                         </div>
                         <div style="text-align: right;">
                             <div style="font-weight: bold; font-size: 0.875rem; color: var(--md-sys-color-on-surface);">
-                                ${DOMHelpers.formatWei(play.amount)}
+                                ${this.dom.formatWei(play.amount)}
                             </div>
                             <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
                                 ${weight}x
@@ -500,12 +487,12 @@ export class DiceGods extends Game {
             
             const isYou = player.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             if (isYou) {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: `🎲 Your play recorded: Number ${number}`,
                     type: 'success'
                 });
             } else {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: `Someone played number ${number}`,
                     type: 'info'
                 });
@@ -516,9 +503,9 @@ export class DiceGods extends Game {
             const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isYou) {
-                eventBus.emit(EVENTS.CONFETTI);
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `🎉 YOU WON ${DOMHelpers.formatWei(amount)} with number ${number}!`,
+                this.events.bus.emit(this.events.EVENTS.CONFETTI);
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `🎉 YOU WON ${this.dom.formatWei(amount)} with number ${number}!`,
                     type: 'success'
                 });
             }
@@ -526,7 +513,7 @@ export class DiceGods extends Game {
 
         this.contract.on('RoundEnded', async (roundNumber, winningNumbers, winnerCount, totalPot) => {
             const numbersStr = winningNumbers.join(', ');
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: `Round ended! Winning number(s): ${numbersStr}`,
                 type: 'info'
             });
@@ -535,7 +522,7 @@ export class DiceGods extends Game {
         });
 
         this.contract.on('RoundStarted', async (roundNumber) => {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: `🚀 Round #${roundNumber} started!`,
                 type: 'info'
             });

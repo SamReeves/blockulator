@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { AddressFlow } from '../../presentation/components/address-flow.js';
 
 export class PayItBackward extends Game {
@@ -30,13 +23,7 @@ export class PayItBackward extends Game {
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: '⏪ Pay It Backward',
-            description: 'Donate now, reward the previous donor! Instant payouts.',
-            contractAddress: CONTRACT_ADDRESSES.PAY_IT_BACKWARD,
-            sourceFile: CONTRACT_SOURCES.PAY_IT_BACKWARD,
-            abiFile: CONTRACT_ABIS.PAY_IT_BACKWARD
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -129,7 +116,7 @@ export class PayItBackward extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.donationInput = new ValueInput('donate-amount-input', {
+        this.donationInput = new this.components.ValueInput('donate-amount-input', {
             label: 'Donation Amount',
             hint: 'Donate any amount to pay previous donor',
             defaultUnit: 'gwei',
@@ -160,7 +147,7 @@ export class PayItBackward extends Game {
         const weiAmount = this.donationInput.getWeiValue();
         
         if (!weiAmount || weiAmount.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a valid wei amount',
                 type: 'warning'
             });
@@ -207,11 +194,11 @@ export class PayItBackward extends Game {
 
             const isZero = lastDonor === '0x0000000000000000000000000000000000000000';
 
-            DOMHelpers.updateInfo('last-donor', 
-                isZero ? 'None' : DOMHelpers.formatAddress(lastDonor)
+            this.dom.updateInfo('last-donor', 
+                isZero ? 'None' : this.dom.formatAddress(lastDonor)
             );
-            DOMHelpers.updateInfo('next-recipient', 
-                DOMHelpers.formatAddress(nextRecipient)
+            this.dom.updateInfo('next-recipient', 
+                this.dom.formatAddress(nextRecipient)
             );
             
             // Update address flow component
@@ -223,7 +210,7 @@ export class PayItBackward extends Game {
                 const isYouLastDonor = lastDonor.toLowerCase() === 
                     this.web3Provider.currentAddress.toLowerCase();
                 
-                DOMHelpers.updateInfo('your-status', 
+                this.dom.updateInfo('your-status', 
                     isYouLastDonor ? '🎯 YOU' : '—'
                 );
 
@@ -234,11 +221,11 @@ export class PayItBackward extends Game {
                     } else if (isYouLastDonor) {
                         stateMessage.textContent = '🎉 You\'re last! Next donor pays you.';
                     } else {
-                        stateMessage.textContent = `💫 Donate to pay ${DOMHelpers.formatAddress(nextRecipient)}`;
+                        stateMessage.textContent = `💫 Donate to pay ${this.dom.formatAddress(nextRecipient)}`;
                     }
                 }
             } else {
-                DOMHelpers.updateInfo('your-status', '—');
+                this.dom.updateInfo('your-status', '—');
                 const stateMessage = document.getElementById('state-message');
                 if (stateMessage) {
                     stateMessage.textContent = isZero ? 
@@ -249,7 +236,7 @@ export class PayItBackward extends Game {
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state',
                 type: 'error'
             });
@@ -269,20 +256,20 @@ export class PayItBackward extends Game {
             
             // Add to flow visualization
             if (this.addressFlow) {
-                this.addressFlow.addAddress(donor, DOMHelpers.formatWei(amount), 'donated');
+                this.addressFlow.addAddress(donor, this.dom.formatWei(amount), 'donated');
             }
             
             await this.refreshState();
             
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `🎉 You paid ${DOMHelpers.formatWei(amount)} to ${DOMHelpers.formatAddress(recipient)}!`,
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `🎉 You paid ${this.dom.formatWei(amount)} to ${this.dom.formatAddress(recipient)}!`,
                         type: 'success'
                     });
                 } else if (recipient.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `💰 You received ${DOMHelpers.formatWei(amount)} from ${DOMHelpers.formatAddress(donor)}!`,
+                    this.events.bus.emit(this.events.EVENTS.TOAST, {
+                        message: `💰 You received ${this.dom.formatWei(amount)} from ${this.dom.formatAddress(donor)}!`,
                         type: 'success'
                     });
                 }

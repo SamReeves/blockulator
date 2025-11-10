@@ -1,10 +1,16 @@
 /**
- * Contract Configuration
- * Infrastructure layer - contract addresses and metadata
- * Network-specific contract addresses for testnet and mainnet
+ * Contract Configuration (Legacy)
+ * Infrastructure layer - Backwards compatibility layer
+ * 
+ * ⚠️ DEPRECATED: This file is maintained for backwards compatibility only.
+ * New code should use: import { getContractMetadata } from './contract-registry.js'
+ * 
+ * This file re-exports the old CONTRACT_ADDRESSES, CONTRACT_SOURCES, and CONTRACT_ABIS
+ * objects by extracting them from the new unified registry.
  */
 
 import { NETWORK } from './network.js';
+import { CONTRACT_REGISTRY } from './contract-registry.js';
 
 // Sepolia Testnet Addresses
 const SEPOLIA_ADDRESSES = {

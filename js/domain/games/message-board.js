@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { MessageFeed } from '../../presentation/components/message-feed.js';
 
 export class MessageBoard extends Game {
@@ -28,13 +21,7 @@ export class MessageBoard extends Game {
         // Clear container first to prevent duplicates
         this.container.innerHTML = '';
         
-        const header = GameRenderer.createGameHeader({
-            title: '💬 Message Board',
-            description: 'Post messages on-chain. Permanent. Transparent.',
-            contractAddress: CONTRACT_ADDRESSES.MESSAGE_BOARD,
-            sourceFile: CONTRACT_SOURCES.MESSAGE_BOARD,
-            abiFile: CONTRACT_ABIS.MESSAGE_BOARD
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -134,7 +121,7 @@ export class MessageBoard extends Game {
         }
         
         // Initialize ValueInput component
-        this.feeInput = new ValueInput('msg-fee-input', {
+        this.feeInput = new this.components.ValueInput('msg-fee-input', {
             label: 'Fee',
             hint: 'Fee to post your message',
             defaultUnit: 'gwei',
@@ -151,7 +138,7 @@ export class MessageBoard extends Game {
         const fee = this.feeInput.getWeiValue();
         
         if (!content) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a message',
                 type: 'warning'
             });
@@ -159,7 +146,7 @@ export class MessageBoard extends Game {
         }
         
         if (!fee || fee <= 0) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a fee',
                 type: 'warning'
             });
@@ -205,22 +192,22 @@ export class MessageBoard extends Game {
                 this.contract.rate_limit_seconds()
             ]);
             
-            DOMHelpers.updateInfo('msg-count', count.toString());
-            DOMHelpers.updateInfo('total', DOMHelpers.formatWei(total));
+            this.dom.updateInfo('msg-count', count.toString());
+            this.dom.updateInfo('total', this.dom.formatWei(total));
             
             // Update message count badge
             const badge = document.getElementById('msg-count-badge');
             if (badge) badge.textContent = count.toString();
             
             const minFeeWei = minFee.toString();
-            DOMHelpers.updateInfo('min-fee', minFeeWei + ' wei');
+            this.dom.updateInfo('min-fee', minFeeWei + ' wei');
             
             const feeInput = document.getElementById('msg-fee');
             if (feeInput) {
                 feeInput.placeholder = `Minimum: ${minFeeWei}`;
             }
             
-            DOMHelpers.updateInfo('rate-limit', rateLimit.toString() + 's');
+            this.dom.updateInfo('rate-limit', rateLimit.toString() + 's');
             
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 const [lastPost, waitTime] = await Promise.all([
@@ -228,15 +215,15 @@ export class MessageBoard extends Game {
                     this.contract.get_time_until_next_post(this.web3Provider.currentAddress)
                 ]);
                 
-                DOMHelpers.updateInfo('last-post', DOMHelpers.formatTimestamp(lastPost.toNumber()));
+                this.dom.updateInfo('last-post', this.dom.formatTimestamp(lastPost.toNumber()));
                 
                 const wait = waitTime.toNumber();
-                DOMHelpers.updateInfo('wait-time', 
+                this.dom.updateInfo('wait-time', 
                     wait === 0 ? 'Now ✅' : `${wait}s ⏳`
                 );
             } else {
-                DOMHelpers.updateInfo('last-post', '👀 Read-only');
-                DOMHelpers.updateInfo('wait-time', 'Connect wallet');
+                this.dom.updateInfo('last-post', '👀 Read-only');
+                this.dom.updateInfo('wait-time', 'Connect wallet');
             }
             
             await this.loadMessages(count.toNumber());
@@ -246,7 +233,7 @@ export class MessageBoard extends Game {
             
         } catch (error) {
             console.error('Failed to load state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load message board state',
                 type: 'error'
             });
@@ -267,7 +254,7 @@ export class MessageBoard extends Game {
                 
                 // Get contract balance
                 const balance = await this.web3Provider.provider.getBalance(this.contract.address);
-                DOMHelpers.updateInfo('contract-balance', DOMHelpers.formatWei(balance));
+                this.dom.updateInfo('contract-balance', this.dom.formatWei(balance));
                 
                 // Setup withdraw button listener
                 const withdrawBtn = document.getElementById('withdraw-btn');
@@ -292,7 +279,7 @@ export class MessageBoard extends Game {
                 { game: 'message-board', action: 'withdraw' }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: '✅ Fees withdrawn successfully',
                 type: 'success'
             });
@@ -349,7 +336,7 @@ export class MessageBoard extends Game {
             
             if (this.web3Provider.isConnected() && 
                 poster.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: '✅ Message posted successfully!',
                     type: 'success'
                 });

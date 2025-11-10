@@ -1,33 +1,18 @@
 /**
- * Hyperbolic Sine (sinh) Calculator Tool
+ * Hyperbolic Sine Calculator Tool
+ * Calculate sinh(x) on-chain
  * Domain layer - extends Calculator base class
  */
 
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class SinhCalculator extends Calculator {
-    constructor() {
-        super();
-        this.constantValue = 1.175201194;
-        this.symbol = 'sinh(x)';
-        this.name = 'Hyperbolic Sine';
-    }
-
     getContractName() {
         return 'sinh';
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: `📈 ${this.symbol} Calculator`,
-            description: `Calculate sinh(x) = (e^x - e^(-x))/2 on-chain! Used in catenary curves and advanced distributions.`,
-            contractAddress: CONTRACT_ADDRESSES.SINH,
-            sourceFile: CONTRACT_SOURCES.SINH,
-            abiFile: CONTRACT_ABIS.SINH
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const container = document.createElement('div');
         container.className = 'game-interface';
@@ -36,13 +21,11 @@ export class SinhCalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
+        controlsDiv.appendChild(this.dom.createInput({
             id: 'input-value',
             label: 'Input (x)',
             type: 'number',
-            placeholder: 'Enter value (e.g., 1)',
-            min: -10,
-            max: 10,
+            placeholder: 'Enter value (e.g., 2)',
             step: 0.1
         }));
         
@@ -51,9 +34,9 @@ export class SinhCalculator extends Calculator {
         hint.textContent = 'Range: [-10, 10]';
         controlsDiv.querySelector('.input-group').appendChild(hint);
         
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
-            `Calculate ${this.symbol} On-Chain`
+            `Calculate ${this.symbol}(x) On-Chain`
         ));
         
         container.appendChild(controlsDiv);
@@ -69,61 +52,40 @@ export class SinhCalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol} =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">Enter a value and click Calculate</div>
-                <div class="result-examples">
-                    <p><strong>Examples:</strong></p>
-                    <ul>
-                        <li>sinh(0) = 0</li>
-                        <li>sinh(1) ≈ 1.175</li>
-                        <li>sinh(-1) ≈ -1.175</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            label: `${this.symbol}(x) =`,
+            examples: [
+                'sinh(0) = 0',
+                'sinh(1) ≈ 1.175',
+                'sinh(2) ≈ 3.627'
+            ]
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}</h3>
-            <div class="tool-info">
-                <p><strong>sinh(x) = (e^x - e^(-x))/2</strong> is the hyperbolic sine function</p>
-                <ul>
-                    <li>Odd function: sinh(-x) = -sinh(x)</li>
-                    <li>Used in catenary curves (hanging cables)</li>
-                    <li>Appears in special relativity</li>
-                    <li>Related to exponential growth/decay</li>
-                </ul>
-                <p class="note">📍 <strong>Contract:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.SINH}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>sinh(x)</strong> is the hyperbolic sine function.</p>`,
+            features: [
+                'Defined as: sinh(x) = (e^x - e^(-x)) / 2',
+                'Used in calculus and hyperbolic geometry',
+                'Models catenary curves (hanging chains)',
+                'Essential for special relativity calculations'
+            ],
+            notes: [
+                '💡 <strong>Note:</strong> Range is restricted to [-10, 10] to prevent overflow',
+                '🔒 <strong>On-chain calculation:</strong> Uses exponential approximations for accuracy.'
+            ]
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        if (calculateButton) {
-            calculateButton.addEventListener('click', () => this.handleCalculate());
-        }
+        this.setupStandardListeners();
     }
 
-    async handleCalculate() {
-        const input = document.getElementById('input-value').value;
-        if (!input) return;
-        
-        const value = parseFloat(input);
-        await this.calculateValue(value);
+    async calculate(inputValue) {
+        return await this.executeStandardCalculation(inputValue, {
+            min: -10,
+            max: 10
+        });
     }
 }
-

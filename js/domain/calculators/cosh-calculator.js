@@ -1,33 +1,18 @@
 /**
- * Hyperbolic Cosine (cosh) Calculator Tool
+ * Hyperbolic Cosine Calculator Tool
+ * Calculate cosh(x) on-chain
  * Domain layer - extends Calculator base class
  */
 
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class CoshCalculator extends Calculator {
-    constructor() {
-        super();
-        this.constantValue = 1.0;
-        this.symbol = 'cosh(x)';
-        this.name = 'Hyperbolic Cosine';
-    }
-
     getContractName() {
         return 'cosh';
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: `📈 ${this.symbol} Calculator`,
-            description: `Calculate cosh(x) = (e^x + e^(-x))/2 on-chain! The even hyperbolic function.`,
-            contractAddress: CONTRACT_ADDRESSES.COSH,
-            sourceFile: CONTRACT_SOURCES.COSH,
-            abiFile: CONTRACT_ABIS.COSH
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const container = document.createElement('div');
         container.className = 'game-interface';
@@ -36,13 +21,11 @@ export class CoshCalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
+        controlsDiv.appendChild(this.dom.createInput({
             id: 'input-value',
             label: 'Input (x)',
             type: 'number',
-            placeholder: 'Enter value (e.g., 1)',
-            min: -10,
-            max: 10,
+            placeholder: 'Enter value (e.g., 2)',
             step: 0.1
         }));
         
@@ -51,9 +34,9 @@ export class CoshCalculator extends Calculator {
         hint.textContent = 'Range: [-10, 10]';
         controlsDiv.querySelector('.input-group').appendChild(hint);
         
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
-            `Calculate ${this.symbol} On-Chain`
+            `Calculate ${this.symbol}(x) On-Chain`
         ));
         
         container.appendChild(controlsDiv);
@@ -69,61 +52,40 @@ export class CoshCalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol} =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">Enter a value and click Calculate</div>
-                <div class="result-examples">
-                    <p><strong>Examples:</strong></p>
-                    <ul>
-                        <li>cosh(0) = 1</li>
-                        <li>cosh(1) ≈ 1.543</li>
-                        <li>cosh(-1) ≈ 1.543 (even function)</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            label: `${this.symbol}(x) =`,
+            examples: [
+                'cosh(0) = 1',
+                'cosh(1) ≈ 1.543',
+                'cosh(2) ≈ 3.762'
+            ]
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}</h3>
-            <div class="tool-info">
-                <p><strong>cosh(x) = (e^x + e^(-x))/2</strong> is the hyperbolic cosine function</p>
-                <ul>
-                    <li>Even function: cosh(-x) = cosh(x)</li>
-                    <li>Always ≥ 1 for all real x</li>
-                    <li>Identity: cosh²(x) - sinh²(x) = 1</li>
-                    <li>Describes shape of hanging cables</li>
-                </ul>
-                <p class="note">📍 <strong>Contract:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.COSH}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>cosh(x)</strong> is the hyperbolic cosine function.</p>`,
+            features: [
+                'Defined as: cosh(x) = (e^x + e^(-x)) / 2',
+                'Always greater than or equal to 1',
+                'Models catenary curves (hanging cables)',
+                'Used in physics and engineering'
+            ],
+            notes: [
+                '💡 <strong>Note:</strong> Range is restricted to [-10, 10] to prevent overflow',
+                '🔒 <strong>On-chain calculation:</strong> Uses exponential approximations for accuracy.'
+            ]
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        if (calculateButton) {
-            calculateButton.addEventListener('click', () => this.handleCalculate());
-        }
+        this.setupStandardListeners();
     }
 
-    async handleCalculate() {
-        const input = document.getElementById('input-value').value;
-        if (!input) return;
-        
-        const value = parseFloat(input);
-        await this.calculateValue(value);
+    async calculate(inputValue) {
+        return await this.executeStandardCalculation(inputValue, {
+            min: -10,
+            max: 10
+        });
     }
 }
-

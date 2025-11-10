@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 import { AddressFlow } from '../../presentation/components/address-flow.js';
 
 export class PayItForward extends Game {
@@ -30,13 +23,7 @@ export class PayItForward extends Game {
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: '⏩ Pay It Forward',
-            description: 'Donate now, receive the next donation! A chain of generosity.',
-            contractAddress: CONTRACT_ADDRESSES.PAY_IT_FORWARD,
-            sourceFile: CONTRACT_SOURCES.PAY_IT_FORWARD,
-            abiFile: CONTRACT_ABIS.PAY_IT_FORWARD
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -129,7 +116,7 @@ export class PayItForward extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.donationInput = new ValueInput('donate-amount-input', {
+        this.donationInput = new this.components.ValueInput('donate-amount-input', {
             label: 'Donation Amount',
             hint: 'Donate any amount to join the chain',
             defaultUnit: 'gwei',
@@ -160,7 +147,7 @@ export class PayItForward extends Game {
         const weiAmount = this.donationInput.getWeiValue();
         
         if (!weiAmount || weiAmount.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a valid donation amount',
                 type: 'warning'
             });
@@ -205,23 +192,23 @@ export class PayItForward extends Game {
 
             const isZero = pendingDonor === '0x0000000000000000000000000000000000000000';
             
-            DOMHelpers.updateInfo('pending-donor', 
-                isZero ? 'None' : DOMHelpers.formatAddress(pendingDonor)
+            this.dom.updateInfo('pending-donor', 
+                isZero ? 'None' : this.dom.formatAddress(pendingDonor)
             );
-            DOMHelpers.updateInfo('pending-amount', 
-                DOMHelpers.formatWei(pendingAmount)
+            this.dom.updateInfo('pending-amount', 
+                this.dom.formatWei(pendingAmount)
             );
             
             // Update address flow component
             if (this.addressFlow) {
-                this.addressFlow.updateCurrent(pendingDonor, DOMHelpers.formatWei(pendingAmount));
+                this.addressFlow.updateCurrent(pendingDonor, this.dom.formatWei(pendingAmount));
             }
             
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 const isYouPending = pendingDonor.toLowerCase() === 
                     this.web3Provider.currentAddress.toLowerCase();
                 
-                DOMHelpers.updateInfo('your-status', 
+                this.dom.updateInfo('your-status', 
                     isYouPending ? '🎯 YOU' : '—'
                 );
 
@@ -236,7 +223,7 @@ export class PayItForward extends Game {
                     }
                 }
             } else {
-                DOMHelpers.updateInfo('your-status', '—');
+                this.dom.updateInfo('your-status', '—');
                 const stateMessage = document.getElementById('state-message');
                 if (stateMessage) {
                     stateMessage.textContent = isZero ? 
@@ -247,7 +234,7 @@ export class PayItForward extends Game {
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state',
                 type: 'error'
             });
@@ -262,7 +249,7 @@ export class PayItForward extends Game {
             
             // Add to flow visualization
             if (this.addressFlow) {
-                this.addressFlow.addAddress(donor, DOMHelpers.formatWei(amount), 'donated');
+                this.addressFlow.addAddress(donor, this.dom.formatWei(amount), 'donated');
             }
             
             await this.refreshState();
@@ -270,13 +257,13 @@ export class PayItForward extends Game {
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                     if (isFirst) {
-                        eventBus.emit(EVENTS.TOAST, {
+                        this.events.bus.emit(this.events.EVENTS.TOAST, {
                             message: '🎉 You started the chain! Waiting for next donor.',
                             type: 'success'
                         });
                     } else {
-                        eventBus.emit(EVENTS.TOAST, {
-                            message: `🎉 You received ${DOMHelpers.formatWei(received)} and are now pending!`,
+                        this.events.bus.emit(this.events.EVENTS.TOAST, {
+                            message: `🎉 You received ${this.dom.formatWei(received)} and are now pending!`,
                             type: 'success'
                         });
                     }

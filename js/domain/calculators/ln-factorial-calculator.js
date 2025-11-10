@@ -1,33 +1,18 @@
 /**
- * Ln Factorial (ln(n!)) Calculator Tool
+ * Natural Log of Factorial Calculator Tool
+ * Calculate ln(n!) on-chain
  * Domain layer - extends Calculator base class
  */
 
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class LnFactorialCalculator extends Calculator {
-    constructor() {
-        super();
-        this.constantValue = 0.693147181;
-        this.symbol = 'ln(n!)';
-        this.name = 'Ln Factorial';
-    }
-
     getContractName() {
         return 'ln-factorial';
     }
 
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: `📐 ${this.symbol} Calculator`,
-            description: `Calculate ln(n!) on-chain! Log factorial avoids overflow for large combinatorial calculations.`,
-            contractAddress: CONTRACT_ADDRESSES.LN_FACTORIAL,
-            sourceFile: CONTRACT_SOURCES.LN_FACTORIAL,
-            abiFile: CONTRACT_ABIS.LN_FACTORIAL
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const container = document.createElement('div');
         container.className = 'game-interface';
@@ -36,24 +21,24 @@ export class LnFactorialCalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
+        controlsDiv.appendChild(this.dom.createInput({
             id: 'input-value',
             label: 'Integer (n)',
             type: 'number',
-            placeholder: 'Enter integer (e.g., 10)',
+            placeholder: 'Enter integer (e.g., 50)',
             min: 0,
-            max: 20,
+            max: 1000,
             step: 1
         }));
         
         const hint = document.createElement('div');
         hint.className = 'input-hint';
-        hint.textContent = 'Range: [0, 20] integers only';
+        hint.textContent = 'Range: [0, 1000] integers only';
         controlsDiv.querySelector('.input-group').appendChild(hint);
         
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
-            `Calculate ${this.symbol} On-Chain`
+            `Calculate ln(${this.symbol}) On-Chain`
         ));
         
         container.appendChild(controlsDiv);
@@ -69,66 +54,59 @@ export class LnFactorialCalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol} =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">Enter an integer and click Calculate</div>
-                <div class="result-examples">
-                    <p><strong>Examples:</strong></p>
-                    <ul>
-                        <li>ln(5!) ≈ 4.787</li>
-                        <li>ln(10!) ≈ 15.104</li>
-                        <li>ln(20!) ≈ 42.336</li>
-                    </ul>
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            label: `ln(${this.symbol}) =`,
+            examples: [
+                'ln(0!) = 0',
+                'ln(5!) ≈ 4.787',
+                'ln(100!) ≈ 363.739'
+            ]
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}</h3>
-            <div class="tool-info">
-                <p><strong>ln(n!)</strong> is the natural log of factorial</p>
-                <ul>
-                    <li>Calculate binomial coefficients: ln(C(n,k)) = ln(n!) - ln(k!) - ln((n-k)!)</li>
-                    <li>Avoid overflow in large combinatorial problems</li>
-                    <li>Used in statistical likelihood calculations</li>
-                </ul>
-                <p class="note">📍 <strong>Contract:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.LN_FACTORIAL}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>ln(n!)</strong> calculates the natural logarithm of n factorial, useful for large factorials that would overflow.</p>`,
+            features: [
+                '<strong>Large Numbers:</strong> Compute factorials beyond standard limits',
+                '<strong>Statistics:</strong> Used in log-likelihood calculations',
+                '<strong>Stirling Approximation:</strong> Validates factorial approximations',
+                '<strong>Numerical Stability:</strong> Avoid overflow in probability calculations'
+            ],
+            notes: [
+                '💡 <strong>Practical:</strong> ln(n!) grows as n*ln(n), much slower than n!',
+                '🔒 <strong>On-chain calculation:</strong> Uses Stirling\'s approximation for efficiency.'
+            ]
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        if (calculateButton) {
-            calculateButton.addEventListener('click', () => this.handleCalculate());
+        this.setupStandardListeners();
+    }
+
+    async calculate(inputValue) {
+        const n = this.validateInput(inputValue, 0, 1001);
+        if (n === null) return;
+
+        // Check if integer
+        if (!Number.isInteger(n)) {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
+                message: 'Factorial requires an integer value',
+                type: 'warning'
+            });
+            return;
         }
-    }
 
-    async handleCalculate() {
-        const input = document.getElementById('input-value').value;
-        if (!input) return;
-        
-        const value = Math.floor(parseFloat(input));
-        await this.calculateValue(value);
-    }
-
-    async calculateValue(value) {
-        const result = await this.contract.calculate(Math.floor(value));
-        const resultFormatted = (Number(result) / 1e10).toFixed(10);
-        document.getElementById('result-value').textContent = resultFormatted;
+        return await this.withButtonState('calculate-button', async () => {
+            console.log(`Calculating ln(${n}!) on-chain`);
+            
+            const result = await this.contract.calculate(n);
+            const resultDecimal = ethers.utils.formatUnits(result, 10);
+            
+            console.log('Result:', resultDecimal);
+            
+            this.displayResult(resultDecimal, `ln(${n}!) ≈ ${parseFloat(resultDecimal).toFixed(6)}`);
+            return resultDecimal;
+        }, { loading: 'Calculating...' });
     }
 }
-

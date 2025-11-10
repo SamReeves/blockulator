@@ -1,34 +1,33 @@
 /**
- * E (Euler's Number) Calculator Tool
- * Calculate e^x on-chain
+ * Euler's Number (e) Calculator Tool
+ * Calculate e ≈ 2.71828... on-chain with high precision
  * Domain layer - extends Calculator base class
  */
 
 import { Calculator } from '../models/calculator.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 
 export class ECalculator extends Calculator {
-    constructor() {
-        super();
-        this.constantValue = 2.7182818285;
-        this.symbol = 'e';
-        this.name = 'Euler';
-    }
-
     getContractName() {
         return 'e-calculator';
     }
 
+    async onAfterInit() {
+        // Load e value from contract
+        try {
+            const value = await this.contract.get_constant();
+            this.constantValue = this.math.fromFixedPoint(value, 10);
+        } catch (error) {
+            console.log('Using default e value');
+        }
+    }
+
     render() {
-        const header = GameRenderer.createGameHeader({
-            title: `🔢 ${this.symbol} Calculator`,
-            description: `Calculate ${this.symbol}^x on-chain! Euler's number (${this.symbol} ≈ ${this.constantValue}) is the base of natural logarithms.`,
-            contractAddress: CONTRACT_ADDRESSES.E_CALCULATOR,
-            sourceFile: CONTRACT_SOURCES.E_CALCULATOR,
-            abiFile: CONTRACT_ABIS.E_CALCULATOR
+        const header = this.renderer.createGameHeader({
+            title: `📈 ${this.symbol} Calculator`,
+            description: `Get Euler's number ${this.symbol} ≈ 2.71828... on-chain with high precision!`,
+            contractAddress: this.metadata.contractAddress,
+            sourceFile: this.metadata.sourceFile,
+            abiFile: this.metadata.abiFile
         });
         
         const container = document.createElement('div');
@@ -38,24 +37,9 @@ export class ECalculator extends Calculator {
         const controlsDiv = document.createElement('div');
         controlsDiv.className = 'game-controls calculator-controls';
         
-        controlsDiv.appendChild(DOMHelpers.createInput({
-            id: 'exponent-input',
-            label: 'Exponent (x)',
-            type: 'number',
-            placeholder: 'Enter exponent (e.g., 2.5)',
-            min: 0,
-            max: 9.999999,
-            step: 0.1
-        }));
-        
-        const hint = document.createElement('div');
-        hint.className = 'input-hint';
-        hint.textContent = 'Range: [0, 10)';
-        controlsDiv.querySelector('.input-group').appendChild(hint);
-        
-        controlsDiv.appendChild(DOMHelpers.createButton(
+        controlsDiv.appendChild(this.dom.createButton(
             'calculate-button',
-            `Calculate ${this.symbol}^x On-Chain`
+            `Get ${this.symbol} On-Chain`
         ));
         
         container.appendChild(controlsDiv);
@@ -71,112 +55,47 @@ export class ECalculator extends Calculator {
     }
 
     renderResultPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>📊 Result</h3>
-            <div class="calculator-result">
-                <div class="result-display" id="result-display">
-                    <div class="result-label">${this.symbol}^x =</div>
-                    <div class="result-value" id="result-value">-</div>
-                </div>
-                <div class="result-info">
-                    Enter an exponent and click Calculate to see the result
-                </div>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardResultPanel({
+            label: `${this.symbol} =`,
+            hint: 'Click the button to retrieve e from the blockchain'
+        });
     }
 
     renderInfoPanel() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        panel.innerHTML = `
-            <h3>ℹ️ About ${this.name}'s Number</h3>
-            <div class="tool-info">
-                <p><strong>${this.symbol} ≈ 2.71828...</strong> is the base of the natural logarithm.</p>
-                <ul>
-                    <li>Discovered by Leonhard Euler</li>
-                    <li>Appears in compound interest calculations</li>
-                    <li>Found in probability theory and statistics</li>
-                    <li>Essential in calculus (derivative of e^x is e^x)</li>
-                </ul>
-                <p class="note">💡 <strong>Fun fact:</strong> ${this.symbol} is irrational and transcendental, like π!</p>
-                <p class="note">🔒 <strong>On-chain calculation:</strong> Results are computed on the blockchain using a lookup table for ~10 decimal place accuracy.</p>
-            </div>
-            
-            <h3>🔧 Use in Your Smart Contract</h3>
-            <div class="tool-info">
-                <p>You can call this calculator from your own smart contracts! Here's an example in Vyper:</p>
-                <pre><code># Interface for ${this.name} Calculator
-interface ${this.name}Calculator:
-    def calculate(x: decimal) -> decimal: view
-    def get_constant() -> decimal: view
-
-# Use the calculator
-CALC: constant(address) = ${CONTRACT_ADDRESSES.E_CALCULATOR}
-
-@external
-@view
-def my_calculation(exponent: decimal) -> decimal:
-    # Call ${this.symbol}^x calculator (FREE - no gas cost!)
-    result: decimal = staticcall ${this.name}Calculator(CALC).calculate(exponent)
-    return result
-</code></pre>
-                <p class="note">✨ <strong>Free to use:</strong> All calculations are view functions with no gas cost!</p>
-                <p class="note">📍 <strong>Contract Address:</strong> <code style="word-break: break-all;">${CONTRACT_ADDRESSES.E_CALCULATOR}</code></p>
-            </div>
-        `;
-        return panel;
+        return this.renderStandardInfoPanel({
+            description: `<p><strong>e</strong> is Euler's number, the base of natural logarithms, approximately 2.71828...</p>`,
+            features: [
+                'Base of the natural exponential function e^x',
+                'Appears in compound interest: A = P * e^(rt)',
+                'Essential for calculus and differential equations',
+                'Fundamental constant in mathematics'
+            ],
+            notes: [
+                '💡 <strong>Fun fact:</strong> e is the limit of (1 + 1/n)^n as n approaches infinity',
+                '🔒 <strong>On-chain value:</strong> Stored with 10 decimal places of precision.'
+            ],
+            interfaceMethod: 'def get_constant() -> decimal: view'
+        });
     }
 
     setupListeners() {
-        const calculateButton = document.getElementById('calculate-button');
-        const expInput = document.getElementById('exponent-input');
-        
-        if (calculateButton && expInput) {
-            const handleCalculate = () => this.calculate(expInput.value);
-            calculateButton.addEventListener('click', handleCalculate);
-            expInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleCalculate();
-            });
+        const button = document.getElementById('calculate-button');
+        if (button) {
+            button.addEventListener('click', () => this.calculate());
         }
     }
 
-    async calculate(exponent) {
-        const x = this.validateInput(exponent, 0, 10);
-        if (x === null) return;
-        
-        const calculateButton = document.getElementById('calculate-button');
-        
-        try {
-            if (calculateButton) {
-                calculateButton.disabled = true;
-                calculateButton.textContent = 'Calculating...';
-            }
+    async calculate() {
+        return await this.withButtonState('calculate-button', async () => {
+            console.log('Retrieving e from contract');
             
-            console.log(`Calculating ${this.symbol}^${x} on-chain`);
-            
-            const xFixed = ethers.utils.parseUnits(x.toString(), 10);
-            const result = await this.contract.calculate(xFixed);
+            const result = await this.contract.get_constant();
             const resultDecimal = ethers.utils.formatUnits(result, 10);
             
             console.log('Result:', resultDecimal);
             
-            this.displayResult(resultDecimal, `${this.symbol}^${x} ≈ ${parseFloat(resultDecimal).toFixed(6)}`);
-            
-        } catch (error) {
-            console.error('Calculation failed:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Calculation failed: ' + (error.reason || error.message),
-                type: 'error'
-            });
-        } finally {
-            if (calculateButton) {
-                calculateButton.disabled = false;
-                calculateButton.textContent = `Calculate ${this.symbol}^x On-Chain`;
-            }
-        }
+            this.displayResult(resultDecimal, `${this.symbol} ≈ ${parseFloat(resultDecimal).toFixed(10)}`);
+            return resultDecimal;
+        }, { loading: 'Loading...' });
     }
 }
-

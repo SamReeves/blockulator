@@ -5,13 +5,6 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
-import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
-import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
-import { ValueInput } from '../../presentation/components/value-input.js';
-import { AddressBadge } from '../../presentation/components/address-badge.js';
 
 export class LastCall extends Game {
     constructor() {
@@ -32,13 +25,7 @@ export class LastCall extends Game {
         // Clear container first to prevent duplicates
         this.container.innerHTML = '';
         
-        const header = GameRenderer.createGameHeader({
-            title: '⏰ Last Call',
-            description: 'Be the LAST to donate before time runs out! Rush to be the final player. Winner takes 99% of the pot!',
-            contractAddress: CONTRACT_ADDRESSES.LAST_CALL,
-            sourceFile: CONTRACT_SOURCES.LAST_CALL,
-            abiFile: CONTRACT_ABIS.LAST_CALL
-        });
+        const header = this.renderer.createGameHeader(this.metadata);
         
         const gameContent = document.createElement('div');
         gameContent.className = 'game-interface';
@@ -151,7 +138,7 @@ export class LastCall extends Game {
         this.container.appendChild(gameContent);
         
         // Initialize ValueInput component
-        this.donationInput = new ValueInput('donation-amount-input', {
+        this.donationInput = new this.components.ValueInput('donation-amount-input', {
             label: 'Donation Amount',
             hint: 'Be the last donor when time expires!',
             defaultUnit: 'gwei',
@@ -180,7 +167,7 @@ export class LastCall extends Game {
         const amount = this.donationInput.getWeiValue();
         
         if (!amount || amount.eq(0)) {
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a donation amount',
                 type: 'warning'
             });
@@ -193,7 +180,7 @@ export class LastCall extends Game {
                 { game: 'last-call', amount: amount.toString() }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: '⏰ You are now in the LAST position!',
                 type: 'success'
             });
@@ -210,7 +197,7 @@ export class LastCall extends Game {
         try {
             const canEnd = await this.contract.can_end_round();
             if (!canEnd) {
-                eventBus.emit(EVENTS.TOAST, {
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
                     message: 'Round cannot be ended yet',
                     type: 'warning'
                 });
@@ -222,7 +209,7 @@ export class LastCall extends Game {
                 { game: 'last-call', action: 'end-round' }
             );
             
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: '🏁 Round ended! Winner paid out.',
                 type: 'success'
             });
@@ -252,9 +239,9 @@ export class LastCall extends Game {
                 this.contract.get_current_winner_prize()
             ]);
             
-            DOMHelpers.updateInfo('round-number', `#${roundNumber.toString()}`);
-            DOMHelpers.updateInfo('pot-value', DOMHelpers.formatWei(potValue));
-            DOMHelpers.updateInfo('winner-prize', DOMHelpers.formatWei(currentWinnerPrize[0]));
+            this.dom.updateInfo('round-number', `#${roundNumber.toString()}`);
+            this.dom.updateInfo('pot-value', this.dom.formatWei(potValue));
+            this.dom.updateInfo('winner-prize', this.dom.formatWei(currentWinnerPrize[0]));
             
             const winnerEl = document.getElementById('current-winner');
             if (winnerEl) {
@@ -292,7 +279,7 @@ export class LastCall extends Game {
             
         } catch (error) {
             console.error('Failed to refresh state:', error);
-            eventBus.emit(EVENTS.TOAST, {
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Failed to load game state',
                 type: 'error'
             });
@@ -363,13 +350,13 @@ export class LastCall extends Game {
             const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isYou) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `⏰ You donated ${DOMHelpers.formatWei(amount)}! You're now LAST!`,
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `⏰ You donated ${this.dom.formatWei(amount)}! You're now LAST!`,
                     type: 'success'
                 });
             } else {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `⚡ ${DOMHelpers.formatAddress(donor)} just donated!`,
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `⚡ ${this.dom.formatAddress(donor)} just donated!`,
                     type: 'info'
                 });
             }
@@ -381,15 +368,15 @@ export class LastCall extends Game {
             const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isYou) {
-                eventBus.emit(EVENTS.WINNER_DETERMINED, { player: winner, prize });
-                eventBus.emit(EVENTS.CONFETTI);
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `🎉 YOU WON ${DOMHelpers.formatWei(prize)}!`,
+                this.events.bus.emit(this.events.EVENTS.WINNER_DETERMINED, { player: winner, prize });
+                this.events.bus.emit(this.events.EVENTS.CONFETTI);
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `🎉 YOU WON ${this.dom.formatWei(prize)}!`,
                     type: 'success'
                 });
             } else {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `Round ended. Winner: ${DOMHelpers.formatAddress(winner)}`,
+                this.events.bus.emit(this.events.EVENTS.TOAST, {
+                    message: `Round ended. Winner: ${this.dom.formatAddress(winner)}`,
                     type: 'info'
                 });
             }
