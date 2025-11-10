@@ -12,30 +12,24 @@ import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
 import { AddressBadge } from '../../presentation/components/address-badge.js';
+import { KingLadder } from '../../presentation/components/king-ladder.js';
 
 export class KingOfTheHill extends Game {
     constructor() {
         super();
-        this.updateInterval = null;
         this.paymentInput = null;
+        this.kingLadder = null;
+        this.updateInterval = null;
     }
 
     getContractName() {
         return 'king-of-the-hill';
     }
 
-    async onAfterInit() {
-        // Call parent to setup events and load initial state
-        await super.onAfterInit();
-        
-        // Update reign timer every second
-        this.updateInterval = setInterval(() => this.updateReign(), 1000);
-    }
-
     render() {
         const header = GameRenderer.createGameHeader({
             title: '👑 King of the Hill',
-            description: 'Pay to dethrone and win the prize. No refunds. Stakes grow forever.',
+            description: 'Dethrone the king. Win the prize. No refunds.',
             contractAddress: CONTRACT_ADDRESSES.KING_OF_THE_HILL,
             sourceFile: CONTRACT_SOURCES.KING_OF_THE_HILL,
             abiFile: CONTRACT_ABIS.KING_OF_THE_HILL
@@ -47,93 +41,54 @@ export class KingOfTheHill extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-                <div class="game-sections">
-                    <!-- Current King Display -->
-                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                        <h3 style="color: white;">👑 CURRENT KING</h3>
-                        <div style="text-align: center; padding: 2rem 0;">
-                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem;">Reigning Champion</div>
-                            <div id="king-address" style="font-family: monospace; font-size: 1.25rem; font-weight: bold; word-break: break-all; margin-bottom: 1rem;">
-                                Loading...
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1.5rem;">
-                                <div>
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.25rem;">CURRENT PRIZE</div>
-                                    <div id="current-prize" style="font-size: 1.5rem; font-weight: bold;">0</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.25rem;">REIGN TIME</div>
-                                    <div id="reign-time" style="font-size: 1.5rem; font-weight: bold;">0s</div>
-                                </div>
-                            </div>
+            <div class="game-sections">
+                <!-- Main Panel -->
+                <div class="contest-info-panel" style="border: 2px solid #764ba2; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #764ba2; margin: 0;">
+                            <span>👑</span>
+                            <span>King of the Hill</span>
+                        </h3>
+                        <div style="font-size: 0.75rem; color: #764ba2;">
+                            <span id="total-dethrone-badge">0</span> battles
                         </div>
                     </div>
-
-                    <!-- Dethrone Panel -->
-                    <div class="contest-info-panel">
-                        <h3>⚔️ Claim the Throne</h3>
-                        <div class="game-controls">
-                            <div class="info-grid" style="margin-bottom: 1rem;">
-                                <div class="info-item">
-                                    <div class="info-label">Minimum Payment</div>
-                                    <div class="info-value" id="min-payment">0 wei</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Required Increase</div>
-                                    <div class="info-value">+1000 wei AND +1%</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                        <!-- Left: Controls -->
+                        <div style="min-width: 0;">
+                            <div style="background: rgba(118, 75, 162, 0.15); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; border-left: 3px solid #764ba2;">
+                                <div style="font-size: 0.7rem; opacity: 0.8; margin-bottom: 0.3rem;">Min Payment</div>
+                                <div id="min-payment" style="font-size: 0.95rem; font-weight: bold; color: #764ba2;">
+                                    0 wei
                                 </div>
                             </div>
                             
-                            <div id="throne-payment-input"></div>
+                            <div id="throne-payment-input" style="margin-bottom: 0.75rem;"></div>
                             
-                            <button id="claim-btn" class="btn-play">
-                                🎮 Play
+                            <button id="claim-btn" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);">
+                                ⚔️ Dethrone King
                             </button>
                             
-                            <div style="margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.1); border-radius: 8px; font-size: 0.875rem;">
-                                <strong>How it works:</strong><br>
-                                • Pay BOTH: +1000 wei AND +1% (both conditions required)<br>
-                                • You immediately win the current prize<br>
-                                • Your payment becomes the new prize<br>
-                                • No refunds - prize pot grows forever!
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.75rem;">
+                                <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 4px;">
+                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Crowns</div>
+                                    <div id="your-crowns" style="font-weight: bold; font-size: 0.8rem;">—</div>
+                                </div>
+                                <div style="padding: 0.5rem; background: rgba(245, 158, 11, 0.1); border-radius: 4px;">
+                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Total Reign</div>
+                                    <div id="your-reign" style="font-weight: bold; font-size: 0.8rem;">—</div>
+                                </div>
                             </div>
+                        </div>
+                        
+                        <!-- Right: King Ladder -->
+                        <div style="min-width: 0;">
+                            <div id="king-ladder-container"></div>
                         </div>
                     </div>
-
-                    <!-- Statistics Panel -->
-                    <div class="contest-info-panel">
-                        <h3>📊 Statistics</h3>
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label">Total Dethronements</div>
-                                <div class="info-value" id="total-dethrone">0</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Contract Balance</div>
-                                <div class="info-value" id="contract-balance">0</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Your Times Crowned</div>
-                                <div class="info-value" id="your-crowns">0</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">Your Total Reign</div>
-                                <div class="info-value" id="your-reign">0s</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- History Panel - Collapsible -->
-                    <details class="contest-info-panel" style="cursor: pointer;">
-                        <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                            <span>▶</span>
-                            <span>📜 Recent Kings</span>
-                        </summary>
-                        <div id="history" style="max-height: 300px; overflow-y: auto; margin-top: 0.75rem;">
-                            <div class="loading">Loading...</div>
-                        </div>
-                    </details>
                 </div>
+            </div>
         `;
         
         gameContent.appendChild(contentInner);
@@ -142,12 +97,26 @@ export class KingOfTheHill extends Game {
         // Initialize ValueInput component
         this.paymentInput = new ValueInput('throne-payment-input', {
             label: 'Your Payment',
-            hint: 'Amount to claim the throne',
+            hint: 'Pay more to dethrone',
             defaultUnit: 'gwei',
             minWei: '0',
             required: true
         });
         this.paymentInput.render();
+        
+        // Initialize KingLadder component
+        this.kingLadder = new KingLadder('king-ladder-container', {
+            maxVisible: 8,
+            currentAddress: this.web3Provider?.currentAddress
+        });
+        this.kingLadder.init();
+        
+        // Start updating reign time
+        this.updateInterval = setInterval(() => {
+            if (this.kingLadder) {
+                this.refreshState();
+            }
+        }, 5000); // Update every 5 seconds
     }
 
     setupListeners() {
@@ -207,17 +176,15 @@ export class KingOfTheHill extends Game {
             const [
                 currentKing,
                 currentPrize,
-                coronationTime,
                 totalDethronements,
-                contractBalance,
-                minPayment
+                minPayment,
+                reignDuration
             ] = await Promise.all([
                 this.contract.current_king(),
                 this.contract.current_prize(),
-                this.contract.coronation_time(),
                 this.contract.total_dethronements(),
-                this.contract.get_contract_balance(),
-                this.contract.get_minimum_payment()
+                this.contract.get_minimum_payment(),
+                this.contract.get_current_reign_duration()
             ]);
             
             let userStats = null;
@@ -225,50 +192,33 @@ export class KingOfTheHill extends Game {
                 userStats = await this.contract.get_king_stats(this.web3Provider.currentAddress);
             }
             
-            const kingEl = document.getElementById('king-address');
-            if (kingEl) {
-                if (currentKing === '0x0000000000000000000000000000000000000000') {
-                    kingEl.textContent = 'No King Yet';
-                } else {
-                    const isYouKing = this.web3Provider.isConnected() && 
-                                       this.web3Provider.currentAddress &&
-                                       currentKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                    
-                    // Create badge + address display
-                    const kingDisplay = await AddressBadge.createWithAddress(currentKing, this.web3Provider, {
-                        size: 32,
-                        formatAddress: true,
-                        addressStyle: 'font-size: 1.25rem; font-weight: bold;',
-                        badgeStyle: 'margin-right: 0.5rem;'
-                    });
-                    
-                    if (isYouKing) {
-                        kingEl.innerHTML = '';
-                        const youLabel = document.createElement('span');
-                        youLabel.style.cssText = 'color: #ffd700; display: block; margin-bottom: 0.5rem;';
-                        youLabel.textContent = 'YOU!';
-                        kingEl.appendChild(youLabel);
-                        kingEl.appendChild(kingDisplay);
-                    } else {
-                        kingEl.innerHTML = '';
-                        kingEl.appendChild(kingDisplay);
-                    }
-                }
+            const isYouKing = this.web3Provider.isConnected() && 
+                             this.web3Provider.currentAddress &&
+                             currentKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+            
+            // Update king ladder
+            if (this.kingLadder) {
+                this.kingLadder.updateCurrentKing({
+                    address: currentKing,
+                    prize: DOMHelpers.formatWei(currentPrize),
+                    reignDuration: reignDuration.toNumber(),
+                    isYou: isYouKing
+                });
+                this.kingLadder.updateCurrentAddress(this.web3Provider?.currentAddress);
             }
             
-            DOMHelpers.updateInfo('current-prize', DOMHelpers.formatWei(currentPrize));
-            this.updateReign();
             DOMHelpers.updateInfo('min-payment', DOMHelpers.formatWei(minPayment));
             
-            DOMHelpers.updateInfo('total-dethrone', totalDethronements.toString());
-            DOMHelpers.updateInfo('contract-balance', DOMHelpers.formatWei(contractBalance));
+            // Update badges
+            const badge = document.getElementById('total-dethrone-badge');
+            if (badge) badge.textContent = totalDethronements.toString();
             
             if (userStats) {
                 DOMHelpers.updateInfo('your-crowns', userStats[0].toString());
                 DOMHelpers.updateInfo('your-reign', DOMHelpers.formatDuration(userStats[1].toNumber()));
             } else {
-                DOMHelpers.updateInfo('your-crowns', '👀');
-                DOMHelpers.updateInfo('your-reign', 'Read-only');
+                DOMHelpers.updateInfo('your-crowns', '—');
+                DOMHelpers.updateInfo('your-reign', '—');
             }
             
             await this.loadHistory();
@@ -283,71 +233,19 @@ export class KingOfTheHill extends Game {
     }
 
     async loadHistory() {
+        if (!this.kingLadder) return;
+        
         try {
-            const recentKings = await this.contract.get_recent_kings(20);
-            const historyEl = document.getElementById('history');
+            const recentKings = await this.contract.get_recent_kings(10);
             
-            if (!historyEl) return;
+            // Reverse to show most recent first (excluding current king)
+            const kings = [...recentKings].reverse().slice(1); // Skip first (current king already shown)
             
-            if (recentKings.length === 0) {
-                historyEl.innerHTML = 
-                    '<div style="padding: 1rem; text-align: center; color: var(--text-muted);">No kings yet. Be the first!</div>';
-                return;
-            }
-            
-            const kings = [...recentKings].reverse();
-            
-            // Create container
-            const container = document.createElement('div');
-            container.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem;';
-            
-            // Create entries with badges (async)
-            const entries = await Promise.all(kings.map(async (king, idx) => {
-                const position = recentKings.length - idx;
-                const isYou = this.web3Provider.isConnected() && 
-                             this.web3Provider.currentAddress &&
-                             king.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                
-                const entry = document.createElement('div');
-                entry.style.cssText = 'padding: 0.75rem; background: rgba(0,0,0,0.1); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;';
-                
-                const label = document.createElement('span');
-                label.style.cssText = `font-weight: bold; color: ${isYou ? '#ffd700' : 'inherit'};`;
-                label.textContent = isYou ? '👑 YOU' : `#${position}`;
-                
-                const labelDiv = document.createElement('div');
-                labelDiv.appendChild(label);
-                entry.appendChild(labelDiv);
-                
-                // Create badge + address
-                const addressDisplay = await AddressBadge.createWithAddress(king, this.web3Provider, {
-                    size: 20,
-                    formatAddress: true,
-                    addressStyle: 'font-family: monospace; font-size: 0.875rem;'
-                });
-                entry.appendChild(addressDisplay);
-                
-                return entry;
-            }));
-            
-            entries.forEach(entry => container.appendChild(entry));
-            historyEl.innerHTML = '';
-            historyEl.appendChild(container);
+            this.kingLadder.setKings(kings);
             
         } catch (error) {
             console.error('Failed to load history:', error);
         }
-    }
-
-    updateReign() {
-        if (!this.contract) return;
-        
-        this.contract.get_current_reign_duration()
-            .then(duration => {
-                const seconds = duration.toNumber();
-                DOMHelpers.updateInfo('reign-time', DOMHelpers.formatDuration(seconds));
-            })
-            .catch(err => console.error('Failed to update reign:', err));
     }
 
     setupContractEvents() {
@@ -362,6 +260,7 @@ export class KingOfTheHill extends Game {
                     message: `👑 You won ${DOMHelpers.formatWei(prizeWon)}!`,
                     type: 'success'
                 });
+                eventBus.emit(EVENTS.CONFETTI);
             } else if (wasYou) {
                 eventBus.emit(EVENTS.TOAST, {
                     message: '⚔️ You were dethroned!',

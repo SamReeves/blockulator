@@ -16,7 +16,6 @@ import { AddressBadge } from '../../presentation/components/address-badge.js';
 export class LastCall extends Game {
     constructor() {
         super();
-        this.countdownInterval = null;
         this.donationInput = null;
     }
 
@@ -25,10 +24,14 @@ export class LastCall extends Game {
     }
 
     async onAfterInit() {
-        this.countdownInterval = setInterval(() => this.updateCountdown(), 1000);
+        // Update countdown wheel every second
+        setInterval(() => this.updateCountdownWheel(), 1000);
     }
 
     render() {
+        // Clear container first to prevent duplicates
+        this.container.innerHTML = '';
+        
         const header = GameRenderer.createGameHeader({
             title: '⏰ Last Call',
             description: 'Be the LAST to donate before time runs out! Rush to be the final player. Winner takes 99% of the pot!',
@@ -43,82 +46,105 @@ export class LastCall extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-                <div class="game-sections">
-                    <!-- Compact Round Status -->
-                    <div class="contest-info-panel" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
-                        <div style="text-align: center; padding: 1.5rem 0;">
-                            <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem;">⏱️ TIME REMAINING</div>
-                            <div id="countdown" style="font-size: 2.5rem; font-weight: bold; font-family: monospace; margin-bottom: 0.75rem;">
-                                --:--:--
-                            </div>
-                            <div id="countdown-status" style="font-size: 0.875rem; opacity: 0.9;">Round ends when time expires</div>
-                            <button id="end-round-btn" style="margin-top: 1rem; padding: 0.5rem 1.5rem; background: rgba(255,255,255,0.2); border: 2px solid white; color: white; border-radius: 8px; font-size: 0.875rem; font-weight: bold; cursor: pointer; display: none;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-                                🏁 End & Claim
-                            </button>
-                        </div>
-                        <div style="border-top: 1px solid rgba(255,255,255,0.2); padding: 1rem 0;">
-                            <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-align: center;">🏆 CURRENT WINNER</div>
-                            <div id="current-winner" style="font-family: monospace; font-size: 1rem; font-weight: bold; text-align: center; margin-bottom: 1rem;">
-                                No one yet
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; font-size: 0.875rem;">
-                                <div style="text-align: center;">
-                                    <div style="opacity: 0.8; font-size: 0.7rem; margin-bottom: 0.25rem;">POT</div>
-                                    <div id="pot-value" style="font-weight: bold;">0</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="opacity: 0.8; font-size: 0.7rem; margin-bottom: 0.25rem;">PRIZE</div>
-                                    <div id="winner-prize" style="font-weight: bold;">0</div>
-                                </div>
-                                <div style="text-align: center;">
-                                    <div style="opacity: 0.8; font-size: 0.7rem; margin-bottom: 0.25rem;">ROUND</div>
-                                    <div id="round-number" style="font-weight: bold;">#1</div>
-                                </div>
-                            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+                <!-- Left Column: Countdown & Action -->
+                <div class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);">
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ef4444;">
+                        <span>⏰</span>
+                        <span>Time's Running Out!</span>
+                    </h3>
+                    
+                    <!-- Countdown Display -->
+                    <div style="margin: 1.5rem 0; display: flex; flex-direction: column; align-items: center;">
+                        <svg width="200" height="200" viewBox="0 0 200 200" style="transform: rotate(-90deg);">
+                            <!-- Background circle -->
+                            <circle cx="100" cy="100" r="75" fill="none" stroke="rgba(239, 68, 68, 0.1)" stroke-width="12"/>
+                            <!-- Progress circle -->
+                            <circle id="countdown-progress-circle" cx="100" cy="100" r="75" fill="none" 
+                                    stroke="url(#lastcall-gradient)" stroke-width="12" stroke-linecap="round"
+                                    stroke-dasharray="471.24" stroke-dashoffset="471.24" 
+                                    style="transition: stroke-dashoffset 1s linear;"/>
+                            <!-- Gradient -->
+                            <defs>
+                                <linearGradient id="lastcall-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#ef4444;stop-opacity:1"/>
+                                    <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div style="position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 70px;">
+                            <div id="countdown-time" style="font-size: 2rem; font-weight: bold; color: #ec4899; font-family: monospace;">--:--:--</div>
+                            <div id="countdown-label" style="font-size: 0.75rem; opacity: 0.7; margin-top: 0.25rem;">Until Round Ends</div>
                         </div>
                     </div>
+                    
+                    <!-- Donation Input -->
+                    <div id="donation-amount-input" style="margin-bottom: 1rem;"></div>
+                    
+                    <button id="donate-btn" class="btn-play" style="width: 100%; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                        💰 Donate (Become Last!)
+                    </button>
+                    
+                    <button id="end-round-btn" style="width: 100%; margin-top: 0.75rem; padding: 0.75rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none; color: white; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; display: none; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                        🏁 End Round & Claim Prize
+                    </button>
+                    
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444; font-size: 0.85rem;">
+                        <strong style="color: #ef4444;">⚡ Strategy:</strong> Be the LAST donor when timer hits zero. Winner gets 99%!
+                    </div>
+                </div>
 
-                    <!-- Donate Panel -->
-                    <div class="contest-info-panel" style="border: 2px solid #10b981;">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #10b981;">
-                            <span>💰</span>
-                            <span>Make Your Move</span>
+                <!-- Right Column: Round Info -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Current Leader -->
+                    <div class="contest-info-panel" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);">
+                        <h3 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; color: #10b981;">
+                            <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span>🏆</span>
+                                <span>Current Leader</span>
+                            </span>
+                            <span style="font-size: 0.85rem; font-weight: normal;">Round <span id="round-number">#1</span></span>
                         </h3>
-                        <div class="game-controls">
-                            <div id="donation-amount-input" style="margin-top: 1rem;"></div>
-                            
-                            <button id="donate-btn" class="btn-play" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                                🎮 Donate (Become Last!)
-                            </button>
-                            
-                            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 3px solid #ef4444; font-size: 0.875rem;">
-                                <strong style="color: #ef4444;">⏰ Strategy:</strong> Be LAST when timer expires. Each donation resets the countdown. Winner gets 99%!
+                        
+                        <div id="current-winner" style="padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; margin-bottom: 1rem; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center;">
+                            No one yet
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; text-align: center;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">💰 Current Pot</div>
+                                <div id="pot-value" style="font-size: 1.1rem; font-weight: bold;">0 wei</div>
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; text-align: center;">
+                                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">🎁 Winner Gets</div>
+                                <div id="winner-prize" style="font-size: 1.1rem; font-weight: bold;">0 wei</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- How It Works - Collapsible -->
+                    <!-- How It Works -->
                     <details class="contest-info-panel" style="cursor: pointer;">
                         <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
                             <span>▶</span>
                             <span>📖 How To Win</span>
                         </summary>
-                        <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
-                            <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 3px solid #ef4444; margin-bottom: 0.5rem;">
-                                <strong>1. Donate</strong> - Become current winner, reset the 10-day countdown
+                        <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6; display: grid; gap: 0.5rem;">
+                            <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981;">
+                                <strong>1. Donate</strong> - Become current winner, reset 10-day timer
                             </div>
-                            <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b; margin-bottom: 0.5rem;">
-                                <strong>2. Watch</strong> - Be LAST donor when time expires
+                            <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 3px solid #ef4444;">
+                                <strong>2. Be Last</strong> - Stay in lead when countdown hits zero
                             </div>
-                            <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 0.5rem;">
-                                <strong>3. Claim</strong> - End round after countdown to win 99%!
+                            <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                <strong>3. Claim</strong> - End round to win 99% of the pot
                             </div>
                             <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
-                                <strong>💡 Tip:</strong> Timing is everything! Not too early, not too late.
+                                <strong>💡 Tip:</strong> Each donation resets the clock. Time your move perfectly!
                             </div>
                         </div>
                     </details>
                 </div>
+            </div>
         `;
         
         gameContent.appendChild(contentInner);
@@ -127,7 +153,7 @@ export class LastCall extends Game {
         // Initialize ValueInput component
         this.donationInput = new ValueInput('donation-amount-input', {
             label: 'Donation Amount',
-            hint: 'Try to make the final donation before time runs out!',
+            hint: 'Be the last donor when time expires!',
             defaultUnit: 'gwei',
             minWei: '1',
             required: true
@@ -226,37 +252,38 @@ export class LastCall extends Game {
                 this.contract.get_current_winner_prize()
             ]);
             
-            DOMHelpers.updateInfo('round-number', roundNumber.toString());
+            DOMHelpers.updateInfo('round-number', `#${roundNumber.toString()}`);
             DOMHelpers.updateInfo('pot-value', DOMHelpers.formatWei(potValue));
+            DOMHelpers.updateInfo('winner-prize', DOMHelpers.formatWei(currentWinnerPrize[0]));
             
             const winnerEl = document.getElementById('current-winner');
             if (winnerEl) {
                 if (lastDonor === '0x0000000000000000000000000000000000000000') {
-                    winnerEl.textContent = 'No one yet';
+                    winnerEl.innerHTML = '<span style="opacity: 0.6;">No one yet</span>';
                 } else {
                     const isYou = this.web3Provider.isConnected() && 
                                  this.web3Provider.currentAddress &&
                                  lastDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                     
                     const winnerDisplay = await AddressBadge.createWithAddress(lastDonor, this.web3Provider, {
-                        size: 28,
+                        size: 24,
                         formatAddress: true,
-                        addressStyle: 'font-size: 1.1rem; font-weight: bold;'
+                        addressStyle: 'font-size: 1rem; font-weight: bold;'
                     });
                     
                     winnerEl.innerHTML = '';
                     if (isYou) {
                         const youLabel = document.createElement('div');
-                        youLabel.style.cssText = 'color: #ffd700; margin-bottom: 0.5rem;';
-                        youLabel.textContent = '🎉 YOU! 🎉';
+                        youLabel.style.cssText = 'color: #10b981; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;';
+                        youLabel.textContent = '🎉 YOU ARE WINNING! 🎉';
                         winnerEl.appendChild(youLabel);
                     }
                     winnerEl.appendChild(winnerDisplay);
                 }
             }
             
-            DOMHelpers.updateInfo('winner-prize', DOMHelpers.formatWei(currentWinnerPrize[0]));
-            this.updateCountdown();
+            // Update countdown wheel
+            await this.updateCountdownWheel();
             
             const endRoundBtn = document.getElementById('end-round-btn');
             if (endRoundBtn) {
@@ -272,27 +299,26 @@ export class LastCall extends Game {
         }
     }
 
-    async updateCountdown() {
+    async updateCountdownWheel() {
         if (!this.contract) return;
         
         try {
             const timeRemaining = await this.contract.get_time_remaining();
             const seconds = timeRemaining.toNumber();
+            const totalDuration = 10 * 24 * 60 * 60; // 10 days in seconds
             
-            const countdownEl = document.getElementById('countdown');
-            const statusEl = document.getElementById('countdown-status');
+            // Update the countdown display manually
+            const timeEl = document.getElementById('countdown-time');
+            const labelEl = document.getElementById('countdown-label');
+            const progressCircle = document.getElementById('countdown-progress-circle');
             
-            if (!countdownEl || !statusEl) return;
+            if (!timeEl || !progressCircle) return;
             
+            // Format time display
             if (seconds === 0) {
-                countdownEl.textContent = 'ENDED!';
-                countdownEl.style.color = '#ff4444';
-                statusEl.textContent = 'Round can be ended now!';
-                
-                const endRoundBtn = document.getElementById('end-round-btn');
-                if (endRoundBtn) {
-                    endRoundBtn.style.display = 'block';
-                }
+                timeEl.textContent = 'ENDED!';
+                timeEl.style.color = '#ef4444';
+                if (labelEl) labelEl.textContent = 'Round Complete';
             } else {
                 const days = Math.floor(seconds / 86400);
                 const hours = Math.floor((seconds % 86400) / 3600);
@@ -300,23 +326,30 @@ export class LastCall extends Game {
                 const secs = seconds % 60;
                 
                 if (days > 0) {
-                    countdownEl.textContent = `${days}d ${hours}h ${minutes}m`;
+                    timeEl.textContent = `${days}d ${hours}h`;
                 } else if (hours > 0) {
-                    countdownEl.textContent = `${hours}h ${minutes}m ${secs}s`;
+                    timeEl.textContent = `${hours}h ${minutes}m`;
                 } else {
-                    countdownEl.textContent = `${minutes}m ${secs}s`;
+                    timeEl.textContent = `${minutes}m ${secs}s`;
                 }
                 
+                // Color based on urgency
                 if (seconds < 3600) {
-                    countdownEl.style.color = '#ff4444';
+                    timeEl.style.color = '#ef4444';
                 } else if (seconds < 86400) {
-                    countdownEl.style.color = '#ffaa00';
+                    timeEl.style.color = '#f59e0b';
                 } else {
-                    countdownEl.style.color = 'white';
+                    timeEl.style.color = '#ec4899';
                 }
                 
-                statusEl.textContent = 'Time until round ends';
+                if (labelEl) labelEl.textContent = 'Until Round Ends';
             }
+            
+            // Update progress circle
+            const circumference = 2 * Math.PI * 75;
+            const progress = seconds / totalDuration;
+            const offset = circumference * (1 - progress);
+            progressCircle.style.strokeDashoffset = offset;
             
         } catch (error) {
             console.error('Failed to update countdown:', error);
@@ -366,9 +399,6 @@ export class LastCall extends Game {
     }
 
     destroy() {
-        if (this.countdownInterval) {
-            clearInterval(this.countdownInterval);
-        }
         super.destroy();
     }
 }

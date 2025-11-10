@@ -2,13 +2,16 @@
  * Master Router
  * Handles top-level navigation between major views (games, tools, discussions, factory)
  * Manages URL state and browser history without page reloads
+ * Supports sub-routes: #/games/pissing-contest
  */
 
 export class MasterRouter {
     constructor() {
         this.currentView = null;
+        this.currentSubRoute = null;
         this.viewInitializers = new Map(); // view name -> initializer function
         this.initializedViews = new Set(); // track which views have been initialized
+        this.subRouteHandlers = new Map(); // view name -> sub-route handler
         
         console.log('📍 MasterRouter created');
     }
@@ -29,7 +32,7 @@ export class MasterRouter {
         
         // Load initial route from URL
         const route = this.parseRoute();
-        this.navigateTo(route.view, { replace: true, skipPush: true });
+        this.navigateTo(route.view, { subRoute: route.subRoute, replace: true, skipPush: true });
         
         console.log('✅ MasterRouter initialized');
     }
@@ -41,6 +44,16 @@ export class MasterRouter {
     registerView(viewName, initializerFn) {
         this.viewInitializers.set(viewName, initializerFn);
         console.log(`📍 Registered view: ${viewName}`);
+    }
+
+    /**
+     * Register a sub-route handler for a view
+     * @param {string} viewName - Parent view name (e.g., 'games')
+     * @param {Function} handlerFn - Function to handle sub-routes: (subRoute) => {}
+     */
+    registerSubRouteHandler(viewName, handlerFn) {
+        this.subRouteHandlers.set(viewName, handlerFn);
+        console.log(`📍 Registered sub-route handler for: ${viewName}`);
     }
 
     /**
@@ -61,20 +74,20 @@ export class MasterRouter {
         
         const parts = path.split('/').filter(Boolean);
         const view = parts[0] || 'games';
-        const subRoute = parts.slice(1).join('/');
+        const subRoute = parts.slice(1).join('/') || null;
         
         return { view, subRoute };
     }
 
     /**
-     * Navigate to a view
+     * Navigate to a view with optional sub-route
      * @param {string} viewName - Name of view to navigate to (games, tools, discussions, factory)
      * @param {object} options - Navigation options
      */
     async navigateTo(viewName, options = {}) {
-        const { replace = false, skipPush = false } = options;
+        const { replace = false, skipPush = false, subRoute = null } = options;
         
-        console.log(`🧭 Navigating to: ${viewName}`);
+        console.log(`🧭 Navigating to: ${viewName}${subRoute ? '/' + subRoute : ''}`);
         
         // Validate view exists
         const viewElement = document.getElementById(`${viewName}-view`);
@@ -96,11 +109,11 @@ export class MasterRouter {
         
         // Update URL if not skipping push
         if (!skipPush) {
-            const url = `#/${viewName}`;
+            const url = `#/${viewName}${subRoute ? '/' + subRoute : ''}`;
             if (replace) {
-                window.history.replaceState({ view: viewName }, '', url);
+                window.history.replaceState({ view: viewName, subRoute }, '', url);
             } else {
-                window.history.pushState({ view: viewName }, '', url);
+                window.history.pushState({ view: viewName, subRoute }, '', url);
             }
         }
         
@@ -123,10 +136,19 @@ export class MasterRouter {
             }
         }
         
-        // Update current view
-        this.currentView = viewName;
+        // Handle sub-route if present
+        if (subRoute) {
+            const handler = this.subRouteHandlers.get(viewName);
+            if (handler) {
+                await handler(subRoute);
+            }
+        }
         
-        console.log(`✅ Navigated to: ${viewName}`);
+        // Update current view and sub-route
+        this.currentView = viewName;
+        this.currentSubRoute = subRoute;
+        
+        console.log(`✅ Navigated to: ${viewName}${subRoute ? '/' + subRoute : ''}`);
     }
 
     /**
@@ -157,7 +179,7 @@ export class MasterRouter {
         console.log('⬅️ Browser back/forward detected');
         
         const route = this.parseRoute();
-        this.navigateTo(route.view, { skipPush: true });
+        this.navigateTo(route.view, { subRoute: route.subRoute, skipPush: true });
     }
 
     /**
@@ -180,6 +202,13 @@ export class MasterRouter {
      */
     getCurrentView() {
         return this.currentView;
+    }
+
+    /**
+     * Get current sub-route
+     */
+    getCurrentSubRoute() {
+        return this.currentSubRoute;
     }
 
     /**

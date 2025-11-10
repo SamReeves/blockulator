@@ -87,6 +87,13 @@ export class MasterApp {
         this.masterRouter.registerView('badges', () => this.initBadgesView());
         this.masterRouter.registerView('about', () => this.initAboutView());
         
+        // Register sub-route handlers
+        this.masterRouter.registerSubRouteHandler('games', (subRoute) => {
+            if (this.gamesApp) {
+                this.gamesApp.handleSubRoute(subRoute);
+            }
+        });
+        
         console.log('✅ All views registered');
     }
 

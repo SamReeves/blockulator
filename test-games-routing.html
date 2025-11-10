@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Games Routing</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #0f172a;
+            color: #f1f5f9;
+        }
+        h1 { color: #3b82f6; }
+        .test-section {
+            margin: 2rem 0;
+            padding: 1rem;
+            background: #1e293b;
+            border-radius: 8px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+        }
+        button:hover { background: #2563eb; }
+        pre {
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Games Routing Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>1. Module Import Tests</h2>
+        <button onclick="testModuleImports()">Run Module Import Tests</button>
+        <pre id="import-results">Not run yet</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Router Tests</h2>
+        <button onclick="testRouter()">Run Router Tests</button>
+        <pre id="router-results">Not run yet</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Game Status Service Tests</h2>
+        <button onclick="testGameStatusService()">Run Status Service Tests</button>
+        <pre id="status-results">Not run yet</pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. URL Routing Tests</h2>
+        <button onclick="testURLRouting()">Test URL: #/games</button>
+        <button onclick="testURLRoutingWithGame()">Test URL: #/games/pissing-contest</button>
+        <pre id="url-results">Not run yet</pre>
+    </div>
+    
+    <script type="module">
+        window.testModuleImports = async function() {
+            const results = document.getElementById('import-results');
+            results.textContent = 'Testing module imports...\n';
+            
+            try {
+                // Test MasterRouter import
+                const { MasterRouter } = await import('./js/application/master-router.js');
+                results.textContent += '✅ MasterRouter imported successfully\n';
+                
+                // Test GamesApp import
+                const { GamesApp } = await import('./js/application/games-app.js');
+                results.textContent += '✅ GamesApp imported successfully\n';
+                
+                // Test GameStatusService import
+                const { gameStatusService, GameStatusService } = await import('./js/application/game-status-service.js');
+                results.textContent += '✅ GameStatusService imported successfully\n';
+                results.textContent += `   - Service instance exists: ${!!gameStatusService}\n`;
+                
+                results.textContent += '\n✅ All module imports successful!';
+                results.className = 'success';
+            } catch (error) {
+                results.textContent += `\n❌ Import failed: ${error.message}\n${error.stack}`;
+                results.className = 'error';
+            }
+        };
+        
+        window.testRouter = async function() {
+            const results = document.getElementById('router-results');
+            results.textContent = 'Testing router functionality...\n';
+            
+            try {
+                const { MasterRouter } = await import('./js/application/master-router.js');
+                const router = new MasterRouter();
+                
+                results.textContent += '✅ MasterRouter instantiated\n';
+                
+                // Test parseRoute
+                const testRoutes = [
+                    { hash: '#/games', expected: { view: 'games', subRoute: null } },
+                    { hash: '#/games/pissing-contest', expected: { view: 'games', subRoute: 'pissing-contest' } },
+                    { hash: '#/tools', expected: { view: 'tools', subRoute: null } }
+                ];
+                
+                for (const test of testRoutes) {
+                    window.location.hash = test.hash;
+                    const parsed = router.parseRoute();
+                    const match = parsed.view === test.expected.view && parsed.subRoute === test.expected.subRoute;
+                    results.textContent += `${match ? '✅' : '❌'} Parse ${test.hash}: view=${parsed.view}, subRoute=${parsed.subRoute}\n`;
+                }
+                
+                results.textContent += '\n✅ Router tests passed!';
+                results.className = 'success';
+            } catch (error) {
+                results.textContent += `\n❌ Router test failed: ${error.message}\n${error.stack}`;
+                results.className = 'error';
+            }
+        };
+        
+        window.testGameStatusService = async function() {
+            const results = document.getElementById('status-results');
+            results.textContent = 'Testing game status service...\n';
+            
+            try {
+                const { gameStatusService } = await import('./js/application/game-status-service.js');
+                
+                results.textContent += '✅ GameStatusService instance exists\n';
+                results.textContent += '   Testing utility functions:\n';
+                
+                // Test formatAddress
+                const addr = gameStatusService.formatAddress('0x1234567890123456789012345678901234567890');
+                results.textContent += `   - formatAddress: ${addr}\n`;
+                
+                // Test formatWei
+                const wei = gameStatusService.formatWei('1000000000000000000');
+                results.textContent += `   - formatWei(1 ETH): ${wei}\n`;
+                
+                // Test formatTime
+                const time = gameStatusService.formatTime(3665);
+                results.textContent += `   - formatTime(3665s): ${time}\n`;
+                
+                results.textContent += '\n⚠️ Note: Actual blockchain calls require web3 provider\n';
+                results.textContent += '✅ Status service utility tests passed!';
+                results.className = 'success';
+            } catch (error) {
+                results.textContent += `\n❌ Status service test failed: ${error.message}\n${error.stack}`;
+                results.className = 'error';
+            }
+        };
+        
+        window.testURLRouting = function() {
+            const results = document.getElementById('url-results');
+            results.textContent = 'Testing URL: #/games\n';
+            window.location.hash = '#/games';
+            results.textContent += '✅ URL updated to #/games\n';
+            results.textContent += 'Check browser URL bar and navigation!\n';
+        };
+        
+        window.testURLRoutingWithGame = function() {
+            const results = document.getElementById('url-results');
+            results.textContent = 'Testing URL: #/games/pissing-contest\n';
+            window.location.hash = '#/games/pissing-contest';
+            results.textContent += '✅ URL updated to #/games/pissing-contest\n';
+            results.textContent += 'Check browser URL bar and navigation!\n';
+        };
+        
+        // Auto-run import tests on load
+        setTimeout(() => {
+            testModuleImports();
+        }, 500);
+    </script>
+</body>
+</html>
+

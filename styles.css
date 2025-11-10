@@ -1266,6 +1266,322 @@ body {
     border-color: #ef4444;
 }
 
+/* ============================================
+   UNIFIED STATUS CARD SYSTEM
+   Reusable across games, tools, discussions, factory
+   ============================================ */
+
+.status-list-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+.status-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.status-card {
+    background: var(--md-sys-color-surface-container);
+    border: 2px solid var(--md-sys-color-outline);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Large faded emoji background on the right */
+.status-card-bg-emoji {
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 6rem;
+    opacity: 0.08;
+    z-index: 0;
+    pointer-events: none;
+    line-height: 1;
+    user-select: none;
+}
+
+.status-card-clickable {
+    cursor: pointer;
+}
+
+.status-card-clickable:focus {
+    outline: 2px solid var(--md-sys-color-primary);
+    outline-offset: 2px;
+}
+
+.status-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        var(--md-sys-color-primary) 0%, 
+        transparent 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 0;
+}
+
+.status-card-clickable:hover {
+    border-color: var(--md-sys-color-primary);
+    transform: translateX(4px);
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
+}
+
+.status-card-clickable:hover::before {
+    opacity: 0.1;
+}
+
+.status-card-clickable:hover .status-card-bg-emoji {
+    opacity: 0.12;
+    transform: translateY(-50%) scale(1.05);
+}
+
+.status-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    z-index: 1;
+}
+
+.status-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.status-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.status-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.3;
+    display: inline;
+    margin-right: 0.5rem;
+}
+
+.status-description {
+    font-size: 0.8125rem;
+    color: var(--md-sys-color-on-surface-variant);
+    line-height: 1.4;
+    display: inline;
+}
+
+.status-data {
+    padding-left: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+    line-height: 1.4;
+    text-align: right;
+}
+
+.status-value {
+    color: var(--md-sys-color-on-surface);
+    font-weight: 600;
+}
+
+.status-separator {
+    color: var(--md-sys-color-outline);
+    margin: 0 0.25rem;
+}
+
+.status-details {
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 400;
+}
+
+.view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--md-sys-color-outline);
+}
+
+.view-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+}
+
+.btn-secondary {
+    background: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface);
+    border: 2px solid var(--md-sys-color-outline);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border-color: var(--md-sys-color-primary);
+}
+
+.loading-state,
+.error-state {
+    text-align: center;
+    padding: 3rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 1.1rem;
+}
+
+.error-state {
+    color: var(--md-sys-color-error);
+}
+
+/* Game-specific gradient backgrounds for status cards */
+.status-card[data-game="pissing-contest"] {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+    border-color: rgba(59, 130, 246, 0.5);
+}
+
+.status-card[data-game="pissing-contest"]::before {
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+}
+
+.status-card[data-game="pay-it-forward"] {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+    border-color: rgba(16, 185, 129, 0.5);
+}
+
+.status-card[data-game="pay-it-forward"]::before {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.status-card[data-game="pay-it-backward"] {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%);
+    border-color: rgba(139, 92, 246, 0.5);
+}
+
+.status-card[data-game="pay-it-backward"]::before {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.status-card[data-game="message-board"] {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(8, 145, 178, 0.15) 100%);
+    border-color: rgba(14, 165, 233, 0.5);
+}
+
+.status-card[data-game="message-board"]::before {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0891b2 100%);
+}
+
+.status-card[data-game="king-of-the-hill"] {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
+    border-color: rgba(251, 191, 36, 0.5);
+}
+
+.status-card[data-game="king-of-the-hill"]::before {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.status-card[data-game="last-call"] {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.status-card[data-game="last-call"]::before {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.status-card[data-game="time-to-make-the-donuts"] {
+    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(219, 39, 119, 0.15) 100%);
+    border-color: rgba(236, 72, 153, 0.5);
+}
+
+.status-card[data-game="time-to-make-the-donuts"]::before {
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+}
+
+.status-card[data-game="dice-gods"] {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
+    border-color: rgba(168, 85, 247, 0.5);
+}
+
+.status-card[data-game="dice-gods"]::before {
+    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+}
+
+.status-card[data-game="satan-moloch-baal"] {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(153, 27, 27, 0.15) 100%);
+    border-color: rgba(239, 68, 68, 0.5);
+}
+
+.status-card[data-game="satan-moloch-baal"]::before {
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+}
+
+/* Responsive adjustments for status cards */
+@media (max-width: 768px) {
+    .status-list-container {
+        padding: 1rem;
+    }
+    
+    .status-card {
+        padding: 0.875rem 1rem;
+    }
+    
+    .status-icon {
+        font-size: 2rem;
+    }
+    
+    .status-title {
+        font-size: 1rem;
+    }
+    
+    .status-description {
+        font-size: 0.75rem;
+    }
+    
+    .status-data {
+        font-size: 0.75rem;
+    }
+    
+    .view-title {
+        font-size: 1.5rem;
+    }
+    
+    .status-card-bg-emoji {
+        font-size: 4.5rem;
+        right: -10px;
+    }
+    
+    .status-data {
+        padding-left: 3rem;
+    }
+}
+
 /* Individual gradients for each tool */
 .tool-card[data-tool="e-calculator"] {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -4470,5 +4786,268 @@ details[open] .panel-arrow {
     
     .bar-label {
         font-size: 0.55rem !important;
+    }
+}
+
+/* ============================================
+   LAZY SUSAN 3D COMPONENT
+   ============================================ */
+
+/* Scene Container */
+.lazy-susan-scene {
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+    perspective: 1200px;
+    perspective-origin: 50% 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+    border-radius: 16px;
+    overflow: visible;
+}
+
+/* Rotating Platform */
+.lazy-susan-platform {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+    transform: rotateX(-15deg) rotateY(0deg);
+}
+
+/* Pentagram Base */
+.lazy-susan-pentagram {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(-20px) rotateX(90deg);
+    filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.6));
+    animation: pentagram-pulse 3s ease-in-out infinite;
+}
+
+@keyframes pentagram-pulse {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.6));
+    }
+    50% {
+        filter: drop-shadow(0 0 30px rgba(239, 68, 68, 0.9));
+    }
+}
+
+/* Fire Emoji at Center */
+.lazy-susan-fire {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translateZ(5px);
+    font-size: 3rem;
+    filter: drop-shadow(0 0 10px rgba(255, 100, 0, 0.8));
+    pointer-events: none;
+}
+
+/* Individual Items on the Lazy Susan */
+.lazy-susan-item {
+    position: absolute;
+    width: 100px;
+    height: 140px;
+    top: 50%;
+    left: 50%;
+    margin-left: -50px;
+    margin-top: -70px;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.lazy-susan-item-content {
+    width: 100%;
+    height: 100%;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    box-shadow: 
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset 0 2px 8px rgba(255, 255, 255, 0.1);
+    transform: rotateY(0deg);
+    backface-visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.lazy-susan-item:hover .lazy-susan-item-content {
+    transform: translateZ(20px) scale(1.05);
+    box-shadow: 
+        0 12px 32px rgba(0, 0, 0, 0.4),
+        inset 0 2px 12px rgba(255, 255, 255, 0.2);
+}
+
+.lazy-susan-item.selected .lazy-susan-item-content {
+    border-color: rgba(255, 255, 255, 0.9);
+    box-shadow: 
+        inset 0 0 20px rgba(255, 255, 255, 0.4),
+        0 12px 48px rgba(255, 255, 255, 0.4),
+        0 0 60px var(--item-color, currentColor);
+    animation: pulse-glow-lazy 1.5s ease-in-out infinite;
+    transform: translateZ(30px) scale(1.1);
+}
+
+@keyframes pulse-glow-lazy {
+    0%, 100% {
+        box-shadow: 
+            inset 0 0 20px rgba(255, 255, 255, 0.4),
+            0 12px 48px rgba(255, 255, 255, 0.4),
+            0 0 60px var(--item-color, currentColor);
+    }
+    50% {
+        box-shadow: 
+            inset 0 0 30px rgba(255, 255, 255, 0.6),
+            0 12px 56px rgba(255, 255, 255, 0.5),
+            0 0 80px var(--item-color, currentColor);
+    }
+}
+
+.lazy-susan-emoji {
+    font-size: 3rem;
+    line-height: 1;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.lazy-susan-name {
+    font-size: 1rem;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.lazy-susan-subtitle {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Arrow Controls */
+.lazy-susan-controls {
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.lazy-susan-arrow {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.lazy-susan-arrow:hover {
+    transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.lazy-susan-arrow:active {
+    transform: scale(0.95);
+}
+
+.lazy-susan-select-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 2rem;
+    color: white;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    min-width: 160px;
+    background: linear-gradient(135deg, #ef4444dd 0%, #ef4444aa 100%);
+}
+
+.lazy-susan-select-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border-color: rgba(255, 255, 255, 0.7);
+}
+
+.lazy-susan-select-btn:active {
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .lazy-susan-scene {
+        height: 250px;
+    }
+    
+    .lazy-susan-platform {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .lazy-susan-pentagram svg {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .lazy-susan-fire {
+        font-size: 3rem;
+    }
+    
+    .lazy-susan-item {
+        width: 80px;
+        height: 110px;
+        margin-left: -40px;
+        margin-top: -55px;
+    }
+    
+    .lazy-susan-emoji {
+        font-size: 2.5rem;
+    }
+    
+    .lazy-susan-name {
+        font-size: 0.85rem;
+    }
+    
+    .lazy-susan-subtitle {
+        font-size: 0.6rem;
+    }
+    
+    .lazy-susan-arrow {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+    
+    .lazy-susan-select-btn {
+        padding: 0.75rem 1.5rem;
+        min-width: 140px;
+    }
+    
+    .lazy-susan-controls {
+        gap: 0.75rem;
     }
 }

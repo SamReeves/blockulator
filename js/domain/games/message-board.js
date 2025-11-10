@@ -12,20 +12,25 @@ import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
 import { AddressBadge } from '../../presentation/components/address-badge.js';
+import { MessageFeed } from '../../presentation/components/message-feed.js';
 
 export class MessageBoard extends Game {
     constructor() {
         super();
         this.feeInput = null;
+        this.messageFeed = null;
     }
     getContractName() {
         return 'message-board';
     }
 
     render() {
+        // Clear container first to prevent duplicates
+        this.container.innerHTML = '';
+        
         const header = GameRenderer.createGameHeader({
             title: '💬 Message Board',
-            description: 'Post messages on-chain. Simple. Transparent.',
+            description: 'Post messages on-chain. Permanent. Transparent.',
             contractAddress: CONTRACT_ADDRESSES.MESSAGE_BOARD,
             sourceFile: CONTRACT_SOURCES.MESSAGE_BOARD,
             abiFile: CONTRACT_ABIS.MESSAGE_BOARD
@@ -38,116 +43,79 @@ export class MessageBoard extends Game {
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
             <div class="game-sections">
-                <!-- Post Message Panel -->
+                <!-- Main Panel -->
                 <div class="contest-info-panel" style="border: 2px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #3b82f6;">
-                        <span>✍️</span>
-                        <span>Post Your Message</span>
-                    </h3>
-                    <div class="game-controls">
-                        <div class="input-group" style="margin-top: 1rem;">
-                            <label for="msg-content" style="font-weight: 600; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                                <span>Your Message</span>
-                                <span class="char-counter" style="font-size: 0.875rem; color: var(--md-sys-color-outline);">
-                                    <span id="char-count">0</span> / 280
-                                </span>
-                            </label>
-                            <textarea 
-                                id="msg-content"
-                                class="message-input"
-                                placeholder="Say something to the blockchain... it's permanent!"
-                                maxlength="280"
-                                rows="4"
-                                style="width: 100%; padding: 1rem; background: var(--md-sys-color-surface); border: 2px solid var(--md-sys-color-outline); border-radius: var(--md-sys-shape-corner-small); color: var(--md-sys-color-on-surface); font-size: 1rem; resize: vertical; font-family: inherit; transition: border-color 0.2s;"
-                                onfocus="this.style.borderColor='#3b82f6'"
-                                onblur="this.style.borderColor='var(--md-sys-color-outline)'"
-                            ></textarea>
-                        </div>
-                        <div class="input-group">
-                            <div id="msg-fee-input"></div>
-                        </div>
-                        <button id="post-btn" class="btn-play" style="width: 100%; margin-top: 0.5rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                            📝 Post Message
-                        </button>
-                        
-                        <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%); border-radius: 12px; border-left: 4px solid #f59e0b;">
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
-                                <span style="font-size: 1.5rem;">⚠️</span>
-                                <strong style="font-size: 1.1rem; color: #f59e0b;">Important</strong>
-                            </div>
-                            <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
-                                <li>Messages are stored on the blockchain FOREVER</li>
-                                <li>Pay the minimum fee to post</li>
-                                <li>Rate limit prevents spam (check your wait time below)</li>
-                                <li>Max 280 characters per message</li>
-                            </ul>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #3b82f6; margin: 0;">
+                            <span>💬</span>
+                            <span>Message Board</span>
+                        </h3>
+                        <div style="font-size: 0.75rem; color: #3b82f6;">
+                            <span id="msg-count-badge">0</span> posts
                         </div>
                     </div>
-                </div>
-
-                <!-- Board Stats -->
-                <div class="contest-info-panel" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #10b981;">
-                        <span>📊</span>
-                        <span>Board Statistics</span>
-                    </h3>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
-                        <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Total Messages</div>
-                            <div id="msg-count" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; align-items: start;">
+                        <!-- Left: Post Form -->
+                        <div style="min-width: 0;">
+                            <textarea 
+                                id="msg-content"
+                                placeholder="Write something permanent..."
+                                maxlength="280"
+                                rows="3"
+                                style="width: 100%; padding: 0.75rem; background: var(--md-sys-color-surface); border: 2px solid #3b82f6; border-radius: 6px; color: var(--md-sys-color-on-surface); font-size: 0.9rem; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"
+                            ></textarea>
+                            <div style="font-size: 0.7rem; opacity: 0.6; text-align: right; margin-bottom: 0.75rem;">
+                                <span id="char-count">0</span>/280
+                            </div>
+                            
+                            <div id="msg-fee-input" style="margin-bottom: 0.75rem;"></div>
+                            
+                            <button id="post-btn" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                                💬 Post
+                            </button>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.7rem;">
+                                <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 4px;">
+                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Min Fee</div>
+                                    <div id="min-fee" style="font-weight: bold; font-size: 0.75rem;">0 wei</div>
+                                </div>
+                                <div style="padding: 0.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 4px;">
+                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Can Post</div>
+                                    <div id="wait-time" style="font-weight: bold; font-size: 0.75rem;">Now</div>
+                                </div>
+                            </div>
                         </div>
-                        <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Total Collected</div>
-                            <div id="total" style="font-size: 1.5rem; font-weight: bold;">0 wei</div>
-                        </div>
-                        <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Minimum Fee</div>
-                            <div id="min-fee" style="font-size: 1.5rem; font-weight: bold;">0 wei</div>
-                        </div>
-                        <div style="padding: 1rem; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Rate Limit</div>
-                            <div id="rate-limit" style="font-size: 1.5rem; font-weight: bold;">0s</div>
-                        </div>
-                        <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Your Last Post</div>
-                            <div id="last-post" style="font-size: 1.25rem; font-weight: bold;">Never</div>
-                        </div>
-                        <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Can Post In</div>
-                            <div id="wait-time" style="font-size: 1.25rem; font-weight: bold;">Now</div>
+                        
+                        <!-- Right: Message Feed -->
+                        <div style="min-width: 0;">
+                            <div id="message-feed-container"></div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Owner Panel (only visible to owner) -->
                 <div id="owner-panel" class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); display: none;">
-                    <h3 style="display: flex; align-items: center; justify-content: space-between; color: #ef4444; margin-bottom: 0.75rem;">
-                        <span style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span>⚙️</span>
-                            <span>Owner</span>
-                        </span>
-                        <span id="contract-balance" style="font-weight: bold; font-size: 1rem;">0 wei</span>
-                    </h3>
-                    <button id="withdraw-btn" class="btn-secondary" style="width: 100%; padding: 0.5rem; font-size: 0.875rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
-                        💰 Withdraw Fees
-                    </button>
-                </div>
-
-                <!-- Messages Feed -->
-                <div class="contest-info-panel" style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(124, 58, 237, 0.05) 100%);">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>💬</span>
-                        <span>Recent Messages</span>
-                    </h3>
-                    <div id="messages" style="max-height: 500px; overflow-y: auto; margin-top: 1rem; padding: 0.5rem;">
-                        <div class="loading" style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">Loading messages...</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="color: #ef4444; margin: 0; font-size: 0.9rem;">⚙️ Owner</h3>
+                        <span id="contract-balance" style="font-weight: bold; font-size: 0.85rem;">0 wei</span>
                     </div>
+                    <button id="withdraw-btn" class="btn-secondary" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; margin-top: 0.5rem;">
+                        💰 Withdraw
+                    </button>
                 </div>
             </div>
         `;
         
         gameContent.appendChild(contentInner);
         this.container.appendChild(gameContent);
+        
+        // Initialize MessageFeed component
+        this.messageFeed = new MessageFeed('message-feed-container', {
+            maxVisible: 10,
+            currentAddress: this.web3Provider?.currentAddress
+        });
+        this.messageFeed.init();
     }
 
     setupListeners() {
@@ -239,6 +207,10 @@ export class MessageBoard extends Game {
             
             DOMHelpers.updateInfo('msg-count', count.toString());
             DOMHelpers.updateInfo('total', DOMHelpers.formatWei(total));
+            
+            // Update message count badge
+            const badge = document.getElementById('msg-count-badge');
+            if (badge) badge.textContent = count.toString();
             
             const minFeeWei = minFee.toString();
             DOMHelpers.updateInfo('min-fee', minFeeWei + ' wei');
@@ -332,11 +304,10 @@ export class MessageBoard extends Game {
     }
 
     async loadMessages(msgCount) {
-        const messagesDiv = document.getElementById('messages');
-        if (!messagesDiv) return;
+        if (!this.messageFeed) return;
         
         if (msgCount === 0) {
-            messagesDiv.innerHTML = '<div class="loading">No messages yet. Be the first!</div>';
+            this.messageFeed.setMessages([]);
             return;
         }
         
@@ -344,73 +315,17 @@ export class MessageBoard extends Game {
             const recent = Math.min(msgCount, 20);
             const messages = await this.contract.get_recent_messages(recent);
             
-            messagesDiv.innerHTML = '';
+            // Update message feed with current address
+            this.messageFeed.updateCurrentAddress(this.web3Provider?.currentAddress);
+            this.messageFeed.setMessages(messages);
             
-            for (let i = messages.length - 1; i >= 0; i--) {
-                const msg = messages[i];
-                
-                const msgEl = document.createElement('div');
-                msgEl.className = 'message-item';
-                msgEl.style.cssText = `
-                    padding: 0.5rem;
-                    margin-bottom: 0.35rem;
-                    background: rgba(255, 255, 255, 0.05);
-                    border-radius: 6px;
-                    border-left: 3px solid var(--primary);
-                `;
-                
-                const isYourMessage = this.web3Provider.isConnected() && 
-                    msg.poster.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                
-                // Header with poster and timestamp
-                const headerDiv = document.createElement('div');
-                headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;';
-                
-                // Poster with badge
-                const posterSpan = document.createElement('span');
-                posterSpan.style.cssText = 'font-family: monospace; font-size: 0.75rem; color: var(--primary); display: flex; align-items: center; gap: 0.25rem;';
-                
-                const badge = await AddressBadge.create(msg.poster, this.web3Provider, { size: 16 });
-                if (badge) {
-                    posterSpan.appendChild(badge);
-                }
-                
-                const addressSpan = document.createElement('span');
-                addressSpan.textContent = DOMHelpers.formatAddress(msg.poster);
-                posterSpan.appendChild(addressSpan);
-                
-                if (isYourMessage) {
-                    const youLabel = document.createElement('strong');
-                    youLabel.textContent = ' (You)';
-                    posterSpan.appendChild(youLabel);
-                }
-                
-                const timestampSpan = document.createElement('span');
-                timestampSpan.style.cssText = 'font-size: 0.7rem; color: var(--text-muted);';
-                timestampSpan.textContent = DOMHelpers.formatTimestamp(msg.timestamp.toNumber());
-                
-                headerDiv.appendChild(posterSpan);
-                headerDiv.appendChild(timestampSpan);
-                
-                // Content
-                const contentDiv = document.createElement('div');
-                contentDiv.style.cssText = 'font-size: 0.875rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 0.25rem;';
-                contentDiv.textContent = msg.content;
-                
-                // Amount
-                const amountDiv = document.createElement('div');
-                amountDiv.style.cssText = 'font-size: 0.7rem; color: var(--text-muted);';
-                amountDiv.textContent = DOMHelpers.formatWei(msg.amount);
-                
-                msgEl.appendChild(headerDiv);
-                msgEl.appendChild(contentDiv);
-                msgEl.appendChild(amountDiv);
-                messagesDiv.appendChild(msgEl);
-            }
+            // Update badge
+            const badge = document.getElementById('msg-count-badge');
+            if (badge) badge.textContent = msgCount;
             
         } catch (error) {
             console.error('Failed to load messages:', error);
-            messagesDiv.innerHTML = '<div class="loading">Failed to load messages</div>';
+            this.messageFeed.setMessages([]);
         }
     }
 
@@ -419,6 +334,16 @@ export class MessageBoard extends Game {
 
         this.contract.on('MessagePosted', async (poster, messageId, amount, content, event) => {
             console.log('New message posted:', { poster, messageId: messageId.toString(), amount: amount.toString(), content });
+            
+            // Add message to feed immediately
+            if (this.messageFeed) {
+                this.messageFeed.addMessage({
+                    poster,
+                    content,
+                    amount,
+                    timestamp: Math.floor(Date.now() / 1000)
+                });
+            }
             
             await this.refreshState();
             

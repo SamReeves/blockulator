@@ -12,11 +12,18 @@ import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
 import { AddressBadge } from '../../presentation/components/address-badge.js';
+import { LazySusan3D } from '../../presentation/components/lazy-susan-3d.js';
 
 export class SatanMolochBaal extends Game {
     constructor() {
         super();
         this.voteInput = null;
+        this.lazySusan = null;
+        this.demons = [
+            { emoji: '😈', name: 'SATAN', subtitle: 'The Adversary', color: '#ef4444', key: 'satan' },
+            { emoji: '🐂', name: 'MOLOCH', subtitle: 'The Bull God', color: '#f59e0b', key: 'moloch' },
+            { emoji: '⚡', name: 'BAAL', subtitle: 'Lord of Storms', color: '#8b5cf6', key: 'baal' }
+        ];
     }
 
     getContractName() {
@@ -24,6 +31,9 @@ export class SatanMolochBaal extends Game {
     }
 
     render() {
+        // Clear container first to prevent duplicates
+        this.container.innerHTML = '';
+        
         // Header with contract info
         const header = GameRenderer.createGameHeader({
             title: '🔥 Satan, Moloch, Baal',
@@ -39,173 +49,71 @@ export class SatanMolochBaal extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-            <div class="game-sections">
-                <!-- Voting Controls -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem;">
+                <!-- Left Column: Lazy Susan & Voting -->
                 <div class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);">
                     <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ef4444;">
                         <span>🔥</span>
-                        <span>Cast Your Vote by Burning ETH</span>
+                        <span>Choose Your Demon</span>
                     </h3>
-                    <div style="text-align: center; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 12px; margin-top: 1rem; margin-bottom: 1.5rem;">
-                        <strong style="color: #ef4444;">All donations go straight to the null address - eternal sacrifice!</strong>
-                    </div>
                     
-                    <div id="vote-amount-input" style="margin-bottom: 1.5rem;"></div>
+                    <!-- 3D Lazy Susan -->
+                    <div id="lazy-susan-container" style="margin: 1rem 0;"></div>
                     
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-                        <button id="vote-satan" class="demon-button" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 20px rgba(239, 68, 68, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239, 68, 68, 0.3)'">
-                            <span style="font-size: 3rem;">😈</span>
-                            <span style="font-size: 1.25rem; font-weight: bold;">SATAN</span>
-                            <span style="font-size: 0.75rem; opacity: 0.9;">The Adversary</span>
-                        </button>
+                    <!-- Vote Amount Input -->
+                    <div id="vote-amount-input" style="margin-top: 1.5rem;"></div>
+                    
+                    <div style="text-align: center; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; margin-top: 1rem; font-size: 0.875rem; color: #ef4444;">
+                        <strong>⚠️ All ETH is burned to address(0) forever!</strong>
+                    </div>
+                </div>
+
+                <!-- Right Column: Stats & Info -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                    <!-- Demon Standings -->
+                    <div class="contest-info-panel">
+                        <h3 style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                            <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span>👹</span>
+                                <span>Demon Standings</span>
+                            </span>
+                            <span style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">🔥 <span id="total-burned">0 wei</span></span>
+                        </h3>
                         
-                        <button id="vote-moloch" class="demon-button" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 20px rgba(245, 158, 11, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(245, 158, 11, 0.3)'">
-                            <span style="font-size: 3rem;">🐂</span>
-                            <span style="font-size: 1.25rem; font-weight: bold;">MOLOCH</span>
-                            <span style="font-size: 0.75rem; opacity: 0.9;">The Bull God</span>
-                        </button>
-                        
-                        <button id="vote-baal" class="demon-button" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 1.5rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.5)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.3)'">
-                            <span style="font-size: 3rem;">⚡</span>
-                            <span style="font-size: 1.25rem; font-weight: bold;">BAAL</span>
-                            <span style="font-size: 0.75rem; opacity: 0.9;">Lord of Storms</span>
-                        </button>
+                        <div id="demon-standings" style="display: grid; gap: 0.75rem;"></div>
                     </div>
+
+                    <!-- Your Stats -->
+                    <div class="contest-info-panel" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #10b981; margin-bottom: 1rem;">
+                            <span>📈</span>
+                            <span>Your Sacrifices</span>
+                        </h3>
+                        <div id="user-stats" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;"></div>
+                    </div>
+
+                    <!-- How It Works -->
+                    <details class="contest-info-panel" style="cursor: pointer;">
+                        <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
+                            <span>▶</span>
+                            <span>📖 The Ritual</span>
+                        </summary>
+                        <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6; display: grid; gap: 0.5rem;">
+                            <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 3px solid #ef4444;">
+                                <strong>1. Choose Demon</strong> - Rotate to select, then vote
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b;">
+                                <strong>2. Burn ETH</strong> - Sent to address(0), destroyed forever
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                                <strong>3. Become Champion</strong> - Highest donor per demon
+                            </div>
+                            <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.15); border-radius: 8px; border: 2px solid #ef4444;">
+                                <strong style="color: #ef4444;">⚠️ Pure Sacrifice:</strong> NO refunds, NO prizes. ETH is permanently destroyed!
+                            </div>
+                        </div>
+                    </details>
                 </div>
-
-                <!-- Demon Standings -->
-                <div class="contest-info-panel">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📊</span>
-                        <span>Demon Standings</span>
-                    </h3>
-                    <div style="display: grid; gap: 1rem; margin-top: 1rem;">
-                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); border-radius: 12px; border-left: 4px solid #ef4444;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                                <span style="font-size: 2.5rem;">😈</span>
-                                <div>
-                                    <div style="font-size: 1.25rem; font-weight: bold; color: #ef4444;">Satan</div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">The Adversary</div>
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                                <div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Burned</div>
-                                    <div id="satan-total" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Votes</div>
-                                    <div id="satan-votes" style="font-size: 1.25rem; font-weight: bold;">0</div>
-                                </div>
-                            </div>
-                            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(239, 68, 68, 0.2);">
-                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Champion</div>
-                                <div id="satan-champion" style="font-family: monospace; font-size: 0.875rem;">No champion yet</div>
-                            </div>
-                        </div>
-
-                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%); border-radius: 12px; border-left: 4px solid #f59e0b;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                                <span style="font-size: 2.5rem;">🐂</span>
-                                <div>
-                                    <div style="font-size: 1.25rem; font-weight: bold; color: #f59e0b;">Moloch</div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">The Bull God</div>
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                                <div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Burned</div>
-                                    <div id="moloch-total" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Votes</div>
-                                    <div id="moloch-votes" style="font-size: 1.25rem; font-weight: bold;">0</div>
-                                </div>
-                            </div>
-                            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(245, 158, 11, 0.2);">
-                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Champion</div>
-                                <div id="moloch-champion" style="font-family: monospace; font-size: 0.875rem;">No champion yet</div>
-                            </div>
-                        </div>
-
-                        <div style="padding: 1.5rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border-radius: 12px; border-left: 4px solid #8b5cf6;">
-                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
-                                <span style="font-size: 2.5rem;">⚡</span>
-                                <div>
-                                    <div style="font-size: 1.25rem; font-weight: bold; color: #8b5cf6;">Baal</div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">Lord of Storms</div>
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                                <div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Total Burned</div>
-                                    <div id="baal-total" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
-                                </div>
-                                <div>
-                                    <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Votes</div>
-                                    <div id="baal-votes" style="font-size: 1.25rem; font-weight: bold;">0</div>
-                                </div>
-                            </div>
-                            <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(139, 92, 246, 0.2);">
-                                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">Champion</div>
-                                <div id="baal-champion" style="font-family: monospace; font-size: 0.875rem;">No champion yet</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%); border-radius: 12px; text-align: center; border: 2px solid #ef4444;">
-                        <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">🔥 Total Sacrificed to the Void</div>
-                        <div id="total-burned" style="font-size: 2rem; font-weight: bold; color: #ef4444;">0 wei</div>
-                    </div>
-                </div>
-
-                <!-- Your Stats -->
-                <div class="contest-info-panel" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #10b981;">
-                        <span>📈</span>
-                        <span>Your Stats</span>
-                    </h3>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
-                        <div style="padding: 1rem; background: rgba(239, 68, 68, 0.1); border-radius: 8px; border-left: 4px solid #ef4444;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">😈 Satan Burned</div>
-                            <div id="user-satan-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
-                        </div>
-                        <div style="padding: 1rem; background: rgba(245, 158, 11, 0.1); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">🐂 Moloch Burned</div>
-                            <div id="user-moloch-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
-                        </div>
-                        <div style="padding: 1rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">⚡ Baal Burned</div>
-                            <div id="user-baal-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
-                        </div>
-                        <div style="padding: 1rem; background: rgba(16, 185, 129, 0.1); border-radius: 8px; border-left: 4px solid #10b981;">
-                            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem;">🔥 Total Burned</div>
-                            <div id="user-total-burned" style="font-size: 1.25rem; font-weight: bold;">0 wei</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- How It Works - Collapsible -->
-                <details class="contest-info-panel" style="cursor: pointer;">
-                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span>▶</span>
-                        <span>📖 The Ritual</span>
-                    </summary>
-                    <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
-                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.05); border-radius: 8px; border-left: 3px solid #ef4444; margin-bottom: 0.5rem;">
-                            <strong>1. Choose Demon</strong> - Satan, Moloch, or Baal - pledge allegiance
-                        </div>
-                        <div style="padding: 0.75rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b; margin-bottom: 0.5rem;">
-                            <strong>2. Burn ETH</strong> - Sent to address(0), destroyed forever
-                        </div>
-                        <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6; margin-bottom: 0.5rem;">
-                            <strong>3. Become Champion</strong> - Highest donor per demon gets eternal glory
-                        </div>
-                        <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.15); border-radius: 8px; border: 2px solid #ef4444;">
-                            <strong style="color: #ef4444;">⚠️ Pure Sacrifice:</strong> NO refunds, NO winners, NO prizes. ETH is permanently destroyed!
-                        </div>
-                    </div>
-                </details>
             </div>
         `;
         
@@ -221,32 +129,73 @@ export class SatanMolochBaal extends Game {
             required: true
         });
         this.voteInput.render();
+        
+        // Initialize LazySusan3D component
+        this.lazySusan = new LazySusan3D('lazy-susan-container', {
+            items: this.demons,
+            onSelect: (index, demon) => {
+                // When user confirms selection (clicks VOTE NOW button), vote
+                this.vote(demon.key);
+            }
+        });
+        this.lazySusan.init();
+        
+        // Populate initial structure
+        this.renderDemonStandings();
+        this.renderUserStats();
+    }
+    
+    renderDemonStandings() {
+        const container = document.getElementById('demon-standings');
+        if (!container) return;
+        
+        container.innerHTML = this.demons.map(demon => `
+            <div style="padding: 1rem; background: linear-gradient(135deg, ${demon.color}19 0%, ${demon.color}0d 100%); border-radius: 8px; border-left: 4px solid ${demon.color};">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="font-size: 1.5rem;">${demon.emoji}</span>
+                        <span style="font-weight: bold; color: ${demon.color};">${demon.name}</span>
+                    </div>
+                    <div id="${demon.key}-votes" style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">0 votes</div>
+                </div>
+                <div id="${demon.key}-total" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem;">0 wei</div>
+                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">
+                    <span>👑</span> <span id="${demon.key}-champion">None</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    renderUserStats() {
+        const container = document.getElementById('user-stats');
+        if (!container) return;
+        
+        const stats = [
+            ...this.demons.map(demon => ({
+                key: `user-${demon.key}-burned`,
+                label: `${demon.emoji} ${demon.name}`,
+                color: demon.color
+            })),
+            { key: 'user-total-burned', label: '🔥 Total', color: '#10b981' }
+        ];
+        
+        container.innerHTML = stats.map(stat => `
+            <div style="padding: 0.75rem; background: ${stat.color}19; border-radius: 8px; border-left: 3px solid ${stat.color};">
+                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">${stat.label}</div>
+                <div id="${stat.key}" style="font-size: 1rem; font-weight: bold;">0 wei</div>
+            </div>
+        `).join('');
     }
 
     setupListeners() {
-        const satanButton = document.getElementById('vote-satan');
-        const molochButton = document.getElementById('vote-moloch');
-        const baalButton = document.getElementById('vote-baal');
-        
-        if (satanButton) {
-            satanButton.addEventListener('click', () => this.vote('satan'));
-        }
-        
-        if (molochButton) {
-            molochButton.addEventListener('click', () => this.vote('moloch'));
-        }
-        
-        if (baalButton) {
-            baalButton.addEventListener('click', () => this.vote('baal'));
-        }
+        // Lazy susan handles demon selection via callback
+        // No additional listeners needed
     }
 
-    async vote(demon) {
-        // Check wallet connection using base class method
+    async vote(demonKey) {
         if (!this.requiresWallet('vote')) return;
         
         const weiAmount = this.voteInput.getWeiValue();
-        
         if (!weiAmount || weiAmount.eq(0)) {
             eventBus.emit(EVENTS.TOAST, {
                 message: 'Please enter a valid amount to burn',
@@ -255,49 +204,25 @@ export class SatanMolochBaal extends Game {
             return;
         }
         
-        const demonNames = {
-            'satan': { display: 'Satan 😈', method: 'vote_satan', button: 'vote-satan' },
-            'moloch': { display: 'Moloch 🐂', method: 'vote_moloch', button: 'vote-moloch' },
-            'baal': { display: 'Baal ⚡', method: 'vote_baal', button: 'vote-baal' }
-        };
-        
-        const demonInfo = demonNames[demon];
+        const demon = this.demons.find(d => d.key === demonKey);
+        if (!demon) return;
         
         try {
-            // Use TransactionHandler utility with loading state callback
             await TransactionHandler.execute(
-                this.contract[demonInfo.method]({ value: weiAmount }),
-                { 
-                    game: 'satan-moloch-baal',
-                    demon: demon,
-                    wei: weiAmount.toString() 
-                },
-                (isLoading) => {
-                    const btn = document.getElementById(demonInfo.button);
-                    if (btn) {
-                        btn.disabled = isLoading;
-                        const originalContent = btn.innerHTML;
-                        if (isLoading) {
-                            btn.innerHTML = '<span class="demon-icon">🔥</span><span class="demon-name">BURNING...</span>';
-                        } else {
-                            // Restore original content
-                            btn.innerHTML = originalContent;
-                        }
-                    }
-                }
+                this.contract[`vote_${demonKey}`]({ value: weiAmount }),
+                { game: 'satan-moloch-baal', demon: demonKey, wei: weiAmount.toString() }
             );
             
             eventBus.emit(EVENTS.TOAST, {
-                message: `🔥 Burned ${DOMHelpers.formatWei(weiAmount)} for ${demonInfo.display}!`,
+                message: `🔥 Burned ${DOMHelpers.formatWei(weiAmount)} for ${demon.emoji} ${demon.name}!`,
                 type: 'success'
             });
             
-            // Clear input and refresh state
             this.voteInput.reset();
+            this.lazySusan?.reset();
             await this.refreshState();
             
         } catch (error) {
-            // Error already handled by TransactionHandler
             console.error('Vote failed:', error);
         }
     }
@@ -306,93 +231,53 @@ export class SatanMolochBaal extends Game {
         if (!this.contract) return;
 
         try {
-            // Get current standings
-            const standings = await this.contract.get_current_standings();
-            const satanTotal = standings[0];
-            const molochTotal = standings[1];
-            const baalTotal = standings[2];
+            // Get all data in parallel
+            const [standings, voteCounts, bestWorshippers] = await Promise.all([
+                this.contract.get_current_standings(),
+                this.contract.get_vote_counts(),
+                this.contract.get_all_best_worshippers()
+            ]);
             
-            // Get vote counts
-            const voteCounts = await this.contract.get_vote_counts();
-            const satanVotes = voteCounts[0];
-            const molochVotes = voteCounts[1];
-            const baalVotes = voteCounts[2];
-            
-            // Calculate total
-            const total = satanTotal.add(molochTotal).add(baalTotal);
-
-            // Get best worshippers
-            const bestWorshippers = await this.contract.get_all_best_worshippers();
-            const satanBestAddr = bestWorshippers[0];
-            const satanBestAmt = bestWorshippers[1];
-            const molochBestAddr = bestWorshippers[2];
-            const molochBestAmt = bestWorshippers[3];
-            const baalBestAddr = bestWorshippers[4];
-            const baalBestAmt = bestWorshippers[5];
-
-            // Format champion display
-            const formatChampion = (addr, amt, demonName) => {
-                if (addr === '0x0000000000000000000000000000000000000000') {
-                    return '<span class="no-champion">No champion yet</span>';
-                }
-                return `<div class="champion-info">
-                    <div class="champion-line">
-                        <span>👑 ${DOMHelpers.formatAddress(addr)}</span>
-                        <button class="copy-btn-mini" onclick="navigator.clipboard.writeText('${addr}'); this.textContent='✓'; setTimeout(() => this.textContent='📋', 1000)" title="Copy address">📋</button>
-                    </div>
-                    <div class="champion-amount">${DOMHelpers.formatWei(amt)}</div>
-                </div>`;
-            };
-
-            // Update Satan stats
-            DOMHelpers.updateInfo('satan-total', DOMHelpers.formatWei(satanTotal));
-            DOMHelpers.updateInfo('satan-votes', `${satanVotes} vote${satanVotes.toNumber() === 1 ? '' : 's'}`);
-            document.getElementById('satan-champion').innerHTML = formatChampion(satanBestAddr, satanBestAmt, 'Satan');
-            
-            // Update Moloch stats
-            DOMHelpers.updateInfo('moloch-total', DOMHelpers.formatWei(molochTotal));
-            DOMHelpers.updateInfo('moloch-votes', `${molochVotes} vote${molochVotes.toNumber() === 1 ? '' : 's'}`);
-            document.getElementById('moloch-champion').innerHTML = formatChampion(molochBestAddr, molochBestAmt, 'Moloch');
-            
-            // Update Baal stats
-            DOMHelpers.updateInfo('baal-total', DOMHelpers.formatWei(baalTotal));
-            DOMHelpers.updateInfo('baal-votes', `${baalVotes} vote${baalVotes.toNumber() === 1 ? '' : 's'}`);
-            document.getElementById('baal-champion').innerHTML = formatChampion(baalBestAddr, baalBestAmt, 'Baal');
-            
-            // Update total burned
+            // Calculate total burned
+            const total = standings.reduce((sum, val) => sum.add(val), standings[0].mul(0));
             DOMHelpers.updateInfo('total-burned', DOMHelpers.formatWei(total));
 
-            // User-specific stats - only load if wallet connected
-            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
-                const userBurnedPerDemon = await this.contract.get_user_burned_per_demon(
-                    this.web3Provider.currentAddress
-                );
+            // Update each demon's stats
+            this.demons.forEach((demon, i) => {
+                const voteCount = voteCounts[i];
+                DOMHelpers.updateInfo(`${demon.key}-total`, DOMHelpers.formatWei(standings[i]));
+                DOMHelpers.updateInfo(`${demon.key}-votes`, `${voteCount} vote${voteCount.toNumber() === 1 ? '' : 's'}`);
                 
-                const satanBurned = userBurnedPerDemon[0];
-                const molochBurned = userBurnedPerDemon[1];
-                const baalBurned = userBurnedPerDemon[2];
+                const championAddr = bestWorshippers[i * 2];
+                const championDisplay = championAddr === '0x0000000000000000000000000000000000000000' 
+                    ? 'None' 
+                    : DOMHelpers.formatAddress(championAddr);
+                DOMHelpers.updateInfo(`${demon.key}-champion`, championDisplay);
+            });
 
-                const userStats = await this.contract.get_user_stats(
-                    this.web3Provider.currentAddress
-                );
-                const userTotalBurned = userStats[3];
-
-                DOMHelpers.updateInfo('user-satan-burned', DOMHelpers.formatWei(satanBurned));
-                DOMHelpers.updateInfo('user-moloch-burned', DOMHelpers.formatWei(molochBurned));
-                DOMHelpers.updateInfo('user-baal-burned', DOMHelpers.formatWei(baalBurned));
-                DOMHelpers.updateInfo('user-total-burned', DOMHelpers.formatWei(userTotalBurned));
+            // User-specific stats
+            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+                const [userBurnedPerDemon, userStats] = await Promise.all([
+                    this.contract.get_user_burned_per_demon(this.web3Provider.currentAddress),
+                    this.contract.get_user_stats(this.web3Provider.currentAddress)
+                ]);
+                
+                this.demons.forEach((demon, i) => {
+                    DOMHelpers.updateInfo(`user-${demon.key}-burned`, DOMHelpers.formatWei(userBurnedPerDemon[i]));
+                });
+                DOMHelpers.updateInfo('user-total-burned', DOMHelpers.formatWei(userStats[3]));
             } else {
-                // Read-only mode - show placeholder
-                DOMHelpers.updateInfo('user-satan-burned', '👀 Read-only');
-                DOMHelpers.updateInfo('user-moloch-burned', '👀 Read-only');
-                DOMHelpers.updateInfo('user-baal-burned', '👀 Read-only');
-                DOMHelpers.updateInfo('user-total-burned', 'Connect to play');
+                // Read-only mode
+                this.demons.forEach(demon => {
+                    DOMHelpers.updateInfo(`user-${demon.key}-burned`, '👀');
+                });
+                DOMHelpers.updateInfo('user-total-burned', 'Connect wallet');
             }
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to load game state. Check console for details.',
+                message: 'Failed to load game state.',
                 type: 'error'
             });
         }
@@ -401,52 +286,53 @@ export class SatanMolochBaal extends Game {
     setupContractEvents() {
         if (!this.contract) return;
 
-        this.contract.on('VoteCast', async (voter, demon, amount, totalForDemon) => {
+        this.contract.on('VoteCast', async (voter, demonIndex) => {
             await this.refreshState();
             
-            const demonNames = ['😈 Satan', '🐂 Moloch', '⚡ Baal'];
-            const demonName = demonNames[demon] || 'Unknown';
+            const demon = this.demons[demonIndex];
+            const demonDisplay = `${demon.emoji} ${demon.name}`;
             
-            // Only show "you" messages if wallet connected
-            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
-                const isYou = voter.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                if (isYou) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `🔥 Your sacrifice to ${demonName} is complete!`,
-                        type: 'success'
-                    });
-                }
+            if (this.web3Provider.isConnected() && 
+                voter.toLowerCase() === this.web3Provider.currentAddress?.toLowerCase()) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `🔥 Your sacrifice to ${demonDisplay} is complete!`,
+                    type: 'success'
+                });
             }
         });
 
-        this.contract.on('NewBestWorshipper', async (demon, worshipper, totalAmount, previousBest) => {
+        this.contract.on('NewBestWorshipper', async (demonIndex, worshipper) => {
             await this.refreshState();
             
-            const demonNames = ['😈 Satan', '🐂 Moloch', '⚡ Baal'];
-            const demonName = demonNames[demon] || 'Unknown';
+            const demon = this.demons[demonIndex];
+            const demonDisplay = `${demon.emoji} ${demon.name}`;
+            const isYou = this.web3Provider.isConnected() && 
+                worshipper.toLowerCase() === this.web3Provider.currentAddress?.toLowerCase();
             
-            // Only show "you" messages if wallet connected
-            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
-                const isYou = worshipper.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                if (isYou) {
-                    eventBus.emit(EVENTS.CONFETTI);
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `👑 You are now the BEST WORSHIPPER of ${demonName}!`,
-                        type: 'success'
-                    });
-                } else {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: `👑 New champion for ${demonName}: ${DOMHelpers.formatAddress(worshipper)}`,
-                        type: 'info'
-                    });
-                }
+            if (isYou) {
+                eventBus.emit(EVENTS.CONFETTI);
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `👑 You are the CHAMPION of ${demonDisplay}!`,
+                    type: 'success'
+                });
+            } else if (this.web3Provider.isConnected()) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: `👑 ${demonDisplay} has a new champion!`,
+                    type: 'info'
+                });
             }
         });
-
-        this.contract.on('SacrificeCompleted', async (amount, recipient) => {
-            // Could add additional effects here
-            console.log(`Sacrifice of ${amount} wei sent to ${recipient}`);
-        });
+    }
+    
+    destroy() {
+        // Clean up lazy susan
+        if (this.lazySusan) {
+            this.lazySusan.destroy();
+            this.lazySusan = null;
+        }
+        
+        // Call parent destroy
+        super.destroy();
     }
 }
 

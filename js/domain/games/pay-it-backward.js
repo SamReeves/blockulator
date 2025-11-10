@@ -12,11 +12,13 @@ import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
 import { AddressBadge } from '../../presentation/components/address-badge.js';
+import { AddressFlow } from '../../presentation/components/address-flow.js';
 
 export class PayItBackward extends Game {
     constructor() {
         super();
         this.donationInput = null;
+        this.addressFlow = null;
         this.gameState = {
             lastDonor: '0x0000000000000000000000000000000000000000',
             owner: '0x0000000000000000000000000000000000000000'
@@ -30,7 +32,7 @@ export class PayItBackward extends Game {
     render() {
         const header = GameRenderer.createGameHeader({
             title: '⏪ Pay It Backward',
-            description: 'Donate now, reward the previous donor! Immediate gratification for those who came before.',
+            description: 'Donate now, reward the previous donor! Instant payouts.',
             contractAddress: CONTRACT_ADDRESSES.PAY_IT_BACKWARD,
             sourceFile: CONTRACT_SOURCES.PAY_IT_BACKWARD,
             abiFile: CONTRACT_ABIS.PAY_IT_BACKWARD
@@ -43,83 +45,80 @@ export class PayItBackward extends Game {
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
             <div class="game-sections">
-                <!-- Next Recipient Display -->
-                <div class="contest-info-panel" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">⏪</div>
-                    <h3 style="color: white; position: relative; z-index: 1;">🎁 NEXT RECIPIENT</h3>
-                    <div style="text-align: center; padding: 2rem 0; position: relative; z-index: 1;">
-                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Will Receive Your Donation</div>
-                        <div id="next-recipient" style="font-family: monospace; font-size: 1.25rem; font-weight: bold; word-break: break-all; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(10px);">
-                            Loading...
-                        </div>
-                        <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px); margin-top: 1.5rem;">
-                            <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">LAST DONOR</div>
-                            <div id="last-donor" style="font-size: 1.25rem; font-weight: bold; font-family: monospace;">No one yet</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- State Message & Your Status -->
+                <!-- Main Consolidated Panel -->
                 <div class="contest-info-panel" style="border: 2px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);">
-                    <div id="state-message" style="text-align: center; padding: 1.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 12px; font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem;">
-                        💡 Loading contract state...
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #8b5cf6; margin: 0;">
+                            <span>⏪</span>
+                            <span>Pay It Backward</span>
+                        </h3>
+                        <div style="font-size: 0.85rem; color: #8b5cf6; font-weight: 500;">Donate → Pay Previous → Wait</div>
                     </div>
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                        <span>📊</span>
-                        <span>Your Status</span>
-                    </h3>
-                    <div style="padding: 1.5rem; background: rgba(139, 92, 246, 0.15); border-radius: 12px; border-left: 4px solid #8b5cf6;">
-                        <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Status</div>
-                        <div id="your-status" style="font-size: 1.5rem; font-weight: bold;">Not last donor</div>
-                    </div>
-                </div>
-
-                <!-- Donate Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #ec4899;">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ec4899;">
-                        <span>💰</span>
-                        <span>Make Your Donation</span>
-                    </h3>
-                    <div class="game-controls">
-                        <div id="donate-amount-input" style="margin-top: 1rem;"></div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                        <!-- Left: Chain Visualization -->
+                        <div style="min-width: 0;">
+                            <div id="address-flow-container"></div>
+                        </div>
                         
-                        <button id="donate-button" class="btn-play" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);">
-                            💰 Donate
-                        </button>
-                        
-                        <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%); border-radius: 12px; border-left: 4px solid #10b981;">
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
-                                <span style="font-size: 1.5rem;">✅</span>
-                                <strong style="font-size: 1.1rem; color: #10b981;">Instant Rewards</strong>
+                        <!-- Right: Status + Play -->
+                        <div style="min-width: 0;">
+                            <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="font-size: 0.7rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">🎯 Last Donor</div>
+                                <div id="last-donor" style="font-size: 0.85rem; font-weight: bold; word-break: break-all; margin-bottom: 0.75rem; min-height: 1.5rem; font-family: monospace;">
+                                    None
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.7rem;">
+                                    <div>
+                                        <div style="opacity: 0.8;">Next Gets</div>
+                                        <div id="next-recipient" style="font-weight: bold; font-size: 0.75rem;">—</div>
+                                    </div>
+                                    <div>
+                                        <div style="opacity: 0.8;">Your Status</div>
+                                        <div id="your-status" style="font-weight: bold; font-size: 0.8rem;">—</div>
+                                    </div>
+                                </div>
                             </div>
-                            <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
-                                <li>Your donation goes IMMEDIATELY to the previous donor</li>
-                                <li>You become the new "last donor"</li>
-                                <li>The next person to donate will reward YOU</li>
-                                <li>No waiting, no pending - instant gratification!</li>
-                            </ul>
+                            
+                            <div id="state-message" style="text-align: center; padding: 0.75rem; background: rgba(139, 92, 246, 0.15); border-radius: 6px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; border-left: 3px solid #8b5cf6;">
+                                💡 Loading...
+                            </div>
+                            
+                            <div id="donate-amount-input" style="margin-bottom: 0.75rem;"></div>
+                            <button id="donate-button" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                                ⏪ Donate & Pay Previous
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- How It Works - Collapsible -->
-                <details class="contest-info-panel" style="cursor: pointer;">
+                <details class="contest-info-panel">
                     <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span>▶</span>
-                        <span>🔄 The Backward Chain</span>
+                        <span style="font-size: 0.85rem;">▶</span>
+                        <span style="font-weight: 600;">🔄 How Pay It Backward Works</span>
                     </summary>
-                    <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
-                        <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6; margin-bottom: 0.5rem;">
-                            <strong>1. First Donor</strong> - Goes to owner (bootstrap), becomes "last donor"
+                    <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.85rem;">
+                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 6px; border-left: 3px solid #8b5cf6;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #8b5cf6; min-width: 1.75rem;">1</div>
+                            <div>
+                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">First Donor</strong>
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Pays owner (bootstrap), becomes last donor</span>
+                            </div>
                         </div>
-                        <div style="padding: 0.75rem; background: rgba(236, 72, 153, 0.05); border-radius: 8px; border-left: 3px solid #ec4899; margin-bottom: 0.5rem;">
-                            <strong>2. Second Donor</strong> - Pays first donor immediately, becomes new "last donor"
+                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(236, 72, 153, 0.05); border-radius: 6px; border-left: 3px solid #ec4899;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #ec4899; min-width: 1.75rem;">2</div>
+                            <div>
+                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Second Donor</strong>
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Pays first donor IMMEDIATELY, becomes new last donor</span>
+                            </div>
                         </div>
-                        <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 0.5rem;">
-                            <strong>3. Chain Continues</strong> - Each donor rewards previous, hopes to be rewarded by next
-                        </div>
-                        <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6;">
-                            <strong>✨ Key:</strong> IMMEDIATE distribution. No waiting, no pending balance!
+                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 6px; border-left: 3px solid #10b981;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #10b981; min-width: 1.75rem;">∞</div>
+                            <div>
+                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Chain Continues</strong>
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Each donor pays previous instantly, becomes new last donor</span>
+                            </div>
                         </div>
                     </div>
                 </details>
@@ -132,12 +131,19 @@ export class PayItBackward extends Game {
         // Initialize ValueInput component
         this.donationInput = new ValueInput('donate-amount-input', {
             label: 'Donation Amount',
-            hint: 'Your donation goes to the previous donor',
+            hint: 'Donate any amount to pay previous donor',
             defaultUnit: 'gwei',
             minWei: '1',
             required: true
         });
         this.donationInput.render();
+        
+        // Initialize AddressFlow component in backward mode
+        this.addressFlow = new AddressFlow('address-flow-container', {
+            mode: 'backward'
+        });
+        this.addressFlow.init();
+        this.addressFlow.startAutoUpdate();
     }
 
     setupListeners() {
@@ -199,40 +205,45 @@ export class PayItBackward extends Game {
             this.gameState.nextRecipient = nextRecipient;
             this.gameState.owner = owner;
 
+            const isZero = lastDonor === '0x0000000000000000000000000000000000000000';
+
             DOMHelpers.updateInfo('last-donor', 
-                DOMHelpers.formatAddress(lastDonor)
+                isZero ? 'None' : DOMHelpers.formatAddress(lastDonor)
             );
             DOMHelpers.updateInfo('next-recipient', 
                 DOMHelpers.formatAddress(nextRecipient)
             );
+            
+            // Update address flow component
+            if (this.addressFlow) {
+                this.addressFlow.updateCurrent(lastDonor);
+            }
             
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 const isYouLastDonor = lastDonor.toLowerCase() === 
                     this.web3Provider.currentAddress.toLowerCase();
                 
                 DOMHelpers.updateInfo('your-status', 
-                    isYouLastDonor ? '🎯 You are the last donor!' : 'Not last donor'
+                    isYouLastDonor ? '🎯 YOU' : '—'
                 );
 
                 const stateMessage = document.getElementById('state-message');
                 if (stateMessage) {
-                    if (lastDonor === '0x0000000000000000000000000000000000000000') {
-                        stateMessage.textContent = '🚀 Be the first donor! Your donation will go to the contract owner.';
+                    if (isZero) {
+                        stateMessage.textContent = '🚀 Be first! Donate to owner.';
                     } else if (isYouLastDonor) {
-                        stateMessage.textContent = '🎉 You are the last donor! You will receive the next donation.';
+                        stateMessage.textContent = '🎉 You\'re last! Next donor pays you.';
                     } else {
-                        stateMessage.textContent = `💫 Donate now to reward ${DOMHelpers.formatAddress(nextRecipient)} and become the next recipient!`;
+                        stateMessage.textContent = `💫 Donate to pay ${DOMHelpers.formatAddress(nextRecipient)}`;
                     }
                 }
             } else {
-                DOMHelpers.updateInfo('your-status', '👀 Read-only mode');
+                DOMHelpers.updateInfo('your-status', '—');
                 const stateMessage = document.getElementById('state-message');
                 if (stateMessage) {
-                    if (lastDonor === '0x0000000000000000000000000000000000000000') {
-                        stateMessage.textContent = '🚀 No donors yet. Connect wallet to be first!';
-                    } else {
-                        stateMessage.textContent = `👀 Next recipient: ${DOMHelpers.formatAddress(nextRecipient)}. Connect wallet to participate!`;
-                    }
+                    stateMessage.textContent = isZero ? 
+                        '🚀 No donors yet' : 
+                        '👀 Connect wallet to participate';
                 }
             }
 
@@ -256,12 +267,17 @@ export class PayItBackward extends Game {
                 isFirst 
             });
             
+            // Add to flow visualization
+            if (this.addressFlow) {
+                this.addressFlow.addAddress(donor, DOMHelpers.formatWei(amount), 'donated');
+            }
+            
             await this.refreshState();
             
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                     eventBus.emit(EVENTS.TOAST, {
-                        message: `🎉 You donated ${DOMHelpers.formatWei(amount)} to ${DOMHelpers.formatAddress(recipient)}!`,
+                        message: `🎉 You paid ${DOMHelpers.formatWei(amount)} to ${DOMHelpers.formatAddress(recipient)}!`,
                         type: 'success'
                     });
                 } else if (recipient.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
@@ -272,6 +288,13 @@ export class PayItBackward extends Game {
                 }
             }
         });
+    }
+    
+    destroy() {
+        if (this.addressFlow) {
+            this.addressFlow.destroy();
+        }
+        super.destroy();
     }
 }
 

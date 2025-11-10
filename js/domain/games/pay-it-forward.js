@@ -12,6 +12,7 @@ import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
 import { AddressBadge } from '../../presentation/components/address-badge.js';
+import { AddressFlow } from '../../presentation/components/address-flow.js';
 
 export class PayItForward extends Game {
     constructor() {
@@ -21,6 +22,7 @@ export class PayItForward extends Game {
             pendingAmount: 0
         };
         this.donationInput = null;
+        this.addressFlow = null;
     }
 
     getContractName() {
@@ -43,89 +45,80 @@ export class PayItForward extends Game {
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
             <div class="game-sections">
-                <!-- Pending Donor Display -->
-                <div class="contest-info-panel" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; position: relative; overflow: hidden;">
-                    <div style="position: absolute; top: -20px; right: -20px; font-size: 120px; opacity: 0.1;">⏩</div>
-                    <h3 style="color: white; position: relative; z-index: 1;">🎯 PENDING DONOR</h3>
-                    <div style="text-align: center; padding: 2rem 0; position: relative; z-index: 1;">
-                        <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Awaiting Next Donor</div>
-                        <div id="pending-donor" style="font-family: monospace; font-size: 1.25rem; font-weight: bold; word-break: break-all; margin-bottom: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(10px);">
-                            No one yet
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
-                            <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">PENDING AMOUNT</div>
-                                <div id="pending-amount" style="font-size: 1.5rem; font-weight: bold;">0 wei</div>
-                            </div>
-                            <div style="background: rgba(255,255,255,0.15); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px);">
-                                <div style="font-size: 0.75rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">CONTRACT BALANCE</div>
-                                <div id="contract-balance" style="font-size: 1.5rem; font-weight: bold;">0 wei</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- State Message & Your Status -->
+                <!-- Main Consolidated Panel -->
                 <div class="contest-info-panel" style="border: 2px solid #10b981; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(5, 150, 105, 0.1) 100%);">
-                    <div id="state-message" style="text-align: center; padding: 1.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 12px; font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem;">
-                        💡 Loading contract state...
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #10b981; margin: 0;">
+                            <span>⏩</span>
+                            <span>Pay It Forward</span>
+                        </h3>
+                        <div style="font-size: 0.85rem; color: #10b981; font-weight: 500;">Donate → Wait → Receive</div>
                     </div>
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                        <span>📊</span>
-                        <span>Your Status</span>
-                    </h3>
-                    <div style="padding: 1.5rem; background: rgba(16, 185, 129, 0.15); border-radius: 12px; border-left: 4px solid #10b981;">
-                        <div style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">Status</div>
-                        <div id="your-status" style="font-size: 1.5rem; font-weight: bold;">Not pending</div>
-                    </div>
-                </div>
-
-                <!-- Donate Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #3b82f6;">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #3b82f6;">
-                        <span>💰</span>
-                        <span>Make Your Donation</span>
-                    </h3>
-                    <div class="game-controls">
-                        <div id="donate-amount-input" style="margin-top: 1rem;"></div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                        <!-- Left: Chain Visualization -->
+                        <div style="min-width: 0;">
+                            <div id="address-flow-container"></div>
+                        </div>
                         
-                        <button id="donate-button" class="btn-play" style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                            💰 Donate
-                        </button>
-                        
-                        <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%); border-radius: 12px; border-left: 4px solid #f59e0b;">
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
-                                <span style="font-size: 1.5rem;">💡</span>
-                                <strong style="font-size: 1.1rem; color: #f59e0b;">How It Works</strong>
+                        <!-- Right: Status + Play -->
+                        <div style="min-width: 0;">
+                            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="font-size: 0.7rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">⏳ Pending Donor</div>
+                                <div id="pending-donor" style="font-size: 0.85rem; font-weight: bold; word-break: break-all; margin-bottom: 0.75rem; min-height: 1.5rem; font-family: monospace;">
+                                    None
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.7rem;">
+                                    <div>
+                                        <div style="opacity: 0.8;">Pending</div>
+                                        <div id="pending-amount" style="font-weight: bold; font-size: 0.8rem;">0 wei</div>
+                                    </div>
+                                    <div>
+                                        <div style="opacity: 0.8;">Your Status</div>
+                                        <div id="your-status" style="font-weight: bold; font-size: 0.8rem;">—</div>
+                                    </div>
+                                </div>
                             </div>
-                            <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
-                                <li>If no one is pending: You become the first pending donor</li>
-                                <li>If someone is pending: You receive their amount instantly!</li>
-                                <li>You then become the new pending donor</li>
-                                <li>Wait for the next person to pay it forward to you</li>
-                            </ul>
+                            
+                            <div id="state-message" style="text-align: center; padding: 0.75rem; background: rgba(16, 185, 129, 0.15); border-radius: 6px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; border-left: 3px solid #10b981;">
+                                💡 Loading...
+                            </div>
+                            
+                            <div id="donate-amount-input" style="margin-bottom: 0.75rem;"></div>
+                            <button id="donate-button" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                                ⏩ Donate & Join Chain
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- How It Works - Collapsible -->
-                <details class="contest-info-panel" style="cursor: pointer;">
+                <details class="contest-info-panel">
                     <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span>▶</span>
-                        <span>🔗 The Chain of Generosity</span>
+                        <span style="font-size: 0.85rem;">▶</span>
+                        <span style="font-weight: 600;">🔗 How Pay It Forward Works</span>
                     </summary>
-                    <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6;">
-                        <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 3px solid #10b981; margin-bottom: 0.5rem;">
-                            <strong>1. First Donor</strong> - Makes donation, becomes pending donor awaiting reward
+                    <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.85rem;">
+                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 6px; border-left: 3px solid #10b981;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #10b981; min-width: 1.75rem;">1</div>
+                            <div>
+                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">First Donor</strong>
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Becomes pending, waits for next person</span>
+                            </div>
                         </div>
-                        <div style="padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 3px solid #3b82f6; margin-bottom: 0.5rem;">
-                            <strong>2. Second Donor</strong> - Receives first donor's amount, becomes new pending
+                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(59, 130, 246, 0.05); border-radius: 6px; border-left: 3px solid #3b82f6;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #3b82f6; min-width: 1.75rem;">2</div>
+                            <div>
+                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Second Donor</strong>
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Receives first donor's amount, becomes new pending</span>
+                            </div>
                         </div>
-                        <div style="padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 3px solid #8b5cf6; margin-bottom: 0.5rem;">
-                            <strong>3. Chain Continues</strong> - Each new donor receives previous pending amount
-                        </div>
-                        <div style="padding: 0.75rem; background: rgba(251, 191, 36, 0.05); border-radius: 8px; border-left: 3px solid #f59e0b;">
-                            <strong>⚠️ Note:</strong> Your donation stays pending until next person donates!
+                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 6px; border-left: 3px solid #8b5cf6;">
+                            <div style="font-size: 1.25rem; font-weight: bold; color: #8b5cf6; min-width: 1.75rem;">∞</div>
+                            <div>
+                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Chain Continues</strong>
+                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Each donor receives from pending and becomes new pending</span>
+                            </div>
                         </div>
                     </div>
                 </details>
@@ -138,12 +131,19 @@ export class PayItForward extends Game {
         // Initialize ValueInput component
         this.donationInput = new ValueInput('donate-amount-input', {
             label: 'Donation Amount',
-            hint: 'Your donation will go to the next donor',
+            hint: 'Donate any amount to join the chain',
             defaultUnit: 'gwei',
             minWei: '1',
             required: true
         });
         this.donationInput.render();
+        
+        // Initialize AddressFlow component
+        this.addressFlow = new AddressFlow('address-flow-container', {
+            mode: 'forward'
+        });
+        this.addressFlow.init();
+        this.addressFlow.startAutoUpdate();
     }
 
     setupListeners() {
@@ -195,53 +195,53 @@ export class PayItForward extends Game {
         if (!this.contract) return;
 
         try {
-            const provider = this.web3Provider.getProvider();
-            const [pendingDonor, pendingAmount, balance] = await Promise.all([
+            const [pendingDonor, pendingAmount] = await Promise.all([
                 this.contract.pending_donor(),
-                this.contract.pending_amount(),
-                provider.getBalance(this.contract.address)
+                this.contract.pending_amount()
             ]);
 
             this.gameState.pendingDonor = pendingDonor;
             this.gameState.pendingAmount = pendingAmount;
 
+            const isZero = pendingDonor === '0x0000000000000000000000000000000000000000';
+            
             DOMHelpers.updateInfo('pending-donor', 
-                DOMHelpers.formatAddress(pendingDonor)
+                isZero ? 'None' : DOMHelpers.formatAddress(pendingDonor)
             );
             DOMHelpers.updateInfo('pending-amount', 
                 DOMHelpers.formatWei(pendingAmount)
             );
-            DOMHelpers.updateInfo('contract-balance', 
-                DOMHelpers.formatWei(balance)
-            );
+            
+            // Update address flow component
+            if (this.addressFlow) {
+                this.addressFlow.updateCurrent(pendingDonor, DOMHelpers.formatWei(pendingAmount));
+            }
             
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 const isYouPending = pendingDonor.toLowerCase() === 
                     this.web3Provider.currentAddress.toLowerCase();
                 
                 DOMHelpers.updateInfo('your-status', 
-                    isYouPending ? '🎯 You are pending!' : 'Not pending'
+                    isYouPending ? '🎯 YOU' : '—'
                 );
 
                 const stateMessage = document.getElementById('state-message');
                 if (stateMessage) {
-                    if (pendingDonor === '0x0000000000000000000000000000000000000000') {
-                        stateMessage.textContent = '🚀 Be the first donor to start the chain!';
+                    if (isZero) {
+                        stateMessage.textContent = '🚀 Be the first to start the chain!';
                     } else if (isYouPending) {
-                        stateMessage.textContent = '⏳ You are pending! Waiting for the next donor to pay you.';
+                        stateMessage.textContent = '⏳ You\'re pending! Next donor pays you.';
                     } else {
-                        stateMessage.textContent = '💫 Donate now and receive the pending amount immediately!';
+                        stateMessage.textContent = '💫 Donate now, receive pending instantly!';
                     }
                 }
             } else {
-                DOMHelpers.updateInfo('your-status', '👀 Read-only mode');
+                DOMHelpers.updateInfo('your-status', '—');
                 const stateMessage = document.getElementById('state-message');
                 if (stateMessage) {
-                    if (pendingDonor === '0x0000000000000000000000000000000000000000') {
-                        stateMessage.textContent = '🚀 Chain not started yet. Connect wallet to be first!';
-                    } else {
-                        stateMessage.textContent = '👀 Viewing game state. Connect wallet to participate!';
-                    }
+                    stateMessage.textContent = isZero ? 
+                        '🚀 Chain not started' : 
+                        '👀 Connect wallet to participate';
                 }
             }
 
@@ -259,6 +259,11 @@ export class PayItForward extends Game {
 
         this.contract.on('Donation', async (donor, amount, received, isFirst, event) => {
             console.log('Donation event:', { donor, amount: amount.toString(), received: received.toString(), isFirst });
+            
+            // Add to flow visualization
+            if (this.addressFlow) {
+                this.addressFlow.addAddress(donor, DOMHelpers.formatWei(amount), 'donated');
+            }
             
             await this.refreshState();
             
@@ -278,6 +283,13 @@ export class PayItForward extends Game {
                 }
             }
         });
+    }
+    
+    destroy() {
+        if (this.addressFlow) {
+            this.addressFlow.destroy();
+        }
+        super.destroy();
     }
 }
 
