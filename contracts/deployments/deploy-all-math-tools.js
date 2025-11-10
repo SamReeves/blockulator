@@ -266,15 +266,13 @@ async function main() {
     console.log('📝 Next Steps');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('');
-    console.log('1. Update contracts/deployments/addresses.js:');
+    console.log('1. Update js/infrastructure/config/contracts.js:');
     console.log('');
     deployedContracts.forEach(contract => {
         console.log(`   ${contract.name}: '${contract.address}',`);
     });
     console.log('');
-    console.log('2. Update js/infrastructure/config/contracts.js with same addresses');
-    console.log('');
-    console.log('3. View on Etherscan:');
+    console.log('2. View on Etherscan:');
     deployedContracts.forEach(contract => {
         console.log(`   ${contract.name}: https://sepolia.etherscan.io/address/${contract.address}`);
     });

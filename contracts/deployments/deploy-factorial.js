@@ -135,9 +135,6 @@ async function main() {
     console.log('1. Update address in js/infrastructure/config/contracts.js:');
     console.log(`   FACTORIAL: '${contract.address}',`);
     console.log('');
-    console.log('2. Update address in contracts/deployments/addresses.js:');
-    console.log(`   FACTORIAL: '${contract.address}',`);
-    console.log('');
 }
 
 main()

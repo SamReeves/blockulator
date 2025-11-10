@@ -18,7 +18,7 @@ export class MasterApp {
         
         // Sub-apps (lazy loaded)
         this.gamesApp = null;
-        this.toolsApp = null;
+        this.calculatorApp = null;
         this.discussionsApp = null;
         this.futuresApp = null;
         this.badgesModule = null;
@@ -81,7 +81,7 @@ export class MasterApp {
         console.log('📦 Registering views...');
         
         this.masterRouter.registerView('games', () => this.initGamesView());
-        this.masterRouter.registerView('tools', () => this.initToolsView());
+        this.masterRouter.registerView('calculator', () => this.initCalculatorView());
         this.masterRouter.registerView('discussions', () => this.initDiscussionsView());
         this.masterRouter.registerView('factory', () => this.initFactoryView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
@@ -116,14 +116,14 @@ export class MasterApp {
     /**
      * Initialize Calculator view (lazy loaded)
      */
-    async initToolsView() {
+    async initCalculatorView() {
         console.log('🧮 Initializing Calculator view...');
         
-        if (!this.toolsApp) {
-            // Import and create tools app
-            const { ToolsApp } = await import('./tools-app.js');
-            this.toolsApp = new ToolsApp(this.web3Provider, this.walletComponent, this.toastComponent);
-            await this.toolsApp.init();
+        if (!this.calculatorApp) {
+            // Import and create calculator app
+            const { CalculatorApp } = await import('./calculator-app.js');
+            this.calculatorApp = new CalculatorApp(this.web3Provider, this.walletComponent, this.toastComponent);
+            await this.calculatorApp.init();
         }
         
         console.log('✅ Calculator view initialized');

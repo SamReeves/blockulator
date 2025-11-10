@@ -119,22 +119,6 @@ async function main() {
     
     fs.writeFileSync(contractsPath, contractsContent);
     console.log('✅ Updated js/infrastructure/config/contracts.js');
-    
-    // Update addresses.js
-    const addressesPath = path.join(__dirname, 'addresses.js');
-    let addressesContent = fs.readFileSync(addressesPath, 'utf8');
-    
-    addressesContent = addressesContent.replace(
-        /DISCUSSION_BOARD: '0x[a-fA-F0-9]{40}'/,
-        `DISCUSSION_BOARD: '${board.address}'`
-    );
-    addressesContent = addressesContent.replace(
-        /DISCUSSION_BLUEPRINT: '0x[a-fA-F0-9]{40}'/,
-        `DISCUSSION_BLUEPRINT: '${blueprintAddress}'`
-    );
-    
-    fs.writeFileSync(addressesPath, addressesContent);
-    console.log('✅ Updated contracts/deployments/addresses.js');
     console.log('');
 
     // Summary
