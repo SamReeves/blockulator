@@ -11,6 +11,7 @@ import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
+import { AddressBadge } from '../../presentation/components/address-badge.js';
 
 export class MessageBoard extends Game {
     constructor() {
@@ -361,24 +362,49 @@ export class MessageBoard extends Game {
                 const isYourMessage = this.web3Provider.isConnected() && 
                     msg.poster.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                 
-                msgEl.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;">
-                        <span style="font-family: monospace; font-size: 0.75rem; color: var(--primary);">
-                            ${DOMHelpers.formatAddress(msg.poster)}
-                            ${isYourMessage ? ' <strong>(You)</strong>' : ''}
-                        </span>
-                        <span style="font-size: 0.7rem; color: var(--text-muted);">
-                            ${DOMHelpers.formatTimestamp(msg.timestamp.toNumber())}
-                        </span>
-                    </div>
-                    <div style="font-size: 0.875rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 0.25rem;">
-                        ${this.escapeHtml(msg.content)}
-                    </div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted);">
-                        ${DOMHelpers.formatWei(msg.amount)}
-                    </div>
-                `;
+                // Header with poster and timestamp
+                const headerDiv = document.createElement('div');
+                headerDiv.style.cssText = 'display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.25rem;';
                 
+                // Poster with badge
+                const posterSpan = document.createElement('span');
+                posterSpan.style.cssText = 'font-family: monospace; font-size: 0.75rem; color: var(--primary); display: flex; align-items: center; gap: 0.25rem;';
+                
+                const badge = await AddressBadge.create(msg.poster, this.web3Provider, { size: 16 });
+                if (badge) {
+                    posterSpan.appendChild(badge);
+                }
+                
+                const addressSpan = document.createElement('span');
+                addressSpan.textContent = DOMHelpers.formatAddress(msg.poster);
+                posterSpan.appendChild(addressSpan);
+                
+                if (isYourMessage) {
+                    const youLabel = document.createElement('strong');
+                    youLabel.textContent = ' (You)';
+                    posterSpan.appendChild(youLabel);
+                }
+                
+                const timestampSpan = document.createElement('span');
+                timestampSpan.style.cssText = 'font-size: 0.7rem; color: var(--text-muted);';
+                timestampSpan.textContent = DOMHelpers.formatTimestamp(msg.timestamp.toNumber());
+                
+                headerDiv.appendChild(posterSpan);
+                headerDiv.appendChild(timestampSpan);
+                
+                // Content
+                const contentDiv = document.createElement('div');
+                contentDiv.style.cssText = 'font-size: 0.875rem; line-height: 1.4; word-wrap: break-word; margin-bottom: 0.25rem;';
+                contentDiv.textContent = msg.content;
+                
+                // Amount
+                const amountDiv = document.createElement('div');
+                amountDiv.style.cssText = 'font-size: 0.7rem; color: var(--text-muted);';
+                amountDiv.textContent = DOMHelpers.formatWei(msg.amount);
+                
+                msgEl.appendChild(headerDiv);
+                msgEl.appendChild(contentDiv);
+                msgEl.appendChild(amountDiv);
                 messagesDiv.appendChild(msgEl);
             }
             

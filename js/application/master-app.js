@@ -21,6 +21,7 @@ export class MasterApp {
         this.toolsApp = null;
         this.discussionsApp = null;
         this.futuresApp = null;
+        this.badgesModule = null;
         
         console.log('🐋 MasterApp created');
     }
@@ -83,6 +84,7 @@ export class MasterApp {
         this.masterRouter.registerView('tools', () => this.initToolsView());
         this.masterRouter.registerView('discussions', () => this.initDiscussionsView());
         this.masterRouter.registerView('factory', () => this.initFactoryView());
+        this.masterRouter.registerView('badges', () => this.initBadgesView());
         
         console.log('✅ All views registered');
     }
@@ -159,6 +161,29 @@ export class MasterApp {
         }
         
         console.log('✅ Factory view initialized');
+    }
+
+    /**
+     * Initialize Badges view (lazy loaded)
+     */
+    async initBadgesView() {
+        console.log('🎨 Initializing Badges view...');
+        
+        if (!this.badgesModule) {
+            // Import BadgeManager
+            const { BadgeManager } = await import('../domain/identity/badge-manager.js');
+            this.badgesModule = new BadgeManager();
+            
+            // Initialize the module
+            const container = document.getElementById('badges-view');
+            if (container) {
+                await this.badgesModule.init(container, this.web3Provider);
+            } else {
+                console.error('❌ Badges view container not found');
+            }
+        }
+        
+        console.log('✅ Badges view initialized');
     }
 }
 

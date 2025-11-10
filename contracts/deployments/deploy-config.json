@@ -1,7 +1,7 @@
 {
-  "contractName": "LN_CALCULATOR",
-  "contractFile": "ln.vy",
-  "abiPath": "contracts/build/abis/ln.json",
-  "bytecodePath": "contracts/build/bytecode/ln.json",
-  "timestamp": "2025-11-09T19:25:11Z"
+  "contractName": "BADGE_FACTORY",
+  "contractFile": "badge_factory.vy",
+  "abiPath": "contracts/build/abis/badge-factory.json",
+  "bytecodePath": "contracts/build/bytecode/badge-factory.json",
+  "timestamp": "2025-11-09T22:59:44Z"
 }

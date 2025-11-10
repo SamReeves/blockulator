@@ -11,6 +11,7 @@ import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
+import { AddressBadge } from '../../presentation/components/address-badge.js';
 
 export class KingOfTheHill extends Game {
     constructor() {
@@ -224,20 +225,34 @@ export class KingOfTheHill extends Game {
                 userStats = await this.contract.get_king_stats(this.web3Provider.currentAddress);
             }
             
-            const kingDisplay = currentKing === '0x0000000000000000000000000000000000000000' 
-                ? 'No King Yet' 
-                : DOMHelpers.formatAddress(currentKing);
-            
             const kingEl = document.getElementById('king-address');
             if (kingEl) {
-                const isYouKing = this.web3Provider.isConnected() && 
-                                   this.web3Provider.currentAddress &&
-                                   currentKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                if (isYouKing) {
-                    kingEl.innerHTML = 
-                        `<span style="color: #ffd700;">YOU!</span><br><span style="font-size: 0.875rem; opacity: 0.9;">${kingDisplay}</span>`;
+                if (currentKing === '0x0000000000000000000000000000000000000000') {
+                    kingEl.textContent = 'No King Yet';
                 } else {
-                    kingEl.textContent = kingDisplay;
+                    const isYouKing = this.web3Provider.isConnected() && 
+                                       this.web3Provider.currentAddress &&
+                                       currentKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                    
+                    // Create badge + address display
+                    const kingDisplay = await AddressBadge.createWithAddress(currentKing, this.web3Provider, {
+                        size: 32,
+                        formatAddress: true,
+                        addressStyle: 'font-size: 1.25rem; font-weight: bold;',
+                        badgeStyle: 'margin-right: 0.5rem;'
+                    });
+                    
+                    if (isYouKing) {
+                        kingEl.innerHTML = '';
+                        const youLabel = document.createElement('span');
+                        youLabel.style.cssText = 'color: #ffd700; display: block; margin-bottom: 0.5rem;';
+                        youLabel.textContent = 'YOU!';
+                        kingEl.appendChild(youLabel);
+                        kingEl.appendChild(kingDisplay);
+                    } else {
+                        kingEl.innerHTML = '';
+                        kingEl.appendChild(kingDisplay);
+                    }
                 }
             }
             
@@ -282,26 +297,42 @@ export class KingOfTheHill extends Game {
             
             const kings = [...recentKings].reverse();
             
-            let html = '<div style="display: flex; flex-direction: column; gap: 0.5rem;">';
-            kings.forEach((king, idx) => {
-                const position = recentKings.length - idx;
-                const isYou = king.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                html += `
-                    <div style="padding: 0.75rem; background: rgba(0,0,0,0.1); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <span style="font-weight: bold; color: ${isYou ? '#ffd700' : 'inherit'};">
-                                ${isYou ? '👑 YOU' : `#${position}`}
-                            </span>
-                        </div>
-                        <div style="font-family: monospace; font-size: 0.875rem;">
-                            ${DOMHelpers.formatAddress(king)}
-                        </div>
-                    </div>
-                `;
-            });
-            html += '</div>';
+            // Create container
+            const container = document.createElement('div');
+            container.style.cssText = 'display: flex; flex-direction: column; gap: 0.5rem;';
             
-            historyEl.innerHTML = html;
+            // Create entries with badges (async)
+            const entries = await Promise.all(kings.map(async (king, idx) => {
+                const position = recentKings.length - idx;
+                const isYou = this.web3Provider.isConnected() && 
+                             this.web3Provider.currentAddress &&
+                             king.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                
+                const entry = document.createElement('div');
+                entry.style.cssText = 'padding: 0.75rem; background: rgba(0,0,0,0.1); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;';
+                
+                const label = document.createElement('span');
+                label.style.cssText = `font-weight: bold; color: ${isYou ? '#ffd700' : 'inherit'};`;
+                label.textContent = isYou ? '👑 YOU' : `#${position}`;
+                
+                const labelDiv = document.createElement('div');
+                labelDiv.appendChild(label);
+                entry.appendChild(labelDiv);
+                
+                // Create badge + address
+                const addressDisplay = await AddressBadge.createWithAddress(king, this.web3Provider, {
+                    size: 20,
+                    formatAddress: true,
+                    addressStyle: 'font-family: monospace; font-size: 0.875rem;'
+                });
+                entry.appendChild(addressDisplay);
+                
+                return entry;
+            }));
+            
+            entries.forEach(entry => container.appendChild(entry));
+            historyEl.innerHTML = '';
+            historyEl.appendChild(container);
             
         } catch (error) {
             console.error('Failed to load history:', error);

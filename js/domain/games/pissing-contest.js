@@ -11,6 +11,7 @@ import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
+import { AddressBadge } from '../../presentation/components/address-badge.js';
 
 export class PissingContest extends Game {
     constructor() {
@@ -346,11 +347,21 @@ export class PissingContest extends Game {
             DOMHelpers.updateInfo('donations-count', 
                 `${donationCount} / ${maxDonations}`
             );
-            DOMHelpers.updateInfo('current-leader', 
-                largestDonor === '0x0000000000000000000000000000000000000000'
-                    ? 'No donations yet'
-                    : DOMHelpers.formatAddress(largestDonor)
-            );
+            // Update leader with badge
+            const leaderEl = document.getElementById('current-leader');
+            if (leaderEl) {
+                if (largestDonor === '0x0000000000000000000000000000000000000000') {
+                    leaderEl.textContent = 'No donations yet';
+                } else {
+                    const leaderDisplay = await AddressBadge.createWithAddress(largestDonor, this.web3Provider, {
+                        size: 32,
+                        formatAddress: true,
+                        addressStyle: 'font-size: 1.25rem; font-weight: bold;'
+                    });
+                    leaderEl.innerHTML = '';
+                    leaderEl.appendChild(leaderDisplay);
+                }
+            }
 
             // User-specific info - only load if wallet connected
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
@@ -414,11 +425,21 @@ export class PissingContest extends Game {
             const globalStats = await this.contract.get_global_stats();
             DOMHelpers.updateInfo('total-rounds', globalStats[0].toString());
             DOMHelpers.updateInfo('highest-donation', DOMHelpers.formatWei(globalStats[1]));
-            DOMHelpers.updateInfo('highest-donor', 
-                globalStats[2] === '0x0000000000000000000000000000000000000000'
-                    ? 'No donations yet'
-                    : DOMHelpers.formatAddress(globalStats[2])
-            );
+            
+            // Update all-time champion with badge
+            const championEl = document.getElementById('highest-donor');
+            if (championEl) {
+                if (globalStats[2] === '0x0000000000000000000000000000000000000000') {
+                    championEl.textContent = 'No donations yet';
+                } else {
+                    const championDisplay = await AddressBadge.createWithAddress(globalStats[2], this.web3Provider, {
+                        size: 24,
+                        formatAddress: true
+                    });
+                    championEl.innerHTML = '';
+                    championEl.appendChild(championDisplay);
+                }
+            }
             
             // Calculate total donated (we don't have this directly, so use contract balance as proxy)
             const contractBalance = await this.contract.get_contract_balance();
@@ -475,35 +496,60 @@ export class PissingContest extends Game {
                 })
             );
             
-            historyContainer.innerHTML = winnerDetails
-                .filter(detail => detail !== null)
-                .map((detail, index) => {
-                    const isRecent = index === 0;
-                    return `
-                        <div style="padding: 0.75rem; background: ${isRecent ? 'rgba(245, 158, 11, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isRecent ? '#f59e0b' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem; font-size: 0.875rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-                                <div>
-                                    <strong style="font-size: 0.875rem;">${isRecent ? '🏆 ' : ''}#${detail.roundNumber}</strong>
-                                    <div style="font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);">
-                                        ${DOMHelpers.formatAddress(detail.winner)}
-                                    </div>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div style="font-weight: bold; font-size: 0.875rem;">
-                                        ${DOMHelpers.formatWei(detail.prize)}
-                                    </div>
-                                    <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
-                                        ${detail.donationCount} plays
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('') || `
+            // Create history entries with badges
+            const filteredDetails = winnerDetails.filter(detail => detail !== null);
+            
+            if (filteredDetails.length === 0) {
+                historyContainer.innerHTML = `
                     <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
                         No round details available
                     </div>
                 `;
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            
+            for (let index = 0; index < filteredDetails.length; index++) {
+                const detail = filteredDetails[index];
+                const isRecent = index === 0;
+                
+                const entry = document.createElement('div');
+                entry.style.cssText = `padding: 0.75rem; background: ${isRecent ? 'rgba(245, 158, 11, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isRecent ? '#f59e0b' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem; font-size: 0.875rem;`;
+                
+                const flexContainer = document.createElement('div');
+                flexContainer.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;';
+                
+                const leftDiv = document.createElement('div');
+                const roundLabel = document.createElement('strong');
+                roundLabel.style.cssText = 'font-size: 0.875rem; display: block; margin-bottom: 0.25rem;';
+                roundLabel.textContent = `${isRecent ? '🏆 ' : ''}#${detail.roundNumber}`;
+                leftDiv.appendChild(roundLabel);
+                
+                // Add badge + address
+                const addressDisplay = await AddressBadge.createWithAddress(detail.winner, this.web3Provider, {
+                    size: 16,
+                    formatAddress: true,
+                    addressStyle: 'font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);'
+                });
+                leftDiv.appendChild(addressDisplay);
+                
+                const rightDiv = document.createElement('div');
+                rightDiv.style.cssText = 'text-align: right;';
+                rightDiv.innerHTML = `
+                    <div style="font-weight: bold; font-size: 0.875rem;">
+                        ${DOMHelpers.formatWei(detail.prize)}
+                    </div>
+                    <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
+                        ${detail.donationCount} plays
+                    </div>
+                `;
+                
+                flexContainer.appendChild(leftDiv);
+                flexContainer.appendChild(rightDiv);
+                entry.appendChild(flexContainer);
+                historyContainer.appendChild(entry);
+            }
                 
         } catch (error) {
             console.error('Failed to load winners history:', error);

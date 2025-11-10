@@ -11,6 +11,7 @@ import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
+import { AddressBadge } from '../../presentation/components/address-badge.js';
 
 export class TimeToMakeTheDonuts extends Game {
     constructor() {

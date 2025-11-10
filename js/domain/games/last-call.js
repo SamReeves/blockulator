@@ -11,6 +11,7 @@ import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
+import { AddressBadge } from '../../presentation/components/address-badge.js';
 
 export class LastCall extends Game {
     constructor() {
@@ -228,18 +229,29 @@ export class LastCall extends Game {
             DOMHelpers.updateInfo('round-number', roundNumber.toString());
             DOMHelpers.updateInfo('pot-value', DOMHelpers.formatWei(potValue));
             
-            const winnerDisplay = lastDonor === '0x0000000000000000000000000000000000000000' 
-                ? 'No one yet' 
-                : DOMHelpers.formatAddress(lastDonor);
-            
             const winnerEl = document.getElementById('current-winner');
             if (winnerEl) {
-                const isYou = lastDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-                if (isYou && lastDonor !== '0x0000000000000000000000000000000000000000') {
-                    winnerEl.innerHTML = 
-                        `<span style="color: #ffd700;">🎉 YOU! 🎉</span><br><span style="font-size: 0.875rem; opacity: 0.9;">${winnerDisplay}</span>`;
+                if (lastDonor === '0x0000000000000000000000000000000000000000') {
+                    winnerEl.textContent = 'No one yet';
                 } else {
-                    winnerEl.textContent = winnerDisplay;
+                    const isYou = this.web3Provider.isConnected() && 
+                                 this.web3Provider.currentAddress &&
+                                 lastDonor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+                    
+                    const winnerDisplay = await AddressBadge.createWithAddress(lastDonor, this.web3Provider, {
+                        size: 28,
+                        formatAddress: true,
+                        addressStyle: 'font-size: 1.1rem; font-weight: bold;'
+                    });
+                    
+                    winnerEl.innerHTML = '';
+                    if (isYou) {
+                        const youLabel = document.createElement('div');
+                        youLabel.style.cssText = 'color: #ffd700; margin-bottom: 0.5rem;';
+                        youLabel.textContent = '🎉 YOU! 🎉';
+                        winnerEl.appendChild(youLabel);
+                    }
+                    winnerEl.appendChild(winnerDisplay);
                 }
             }
             

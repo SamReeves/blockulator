@@ -19,8 +19,9 @@ export class ContractLoader {
     static async load(contractName, web3Provider) {
         // No longer requires wallet connection - works in read-only mode too!
         try {
-            // Fetch ABI
-            const response = await fetch(`/contracts/build/abis/${contractName}.json`);
+            // Fetch ABI (with cache busting to ensure latest version)
+            const cacheBust = Date.now();
+            const response = await fetch(`/contracts/build/abis/${contractName}.json?v=${cacheBust}`);
             if (!response.ok) {
                 throw new Error(`ABI file not found: ${contractName}.json`);
             }
