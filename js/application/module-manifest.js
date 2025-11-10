@@ -78,9 +78,24 @@ export const MODULE_MANIFEST = {
         export: 'CosCalculator',
         category: 'calculator'
     },
+    'atan': {
+        path: '../domain/calculators/atan-calculator.js',
+        export: 'AtanCalculator',
+        category: 'calculator'
+    },
     'tanh-calculator': {
         path: '../domain/calculators/tanh-calculator.js',
         export: 'TanhCalculator',
+        category: 'calculator'
+    },
+    'sinh': {
+        path: '../domain/calculators/sinh-calculator.js',
+        export: 'SinhCalculator',
+        category: 'calculator'
+    },
+    'cosh': {
+        path: '../domain/calculators/cosh-calculator.js',
+        export: 'CoshCalculator',
         category: 'calculator'
     },
     'sqrt-calculator': {
@@ -116,6 +131,26 @@ export const MODULE_MANIFEST = {
     'erf-calculator': {
         path: '../domain/calculators/erf-calculator.js',
         export: 'ErfCalculator',
+        category: 'calculator'
+    },
+    'exp': {
+        path: '../domain/calculators/exp-calculator.js',
+        export: 'ExpCalculator',
+        category: 'calculator'
+    },
+    'factorial': {
+        path: '../domain/calculators/factorial-calculator.js',
+        export: 'FactorialCalculator',
+        category: 'calculator'
+    },
+    'ln-factorial': {
+        path: '../domain/calculators/ln-factorial-calculator.js',
+        export: 'LnFactorialCalculator',
+        category: 'calculator'
+    },
+    'norm-cdf': {
+        path: '../domain/calculators/norm-cdf-calculator.js',
+        export: 'NormCdfCalculator',
         category: 'calculator'
     },
     

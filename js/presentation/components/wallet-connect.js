@@ -125,25 +125,24 @@ export class WalletConnectComponent {
             const badgeAddress = await this.badgeFactoryContract.get_badge(address);
             const hasBadge = badgeAddress !== '0x0000000000000000000000000000000000000000';
 
-            // Get or create badge container - place it inline with address on the left
+            // Get or create badge container - place it in header-right (centered with header bar)
             let badgeContainer = document.getElementById('wallet-badge-container');
             if (!badgeContainer) {
-                // Find the first wallet-line (the one with the address)
-                const addressLine = document.querySelector('#wallet-info .wallet-line');
-                if (!addressLine) return;
+                // Find the header-right container
+                const headerRight = document.querySelector('.header-right');
+                const walletInfo = document.getElementById('wallet-info');
+                if (!headerRight || !walletInfo) return;
 
-                // Create badge container as an inline element
-                badgeContainer = document.createElement('span');
+                // Create badge container that will be centered with header
+                badgeContainer = document.createElement('div');
                 badgeContainer.id = 'wallet-badge-container';
                 badgeContainer.style.cssText = `
-                    display: inline-flex;
+                    display: flex;
                     align-items: center;
-                    gap: 0.25rem;
-                    margin-right: 0.5rem;
-                    vertical-align: middle;
+                    justify-content: center;
                 `;
-                // Insert at the beginning of the address line
-                addressLine.insertBefore(badgeContainer, addressLine.firstChild);
+                // Insert before wallet-info so it appears to the left
+                headerRight.insertBefore(badgeContainer, walletInfo);
             }
 
             if (hasBadge) {
@@ -158,25 +157,58 @@ export class WalletConnectComponent {
                 const pixelData = await badgeContract.pixel_data();
                 const pixelBytes = new Uint8Array(ethers.utils.arrayify(pixelData));
 
-                // Display badge (no label, just the badge itself)
+                // Display badge (no label, just the badge itself) - BIGGER and CLICKABLE
                 badgeContainer.innerHTML = '';
                 badgeContainer.style.display = 'inline-flex';  // Make sure it's visible
+                badgeContainer.style.cursor = 'pointer';       // Show it's clickable
 
                 const viewer = BadgeViewer.create(pixelBytes, {
-                    size: 24,  // Smaller for inline display
+                    size: 48,  // Bigger for header display
                     showGrid: false,
-                    clickToExpand: true
+                    clickToExpand: false  // Disable default expansion, we'll handle navigation
                 });
                 viewer.style.borderRadius = '4px';
                 viewer.style.overflow = 'hidden';
-                viewer.title = 'Your badge - click to view full size';
+                viewer.style.display = 'block';
+                viewer.title = 'Your badge - click to edit';
+
+                // Navigate to badge editor on click
+                badgeContainer.onclick = () => {
+                    window.location.hash = '#/badges';
+                };
 
                 badgeContainer.appendChild(viewer);
             } else {
-                // No badge - hide the container
-                if (badgeContainer) {
-                    badgeContainer.style.display = 'none';
-                }
+                // No badge - show "Create Badge" link
+                badgeContainer.innerHTML = '';
+                badgeContainer.style.display = 'inline-flex';
+                badgeContainer.style.cursor = 'pointer';
+                
+                const createLink = document.createElement('a');
+                createLink.textContent = 'Create Badge';
+                createLink.style.cssText = `
+                    color: var(--md-sys-color-primary);
+                    text-decoration: none;
+                    font-size: 0.875rem;
+                    font-weight: 500;
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 4px;
+                    transition: background-color 0.2s;
+                    display: flex;
+                    align-items: center;
+                `;
+                createLink.onmouseover = () => {
+                    createLink.style.backgroundColor = 'var(--md-sys-color-surface-variant)';
+                };
+                createLink.onmouseout = () => {
+                    createLink.style.backgroundColor = 'transparent';
+                };
+                createLink.onclick = (e) => {
+                    e.preventDefault();
+                    window.location.hash = '#/badges';
+                };
+                
+                badgeContainer.appendChild(createLink);
             }
         } catch (error) {
             console.log('Badge loading failed (contract may not be deployed):', error.message);

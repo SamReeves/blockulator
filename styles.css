@@ -111,7 +111,7 @@ body {
     background: rgba(30, 41, 59, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: var(--md-sys-spacing-2) var(--md-sys-spacing-4);
+    padding: var(--md-sys-spacing-1) var(--md-sys-spacing-4);
     display: grid;
     grid-template-columns: 0.8fr auto 1fr;
     align-items: center;
@@ -159,7 +159,7 @@ body {
     color: var(--md-sys-color-on-surface-variant);
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     padding: 6px 12px;
     border-radius: var(--md-sys-shape-corner-small);
     transition: all var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
@@ -3959,6 +3959,56 @@ details[open] .panel-arrow {
     font-size: 0.95em;
 }
 
+/* Faucet Section */
+.faucet-section {
+    background: linear-gradient(135deg, 
+        rgba(16, 185, 129, 0.1) 0%, 
+        rgba(59, 130, 246, 0.1) 100%);
+    border-radius: var(--md-sys-shape-corner-large);
+    padding: var(--md-sys-spacing-8);
+}
+
+.faucet-panel {
+    text-align: center;
+}
+
+.faucet-panel h2 {
+    font-size: 2.2rem;
+    margin-bottom: var(--md-sys-spacing-4);
+    color: #10b981;
+    border: none;
+}
+
+.faucet-message {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: var(--md-sys-spacing-6);
+    color: var(--md-sys-color-on-surface);
+}
+
+.btn-faucet {
+    display: inline-block;
+    padding: var(--md-sys-spacing-4) var(--md-sys-spacing-8);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--md-sys-shape-corner-medium);
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-faucet:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.btn-faucet:active {
+    transform: translateY(0);
+}
+
 /* Card Grids */
 .about-grid {
     display: grid;
@@ -4121,6 +4171,24 @@ details[open] .panel-arrow {
     
     .about-section p {
         font-size: 1rem;
+    }
+    
+    .faucet-section {
+        padding: var(--md-sys-spacing-5);
+    }
+    
+    .faucet-panel h2 {
+        font-size: 1.6rem;
+    }
+    
+    .faucet-message {
+        font-size: 1rem;
+    }
+    
+    .btn-faucet {
+        padding: var(--md-sys-spacing-3) var(--md-sys-spacing-6);
+        font-size: 1rem;
+        width: 100%;
     }
     
     .about-grid {

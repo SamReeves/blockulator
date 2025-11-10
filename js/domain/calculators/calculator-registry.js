@@ -53,19 +53,10 @@ export const CALCULATOR_REGISTRY = [
         category: 'trig'
     },
     {
-        id: 'tanh-calculator',
-        name: 'Tanh',
-        symbol: 'tanh(x)',
-        emoji: '📈',
-        description: 'Hyperbolic tangent',
-        className: 'TanhCalculator',
-        category: 'trig'
-    },
-    {
         id: 'atan',
         name: 'Arctangent',
         symbol: 'atan(x)',
-        emoji: '📐',
+        emoji: '↩️',
         description: 'Calculate arctangent',
         className: 'AtanCalculator',
         category: 'trig'
@@ -197,6 +188,15 @@ export const CALCULATOR_REGISTRY = [
         emoji: '📈',
         description: 'Hyperbolic cosine',
         className: 'CoshCalculator',
+        category: 'hyperbolic'
+    },
+    {
+        id: 'tanh-calculator',
+        name: 'Tanh',
+        symbol: 'tanh(x)',
+        emoji: '📈',
+        description: 'Hyperbolic tangent',
+        className: 'TanhCalculator',
         category: 'hyperbolic'
     }
 ];
