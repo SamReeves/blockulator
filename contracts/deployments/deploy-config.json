@@ -1,7 +1,7 @@
 {
-  "contractName": "BADGE_FACTORY",
-  "contractFile": "badge_factory.vy",
-  "abiPath": "contracts/build/abis/badge-factory.json",
-  "bytecodePath": "contracts/build/bytecode/badge-factory.json",
-  "timestamp": "2025-11-09T22:59:44Z"
+  "contractName": "COSH",
+  "contractFile": "cosh.vy",
+  "abiPath": "contracts/build/abis/cosh.json",
+  "bytecodePath": "contracts/build/bytecode/cosh.json",
+  "timestamp": "2025-11-10T06:30:57Z"
 }

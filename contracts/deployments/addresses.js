@@ -37,6 +37,15 @@ const SEPOLIA_ADDRESSES = {
     SQRT_CALCULATOR: '0xb7DdD29478DFC6318f48BeA493f6ae8df1C39226',
     ERF_CALCULATOR: '0x774f4e29521d0AE16E4101419dD059785345F142',
     
+    // New Math Tools (Tier 1 & 2)
+    EXP: '0xE62DAA640895ca022Abc53A2963A8542f6760138',
+    FACTORIAL: '0xd38460Acbf04E3A7a6D40423367f6fd2a876c0d6',
+    NORM_CDF: '0x96C2DC2C0A02dAba9E9aDFd21079F3DF863636d6',
+    LN_FACTORIAL: '0x3f1E462e882bB09d95040b16184D1105f6E8D2E8',
+    ATAN: '0xd1Cd4E090d61a2347319C62991D602A614C7C1E5',
+    SINH: '0x306e141415d87B03B987Eee6912BF8051E213A08',
+    COSH: '0xA713c8F56BB9133026FA617f4cbbAC2518b2a7d8',
+    
     // Futures Market
     FUTURE_FACTORY: '0x8cf41fbE9abE00e47fDed94FdbdC75C2d07f8193',
     EULERIAN_FUTURE_BLUEPRINT: '0x2E942C37B0ED14017E502E2aFB038E8657eD5F67'
@@ -108,7 +117,14 @@ export const CONTRACT_SOURCES = {
     LOG2_CALCULATOR: 'contracts/src/tools/math/log2.vy',
     LOG10_CALCULATOR: 'contracts/src/tools/math/log10.vy',
     SQRT_CALCULATOR: 'contracts/src/tools/math/sqrt.vy',
-    ERF_CALCULATOR: 'contracts/src/tools/math/erf.vy'
+    ERF_CALCULATOR: 'contracts/src/tools/math/erf.vy',
+    EXP: 'contracts/src/tools/math/exp.vy',
+    FACTORIAL: 'contracts/src/tools/math/factorial.vy',
+    NORM_CDF: 'contracts/src/tools/math/norm_cdf.vy',
+    LN_FACTORIAL: 'contracts/src/tools/math/ln_factorial.vy',
+    ATAN: 'contracts/src/tools/math/atan.vy',
+    SINH: 'contracts/src/tools/math/sinh.vy',
+    COSH: 'contracts/src/tools/math/cosh.vy'
 };
 
 // Map contract addresses to their ABI files
@@ -136,7 +152,14 @@ export const CONTRACT_ABIS = {
     LOG2_CALCULATOR: 'contracts/build/abis/log2-calculator.json',
     LOG10_CALCULATOR: 'contracts/build/abis/log10-calculator.json',
     SQRT_CALCULATOR: 'contracts/build/abis/sqrt-calculator.json',
-    ERF_CALCULATOR: 'contracts/build/abis/erf-calculator.json'
+    ERF_CALCULATOR: 'contracts/build/abis/erf-calculator.json',
+    EXP: 'contracts/build/abis/exp.json',
+    FACTORIAL: 'contracts/build/abis/factorial.json',
+    NORM_CDF: 'contracts/build/abis/norm-cdf.json',
+    LN_FACTORIAL: 'contracts/build/abis/ln-factorial.json',
+    ATAN: 'contracts/build/abis/atan.json',
+    SINH: 'contracts/build/abis/sinh.json',
+    COSH: 'contracts/build/abis/cosh.json'
 };
 
 // Network configuration
