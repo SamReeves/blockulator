@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WhaleGames - Blockchain games, tools, discussions, and futures on Sepolia testnet">
-    <title>WhaleGames</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐋</text></svg>">
+    <meta name="description" content="Blockulator - Blockchain games, tools, discussions, and futures on Sepolia testnet">
+    <title>Blockulator</title>
+    <link rel="icon" type="image/png" href="/blockulator_favicon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -13,7 +13,9 @@
         <!-- Header - Loaded once, never reloaded -->
         <header class="app-header">
             <div class="header-left">
-                <h1 class="app-title">🐋 WhaleGames</h1>
+                <h1 class="app-title">
+                    <img src="/blockulator.png" alt="Blockulator" class="brand-logo" style="height: 110px; vertical-align: middle;">
+                </h1>
                 <span class="testnet-badge">TESTNET</span>
                 <span id="readonly-badge" class="readonly-badge hidden">Browsing</span>
             </div>
@@ -505,7 +507,7 @@
                     <section class="about-section">
                         <h2>🎯 Our Mission</h2>
                         <p>
-                            WhaleGames is an experimental platform demonstrating that complex scientific computing 
+                            Blockulator is an experimental platform demonstrating that complex scientific computing 
                             and autonomous market mechanisms can operate entirely on-chain. Every calculation, 
                             every transaction, every piece of data lives on the Ethereum blockchain—nothing is 
                             stored in traditional databases.
@@ -699,7 +701,7 @@
         
         const app = new MasterApp();
         app.init().then(() => {
-            console.log('🐋 WhaleGames SPA ready!');
+            console.log('🐋 Blockulator SPA ready!');
         }).catch(err => {
             console.error('Failed to initialize app:', err);
         });

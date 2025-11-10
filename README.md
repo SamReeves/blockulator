@@ -1,12 +1,14 @@
-# 🐋 WhaleGames.net
+# Blockulator
 
-A mobile-first web application for playing blockchain-based games. Built with vanilla JavaScript for simplicity and deployed as a single Docker image.
+A mobile-first web application for blockchain-based games and on-chain scientific computing. Built with vanilla JavaScript for simplicity and deployed as static files.
 
 ## 🎮 Games
 
 - **💦 Pissing Contest** - Compete to make the biggest splash
-- **🐋 Median Whale** - Play the middle ground
-- **🐳 Mean Whale** - Calculate the average
+- **👑 King of the Hill** - Dethrone the king
+- **🎲 Dice Gods** - Pick the least popular number
+- **⏰ Last Call** - Last donor wins after timer
+- **🍩 Time to Make the Donuts** - First donor daily at midnight
 
 ## 🛠️ Mathematical Tools
 
@@ -24,36 +26,37 @@ A mobile-first web application for playing blockchain-based games. Built with va
 ### Project Structure
 
 ```
-whalegames/
+blockulator/
 ├── index.html              # Single page application
 ├── styles.css              # Mobile-first responsive styles
+├── games/                  # Individual game pages
 ├── js/
-│   ├── main.js            # App initialization & routing
-│   ├── web3-provider.js   # Web3/wallet connection manager
-│   ├── games/             # Game modules
-│   │   ├── pissing-contest.js
-│   │   ├── median-whale.js
-│   │   └── mean-whale.js
-│   ├── tools/             # Tool modules
-│   │   ├── exp-estimator.js
-│   │   └── factorial.js
-│   └── ui/                # UI utilities
-│       ├── events.js      # Central event bus
-│       └── game-renderer.js  # Reusable UI patterns
+│   ├── application/        # Core application logic
+│   │   ├── master-app.js
+│   │   └── master-router.js
+│   ├── domain/             # Business logic
+│   │   ├── games/          # Game modules
+│   │   ├── calculators/    # Calculator modules
+│   │   └── discussions/    # Discussion modules
+│   ├── infrastructure/     # Framework code
+│   │   ├── blockchain/     # Web3 provider
+│   │   ├── config/         # Configuration
+│   │   └── events/         # Event bus
+│   └── presentation/       # UI components
+│       ├── components/     # Reusable components
+│       ├── views/          # Page views
+│       └── templates/      # HTML templates
 ├── contracts/
 │   ├── src/               # Vyper source code
 │   │   ├── games/         # Game contracts
 │   │   ├── futures/       # Future contracts
+│   │   ├── discussions/   # Discussion contracts
 │   │   └── tools/         # Math utility contracts
 │   ├── build/             # Compilation artifacts
 │   │   ├── abis/          # Contract ABI JSON files
-│   │   ├── bytecode/      # Contract bytecode
-│   │   └── bins/          # Binary files
-│   └── deployments/       # Deployment data
-│       └── addresses.js   # Contract addresses
-├── Dockerfile             # Docker build configuration
-├── docker-compose.yml     # Docker Compose setup
-└── nginx.conf             # Nginx configuration
+│   │   └── bytecode/      # Contract bytecode
+│   └── deployments/       # Deployment scripts
+└── blockulator.png         # Logo
 ```
 
 ## 🚀 Getting Started
@@ -75,50 +78,15 @@ whalegames/
    - Add your contract ABIs to `contracts/build/abis/`
    - Update contract addresses in `contracts/deployments/addresses.js`
 
-### Docker Deployment
-
-Build and run as a single Docker image:
-
-```bash
-# Build the image
-docker build -t whalegames .
-
-# Run the container
-docker run -d -p 80:80 whalegames
-
-# Or use docker-compose
-docker-compose up -d
-```
-
-Access the app at `http://localhost`
-
 ### Production Deployment
 
-```bash
-# Build for production
-docker build -t whalegames:latest .
-
-# Tag for your registry
-docker tag whalegames:latest your-registry/whalegames:latest
-
-# Push to registry
-docker push your-registry/whalegames:latest
-
-# Deploy to your server
-docker pull your-registry/whalegames:latest
-docker run -d -p 80:80 --restart unless-stopped whalegames:latest
-```
+Deploy static files to any web server or CDN. No build step required - just upload the files.
 
 ## 🔧 Integrating Your Contracts
 
 ### 1. Add Contract ABIs
 
-Create JSON files in `contracts/build/abis/`:
-- `pissing-contest.json`
-- `median-whale.json`
-- `mean-whale.json`
-- `exp-estimator.json`
-- `factorial.json`
+Contract ABIs are automatically generated in `contracts/build/abis/` from Vyper source files.
 
 Example ABI structure:
 ```json
@@ -135,14 +103,7 @@ Example ABI structure:
 
 ### 2. Update Contract Addresses
 
-Edit `contracts/deployments/addresses.js` with your deployed addresses:
-```javascript
-export const CONTRACT_ADDRESSES = {
-    PISSING_CONTEST: '0xYourContractAddress...',
-    MEDIAN_WHALE: '0xYourContractAddress...',
-    // ...
-};
-```
+Contract addresses are configured in `js/infrastructure/config/contract-addresses.js`.
 
 ### 3. Update Game Modules
 
@@ -199,11 +160,11 @@ eventBus.emit(EVENTS.WINNER_DETERMINED, { player: address });
 
 ### Available Events
 
-See `js/ui/events.js` for all available events:
+See `js/infrastructure/events/event-bus.js` for all available events:
 - `WALLET_CONNECTED`, `WALLET_DISCONNECTED`
 - `PLAY_SUBMITTED`, `PLAY_CONFIRMED`, `PLAY_FAILED`
 - `WINNER_DETERMINED`
-- `WHALE_APPEARS`, `CONFETTI`, `SPLASH`
+- `CONFETTI`, `SPLASH`
 
 ## 🎯 Design Philosophy
 
@@ -234,23 +195,20 @@ See `js/ui/events.js` for all available events:
 
 ## 📝 TODO Items
 
-- [ ] Add actual contract ABIs and addresses
-- [ ] Implement real blockchain state reading
 - [ ] Add transaction history persistence
-- [ ] Create custom whale animations
 - [ ] Add sound effects
 - [ ] Implement proper error handling for different networks
 - [ ] Add unit tests for game logic
 - [ ] Create animation library for physics effects
 
-## 🤝 Contributing
+## 🔗 Live Site
 
-This is a boilerplate structure. Customize it for your specific games and contracts!
+Visit [blockulator.com](https://blockulator.com) to try it out on Sepolia testnet.
 
 ## 📄 License
 
-MIT - Do whatever you want with this code!
+MIT
 
 ---
 
-Built with ❤️ and vanilla JavaScript - no framework bloat, just pure code.
+**Project**: Blockulator - Blockchain-powered scientific computing and game theory experiments.

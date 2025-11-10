@@ -1,6 +1,6 @@
-# WhaleGames Tests
+# Blockulator Tests
 
-This directory contains various test files for the WhaleGames platform.
+This directory contains various test files for the Blockulator platform.
 
 ## Test Files
 

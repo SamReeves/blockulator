@@ -99,7 +99,7 @@ class Web3Provider {
         if (!this.isMetaMaskInstalled()) {
             console.error('❌ MetaMask not installed');
             eventBus.emit(EVENTS.TOAST, {
-                message: 'Please install MetaMask to use WhaleGames',
+                message: 'Please install MetaMask to use Blockulator',
                 type: 'error'
             });
             return false;

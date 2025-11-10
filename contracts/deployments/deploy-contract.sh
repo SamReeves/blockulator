@@ -42,9 +42,9 @@ if ! curl -s http://localhost:8000 > /dev/null 2>&1; then
     # Check if Python is available
     if command -v python3 &> /dev/null; then
         cd "$SCRIPT_DIR/../.."
-        nohup python3 -m http.server 8000 > /tmp/whalegames-server.log 2>&1 &
+        nohup python3 -m http.server 8000 > /tmp/blockulator-server.log 2>&1 &
         SERVER_PID=$!
-        echo $SERVER_PID > /tmp/whalegames-server.pid
+        echo $SERVER_PID > /tmp/blockulator-server.pid
         sleep 2
         echo -e "${GREEN}✓${NC} Server started (PID: $SERVER_PID)"
     else

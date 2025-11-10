@@ -111,9 +111,9 @@ body {
     background: rgba(30, 41, 59, 0.95);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    padding: var(--md-sys-spacing-3) var(--md-sys-spacing-4);
+    padding: var(--md-sys-spacing-2) var(--md-sys-spacing-4);
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 0.8fr auto 1fr;
     align-items: center;
     border-bottom: 1px solid var(--md-sys-color-outline);
     position: sticky;
@@ -1762,7 +1762,7 @@ body {
     }
 
     .app-header {
-        padding: var(--md-sys-spacing-6) var(--md-sys-spacing-8);
+        padding: var(--md-sys-spacing-3) var(--md-sys-spacing-8);
     }
 
     .game-list, .tool-list {

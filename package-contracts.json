@@ -1,7 +1,7 @@
 {
-  "name": "whalegames-contracts",
+  "name": "blockulator-contracts",
   "version": "1.0.0",
-  "description": "Contract verification scripts for Whale Games",
+  "description": "Contract verification scripts for Blockulator",
   "scripts": {
     "verify": "node scripts/verify-contract.js",
     "verify:factory": "node scripts/verify-contract.js 0x8cf41fbE9abE00e47fDed94FdbdC75C2d07f8193 contracts/src/market/future_factory.vy",

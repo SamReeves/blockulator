@@ -272,9 +272,9 @@ function generateGamesIndex() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WhaleGames - Blockchain games on Sepolia testnet">
-    <title>Games - WhaleGames</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐋</text></svg>">
+    <meta name="description" content="Blockulator - Blockchain games on Sepolia testnet">
+    <title>Games - Blockulator</title>
+    <link rel="icon" type="image/png" href="/blockulator_favicon.png">
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="games-index-page">
@@ -341,9 +341,9 @@ function generateToolsIndex() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="WhaleGames - Blockchain calculators on Sepolia testnet">
-    <title>Tools - WhaleGames</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐋</text></svg>">
+    <meta name="description" content="Blockulator - Blockchain calculators on Sepolia testnet">
+    <title>Tools - Blockulator</title>
+    <link rel="icon" type="image/png" href="/blockulator_favicon.png">
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body class="tools-index-page">

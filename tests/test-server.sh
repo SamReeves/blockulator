@@ -1,7 +1,7 @@
 #!/bin/bash
 # Quick test server script
 
-echo "🐋 Starting WhaleGames local server..."
+echo "🔢 Starting Blockulator local server..."
 echo "Press Ctrl+C to stop"
 echo ""
 

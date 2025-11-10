@@ -30,7 +30,7 @@ export class MasterApp {
      * Initialize the entire application
      */
     async init() {
-        console.log('🐋 Initializing WhaleGames SPA...');
+        console.log('🐋 Initializing Blockulator SPA...');
         
         try {
             // 1. Check for existing wallet connection
@@ -48,7 +48,7 @@ export class MasterApp {
             // 5. Start routing
             this.masterRouter.init();
             
-            console.log('✅ WhaleGames SPA initialized successfully');
+            console.log('✅ Blockulator SPA initialized successfully');
         } catch (error) {
             console.error('❌ Failed to initialize app:', error);
             throw error;

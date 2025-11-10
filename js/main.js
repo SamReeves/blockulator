@@ -24,7 +24,7 @@ for (const [name, config] of Object.entries(MODULE_MANIFEST)) {
 app.init().then(() => {
     const initTime = (performance.now() - initStartTime).toFixed(2);
 
-    console.log('✅ WhaleGames Ready!');
+    console.log('✅ Blockulator Ready!');
     console.log(`📦 ${app.moduleRegistry.size} modules registered`);
     console.log(`🎮 ${app.moduleRegistry.getCategory('game').length} games`);
     console.log(`🔧 ${app.moduleRegistry.getCategory('calculator').length} calculators`);
