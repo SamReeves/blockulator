@@ -45,8 +45,9 @@ export class ScientificCalculator {
         this.container = container;
         this.web3Provider = web3Provider;
         
-        // Load all contracts
-        await this.loadContracts();
+        // Don't load all contracts upfront - load on demand instead
+        // This saves ~300ms on initial load
+        console.log('✅ Scientific Calculator ready (contracts load on-demand)');
         
         // Render UI
         this.render();
@@ -55,7 +56,10 @@ export class ScientificCalculator {
         this.setupListeners();
     }
 
-    async loadContracts() {
+    /**
+     * Get contract name for a function key
+     */
+    getContractName(functionKey) {
         const contractMap = {
             sin: 'sin-calculator',
             cos: 'cos-calculator',
@@ -71,13 +75,29 @@ export class ScientificCalculator {
             sqrt: 'sqrt-calculator',
             erf: 'erf-calculator'
         };
+        return contractMap[functionKey];
+    }
+
+    /**
+     * Load a single contract on-demand
+     */
+    async loadContract(functionKey) {
+        const contractName = this.getContractName(functionKey);
         
-        for (const [key, contractName] of Object.entries(contractMap)) {
-            try {
-                this.contracts[key] = await ContractLoader.load(contractName, this.web3Provider);
-            } catch (error) {
-                console.warn(`Failed to load ${contractName}:`, error);
-            }
+        if (!contractName) {
+            throw new Error(`Unknown function: ${functionKey}`);
+        }
+        
+        console.log(`📥 Loading ${contractName} contract...`);
+        const startTime = performance.now();
+        
+        try {
+            this.contracts[functionKey] = await ContractLoader.load(contractName, this.web3Provider);
+            const loadTime = (performance.now() - startTime).toFixed(2);
+            console.log(`✅ ${contractName} loaded in ${loadTime}ms`);
+        } catch (error) {
+            console.warn(`Failed to load ${contractName}:`, error);
+            throw error;
         }
     }
 
@@ -361,15 +381,23 @@ export class ScientificCalculator {
         }
         
         const fn = this.functions[this.currentFunction];
-        const contract = this.contracts[this.currentFunction];
         
-        if (!contract) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Contract not loaded',
-                type: 'error'
-            });
-            return;
+        // Load contract on-demand if not already loaded
+        if (!this.contracts[this.currentFunction]) {
+            try {
+                result.textContent = 'Loading contract...';
+                await this.loadContract(this.currentFunction);
+            } catch (error) {
+                eventBus.emit(EVENTS.TOAST, {
+                    message: 'Failed to load contract',
+                    type: 'error'
+                });
+                result.textContent = 'Error';
+                return;
+            }
         }
+        
+        const contract = this.contracts[this.currentFunction];
         
         // Validate range
         if ((this.currentFunction === 'ln' || this.currentFunction === 'log2' || this.currentFunction === 'log10') && x <= 0) {

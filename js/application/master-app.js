@@ -148,6 +148,9 @@ export class MasterApp {
     async initFactoryView() {
         console.log('🏭 Initializing Factory view...');
         
+        // Load Chart.js before initializing factory (needed for distribution charts)
+        await this.loadChartJs();
+        
         if (!this.futuresApp) {
             // Import and create futures app
             const { FuturesApp } = await import('../futures-app.js');
@@ -184,6 +187,40 @@ export class MasterApp {
         }
         
         console.log('✅ Badges view initialized');
+    }
+
+    /**
+     * Lazy load Chart.js library
+     * Only loaded when factory view is accessed (for distribution charts)
+     */
+    async loadChartJs() {
+        // Check if already loaded
+        if (window.Chart) {
+            console.log('✅ Chart.js already loaded');
+            return;
+        }
+        
+        console.log('📊 Loading Chart.js library...');
+        const startTime = performance.now();
+        
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+            script.async = true;
+            
+            script.onload = () => {
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log(`✅ Chart.js loaded in ${loadTime}ms`);
+                resolve();
+            };
+            
+            script.onerror = () => {
+                console.error('❌ Failed to load Chart.js');
+                reject(new Error('Failed to load Chart.js'));
+            };
+            
+            document.head.appendChild(script);
+        });
     }
 }
 

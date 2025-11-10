@@ -2,7 +2,10 @@
  * Module Registry
  * Application layer - manages module registration and loading
  * Provides dependency injection and module discovery
+ * Now with dynamic import() for lazy loading
  */
+
+import { MODULE_MANIFEST } from './module-manifest.js';
 
 export class ModuleRegistry {
     constructor() {
@@ -10,22 +13,31 @@ export class ModuleRegistry {
     }
 
     /**
-     * Register a module
+     * Register a module (manifest-based, no class needed)
      * @param {string} name - Module name in kebab-case
-     * @param {Class} ModuleClass - Module class
-     * @param {string} category - Module category ('game' or 'calculator')
+     * @param {string} category - Module category ('game', 'calculator', or 'tool')
      */
-    register(name, ModuleClass, category) {
+    register(name, category) {
+        const manifest = MODULE_MANIFEST[name];
+        
+        if (!manifest) {
+            throw new Error(`Module not found in manifest: ${name}`);
+        }
+        
         this.modules.set(name, {
-            class: ModuleClass,
-            category: category,
-            name: name
+            manifest: manifest,
+            category: category || manifest.category,
+            name: name,
+            loaded: false,
+            moduleClass: null,
+            instance: null
         });
-        console.log(`📦 Registered ${category}: ${name}`);
+        
+        console.log(`📦 Registered ${category || manifest.category}: ${name}`);
     }
 
     /**
-     * Load and instantiate a module
+     * Load and instantiate a module (with dynamic import)
      * @param {string} name - Module name
      * @param {HTMLElement} container - DOM container
      * @param {Object} web3Provider - Web3 provider instance
@@ -40,8 +52,23 @@ export class ModuleRegistry {
 
         console.log(`🚀 Loading ${moduleInfo.category}: ${name}`);
         
-        // Instantiate and initialize
-        const instance = new moduleInfo.class();
+        // Dynamic import if not already loaded
+        if (!moduleInfo.loaded) {
+            console.log(`📥 Dynamically importing: ${name}`);
+            const startTime = performance.now();
+            
+            const module = await import(moduleInfo.manifest.path);
+            const ModuleClass = module[moduleInfo.manifest.export];
+            
+            const loadTime = (performance.now() - startTime).toFixed(2);
+            console.log(`✅ Module imported in ${loadTime}ms: ${name}`);
+            
+            moduleInfo.moduleClass = ModuleClass;
+            moduleInfo.loaded = true;
+        }
+        
+        // Create new instance and initialize
+        const instance = new moduleInfo.moduleClass();
         await instance.init(container, web3Provider);
         
         return instance;
@@ -69,6 +96,16 @@ export class ModuleRegistry {
      */
     has(name) {
         return this.modules.has(name);
+    }
+
+    /**
+     * Check if module has been loaded
+     * @param {string} name - Module name
+     * @returns {boolean}
+     */
+    isLoaded(name) {
+        const moduleInfo = this.modules.get(name);
+        return moduleInfo ? moduleInfo.loaded : false;
     }
 
     /**
