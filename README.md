@@ -27,16 +27,17 @@ A mobile-first web application for blockchain-based games and on-chain scientifi
 
 ```
 blockulator/
-├── index.html              # Single page application
+├── index.html              # Single page application (SPA)
 ├── styles.css              # Mobile-first responsive styles
-├── games/                  # Individual game pages
+├── games/
+│   └── index.html          # Games listing (routes to SPA)
 ├── js/
 │   ├── application/        # Core application logic
-│   │   ├── master-app.js
-│   │   └── master-router.js
+│   │   ├── master-app.js   # Main SPA controller
+│   │   └── master-router.js # Hash routing (#/games, #/calculator, etc)
 │   ├── domain/             # Business logic
-│   │   ├── games/          # Game modules
-│   │   ├── calculators/    # Calculator modules
+│   │   ├── games/          # Game modules (9 games)
+│   │   ├── calculators/    # Calculator modules (21 calculators)
 │   │   └── discussions/    # Discussion modules
 │   ├── infrastructure/     # Framework code
 │   │   ├── blockchain/     # Web3 provider
@@ -45,7 +46,6 @@ blockulator/
 │   └── presentation/       # UI components
 │       ├── components/     # Reusable components
 │       ├── views/          # Page views
-│       └── templates/      # HTML templates
 ├── contracts/
 │   ├── src/               # Vyper source code
 │   │   ├── games/         # Game contracts
@@ -107,7 +107,7 @@ Contract addresses are configured in `js/infrastructure/config/contract-addresse
 
 ### 3. Update Game Modules
 
-In each game file (e.g., `js/games/pissing-contest.js`), update the contract initialization:
+In each game file (e.g., `js/domain/games/pissing-contest.js`), update the contract initialization:
 
 ```javascript
 import { CONTRACT_ADDRESSES } from '../../contracts/deployments/addresses.js';
