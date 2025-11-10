@@ -31,18 +31,9 @@ export class BadgeManager extends InteractiveContract {
     }
 
     render() {
-        // Header with contract info
-        const header = GameRenderer.createGameHeader({
-            title: '🎨 Badge Creator',
-            description: 'Create your unique 32x32 pixel art badge - one per wallet, stored forever on-chain',
-            contractAddress: CONTRACT_ADDRESSES.BADGE_FACTORY,
-            sourceFile: CONTRACT_SOURCES.BADGE_FACTORY,
-            abiFile: CONTRACT_ABIS.BADGE_FACTORY
-        });
-
         const badgeContent = document.createElement('div');
         badgeContent.className = 'badge-interface';
-        badgeContent.appendChild(header);
+        badgeContent.style.paddingTop = '1.5rem';
 
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
@@ -55,12 +46,6 @@ export class BadgeManager extends InteractiveContract {
 
                 <!-- Main Content (hidden until loaded) -->
                 <div id="badge-content" class="hidden">
-                    <!-- Gas Warning -->
-                    <div class="warning-panel" style="background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%); color: white; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
-                        <h3 style="color: white; margin: 0 0 0.5rem 0;">💰 Affordable Badge Creation!</h3>
-                        <p style="margin: 0; opacity: 0.95;">Creating a badge stores 3,072 bytes on-chain (32×32 RGB). This costs approximately <strong>60,000 gas (~$5-10)</strong> depending on network conditions. Your badge is permanent and cannot be transferred.</p>
-                    </div>
-
                     <!-- No Badge State -->
                     <div id="no-badge-state" class="hidden">
                         <div style="text-align: center; margin-bottom: 2rem;">
@@ -109,6 +94,48 @@ export class BadgeManager extends InteractiveContract {
         `;
 
         badgeContent.appendChild(contentInner);
+        
+        // Contract info grid for both contracts (placed after main content)
+        const contractsSection = document.createElement('div');
+        contractsSection.className = 'contract-info-grid';
+        contractsSection.style.cssText = 'display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin: 2rem 0; max-width: 1200px; margin-left: auto; margin-right: auto;';
+        
+        // Badge Factory contract
+        const factoryCard = document.createElement('div');
+        factoryCard.className = 'contract-info-card';
+        factoryCard.innerHTML = `
+            <div class="contract-card-header">
+                <h4>🏭 Badge Factory Contract</h4>
+                <p class="contract-card-description">Creates and manages badge instances</p>
+            </div>
+        `;
+        const factoryInfo = GameRenderer.createContractInfo(
+            CONTRACT_ADDRESSES.BADGE_FACTORY,
+            CONTRACT_SOURCES.BADGE_FACTORY,
+            CONTRACT_ABIS.BADGE_FACTORY
+        );
+        factoryCard.appendChild(factoryInfo);
+        contractsSection.appendChild(factoryCard);
+        
+        // Badge Blueprint contract
+        const blueprintCard = document.createElement('div');
+        blueprintCard.className = 'contract-info-card';
+        blueprintCard.innerHTML = `
+            <div class="contract-card-header">
+                <h4>📐 Badge Blueprint Contract</h4>
+                <p class="contract-card-description">Template contract for individual badges</p>
+            </div>
+        `;
+        const blueprintInfo = GameRenderer.createContractInfo(
+            CONTRACT_ADDRESSES.BADGE_BLUEPRINT,
+            CONTRACT_SOURCES.BADGE_BLUEPRINT,
+            CONTRACT_ABIS.BADGE
+        );
+        blueprintCard.appendChild(blueprintInfo);
+        contractsSection.appendChild(blueprintCard);
+        
+        badgeContent.appendChild(contractsSection);
+        
         this.container.innerHTML = '';
         this.container.appendChild(badgeContent);
     }

@@ -12,12 +12,14 @@ import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { ValueInput } from '../../presentation/components/value-input.js';
 import { AddressBadge } from '../../presentation/components/address-badge.js';
+import { DiceThreeD } from '../../presentation/components/dice-3d.js';
 
 export class DiceGods extends Game {
     constructor() {
         super();
         this.selectedNumber = null;
         this.donationInput = null;
+        this.dice3D = null;
     }
 
     getContractName() {
@@ -40,93 +42,44 @@ export class DiceGods extends Game {
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
             <div class="game-sections">
-                <!-- Dice Selection Panel -->
+                <!-- Consolidated Game Panel -->
                 <div class="contest-info-panel" style="border: 2px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #8b5cf6; margin-bottom: 1rem;">
-                        <span>🎲</span>
-                        <span>Choose Your Number</span>
-                    </h3>
-                    <div style="padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 12px; margin-bottom: 1rem; text-align: center;">
-                        <strong style="color: #8b5cf6;">Pick the LEAST popular number to win!</strong>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #8b5cf6; margin: 0;">
+                            <span>🎲</span>
+                            <span>Dice Gods</span>
+                        </h3>
+                        <div style="font-size: 0.85rem; color: #8b5cf6; font-weight: 500;">Pick the LEAST popular number!</div>
                     </div>
-                    <div class="dice-grid" id="dice-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;"></div>
-                </div>
-
-                <!-- Play Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #10b981;">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #10b981;">
-                        <span>💰</span>
-                        <span>Place Your Bet</span>
-                    </h3>
-                    <div class="game-controls">
-                        <div class="input-group" style="margin-top: 1rem;">
-                            <div id="play-amount-input"></div>
-                        </div>
-                        
-                        <button id="play-button" class="btn-play" disabled style="width: 100%; margin-top: 1rem; padding: 1rem; font-size: 1.1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); opacity: 0.5;">
-                            🎲 Play Your Number
-                        </button>
-                        
-                        <div style="margin-top: 1.5rem; padding: 1.5rem; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border-radius: 12px; border-left: 4px solid #8b5cf6;">
-                            <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem;">
-                                <span style="font-size: 1.5rem;">🎯</span>
-                                <strong style="font-size: 1.1rem; color: #8b5cf6;">Reverse Psychology</strong>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start; position: relative;">
+                        <!-- Left: Die + Selection -->
+                        <div style="min-width: 0;">
+                            <div id="dice-3d-container" style="margin-bottom: 0;"></div>
+                            <div id="selected-number-display" style="text-align: center; margin-top: 0.5rem; padding: 0.5rem; background: rgba(139, 92, 246, 0.08); border-radius: 8px;">
+                                <div style="font-size: 1rem; color: #8b5cf6; font-weight: 600;">
+                                    <span id="selected-number-text">—</span>
+                                </div>
                             </div>
-                            <ul style="margin: 0; padding-left: 1.25rem; line-height: 1.8;">
-                                <li>Pick a number that others will AVOID</li>
-                                <li>The LEAST popular choice wins</li>
-                                <li>Think opposite - be unpredictable!</li>
-                                <li><strong>Earlier plays get MORE weight!</strong> Position matters for payouts</li>
-                            </ul>
+                        </div>
+                        
+                        <!-- Right: Amount + Play + Round Info -->
+                        <div style="position: relative; overflow: visible; min-width: 0;">
+                            <div style="margin-bottom: 1rem; position: relative; overflow: visible;">
+                                <div id="play-amount-input" style="position: relative; overflow: visible;"></div>
+                            </div>
+                            
+                            <button id="play-button" class="btn-play" disabled style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); opacity: 0.5; margin-bottom: 1rem;">
+                                🎲 Play Your Number
+                            </button>
+                            
+                            <div id="round-info-panel-compact"></div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Round Info Panel -->
-                <div id="round-info-panel"></div>
 
                 <!-- Vote Distribution Panel -->
                 <div id="vote-distribution-panel"></div>
-
-                <!-- How It Works Panel -->
-                <div class="contest-info-panel">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span>📖</span>
-                        <span>How To Win</span>
-                    </h3>
-                    <div style="margin-top: 1rem;">
-                        <div style="display: grid; gap: 1rem;">
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px; border-left: 4px solid #8b5cf6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #8b5cf6; min-width: 2.5rem;">1</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Choose Your Number</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Select from 1-6. Think about what others will pick, then choose differently!</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(16, 185, 129, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #10b981; min-width: 2.5rem;">2</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Place Your Bet</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Donate any amount and your choice is locked in for this round</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #3b82f6; min-width: 2.5rem;">3</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Wait For Round End</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Round ends when max players is reached or time runs out</span>
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 1rem; padding: 1rem; background: rgba(245, 158, 11, 0.05); border-radius: 8px; border-left: 4px solid #f59e0b;">
-                                <div style="font-size: 2rem; font-weight: bold; color: #f59e0b; min-width: 2.5rem;">4</div>
-                                <div>
-                                    <strong style="display: block; margin-bottom: 0.25rem; color: var(--md-sys-color-on-surface);">Winners Claim Prize</strong>
-                                    <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">Those who picked the LEAST popular number win! Payouts are weighted by position (play #1 gets 10x weight, #2 gets 9x, down to #10 at 1x) AND by donation amount. Early + big = best!</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         `;
         
@@ -143,12 +96,45 @@ export class DiceGods extends Game {
         });
         this.donationInput.render();
         
-        this.renderDiceButtons();
-        this.renderRoundPanel();
+        this.renderDice3D();
+        this.renderCompactRoundPanel();
         this.renderVoteDistribution();
     }
 
+    renderDice3D() {
+        // Initialize the 3D die component
+        this.dice3D = new DiceThreeD('dice-3d-container', {
+            onSelect: (number) => this.handleDiceSelect(number)
+        });
+        this.dice3D.init();
+    }
+
+    handleDiceSelect(number) {
+        this.selectedNumber = number;
+        this.updateSelectedNumberDisplay();
+        this.updatePlayButton();
+    }
+
+    updateSelectedNumberDisplay() {
+        const displayText = document.getElementById('selected-number-text');
+        if (!displayText) return;
+        
+        const numberEmojis = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        const colors = ['', '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+        
+        if (this.selectedNumber) {
+            displayText.innerHTML = `
+                <span style="font-size: 1.5rem; display: block;">${numberEmojis[this.selectedNumber]}</span>
+                <span style="color: ${colors[this.selectedNumber]}; font-weight: 700; font-size: 0.9rem;">Number ${this.selectedNumber}</span>
+            `;
+        } else {
+            displayText.textContent = '—';
+        }
+    }
+
     renderDiceButtons() {
+        // Legacy method - now replaced by renderDice3D
+        // Keeping for backward compatibility but not used
         const diceGrid = document.getElementById('dice-grid');
         if (!diceGrid) return;
         
@@ -230,6 +216,26 @@ export class DiceGods extends Game {
         });
     }
 
+    renderCompactRoundPanel() {
+        const container = document.getElementById('round-info-panel-compact');
+        if (!container) return;
+        
+        container.innerHTML = `
+            <div style="background: rgba(139, 92, 246, 0.08); border-radius: 8px; padding: 0.75rem; font-size: 0.85rem;">
+                <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; row-gap: 0.3rem;">
+                    <div style="color: #8b5cf6; font-weight: 600;">Round:</div>
+                    <div id="round-number">-</div>
+                    
+                    <div style="color: #8b5cf6; font-weight: 600;">Plays:</div>
+                    <div id="plays-count">-</div>
+                    
+                    <div style="color: #10b981; font-weight: 600;">Pool:</div>
+                    <div id="prize-pool" style="color: #10b981;">-</div>
+                </div>
+            </div>
+        `;
+    }
+    
     renderRoundPanel() {
         const panel = DOMHelpers.createInfoPanel('🏆 Current Round', [
             { label: 'Round Number', id: 'round-number' },
@@ -247,27 +253,32 @@ export class DiceGods extends Game {
         panel.className = 'vote-distribution-panel';
         
         panel.innerHTML = `
-            <h3>📊 Vote Distribution</h3>
-            <div class="distribution-bars" id="distribution-bars">
-                <div class="loading">No plays yet...</div>
-            </div>
-            <p class="strategy-hint">
-                💡 <strong>Strategy:</strong> The number with the FEWEST votes wins!
-                Earlier plays with higher donations get more of the pot.
-            </p>
-            
-            <details style="margin-top: 1.5rem; cursor: pointer;">
-                <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; font-weight: bold; font-size: 1.1rem;">
-                    <span>▶</span>
-                    <span>🎮 Current Round Plays</span>
+            <details style="cursor: pointer;">
+                <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; font-weight: bold; font-size: 1rem; padding: 0.75rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border: 2px solid rgba(139, 92, 246, 0.2);">
+                    <span style="transition: transform 0.2s;">▶</span>
+                    <span>📊 Vote Distribution & Plays</span>
                 </summary>
-                <div id="current-plays-list" style="margin-top: 0.75rem; max-height: 400px; overflow-y: auto;">
-                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
-                        Loading plays...
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px;">
+                    <div class="distribution-bars" id="distribution-bars" style="margin-bottom: 1rem;">
+                        <div class="loading">No plays yet...</div>
+                    </div>
+                    <div style="font-size: 0.85rem; color: #8b5cf6; margin-bottom: 1rem; padding: 0.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 6px;">
+                        💡 Number with FEWEST votes wins! Earlier + bigger donations = more payout.
+                    </div>
+                    <div id="current-plays-list" style="max-height: 300px; overflow-y: auto;">
+                        <div style="text-align: center; padding: 1rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.85rem;">
+                            Loading plays...
+                        </div>
                     </div>
                 </div>
             </details>
         `;
+        
+        // Add rotation for arrow
+        panel.querySelector('details').addEventListener('toggle', (e) => {
+            const arrow = e.target.querySelector('summary span');
+            arrow.style.transform = e.target.open ? 'rotate(90deg)' : 'rotate(0deg)';
+        });
         
         return panel;
     }

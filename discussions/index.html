@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WhaleGames - On-chain discussion board with algorithmic curation">
+    <title>WhaleGames - Discussion Board</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐋</text></svg>">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+    <!-- Shared header loaded dynamically -->
+    <div id="header-container"></div>
+    
+    <main class="page-content">
+        <!-- Breadcrumb navigation -->
+        <nav class="breadcrumb">
+            <a href="/index.html" class="breadcrumb-link">Home</a> →
+            <span class="breadcrumb-current">Discussions</span>
+        </nav>
+        
+        <div id="content" class="content">
+            <div class="discussions-layout">
+                
+                <!-- PRIMARY VIEW AREA (State-driven: Board Table OR Discussion Detail) -->
+                <div class="primary-view-area">
+                    
+                    <!-- BOARD VIEW (Level 1) -->
+                    <div id="board-view" class="view-container">
+                        
+                        <!-- Create Discussion Button -->
+                        <div class="view-header">
+                            <h2 class="view-title">Discussions</h2>
+                            <button id="create-discussion-btn" class="btn-primary">
+                                ➕ Create Discussion
+                            </button>
+                        </div>
+
+                        <!-- Create Discussion Form (Hidden by default) -->
+                        <div id="create-discussion-form-container" class="form-panel hidden">
+                            <div class="form-panel-header">
+                                <h3>✍️ Create New Discussion</h3>
+                                <button id="close-create-form" class="btn-close">✖</button>
+                            </div>
+
+                            <form id="create-form" class="discussion-form">
+                                <div class="form-group">
+                                    <label for="discussion-subject">
+                                        <span>Subject</span>
+                                        <span id="subject-counter" class="char-counter">0/200</span>
+                                    </label>
+                                    <input type="text" id="discussion-subject" name="subject" 
+                                           placeholder="Enter discussion subject..." maxlength="200" required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="discussion-body">
+                                    <span>Description</span>
+                                        <span id="body-counter" class="char-counter">0/1000</span>
+                                </label>
+                                    <textarea id="discussion-body" name="body" 
+                                              placeholder="Describe your discussion topic..." 
+                                              maxlength="1000" rows="4" required></textarea>
+                            </div>
+
+                                <div class="form-group">
+                                <div id="initial-value-input"></div>
+                                    <div id="value-warning" class="value-warning"></div>
+                            </div>
+
+                                <details class="advanced-config">
+                                    <summary>
+                                        <span>▶</span>
+                                    <span>⚙️ Advanced Configuration (Optional)</span>
+                                </summary>
+                                    <div class="advanced-config-content">
+                                        <div class="config-grid">
+                                            <div class="form-group">
+                                                <label for="max-messages">Max Messages (1-1000)</label>
+                                                <input type="number" id="max-messages" name="max_messages" 
+                                                       value="100" min="1" max="1000" required>
+                                            </div>
+                                        <div class="form-group">
+                                                <label for="max-message-length">Max Length (1-500)</label>
+                                                <input type="number" id="max-message-length" name="max_message_length" 
+                                                       value="200" min="1" max="500" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="min-donation-input"></div>
+                                    </div>
+                                </div>
+                            </details>
+
+                                <div class="form-actions">
+                                    <button type="button" id="cancel-create-btn" class="btn-secondary">
+                                    Cancel
+                                </button>
+                                    <button type="submit" id="create-submit-btn" class="btn-submit">
+                                    🚀 Create Discussion
+                                </button>
+                            </div>
+                        </form>
+                </div>
+
+                        <!-- Filter & Sort Controls -->
+                        <div class="table-controls">
+                            <div class="filter-tabs">
+                                <button class="tab active" data-filter="all">All</button>
+                                <button class="tab" data-filter="active">Active</button>
+                                <button class="tab" data-filter="inactive">Stale/Inactive</button>
+                                    </div>
+                            <div class="sort-controls">
+                                <label for="board-sort-select">Sort by:</label>
+                                <select id="board-sort-select">
+                                    <option value="recent">Most Recent</option>
+                                    <option value="activity">Last Activity</option>
+                                    <option value="pool">Highest Pool</option>
+                                    <option value="messages">Most Messages</option>
+                                </select>
+                            </div>
+                </div>
+
+                        <!-- Board Table Container -->
+                        <div id="board-table-container" class="table-view"></div>
+                </div>
+
+                    <!-- DISCUSSION VIEW (Level 2) - Initially Hidden -->
+                    <div id="discussion-view" class="view-container hidden">
+                        <!-- Discussion detail view rendered here by DiscussionDetailView component -->
+                    </div>
+
+                </div>
+
+                <!-- MECHANICS PANEL (Collapsible) -->
+                <div id="mechanics-panel" class="info-panel-container"></div>
+
+                <!-- TECHNICAL PANEL (Collapsible) -->
+                <div id="technical-panel" class="info-panel-container"></div>
+
+            </div>
+        </div>
+    </main>
+    
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+    
+    <!-- Initialize page -->
+    <script type="module">
+        import { initializePage } from '/shared/js/page-initializer.js';
+        import { DiscussionsApp } from '/js/discussions-app.js';
+        
+        async function init() {
+            try {
+                // Initialize common page components
+                await initializePage();
+                
+                // Initialize discussions app
+                const app = new DiscussionsApp();
+                await app.init();
+                
+                console.log('✅ Discussions page ready');
+            } catch (error) {
+                console.error('❌ Failed to initialize page:', error);
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Dice Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 2rem;
+            background: #1a1a2e;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #16213e;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        h1 {
+            color: #8b5cf6;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .test-info {
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            color: #a0a0a0;
+        }
+        .test-info ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+        .selected-display {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(139, 92, 246, 0.08);
+            border-radius: 12px;
+            border: 2px solid rgba(139, 92, 246, 0.2);
+        }
+        .selected-number {
+            font-size: 3rem;
+            color: #8b5cf6;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .selected-label {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎲 3D Dice Component Test</h1>
+        
+        <div class="test-info">
+            <strong style="color: #8b5cf6;">Test Instructions:</strong>
+            <ul>
+                <li>Click any number (1-6) or use keyboard</li>
+                <li>Watch the die rotate to your chosen face</li>
+                <li>Selected face glows with a pulsing animation</li>
+            </ul>
+        </div>
+
+        <div id="dice-3d-container"></div>
+        
+        <div class="selected-display">
+            <div class="selected-number" id="selected-number">—</div>
+            <div class="selected-label" id="selected-label">No number selected</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { DiceThreeD } from './js/presentation/components/dice-3d.js';
+
+        // Initialize the 3D die
+        const dice = new DiceThreeD('dice-3d-container', {
+            onSelect: (number) => {
+                console.log('Selected number:', number);
+                document.getElementById('selected-number').textContent = number;
+                document.getElementById('selected-label').textContent = `Number ${number} selected!`;
+                
+                // Color mapping
+                const colors = {
+                    1: '#ef4444',
+                    2: '#f59e0b',
+                    3: '#10b981',
+                    4: '#3b82f6',
+                    5: '#8b5cf6',
+                    6: '#ec4899'
+                };
+                document.getElementById('selected-number').style.color = colors[number];
+            }
+        });
+
+        dice.init();
+        
+        console.log('3D Dice component initialized successfully!');
+    </script>
+</body>
+</html>
+

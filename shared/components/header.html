@@ -1,0 +1,29 @@
+<header class="app-header">
+    <div class="header-left">
+        <h1 class="app-title">🐋 WhaleGames</h1>
+        <span class="testnet-badge">TESTNET</span>
+        <span id="readonly-badge" class="readonly-badge hidden">Browsing</span>
+    </div>
+    <nav class="header-nav">
+        <a href="/games/index.html" class="nav-link" data-page="games">Games</a>
+        <a href="/tools/index.html" class="nav-link" data-page="tools">Tools</a>
+        <a href="/discussions/index.html" class="nav-link" data-page="discussions">Discussions</a>
+        <a href="/factory.html" class="nav-link" data-page="factory">Factory</a>
+        <a href="/badges.html" class="nav-link" data-page="badges">Badges</a>
+        <a href="/about.html" class="nav-link" data-page="about">About</a>
+        <a href="https://sepolia-faucet.pk910.de/" class="nav-link" target="_blank">Faucet</a>
+    </nav>
+    <div class="header-right">
+        <button id="connect-wallet" class="btn-connect">Connect</button>
+        <div id="wallet-info" class="wallet-info hidden">
+            <div class="wallet-line">
+                <span id="wallet-address" class="wallet-value"></span>
+                <button id="copy-address" class="copy-btn">📋</button>
+            </div>
+            <div class="wallet-line">
+                <span id="wallet-balance" class="wallet-value"></span>
+            </div>
+        </div>
+    </div>
+</header>
+

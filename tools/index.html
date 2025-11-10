@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="WhaleGames - Blockchain calculators on Sepolia testnet">
+    <title>Tools - WhaleGames</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐋</text></svg>">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="tools-index-page">
+    <!-- Shared header loaded dynamically -->
+    <div id="header-container"></div>
+    
+    <main class="page-content">
+        <!-- Breadcrumb navigation -->
+        <nav class="breadcrumb">
+            <a href="/index.html" class="breadcrumb-link">Home</a> →
+            <span class="breadcrumb-current">Tools</span>
+        </nav>
+        
+        <div class="page-header">
+            <h2 class="page-title">🧮 Blockchain Calculators</h2>
+            <p class="page-subtitle">Mathematical functions executed on-chain</p>
+        </div>
+        
+        <!-- Tool grid -->
+        <div class="tool-grid">
+
+        <a href="pi-calculator.html" class="tool-card">
+            <h3>π Pi Calculator</h3>
+            <p>Calculate Pi on-chain</p>
+        </a>
+
+        <a href="e-calculator.html" class="tool-card">
+            <h3>e E Calculator</h3>
+            <p>Calculate Euler's number</p>
+        </a>
+
+        <a href="tau-calculator.html" class="tool-card">
+            <h3>τ Tau Calculator</h3>
+            <p>Calculate Tau (2π)</p>
+        </a>
+
+        <a href="sin-calculator.html" class="tool-card">
+            <h3>〰️ Sin Calculator</h3>
+            <p>Calculate sine</p>
+        </a>
+
+        <a href="cos-calculator.html" class="tool-card">
+            <h3>〰️ Cos Calculator</h3>
+            <p>Calculate cosine</p>
+        </a>
+
+        <a href="tanh-calculator.html" class="tool-card">
+            <h3>📈 Tanh Calculator</h3>
+            <p>Calculate hyperbolic tangent</p>
+        </a>
+
+        <a href="sqrt-calculator.html" class="tool-card">
+            <h3>√ Sqrt Calculator</h3>
+            <p>Calculate square root</p>
+        </a>
+
+        <a href="ln-calculator.html" class="tool-card">
+            <h3>📊 Ln Calculator</h3>
+            <p>Calculate natural logarithm</p>
+        </a>
+
+        <a href="log2-calculator.html" class="tool-card">
+            <h3>📊 Log2 Calculator</h3>
+            <p>Calculate base-2 logarithm</p>
+        </a>
+
+        <a href="log10-calculator.html" class="tool-card">
+            <h3>📊 Log10 Calculator</h3>
+            <p>Calculate base-10 logarithm</p>
+        </a>
+
+        <a href="pow2-calculator.html" class="tool-card">
+            <h3>² Pow2 Calculator</h3>
+            <p>Calculate power of 2</p>
+        </a>
+
+        <a href="pow10-calculator.html" class="tool-card">
+            <h3>¹⁰ Pow10 Calculator</h3>
+            <p>Calculate power of 10</p>
+        </a>
+
+        <a href="erf-calculator.html" class="tool-card">
+            <h3>∫ Erf Calculator</h3>
+            <p>Calculate error function</p>
+        </a>
+        </div>
+    </main>
+    
+    <!-- Toast container -->
+    <div id="toast-container"></div>
+    
+    <!-- Initialize page -->
+    <script type="module">
+        import { initializePage } from '/shared/js/page-initializer.js';
+        
+        async function init() {
+            try {
+                await initializePage();
+                console.log('✅ Tools index page ready');
+            } catch (error) {
+                console.error('❌ Failed to initialize page:', error);
+            }
+        }
+        
+        init();
+    </script>
+</body>
+</html>
