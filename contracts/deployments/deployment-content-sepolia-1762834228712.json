@@ -1,0 +1,25 @@
+{
+  "network": "sepolia",
+  "timestamp": "2025-11-11T04:10:28.700Z",
+  "deployer": "0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4",
+  "contracts": {
+    "contentBlueprint": {
+      "address": "0x571bd6BCE1245e8bdA37db84caeC8adb1cCecc2F",
+      "txHash": "0x6060053be14789b36191396e8439196c701bcf0bbcc1ccad397137f90133a1f1",
+      "blockNumber": 9604418,
+      "gasUsed": "808339"
+    },
+    "contentFactory": {
+      "address": "0x657D5E7A3568C8b26Dc63797f2634B063bE9277e",
+      "txHash": "0xfad26c2922d22150691ce74329e3b25559f26f2909a6bcb78791d865733445b6",
+      "blockNumber": 9604419,
+      "gasUsed": "1293506",
+      "config": {
+        "blueprint": "0x571bd6BCE1245e8bdA37db84caeC8adb1cCecc2F",
+        "owner": "0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4",
+        "creationFee": 0,
+        "creationCooldown": 0
+      }
+    }
+  }
+}

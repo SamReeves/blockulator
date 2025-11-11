@@ -509,6 +509,33 @@ export const CONTRACT_REGISTRY = {
         },
         source: 'contracts/src/identity/badge.vy',
         abi: 'contracts/build/abis/badge-v2.json'
+    },
+    
+    // ========== CONTENT / UPLOADS ==========
+    'content-factory': {
+        type: 'content',
+        name: 'Content Factory',
+        emoji: '🏭',
+        description: 'Create on-chain images and text',
+        addresses: {
+            sepolia: '0x657D5E7A3568C8b26Dc63797f2634B063bE9277e',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/content/content_factory.vy',
+        abi: 'contracts/build/abis/content-factory.json'
+    },
+    
+    'content-blueprint': {
+        type: 'content',
+        name: 'Content Blueprint',
+        emoji: '📄',
+        description: 'Content contract blueprint',
+        addresses: {
+            sepolia: '0x571bd6BCE1245e8bdA37db84caeC8adb1cCecc2F',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/content/content.vy',
+        abi: 'contracts/build/abis/content.json'
     }
 };
 
@@ -569,5 +596,6 @@ export const CALCULATORS = getContractsByType('calculator');
 export const DISCUSSIONS = getContractsByType('discussion');
 export const FUTURES = getContractsByType('future');
 export const IDENTITY = getContractsByType('identity');
+export const CONTENT = getContractsByType('content');
 
 
