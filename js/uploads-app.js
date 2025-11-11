@@ -63,6 +63,9 @@ class UploadsApp {
             // Setup event listeners
             this.setupEventListeners();
 
+            // Load recent content
+            await this.loadRecentContent();
+
             console.log('✅ Uploads app ready');
 
         } catch (error) {
@@ -231,8 +234,8 @@ class UploadsApp {
         this.toastComponent.show('Image uploaded successfully!', 'success');
         eventBus.emit(EVENTS.GAME_EVENT, { type: 'upload', success: true });
 
-        // Refresh browser
-        setTimeout(() => this.loadRecentContent(), 1000);
+        // Refresh content list
+        setTimeout(() => this.loadRecentContent(), 2000);
     }
 
     async uploadText() {
@@ -262,9 +265,9 @@ class UploadsApp {
         this.toastComponent.show('Text uploaded successfully!', 'success');
         eventBus.emit(EVENTS.GAME_EVENT, { type: 'upload', success: true });
 
-        // Clear form and refresh browser
+        // Clear form and refresh content list
         textarea.value = '';
-        setTimeout(() => this.loadRecentContent(), 1000);
+        setTimeout(() => this.loadRecentContent(), 2000);
     }
 
     initContentBrowser() {
