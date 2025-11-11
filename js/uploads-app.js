@@ -85,11 +85,9 @@ class UploadsApp {
 
             // Initialize factory contract
             if (factoryMeta.contractAddress && factoryMeta.contractAddress !== '0x0000000000000000000000000000000000000000') {
-                const { ethers } = this.web3Provider.getEthers();
-                this.factoryContract = new ethers.Contract(
+                this.factoryContract = this.web3Provider.getContract(
                     factoryMeta.contractAddress,
-                    this.factoryAbi,
-                    this.web3Provider.getSigner()
+                    this.factoryAbi
                 );
                 console.log('📤 Content factory loaded:', factoryMeta.contractAddress);
             } else {
