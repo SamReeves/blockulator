@@ -9,8 +9,8 @@
 MECHANICS:
 - Each round lasts 10 days from the last donation
 - Anyone can donate to become the potential winner
-- The LAST person to donate before the round ends wins 99% of the pot
-- 1% fee goes to owner on each round completion
+- The LAST person to donate before the round ends wins 100% of the pot
+- Winner gets 100% of the pot (no fees)
 - Creates a rush to be the last donor before time runs out!
 
 STRATEGY:
@@ -23,7 +23,7 @@ STRATEGY:
 # Constants
 
 ROUND_DURATION: constant(uint256) = 864000  # 10 days in seconds
-WINNER_PERCENTAGE: constant(uint256) = 99  # Winner gets 99%
+WINNER_PERCENTAGE: constant(uint256) = 100  # Winner gets 100%
 
 # State variables
 
@@ -97,7 +97,7 @@ def donate():
 def end_round():
     """
     @notice Anyone can call this to end the round if time has expired
-    @dev Winner receives 99% of pot, 1% fee to owner
+    @dev Winner receives 100% of pot
     """
     assert self._should_end_round(), "Round not ready to end"
     self._end_round()
@@ -125,20 +125,12 @@ def _end_round():
     assert self.last_donor != empty(address), "No donations this round"
     
     winner: address = self.last_donor
-    total_pot: uint256 = self.pot_value
+    prize: uint256 = self.pot_value
     
-    # Calculate prize (99%) and fee (1%)
-    prize: uint256 = (total_pot * WINNER_PERCENTAGE) // 100
-    fee: uint256 = total_pot - prize
-    
-    # Pay out winner
+    # Pay out winner (100% of pot)
     send(winner, prize)
     
-    # Pay owner fee
-    if fee > 0:
-        send(owner, fee)
-    
-    log RoundEnded(self.round_number, winner, prize, fee)
+    log RoundEnded(self.round_number, winner, prize, 0)
     
     # Increment round and reset state
     self.round_number += 1
@@ -191,12 +183,10 @@ def can_end_round() -> bool:
 def get_current_winner_prize() -> (uint256, uint256):
     """
     @notice Calculate what the current last donor would win
-    @return prize_amount, fee_amount
+    @return prize_amount (100% of pot), 0 (no fee)
     """
     if self.pot_value == 0:
         return (0, 0)
     
-    prize: uint256 = (self.pot_value * WINNER_PERCENTAGE) // 100
-    fee: uint256 = self.pot_value - prize
-    return (prize, fee)
+    return (self.pot_value, 0)
 

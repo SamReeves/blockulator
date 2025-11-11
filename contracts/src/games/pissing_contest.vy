@@ -13,7 +13,6 @@ struct ContestConfig:
     owner: address
     proposed_owner: address
     max_donations_per_round: uint16
-    fee_basis_points: uint16
     minimum_donation: uint256
     paused: bool
 
@@ -38,8 +37,6 @@ struct RoundResult:
 # Constants
 
 MAX_HISTORY: constant(uint256) = 100
-BASIS_POINTS_DIVISOR: constant(uint256) = 10000
-MAX_FEE_BASIS_POINTS: constant(uint16) = 1000  # 10% max fee
 
 # Events
 
@@ -108,21 +105,18 @@ user_rounds_participated: public(HashMap[address, uint256])
 # Initialization
 
 @deploy
-def __init__(max_donations: uint16, fee_bp: uint16, min_donation: uint256):
+def __init__(max_donations: uint16, min_donation: uint256):
     """
     @notice Initialize the perpetual contest system
     @param max_donations Maximum donations per round
-    @param fee_bp Fee in basis points (max 1000 = 10%)
     @param min_donation Minimum donation in wei
     """
     assert max_donations > 0, "Need at least 1 donation"
-    assert fee_bp <= MAX_FEE_BASIS_POINTS, "Fee too high"
     
     self.config = ContestConfig(
         owner=msg.sender,
         proposed_owner=empty(address),
         max_donations_per_round=max_donations,
-        fee_basis_points=fee_bp,
         minimum_donation=min_donation,
         paused=False
     )
@@ -203,15 +197,11 @@ def _end_round():
     total: uint256 = self.current_round.total_value
     duration: uint256 = block.timestamp - self.current_round.start_time
     
-    fee: uint256 = (total * convert(self.config.fee_basis_points, uint256)) // BASIS_POINTS_DIVISOR
-    prize: uint256 = total - fee
+    prize: uint256 = total  # Winner gets 100% of pot
     
     self.current_round.is_active = False
     
     send(winner, prize)
-    
-    if fee > 0:
-        send(self.config.owner, fee)
     
     self.user_lifetime_won[winner] += prize
     self.user_rounds_won[winner] += 1
@@ -229,7 +219,7 @@ def _end_round():
     self.history_head += 1
     self.total_rounds_completed += 1
     
-    log RoundEnded(round_num, winner, prize, fee, total, duration)
+    log RoundEnded(round_num, winner, prize, 0, total, duration)
 
 @internal
 def _start_new_round():
@@ -299,19 +289,6 @@ def toggle_pause():
     log EmergencyPauseToggled(self.config.paused, msg.sender)
 
 @external
-def update_fee_basis_points(new_fee_bp: uint16):
-    """
-    @notice Update the fee percentage
-    @param new_fee_bp New fee in basis points
-    """
-    assert msg.sender == self.config.owner, "Only owner"
-    assert new_fee_bp <= MAX_FEE_BASIS_POINTS, "Fee too high"
-    
-    old_value: uint256 = convert(self.config.fee_basis_points, uint256)
-    self.config.fee_basis_points = new_fee_bp
-    log ConfigUpdated("fee_basis_points", old_value, convert(new_fee_bp, uint256))
-
-@external
 def update_minimum_donation(new_minimum: uint256):
     """
     @notice Update the minimum donation requirement
@@ -373,14 +350,12 @@ def get_current_leaderboard_position(donor: address) -> (uint256, bool):
 def calculate_current_winnings() -> (uint256, uint256):
     """
     @notice Calculate what the current leader would win
-    @return prize_amount, fee_amount
+    @return prize_amount (100% of pot), 0 (no fee)
     """
     if self.current_round.total_value == 0:
         return (0, 0)
     
-    fee: uint256 = (self.current_round.total_value * convert(self.config.fee_basis_points, uint256)) // BASIS_POINTS_DIVISOR
-    prize: uint256 = self.current_round.total_value - fee
-    return (prize, fee)
+    return (self.current_round.total_value, 0)
 
 @view
 @external
@@ -456,15 +431,14 @@ def get_global_stats() -> (uint256, uint256, uint256, address):
 
 @view
 @external
-def get_config() -> (address, uint16, uint16, uint256, bool):
+def get_config() -> (address, uint16, uint256, bool):
     """
     @notice Get current configuration
-    @return owner, max_donations_per_round, fee_basis_points, minimum_donation, paused
+    @return owner, max_donations_per_round, minimum_donation, paused
     """
     return (
         self.config.owner,
         self.config.max_donations_per_round,
-        self.config.fee_basis_points,
         self.config.minimum_donation,
         self.config.paused
     )

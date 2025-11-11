@@ -131,8 +131,8 @@ MIN_INITIAL_VALUE: constant(uint256) = 100000000000000  # 0.0001 ETH
 MIN_LIFETIME: constant(uint256) = 300  # 5 minutes
 MAX_LIFETIME: constant(uint256) = 31557600000  # 1000 years (1000 * 365.25 * 24 * 60 * 60)
 
-CREATION_FEE_PERCENT: constant(uint256) = 1  # 1% fee on future creation
-MARKET_FEE_PERCENT: constant(uint256) = 1  # 1% fee on trades
+CREATION_FEE_PERCENT: constant(uint256) = 0  # 0% fee on future creation
+MARKET_FEE_PERCENT: constant(uint256) = 0  # 0% fee on trades
 CREATION_COOLDOWN: constant(uint256) = 300  # 5 minutes between creations per address
 
 # ============================================================================
@@ -196,19 +196,15 @@ def create_future(lifetime: uint256, distribution_type: uint8) -> address:
     if last_created > 0:
         assert block.timestamp >= last_created + CREATION_COOLDOWN, "Cooldown active"
     
-    # Calculate fees
-    creation_fee: uint256 = msg.value * CREATION_FEE_PERCENT // 100
-    future_value: uint256 = msg.value - creation_fee
-    self.market_balance += creation_fee
-    
     # Deploy from blueprint (pass msg.sender as the owner, self as factory)
+    # No fees - creator deposits 100% of value into future
     new_future: address = create_from_blueprint(
         future_blueprint,
         lifetime,
         distribution_type,
         msg.sender,
         self,
-        value=future_value,
+        value=msg.value,
         code_offset=3
     )
     
@@ -218,7 +214,7 @@ def create_future(lifetime: uint256, distribution_type: uint8) -> address:
         future_address=new_future,
         creation_time=block.timestamp,
         expiry_time=expiry_time,
-        initial_value=future_value,
+        initial_value=msg.value,
         distribution_type=distribution_type
     )
     
@@ -319,7 +315,7 @@ def list_future(future_addr: address, ask_price: uint256):
 @external
 @payable
 def buy_future(future_addr: address):
-    """Buy a listed future (1% marketplace fee)"""
+    """Buy a listed future (no fees)"""
     # Validate future exists
     assert self.is_future[future_addr], "Not a registered future"
     
@@ -336,15 +332,8 @@ def buy_future(future_addr: address):
     assert not is_expired, "Future has expired"
     assert seller != msg.sender, "Cannot buy your own future"
     
-    # Calculate fees
-    market_fee: uint256 = msg.value * MARKET_FEE_PERCENT // 100
-    seller_payment: uint256 = msg.value - market_fee
-    
-    # Accumulate fee
-    self.market_balance += market_fee
-    
-    # Pay seller
-    raw_call(seller, b"", value=seller_payment)
+    # Pay seller (100% of price, no fees)
+    raw_call(seller, b"", value=msg.value)
     
     # Transfer future ownership (this pays out accumulated value to seller)
     extcall IFuture(future_addr).transfer(msg.sender)
@@ -734,49 +723,4 @@ def _determine_phase(t_last: uint256, t_current: uint256, mean: uint256) -> uint
 # ============================================================================
 # ADMIN FUNCTIONS
 # ============================================================================
-
-@external
-def withdraw_fees(amount: uint256):
-    """Owner withdraws accumulated trade fees"""
-    assert msg.sender == owner, "Only owner can withdraw"
-    assert amount <= self.market_balance, "Insufficient accounting balance"
-    assert amount <= self.balance, "Insufficient contract balance"
-    
-    self.market_balance -= amount
-    raw_call(owner, b"", value=amount)
-
-@external
-@view
-def get_market_balance() -> uint256:
-    """Get accumulated fees available for withdrawal"""
-    return self.market_balance
-
-@external
-@view
-def get_unaccounted_balance() -> uint256:
-    """
-    Return ETH in contract not tracked by market_balance
-    This should always be 0 under normal operation
-    """
-    if self.balance > self.market_balance:
-        return self.balance - self.market_balance
-    return 0
-
-@external
-def withdraw_unaccounted(amount: uint256):
-    """
-    Owner can withdraw unaccounted ETH (defensive measure)
-    Only works for ETH that somehow entered contract outside normal flow
-    """
-    assert msg.sender == owner, "Only owner can withdraw"
-    
-    # Calculate unaccounted balance
-    unaccounted: uint256 = 0
-    if self.balance > self.market_balance:
-        unaccounted = self.balance - self.market_balance
-    
-    assert amount <= unaccounted, "Not enough unaccounted balance"
-    assert amount <= self.balance, "Insufficient contract balance"
-    
-    # Note: Do NOT update market_balance since this is unaccounted ETH
-    raw_call(owner, b"", value=amount)
+# No withdrawal functions - factory operates without fee extraction

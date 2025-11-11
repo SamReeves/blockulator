@@ -82,20 +82,6 @@ def post_message(content: String[280]):
     
     log MessagePosted(msg.sender, message_id, msg.value, content)
 
-# Admin functions
-
-@external
-def withdraw():
-    """
-    @notice Owner withdraws accumulated fees
-    """
-    assert msg.sender == owner, "Only owner"
-    amount: uint256 = self.balance
-    assert amount > 0, "Nothing to withdraw"
-    
-    send(owner, amount)
-    log FeesWithdrawn(owner, amount)
-
 # View functions
 
 @view

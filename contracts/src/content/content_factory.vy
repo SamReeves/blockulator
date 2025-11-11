@@ -406,14 +406,3 @@ def set_owner(new_owner: address):
     assert msg.sender == self.owner, "Only owner"
     assert new_owner != empty(address), "Invalid owner"
     self.owner = new_owner
-
-@external
-def withdraw():
-    """
-    @notice Withdraw accumulated fees
-    @dev Only owner
-    """
-    assert msg.sender == self.owner, "Only owner"
-    send(self.owner, self.balance)
-
-

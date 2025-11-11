@@ -291,19 +291,6 @@ def set_owner(new_owner: address):
     assert new_owner != empty(address), "Invalid new owner"
     self.owner = new_owner
 
-@external
-def withdraw_fees():
-    """
-    @notice Withdraw accumulated creation fees
-    @dev Only owner, sends entire balance
-    """
-    assert msg.sender == self.owner, "Only owner"
-    
-    balance: uint256 = self.balance
-    assert balance > 0, "No fees to withdraw"
-    
-    send(self.owner, balance)
-
 # ============================================================================
 # STATISTICS
 # ============================================================================

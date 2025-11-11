@@ -1,0 +1,17 @@
+{
+  "network": "sepolia",
+  "timestamp": "2025-11-11T06:23:26.407Z",
+  "deployer": "0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4",
+  "factories": {
+    "futureFactory": "0x768E0e56d2597B17FC4b433C6A41BC947DAb774F",
+    "discussionBoard": "0x58743322473f17Bd741853bB4B79b4B23F79AB46",
+    "contentFactory": "0xA37262Ef4eD684621468B6433B109a24a72F5b62",
+    "badgeFactory": "0x35e626194E0691FaA54EFA289D90CA0e6D610FA1"
+  },
+  "blueprints": {
+    "eulerianFuture": "0xa1Ef99A9612B8c97F7E4E00aDEFecEdFAD4d3257",
+    "discussion": "0xb122fE99199f1b52B30179b3Bcfce27253b57753",
+    "content": "0x4F5a6c26B62052AC19E4d21bF9b18bA5a1e178A9",
+    "badge": "0xB25D4f15D7FbA7Df399daab6114489B4Ba88d2D2"
+  }
+}

@@ -74,7 +74,7 @@ interface IDiscussion:
 MAX_DISCUSSIONS: constant(uint256) = 100
 INACTIVITY_THRESHOLD: constant(uint256) = 7 * 24 * 60 * 60  # 7 days
 MIN_INITIAL_VALUE: constant(uint256) = 100000000000000  # 0.0001 ETH (much lower!)
-BOARD_FEE_PERCENT: constant(uint256) = 10  # 10% goes to board
+BOARD_FEE_PERCENT: constant(uint256) = 0  # 0% board fee
 CREATION_COOLDOWN: constant(uint256) = 300  # 5 minutes between creations per address
 
 # State
@@ -107,8 +107,8 @@ def __init__(_discussion_blueprint: address, _owner: address):
     """
     @notice Initialize the discussion board
     @param _discussion_blueprint Address of the discussion contract blueprint
-    @param _owner Address that can withdraw board fees
-    @dev Board collects 10% fee on all discussion creations
+    @param _owner Owner address (no fees collected)
+    @dev Board operates without fees
     """
     assert _discussion_blueprint != empty(address), "Blueprint cannot be zero address"
     assert _owner != empty(address), "Owner cannot be zero address"
@@ -149,14 +149,7 @@ def create_and_register(
     if last_created > 0:
         assert block.timestamp >= last_created + CREATION_COOLDOWN, "Creation cooldown active"
     
-    # Calculate board fee (10%) and discussion value (90%)
-    board_fee: uint256 = msg.value * BOARD_FEE_PERCENT // 100
-    discussion_value: uint256 = msg.value - board_fee
-    
-    # Collect board fee
-    self.board_balance += board_fee
-    
-    # Deploy new discussion from blueprint with 90% of value
+    # Deploy new discussion from blueprint with 100% of value (no fees)
     new_discussion: address = create_from_blueprint(
         discussion_blueprint,
         self,  # board address
@@ -165,7 +158,7 @@ def create_and_register(
         max_messages,
         max_message_length,
         min_donation,
-        value=discussion_value,
+        value=msg.value,
         code_offset=3
     )
     
@@ -459,34 +452,6 @@ def update_activity(discussion_address: address):
     self.discussions[idx].last_activity = new_activity
     
     log ActivityUpdated(discussion_address=discussion_address, new_last_activity=new_activity)
-
-@external
-def withdraw_board_fees(percentage: uint256):
-    """
-    @notice Withdraw a percentage of accumulated board fees
-    @param percentage Percentage to withdraw (1-100)
-    @dev Only callable by owner, allows partial withdrawals to keep board operational
-    """
-    assert msg.sender == owner, "Only owner can withdraw"
-    assert percentage > 0 and percentage <= 100, "Invalid percentage"
-    assert self.board_balance > 0, "No fees to withdraw"
-    
-    # Calculate withdrawal amount
-    withdrawal_amount: uint256 = self.board_balance * percentage // 100
-    
-    # Update board balance
-    self.board_balance -= withdrawal_amount
-    
-    # Send to owner
-    send(owner, withdrawal_amount)
-    
-    # Log withdrawal
-    log FeesWithdrawn(
-        owner=owner,
-        amount=withdrawal_amount,
-        remaining_balance=self.board_balance,
-        timestamp=block.timestamp
-    )
 
 # View Functions
 

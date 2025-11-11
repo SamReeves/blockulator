@@ -10,7 +10,7 @@ MECHANICS:
 - Each day (00:00 UTC) starts a new opportunity
 - The FIRST person to donate each day wins the pot from the previous day
 - All donations accumulate into the next day's prize pot
-- 1% fee goes to owner when a winner claims
+- Winner gets 100% of the pot (no fees)
 - Creates a rush to be the first donor when each new day starts!
 
 STRATEGY:
@@ -23,7 +23,7 @@ STRATEGY:
 # Constants
 
 SECONDS_PER_DAY: constant(uint256) = 86400  # 24 hours in seconds
-WINNER_PERCENTAGE: constant(uint256) = 99  # Winner gets 99%
+WINNER_PERCENTAGE: constant(uint256) = 100  # Winner gets 100%
 
 # State variables
 
@@ -82,20 +82,12 @@ def donate():
         if self.pot_value > 0:
             # This donor is the first of the new day and wins the pot!
             winner: address = msg.sender
-            prize_pot: uint256 = self.pot_value
+            prize: uint256 = self.pot_value
             
-            # Calculate prize (99%) and fee (1%)
-            prize: uint256 = (prize_pot * WINNER_PERCENTAGE) // 100
-            fee: uint256 = prize_pot - prize
-            
-            # Pay out winner
+            # Pay out winner (100% of pot)
             send(winner, prize)
             
-            # Pay owner fee
-            if fee > 0:
-                send(owner, fee)
-            
-            log WinnerPaid(self.current_day, winner, prize, fee)
+            log WinnerPaid(self.current_day, winner, prize, 0)
             
             # Reset pot to just this donation
             self.pot_value = msg.value
@@ -194,12 +186,10 @@ def get_current_day_number() -> uint256:
 def get_potential_prize() -> (uint256, uint256):
     """
     @notice Calculate what the next first donor would win
-    @return prize_amount, fee_amount
+    @return prize_amount (100% of pot), 0 (no fee)
     """
     if self.pot_value == 0:
         return (0, 0)
     
-    prize: uint256 = (self.pot_value * WINNER_PERCENTAGE) // 100
-    fee: uint256 = self.pot_value - prize
-    return (prize, fee)
+    return (self.pot_value, 0)
 

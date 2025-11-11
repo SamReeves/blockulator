@@ -4,8 +4,12 @@
 @title Pay It Backward (Simplified)
 @author L1Ca$h
 @notice Minimal donation chain where your donation goes to the previous donor
-@dev Each donor immediately pays the previous donor, first donation goes to deployer
+@dev Each donor immediately pays the previous donor, first donation burns to ensure no owner extraction
 """
+
+# Constants
+
+BURN_ADDRESS: constant(address) = 0x000000000000000000000000000000000000dEaD
 
 # State
 
@@ -33,14 +37,14 @@ def __init__():
 @payable
 def donate():
     """
-    @notice Donate to reward the previous donor
+    @notice Donate to reward the previous donor (first donation burns)
     """
     assert msg.value > 0, "Must donate something"
     
     if self.last_donor == empty(address):
         self.last_donor = msg.sender
-        send(self.owner, msg.value)
-        log Donation(msg.sender, msg.value, self.owner, True)
+        send(BURN_ADDRESS, msg.value)
+        log Donation(msg.sender, msg.value, BURN_ADDRESS, True)
     else:
         recipient: address = self.last_donor
         self.last_donor = msg.sender
@@ -54,8 +58,8 @@ def donate():
 def get_next_recipient() -> address:
     """
     @notice Get who will receive the next donation
-    @return Address that will receive next donation
+    @return Address that will receive next donation (burn address if first donation)
     """
     if self.last_donor == empty(address):
-        return self.owner
+        return BURN_ADDRESS
     return self.last_donor
