@@ -307,6 +307,9 @@ class UploadsApp {
         const typeIcon = entry.content_type === 0 ? '🖼️' : '📝';
         const typeName = entry.content_type === 0 ? 'Image' : 'Text';
         const date = new Date(entry.creation_time.toNumber() * 1000).toLocaleString();
+        
+        // Link to Etherscan to view the contract
+        const etherscanUrl = `https://sepolia.etherscan.io/address/${entry.content_address}`;
 
         div.innerHTML = `
             <div class="content-entry-header">
@@ -314,12 +317,15 @@ class UploadsApp {
                 <span class="content-size">${entry.size.toNumber()} bytes</span>
             </div>
             <div class="content-entry-meta">
-                <span class="content-creator">${entry.creator.slice(0, 8)}...</span>
+                <span class="content-creator" title="${entry.creator}">${entry.creator.slice(0, 6)}...${entry.creator.slice(-4)}</span>
                 <span class="content-date">${date}</span>
             </div>
-            <a href="${entry.content_address}" target="_blank" class="content-link">
-                View Content →
-            </a>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="${etherscanUrl}" target="_blank" class="content-link">
+                    View on Etherscan →
+                </a>
+                <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4);">${entry.content_address.slice(0, 10)}...</span>
+            </div>
         `;
 
         container.appendChild(div);
