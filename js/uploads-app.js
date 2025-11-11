@@ -84,14 +84,14 @@ class UploadsApp {
             this.contentAbi = await contentResponse.json();
 
             // Initialize factory contract
-            if (factoryMeta.address && factoryMeta.address !== '0x0000000000000000000000000000000000000000') {
+            if (factoryMeta.contractAddress && factoryMeta.contractAddress !== '0x0000000000000000000000000000000000000000') {
                 const { ethers } = this.web3Provider.getEthers();
                 this.factoryContract = new ethers.Contract(
-                    factoryMeta.address,
+                    factoryMeta.contractAddress,
                     this.factoryAbi,
                     this.web3Provider.getSigner()
                 );
-                console.log('📤 Content factory loaded:', factoryMeta.address);
+                console.log('📤 Content factory loaded:', factoryMeta.contractAddress);
             } else {
                 console.warn('⚠️ Content factory not deployed yet');
             }
