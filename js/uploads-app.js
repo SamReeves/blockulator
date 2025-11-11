@@ -215,8 +215,7 @@ class UploadsApp {
             pixelData.push(imageData.data[i + 2]); // B
         }
 
-        const { ethers } = this.web3Provider.getEthers();
-        const pixelBytes = ethers.utils.hexlify(pixelData);
+        const pixelBytes = window.ethers.utils.hexlify(pixelData);
 
         this.toastComponent.show('Creating image on-chain...', 'info');
 
@@ -244,8 +243,7 @@ class UploadsApp {
         }
 
         const text = textarea.value;
-        const { ethers } = this.web3Provider.getEthers();
-        const textBytes = ethers.utils.toUtf8Bytes(text);
+        const textBytes = window.ethers.utils.toUtf8Bytes(text);
 
         if (textBytes.length > 16384) {
             this.toastComponent.show('Text too large (max 16KB)', 'error');
@@ -255,7 +253,7 @@ class UploadsApp {
         this.toastComponent.show('Creating text on-chain...', 'info');
 
         const tx = await this.factoryContract.create_text(
-            ethers.utils.hexlify(textBytes)
+            window.ethers.utils.hexlify(textBytes)
         );
 
         this.toastComponent.show('Transaction submitted...', 'info');
