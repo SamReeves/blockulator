@@ -22,6 +22,10 @@ echo "🎨 Copying CSS files..."
 cp -r styles dist/
 cp styles.css dist/ 2>/dev/null || true
 
+# Copy shared components
+echo "📦 Copying shared components..."
+cp -r shared dist/
+
 # Copy images and assets
 echo "🖼️  Copying images..."
 cp *.png dist/ 2>/dev/null || true
