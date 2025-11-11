@@ -23,7 +23,7 @@
                 <a href="#/games" class="nav-link" data-route="games">Games</a>
                 <a href="#/calculator" class="nav-link" data-route="calculator">Calculator</a>
                 <a href="#/discussions" class="nav-link" data-route="discussions">Discussions</a>
-                <a href="#/factory" class="nav-link" data-route="factory">Factory</a>
+                <a href="#/futures" class="nav-link" data-route="futures">Futures</a>
                 <a href="#/about" class="nav-link" data-route="about">About</a>
             </nav>
             <div class="header-right">
@@ -208,16 +208,16 @@
                 </div>
             </div>
 
-            <!-- FACTORY VIEW -->
-            <div id="factory-view" class="view-container hidden" data-view="factory">
-                <div id="factory-content" class="content">
+            <!-- FUTURES VIEW -->
+            <div id="futures-view" class="view-container hidden" data-view="futures">
+                <div id="futures-content" class="content">
                     <div class="discussions-layout">
                         
                         <!-- Elegant Page Header -->
-                        <div class="factory-page-header">
-                            <div class="factory-header-content">
-                                <h1 class="factory-title">🎯 Eulerian Futures</h1>
-                                <p class="factory-subtitle">Time-weighted payout contracts with customizable distributions</p>
+                        <div class="futures-page-header">
+                            <div class="futures-header-content">
+                                <h1 class="futures-title">🎯 Eulerian Futures</h1>
+                                <p class="futures-subtitle">Time-weighted payout contracts with customizable distributions</p>
                             </div>
                             <button id="create-future-btn" class="btn-primary btn-large">
                                 ➕ Create Future
@@ -475,7 +475,7 @@
                                 <h3>📜 Smart Contracts</h3>
                                 <p class="section-subtitle">Eulerian futures marketplace with time-weighted payouts</p>
                             </div>
-                            <div id="factory-contract-info" class="contracts-grid">
+                            <div id="futures-contract-info" class="contracts-grid">
                                 <!-- Will be populated by JavaScript -->
                             </div>
                         </div>
@@ -487,6 +487,107 @@
             <!-- BADGES VIEW -->
             <div id="badges-view" class="view-container hidden" data-view="badges">
                 <!-- Badge content will be dynamically loaded here -->
+            </div>
+
+            <!-- UPLOADS VIEW -->
+            <div id="uploads-view" class="view-container hidden" data-view="uploads">
+                <div class="content">
+                    <div class="view-header">
+                        <h2 class="view-title">📤 Content Uploads</h2>
+                        <p class="view-subtitle">Immutable on-chain storage for images and text</p>
+                    </div>
+
+                    <!-- Upload Section -->
+                    <div id="upload-section" class="upload-section">
+                        <div class="upload-panel">
+                            <div class="upload-type-selector">
+                                <button id="upload-type-image" class="upload-type-btn active" data-type="image">
+                                    🖼️ Image
+                                </button>
+                                <button id="upload-type-text" class="upload-type-btn" data-type="text">
+                                    📝 Text
+                                </button>
+                            </div>
+
+                            <form id="upload-form" class="upload-form">
+                                <!-- Image Upload Section -->
+                                <div id="image-upload-section" class="upload-section-content">
+                                    <div class="upload-info">
+                                        <h3>Upload Image</h3>
+                                        <p>Maximum size: 64×64 pixels (RGB)</p>
+                                        <p>Images are automatically scaled to fit</p>
+                                    </div>
+                                    
+                                    <div class="upload-input-group">
+                                        <label for="image-input" class="file-upload-label">
+                                            <span class="file-upload-text">Choose Image File</span>
+                                            <input type="file" id="image-input" accept="image/*" class="file-input">
+                                        </label>
+                                    </div>
+
+                                    <div class="image-preview">
+                                        <canvas id="image-preview-canvas" style="display:none; max-width: 100%; image-rendering: pixelated;"></canvas>
+                                    </div>
+                                </div>
+
+                                <!-- Text Upload Section -->
+                                <div id="text-upload-section" class="upload-section-content" style="display:none;">
+                                    <div class="upload-info">
+                                        <h3>Upload Text</h3>
+                                        <p>Maximum size: 16KB (UTF-8)</p>
+                                        <p>Approximately 8,000 words</p>
+                                    </div>
+                                    
+                                    <div class="upload-input-group">
+                                        <textarea 
+                                            id="text-input" 
+                                            class="text-upload-textarea" 
+                                            placeholder="Enter your text content here..."
+                                            maxlength="16384"
+                                            rows="10"
+                                        ></textarea>
+                                        <div class="text-counter">
+                                            <span id="text-char-count">0</span> / 16,384 characters
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn-primary upload-submit-btn">
+                                    Upload to Blockchain
+                                </button>
+                            </form>
+
+                            <div class="upload-cost-info">
+                                <p><strong>Estimated Cost:</strong></p>
+                                <ul>
+                                    <li>Images: ~$10-25 USD in gas</li>
+                                    <li>Text: ~$10-30 USD in gas</li>
+                                    <li>Content is permanently stored on-chain</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Content Browser Section -->
+                    <div id="content-browser-section" class="content-browser-section" style="display:none;">
+                        <div class="browser-header">
+                            <h3>Recent Uploads</h3>
+                            <button id="show-upload-btn" class="btn-secondary">← Back to Upload</button>
+                        </div>
+                        
+                        <div id="content-list" class="content-list">
+                            <!-- Content entries will be loaded here -->
+                            <div class="loading-state">Loading content...</div>
+                        </div>
+                    </div>
+
+                    <!-- View Toggle -->
+                    <div class="view-toggle">
+                        <button id="show-browse-btn" class="btn-secondary">
+                            📚 Browse Recent Uploads
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- ABOUT VIEW -->
@@ -705,7 +806,7 @@
 
     <!-- External Dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <!-- Chart.js is lazy-loaded only when /factory view is accessed -->
+    <!-- Chart.js is lazy-loaded only when /futures view is accessed -->
 
     <!-- Single Entry Point - Bootstrap the entire SPA -->
     <script type="module">

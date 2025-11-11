@@ -22,6 +22,7 @@ export class MasterApp {
         this.discussionsApp = null;
         this.futuresApp = null;
         this.badgesModule = null;
+        this.uploadsApp = null;
         
         console.log('🐋 MasterApp created');
     }
@@ -83,8 +84,9 @@ export class MasterApp {
         this.masterRouter.registerView('games', () => this.initGamesView());
         this.masterRouter.registerView('calculator', () => this.initCalculatorView());
         this.masterRouter.registerView('discussions', () => this.initDiscussionsView());
-        this.masterRouter.registerView('factory', () => this.initFactoryView());
+        this.masterRouter.registerView('futures', () => this.initFuturesView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
+        this.masterRouter.registerView('uploads', () => this.initUploadsView());
         this.masterRouter.registerView('about', () => this.initAboutView());
         
         // Register sub-route handlers
@@ -151,12 +153,12 @@ export class MasterApp {
     }
 
     /**
-     * Initialize Factory view (lazy loaded)
+     * Initialize Futures view (lazy loaded)
      */
-    async initFactoryView() {
-        console.log('🏭 Initializing Factory view...');
+    async initFuturesView() {
+        console.log('📈 Initializing Futures view...');
         
-        // Load Chart.js before initializing factory (needed for distribution charts)
+        // Load Chart.js before initializing futures (needed for distribution charts)
         await this.loadChartJs();
         
         if (!this.futuresApp) {
@@ -171,7 +173,7 @@ export class MasterApp {
             await this.futuresApp.refresh();
         }
         
-        console.log('✅ Factory view initialized');
+        console.log('✅ Futures view initialized');
     }
 
     /**
@@ -198,6 +200,24 @@ export class MasterApp {
     }
 
     /**
+     * Initialize Uploads view (lazy loaded)
+     */
+    async initUploadsView() {
+        console.log('📤 Initializing Uploads view...');
+        
+        if (!this.uploadsApp) {
+            // Import and create uploads app
+            const { UploadsApp } = await import('../uploads-app.js');
+            this.uploadsApp = new UploadsApp();
+            
+            // Don't re-initialize shared components, but do initialize view-specific things
+            await this.uploadsApp.initViewOnly();
+        }
+        
+        console.log('✅ Uploads view initialized');
+    }
+
+    /**
      * Initialize About view (static page, no lazy loading needed)
      */
     async initAboutView() {
@@ -207,7 +227,7 @@ export class MasterApp {
 
     /**
      * Lazy load Chart.js library
-     * Only loaded when factory view is accessed (for distribution charts)
+     * Only loaded when futures view is accessed (for distribution charts)
      */
     async loadChartJs() {
         // Check if already loaded

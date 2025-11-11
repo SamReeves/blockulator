@@ -102,7 +102,7 @@ class FuturesApp {
      * Render contract info section with links to contracts
      */
     renderContractInfo() {
-        const container = document.getElementById('factory-contract-info');
+        const container = document.getElementById('futures-contract-info');
         if (!container) return;
 
         container.innerHTML = '';

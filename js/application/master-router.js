@@ -1,6 +1,6 @@
 /**
  * Master Router
- * Handles top-level navigation between major views (games, tools, discussions, factory)
+ * Handles top-level navigation between major views (games, tools, discussions, futures)
  * Manages URL state and browser history without page reloads
  * Supports sub-routes: #/games/pissing-contest
  */
@@ -81,7 +81,7 @@ export class MasterRouter {
 
     /**
      * Navigate to a view with optional sub-route
-     * @param {string} viewName - Name of view to navigate to (games, tools, discussions, factory)
+     * @param {string} viewName - Name of view to navigate to (games, tools, discussions, futures)
      * @param {object} options - Navigation options
      */
     async navigateTo(viewName, options = {}) {
