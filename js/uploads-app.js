@@ -292,7 +292,7 @@ class UploadsApp {
             const start = Math.max(0, count.toNumber() - 20);
             for (let i = count.toNumber() - 1; i >= start; i--) {
                 const entry = await this.factoryContract.get_content_by_index(i);
-                this.renderContentEntry(entry, contentList);
+                await this.renderContentEntry(entry, contentList);
             }
 
         } catch (error) {
@@ -300,7 +300,7 @@ class UploadsApp {
         }
     }
 
-    renderContentEntry(entry, container) {
+    async renderContentEntry(entry, container) {
         const div = document.createElement('div');
         div.className = 'content-entry';
 
@@ -320,15 +320,90 @@ class UploadsApp {
                 <span class="content-creator" title="${entry.creator}">${entry.creator.slice(0, 6)}...${entry.creator.slice(-4)}</span>
                 <span class="content-date">${date}</span>
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <a href="${etherscanUrl}" target="_blank" class="content-link">
+            <div class="content-preview" id="preview-${entry.content_address}">
+                <div style="padding: 0.5rem; color: rgba(255,255,255,0.5); font-style: italic;">Loading...</div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
+                <a href="${etherscanUrl}" target="_blank" class="content-link" style="font-size: 0.75rem;">
                     View on Etherscan →
                 </a>
-                <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4);">${entry.content_address.slice(0, 10)}...</span>
+                <span style="font-size: 0.7rem; color: rgba(255,255,255,0.3);">${entry.content_address.slice(0, 8)}...</span>
             </div>
         `;
 
         container.appendChild(div);
+        
+        // Load and render the actual content
+        await this.loadAndRenderContent(entry);
+    }
+    
+    async loadAndRenderContent(entry) {
+        try {
+            // Get content contract instance
+            const contentContract = this.web3Provider.getContract(
+                entry.content_address,
+                this.contentAbi
+            );
+            
+            const previewDiv = document.getElementById(`preview-${entry.content_address}`);
+            if (!previewDiv) return;
+            
+            if (entry.content_type === 0) {
+                // Image content
+                const [data, width, height] = await Promise.all([
+                    contentContract.content_data(),
+                    contentContract.image_width(),
+                    contentContract.image_height()
+                ]);
+                
+                // Create canvas to render image
+                const canvas = document.createElement('canvas');
+                canvas.width = width.toNumber();
+                canvas.height = height.toNumber();
+                canvas.style.maxWidth = '100%';
+                canvas.style.height = 'auto';
+                canvas.style.imageRendering = 'pixelated';
+                canvas.style.border = '1px solid rgba(102, 126, 234, 0.3)';
+                canvas.style.borderRadius = '4px';
+                
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.createImageData(width.toNumber(), height.toNumber());
+                
+                // Convert hex data to RGB pixels
+                const bytes = window.ethers.utils.arrayify(data);
+                for (let i = 0; i < bytes.length; i += 3) {
+                    const pixelIndex = (i / 3) * 4;
+                    imageData.data[pixelIndex] = bytes[i];       // R
+                    imageData.data[pixelIndex + 1] = bytes[i + 1]; // G
+                    imageData.data[pixelIndex + 2] = bytes[i + 2]; // B
+                    imageData.data[pixelIndex + 3] = 255;         // A
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                previewDiv.innerHTML = '';
+                previewDiv.appendChild(canvas);
+                
+            } else {
+                // Text content
+                const data = await contentContract.content_data();
+                const bytes = window.ethers.utils.arrayify(data);
+                const text = window.ethers.utils.toUtf8String(bytes);
+                
+                const textDiv = document.createElement('div');
+                textDiv.style.cssText = 'padding: 1rem; background: rgba(0,0,0,0.3); border-radius: 4px; border: 1px solid rgba(102, 126, 234, 0.3); white-space: pre-wrap; word-break: break-word; max-height: 200px; overflow-y: auto; font-family: monospace; font-size: 0.85rem; line-height: 1.4;';
+                textDiv.textContent = text;
+                
+                previewDiv.innerHTML = '';
+                previewDiv.appendChild(textDiv);
+            }
+            
+        } catch (error) {
+            console.error('Failed to load content:', error);
+            const previewDiv = document.getElementById(`preview-${entry.content_address}`);
+            if (previewDiv) {
+                previewDiv.innerHTML = '<div style="padding: 0.5rem; color: rgba(255,100,100,0.8); font-size: 0.85rem;">Failed to load content</div>';
+            }
+        }
     }
 
     showView(viewName) {
