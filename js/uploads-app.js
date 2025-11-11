@@ -393,38 +393,57 @@ class UploadsApp {
             
             if (entry.content_type === 0) {
                 // Image content
+                console.log('Loading image from:', entry.content_address);
                 const [data, width, height] = await Promise.all([
                     contentContract.content_data(),
                     contentContract.image_width(),
                     contentContract.image_height()
                 ]);
                 
+                const w = width.toNumber();
+                const h = height.toNumber();
+                console.log(`Image dimensions: ${w}x${h}`);
+                
+                // Convert hex data to RGB pixels
+                const bytes = window.ethers.utils.arrayify(data);
+                console.log(`Image data: ${bytes.length} bytes (expected ${w * h * 3})`);
+                
+                // Validate data size
+                const expectedBytes = w * h * 3;
+                if (bytes.length < expectedBytes) {
+                    throw new Error(`Insufficient image data: got ${bytes.length} bytes, need ${expectedBytes}`);
+                }
+                
                 // Create canvas to render image
                 const canvas = document.createElement('canvas');
-                canvas.width = width.toNumber();
-                canvas.height = height.toNumber();
-                canvas.style.maxWidth = '100%';
+                canvas.width = w;
+                canvas.height = h;
+                canvas.style.maxWidth = '200px';
                 canvas.style.height = 'auto';
                 canvas.style.imageRendering = 'pixelated';
                 canvas.style.border = '1px solid rgba(102, 126, 234, 0.3)';
                 canvas.style.borderRadius = '4px';
                 
                 const ctx = canvas.getContext('2d');
-                const imageData = ctx.createImageData(width.toNumber(), height.toNumber());
+                const imageData = ctx.createImageData(w, h);
                 
-                // Convert hex data to RGB pixels
-                const bytes = window.ethers.utils.arrayify(data);
-                for (let i = 0; i < bytes.length; i += 3) {
-                    const pixelIndex = (i / 3) * 4;
-                    imageData.data[pixelIndex] = bytes[i];       // R
-                    imageData.data[pixelIndex + 1] = bytes[i + 1]; // G
-                    imageData.data[pixelIndex + 2] = bytes[i + 2]; // B
-                    imageData.data[pixelIndex + 3] = 255;         // A
+                // Convert RGB bytes to RGBA pixels
+                let byteIndex = 0;
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const pixelIndex = (y * w + x) * 4;
+                        imageData.data[pixelIndex] = bytes[byteIndex];       // R
+                        imageData.data[pixelIndex + 1] = bytes[byteIndex + 1]; // G
+                        imageData.data[pixelIndex + 2] = bytes[byteIndex + 2]; // B
+                        imageData.data[pixelIndex + 3] = 255;                  // A
+                        byteIndex += 3;
+                    }
                 }
                 
                 ctx.putImageData(imageData, 0, 0);
                 previewDiv.innerHTML = '';
                 previewDiv.appendChild(canvas);
+                console.log('✅ Image rendered successfully');
                 
             } else {
                 // Text content
