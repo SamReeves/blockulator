@@ -101,18 +101,47 @@ class UploadsApp {
 
             // Initialize factory contract
             if (factoryMeta.contractAddress && factoryMeta.contractAddress !== '0x0000000000000000000000000000000000000000') {
+                // Get provider and check network
+                const provider = this.web3Provider.getProvider();
+                console.log('Provider type:', provider ? provider.constructor.name : 'null');
+                
+                if (provider) {
+                    try {
+                        const network = await provider.getNetwork();
+                        console.log('Provider network:', network.name, 'chainId:', network.chainId);
+                    } catch (netError) {
+                        console.error('Failed to get network:', netError);
+                    }
+                    
+                    // Check if contract has code
+                    try {
+                        const code = await provider.getCode(factoryMeta.contractAddress);
+                        console.log('Contract has code:', code !== '0x', 'length:', code.length);
+                    } catch (codeError) {
+                        console.error('Failed to get contract code:', codeError);
+                    }
+                }
+                
                 this.factoryContract = this.web3Provider.getContract(
                     factoryMeta.contractAddress,
                     this.factoryAbi
                 );
                 console.log('📤 Content factory contract initialized:', factoryMeta.contractAddress);
+                console.log('Contract object:', this.factoryContract);
+                console.log('Available functions:', Object.keys(this.factoryContract.functions || {}));
                 
                 // Test the contract connection
                 try {
+                    console.log('Testing contract call: get_content_count()...');
                     const testCount = await this.factoryContract.get_content_count();
                     console.log('✅ Contract connection verified, content count:', testCount.toString());
                 } catch (testError) {
                     console.error('⚠️ Contract call test failed:', testError);
+                    console.error('Error details:', {
+                        code: testError.code,
+                        method: testError.method,
+                        data: testError.data
+                    });
                 }
             } else {
                 console.warn('⚠️ Content factory not deployed yet');
