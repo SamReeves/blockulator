@@ -75,16 +75,29 @@ class UploadsApp {
 
     async loadContracts() {
         try {
+            console.log('📋 Loading content contracts...');
+            
             // Get content factory metadata
             const factoryMeta = getContractMetadata('content-factory');
             const contentMeta = getContractMetadata('content-blueprint');
 
+            console.log('Factory address:', factoryMeta.contractAddress);
+            console.log('Factory ABI path:', factoryMeta.abi);
+
             // Load ABIs
             const factoryResponse = await fetch(factoryMeta.abi);
+            if (!factoryResponse.ok) {
+                throw new Error(`Failed to load factory ABI: ${factoryResponse.status}`);
+            }
             this.factoryAbi = await factoryResponse.json();
+            console.log('✅ Factory ABI loaded, functions:', this.factoryAbi.filter(x => x.type === 'function').map(x => x.name));
 
             const contentResponse = await fetch(contentMeta.abi);
+            if (!contentResponse.ok) {
+                throw new Error(`Failed to load content ABI: ${contentResponse.status}`);
+            }
             this.contentAbi = await contentResponse.json();
+            console.log('✅ Content ABI loaded');
 
             // Initialize factory contract
             if (factoryMeta.contractAddress && factoryMeta.contractAddress !== '0x0000000000000000000000000000000000000000') {
@@ -92,7 +105,15 @@ class UploadsApp {
                     factoryMeta.contractAddress,
                     this.factoryAbi
                 );
-                console.log('📤 Content factory loaded:', factoryMeta.contractAddress);
+                console.log('📤 Content factory contract initialized:', factoryMeta.contractAddress);
+                
+                // Test the contract connection
+                try {
+                    const testCount = await this.factoryContract.get_content_count();
+                    console.log('✅ Contract connection verified, content count:', testCount.toString());
+                } catch (testError) {
+                    console.error('⚠️ Contract call test failed:', testError);
+                }
             } else {
                 console.warn('⚠️ Content factory not deployed yet');
             }
@@ -279,24 +300,46 @@ class UploadsApp {
     }
 
     async loadRecentContent() {
-        if (!this.factoryContract) return;
+        if (!this.factoryContract) {
+            console.log('No factory contract loaded');
+            return;
+        }
+
+        const contentList = document.getElementById('content-list');
+        if (!contentList) return;
 
         try {
+            console.log('Loading content count from factory...');
             const count = await this.factoryContract.get_content_count();
-            const contentList = document.getElementById('content-list');
-            if (!contentList) return;
+            console.log('Content count:', count.toString());
 
-            contentList.innerHTML = '';
+            if (count.toNumber() === 0) {
+                contentList.innerHTML = '<div class="empty-state" style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">📭 No uploads yet. Be the first!</div>';
+                return;
+            }
+
+            contentList.innerHTML = '<div style="padding: 1rem; color: rgba(255,255,255,0.6);">Loading uploads...</div>';
 
             // Load last 20 items
             const start = Math.max(0, count.toNumber() - 20);
+            contentList.innerHTML = '';
+            
             for (let i = count.toNumber() - 1; i >= start; i--) {
-                const entry = await this.factoryContract.get_content_by_index(i);
-                await this.renderContentEntry(entry, contentList);
+                try {
+                    const entry = await this.factoryContract.get_content_by_index(i);
+                    await this.renderContentEntry(entry, contentList);
+                } catch (entryError) {
+                    console.error(`Failed to load entry ${i}:`, entryError);
+                }
+            }
+
+            if (contentList.children.length === 0) {
+                contentList.innerHTML = '<div class="empty-state" style="padding: 2rem; text-align: center; color: rgba(255,255,255,0.5);">📭 No uploads found</div>';
             }
 
         } catch (error) {
             console.error('Failed to load content:', error);
+            contentList.innerHTML = '<div class="error-state" style="padding: 2rem; text-align: center; color: rgba(255,100,100,0.8);">⚠️ Error loading uploads. Contract may not be deployed yet.</div>';
         }
     }
 
