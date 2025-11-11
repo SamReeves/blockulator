@@ -515,8 +515,8 @@
                                 <div id="image-upload-section" class="upload-section-content">
                                     <div class="upload-info">
                                         <h3>Upload Image</h3>
-                                        <p>Maximum size: 64×64 pixels (RGB)</p>
-                                        <p>Images are automatically scaled to fit</p>
+                                        <p><strong>All images resized to exactly 64×64 pixels (RGB)</strong></p>
+                                        <p>Any image will be stretched/compressed to fit this size</p>
                                     </div>
                                     
                                     <div class="upload-input-group">
@@ -570,10 +570,21 @@
                     </div>
 
                     <!-- Recent Uploads List -->
-                    <div style="margin-top: 3rem; border-top: 2px solid rgba(255,255,255,0.1); padding-top: 2rem;">
+                    <div id="content-list-section" style="margin-top: 3rem; border-top: 2px solid rgba(255,255,255,0.1); padding-top: 2rem;">
                         <h3 style="margin-bottom: 1rem; color: #667eea;">📚 Recent Uploads</h3>
                         <div id="content-list" class="content-list">
                             <div class="loading-state">Loading recent uploads...</div>
+                        </div>
+                    </div>
+
+                    <!-- Content Detail View -->
+                    <div id="content-detail-section" style="display: none; margin-top: 3rem; border-top: 2px solid rgba(255,255,255,0.1); padding-top: 2rem;">
+                        <button id="back-to-list-btn" class="btn-secondary" style="margin-bottom: 1.5rem;">
+                            ← Back to Uploads
+                        </button>
+                        
+                        <div id="content-detail-container" class="content-detail-container">
+                            <!-- Detail content will be injected here -->
                         </div>
                     </div>
 

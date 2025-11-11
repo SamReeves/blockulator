@@ -208,19 +208,24 @@ class UploadsApp {
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                // Draw image on canvas (max 64x64)
+                // ENFORCE exactly 64x64 pixels
                 const ctx = canvas.getContext('2d');
-                const maxSize = 64;
-                const scale = Math.min(maxSize / img.width, maxSize / img.height);
-                const width = Math.floor(img.width * scale);
-                const height = Math.floor(img.height * scale);
+                const targetSize = 64;
 
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
+                canvas.width = targetSize;
+                canvas.height = targetSize;
+                
+                // Use high-quality scaling
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                
+                // Draw image stretched to fill entire 64x64 canvas
+                ctx.drawImage(img, 0, 0, targetSize, targetSize);
 
                 // Show preview
                 canvas.style.display = 'block';
+                
+                console.log(`✅ Image resized to ${targetSize}x${targetSize} (${targetSize * targetSize * 3} bytes)`);
             };
             img.src = e.target.result;
         };
@@ -396,12 +401,17 @@ class UploadsApp {
                 <div style="padding: 0.5rem; color: rgba(255,255,255,0.5); font-style: italic;">Loading...</div>
             </div>
             <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
-                <a href="${etherscanUrl}" target="_blank" class="content-link" style="font-size: 0.75rem;">
+                <a href="${etherscanUrl}" target="_blank" class="content-link" style="font-size: 0.75rem;" onclick="event.stopPropagation()">
                     View on Etherscan →
                 </a>
                 <span style="font-size: 0.7rem; color: rgba(255,255,255,0.3);">${entry.content_address.slice(0, 8)}...</span>
             </div>
         `;
+
+        // Make entry clickable to view details
+        div.addEventListener('click', () => {
+            this.showContentDetail(entry);
+        });
 
         container.appendChild(div);
         
@@ -437,10 +447,21 @@ class UploadsApp {
                 const bytes = window.ethers.utils.arrayify(data);
                 console.log(`Image data: ${bytes.length} bytes (expected ${w * h * 3})`);
                 
-                // Validate data size
+                // Check if data has ABI encoding (offset + length = 64 bytes)
+                // Bytes returned from contract include the ABI encoding prefix
+                let dataStartIndex = 0;
                 const expectedBytes = w * h * 3;
-                if (bytes.length < expectedBytes) {
-                    throw new Error(`Insufficient image data: got ${bytes.length} bytes, need ${expectedBytes}`);
+                
+                if (bytes.length > expectedBytes) {
+                    // ABI encoding has 32 bytes offset + 32 bytes length = skip 64 bytes
+                    dataStartIndex = 64;
+                    console.log('Detected ABI encoding, skipping first 64 bytes (offset + length)');
+                    console.log('First 64 bytes:', Array.from(bytes.slice(0, 64)));
+                }
+                
+                // Validate data size
+                if (bytes.length - dataStartIndex < expectedBytes) {
+                    throw new Error(`Insufficient image data: got ${bytes.length - dataStartIndex} bytes, need ${expectedBytes}`);
                 }
                 
                 // Create canvas to render image
@@ -457,7 +478,7 @@ class UploadsApp {
                 const imageData = ctx.createImageData(w, h);
                 
                 // Convert RGB bytes to RGBA pixels
-                let byteIndex = 0;
+                let byteIndex = dataStartIndex;  // Start from correct offset
                 for (let y = 0; y < h; y++) {
                     for (let x = 0; x < w; x++) {
                         const pixelIndex = (y * w + x) * 4;
@@ -526,11 +547,191 @@ class UploadsApp {
             browseBtn.addEventListener('click', () => this.showView('browse'));
         }
 
+        // Back to list button
+        const backBtn = document.getElementById('back-to-list-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => this.showContentList());
+        }
+
         // Listen for wallet connection
         eventBus.on(EVENTS.WALLET_CONNECTED, async () => {
             console.log('Wallet connected, reloading contracts...');
             await this.loadContracts();
         });
+    }
+
+    /**
+     * Show content detail view
+     */
+    async showContentDetail(entry) {
+        const listSection = document.getElementById('content-list-section');
+        const detailSection = document.getElementById('content-detail-section');
+        const detailContainer = document.getElementById('content-detail-container');
+        
+        if (!detailSection || !detailContainer) return;
+        
+        // Hide list, show detail
+        if (listSection) listSection.style.display = 'none';
+        detailSection.style.display = 'block';
+        
+        // Show loading state
+        detailContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.6);">Loading content...</div>';
+        
+        try {
+            // Get content contract instance
+            const contentContract = this.web3Provider.getContract(
+                entry.content_address,
+                this.contentAbi
+            );
+            
+            const typeIcon = entry.content_type === 0 ? '🖼️' : '📝';
+            const typeName = entry.content_type === 0 ? 'Image' : 'Text';
+            const date = new Date(entry.creation_time.toNumber() * 1000).toLocaleString();
+            const etherscanUrl = `https://sepolia.etherscan.io/address/${entry.content_address}`;
+            
+            // Build detail view header
+            let detailHTML = `
+                <div class="content-detail-header">
+                    <div class="content-detail-title">${typeIcon} ${typeName}</div>
+                    <div class="content-detail-meta">
+                        <div class="content-detail-meta-item">
+                            <span class="content-detail-meta-label">Creator</span>
+                            <span class="content-detail-meta-value">${entry.creator}</span>
+                        </div>
+                        <div class="content-detail-meta-item">
+                            <span class="content-detail-meta-label">Contract Address</span>
+                            <span class="content-detail-meta-value">${entry.content_address}</span>
+                        </div>
+                        <div class="content-detail-meta-item">
+                            <span class="content-detail-meta-label">Size</span>
+                            <span class="content-detail-meta-value">${entry.size.toNumber()} bytes</span>
+                        </div>
+                        <div class="content-detail-meta-item">
+                            <span class="content-detail-meta-label">Created</span>
+                            <span class="content-detail-meta-value">${date}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="content-detail-body">
+            `;
+            
+            if (entry.content_type === 0) {
+                // Image content
+                const [data, width, height] = await Promise.all([
+                    contentContract.content_data(),
+                    contentContract.image_width(),
+                    contentContract.image_height()
+                ]);
+                
+                const w = width.toNumber();
+                const h = height.toNumber();
+                
+                // Convert hex data to RGB pixels
+                const bytes = window.ethers.utils.arrayify(data);
+                
+                // Skip ABI encoding (64 bytes)
+                let dataStartIndex = 0;
+                const expectedBytes = w * h * 3;
+                if (bytes.length > expectedBytes) {
+                    dataStartIndex = 64;
+                }
+                
+                // Create canvas to render image
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+                canvas.style.maxWidth = '400px';
+                canvas.style.width = '100%';
+                canvas.style.height = 'auto';
+                
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.createImageData(w, h);
+                
+                // Convert RGB bytes to RGBA pixels
+                let byteIndex = dataStartIndex;
+                for (let y = 0; y < h; y++) {
+                    for (let x = 0; x < w; x++) {
+                        const pixelIndex = (y * w + x) * 4;
+                        imageData.data[pixelIndex] = bytes[byteIndex];
+                        imageData.data[pixelIndex + 1] = bytes[byteIndex + 1];
+                        imageData.data[pixelIndex + 2] = bytes[byteIndex + 2];
+                        imageData.data[pixelIndex + 3] = 255;
+                        byteIndex += 3;
+                    }
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                
+                detailHTML += `
+                    <div class="content-detail-preview" id="detail-preview-${entry.content_address}">
+                        <div style="text-align: center;">
+                            <div style="margin-bottom: 1rem; color: rgba(255,255,255,0.6);">
+                                ${w}×${h} pixels
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                detailContainer.innerHTML = detailHTML + `
+                    </div>
+                    <div class="content-detail-actions">
+                        <a href="${etherscanUrl}" target="_blank" class="btn-secondary" style="text-align: center; text-decoration: none;">
+                            View on Etherscan →
+                        </a>
+                    </div>
+                `;
+                
+                // Append canvas
+                const previewDiv = document.getElementById(`detail-preview-${entry.content_address}`);
+                if (previewDiv) {
+                    previewDiv.querySelector('div').appendChild(canvas);
+                }
+                
+            } else {
+                // Text content
+                const data = await contentContract.content_data();
+                const bytes = window.ethers.utils.arrayify(data);
+                
+                // Skip ABI encoding if present
+                let textBytes = bytes;
+                if (bytes.length > entry.size.toNumber()) {
+                    textBytes = bytes.slice(64);
+                }
+                
+                const text = window.ethers.utils.toUtf8String(textBytes);
+                
+                detailHTML += `
+                    <div class="content-detail-text">${text}</div>
+                    </div>
+                    <div class="content-detail-actions">
+                        <a href="${etherscanUrl}" target="_blank" class="btn-secondary" style="text-align: center; text-decoration: none;">
+                            View on Etherscan →
+                        </a>
+                    </div>
+                `;
+                
+                detailContainer.innerHTML = detailHTML;
+            }
+            
+        } catch (error) {
+            console.error('Failed to load content detail:', error);
+            detailContainer.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: rgba(255,100,100,0.8);">
+                    ⚠️ Error loading content details
+                </div>
+            `;
+        }
+    }
+    
+    /**
+     * Show content list view
+     */
+    showContentList() {
+        const listSection = document.getElementById('content-list-section');
+        const detailSection = document.getElementById('content-detail-section');
+        
+        if (listSection) listSection.style.display = 'block';
+        if (detailSection) detailSection.style.display = 'none';
     }
 
     /**
