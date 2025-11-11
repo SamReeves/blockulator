@@ -152,18 +152,7 @@ export class MechanicsPanel {
                 if (arrow) {
                     arrow.textContent = details.open ? '▲' : '▼';
                 }
-                
-                // Save state to localStorage
-                localStorage.setItem('mechanics-panel-open', details.open);
             });
-
-            // Restore state from localStorage
-            const savedState = localStorage.getItem('mechanics-panel-open');
-            if (savedState === 'true') {
-                details.open = true;
-                const arrow = details.querySelector('.panel-arrow');
-                if (arrow) arrow.textContent = '▲';
-            }
         }
     }
 }
