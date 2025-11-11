@@ -208,7 +208,7 @@ export class MasterApp {
         if (!this.uploadsApp) {
             // Import and create uploads app
             const { UploadsApp } = await import('../uploads-app.js');
-            this.uploadsApp = new UploadsApp();
+            this.uploadsApp = new UploadsApp(this.toastComponent);
             
             // Don't re-initialize shared components, but do initialize view-specific things
             await this.uploadsApp.initViewOnly();

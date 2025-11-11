@@ -10,13 +10,13 @@ import { initConfetti } from './presentation/effects/confetti-animation.js';
 import { getContractMetadata } from './infrastructure/config/contract-registry.js';
 
 class UploadsApp {
-    constructor() {
+    constructor(toastComponent = null) {
         this.web3Provider = web3Provider;
         this.factoryContract = null;
         this.factoryAbi = null;
         this.contentAbi = null;
         this.walletComponent = null;
-        this.toastComponent = null;
+        this.toastComponent = toastComponent; // Use shared toast or create new one
         this.currentView = 'upload'; // 'upload' or 'browse'
     }
 
@@ -49,6 +49,11 @@ class UploadsApp {
         console.log('📤 Initializing Uploads view...');
 
         try {
+            // Ensure toast component exists
+            if (!this.toastComponent) {
+                this.toastComponent = new ToastComponent();
+            }
+
             // Load ABIs and factory contract
             await this.loadContracts();
 
