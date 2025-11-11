@@ -6,6 +6,7 @@
 
 import { Game } from '../models/game.js';
 import { BarGraph3D } from '../../presentation/components/bar-graph-3d.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 
 export class PissingContest extends Game {
     constructor() {

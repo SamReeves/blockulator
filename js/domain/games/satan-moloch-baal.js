@@ -5,6 +5,7 @@
  */
 
 import { Game } from '../models/game.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 import { LazySusan3D } from '../../presentation/components/lazy-susan-3d.js';
 
 export class SatanMolochBaal extends Game {

@@ -6,6 +6,7 @@
 
 import { Game } from '../models/game.js';
 import { DiceThreeD } from '../../presentation/components/dice-3d.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 
 export class DiceGods extends Game {
     constructor() {

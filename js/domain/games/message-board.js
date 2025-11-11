@@ -6,6 +6,7 @@
 
 import { Game } from '../models/game.js';
 import { MessageFeed } from '../../presentation/components/message-feed.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 
 export class MessageBoard extends Game {
     constructor() {

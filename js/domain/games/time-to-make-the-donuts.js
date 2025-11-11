@@ -5,6 +5,7 @@
  */
 
 import { Game } from '../models/game.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 import { CountdownWheel } from '../../presentation/components/countdown-wheel.js';
 
 export class TimeToMakeTheDonuts extends Game {

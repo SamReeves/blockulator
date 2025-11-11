@@ -6,6 +6,7 @@
 
 import { Game } from '../models/game.js';
 import { KingLadder } from '../../presentation/components/king-ladder.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 
 export class KingOfTheHill extends Game {
     constructor() {

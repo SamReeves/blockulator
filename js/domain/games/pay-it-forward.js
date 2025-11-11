@@ -5,6 +5,7 @@
  */
 
 import { Game } from '../models/game.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 import { AddressFlow } from '../../presentation/components/address-flow.js';
 
 export class PayItForward extends Game {

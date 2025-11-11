@@ -5,6 +5,7 @@
  */
 
 import { Game } from '../models/game.js';
+import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 
 export class LastCall extends Game {
     constructor() {
