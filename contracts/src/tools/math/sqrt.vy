@@ -1,5 +1,5 @@
 #pragma enable-decimals
-# @version 0.4.0
+# @version 0.4.3
 # @author L1Ca$h
 
 # Lookup table for sqrt initial estimates
@@ -21,7 +21,7 @@ SQRT_2: constant(decimal) = 1.4142135624
 SQRT_10: constant(decimal) = 3.1622776602
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate sqrt(x) - square root (FREE - no gas cost)
@@ -36,7 +36,7 @@ def calculate(x: decimal) -> decimal:
     return self._sqrt(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get sqrt(2)

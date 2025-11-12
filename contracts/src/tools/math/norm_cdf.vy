@@ -32,7 +32,7 @@ EXP_NEG_X_SQ: constant(decimal[36]) = [
 ]
 
 @external
-@view
+@pure
 def calculate(x: decimal, mu: decimal = 0.0, sigma: decimal = 1.0) -> decimal:
     """
     @notice Calculate CDF of normal distribution N(μ, σ²) (FREE - no gas cost)
@@ -53,7 +53,7 @@ def calculate(x: decimal, mu: decimal = 0.0, sigma: decimal = 1.0) -> decimal:
     return 0.5 * (1.0 + erf_val)
 
 @external
-@view
+@pure
 def standard_cdf(z: decimal) -> decimal:
     """
     @notice Calculate CDF of standard normal N(0, 1) (FREE - no gas cost)
@@ -65,7 +65,7 @@ def standard_cdf(z: decimal) -> decimal:
     return 0.5 * (1.0 + erf_val)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get √2 constant

@@ -121,7 +121,7 @@ ATAN_TABLE: constant(decimal[500]) = [
 ]
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate atan(x) for any x (FREE - no gas cost)
@@ -135,7 +135,7 @@ def calculate(x: decimal) -> decimal:
     return self._atan(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get π/4 = atan(1)

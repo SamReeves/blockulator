@@ -17,7 +17,7 @@ TAB: constant(decimal[10][11]) = [
 TAU: constant(decimal) = 6.2831853072
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate tau^x
@@ -29,7 +29,7 @@ def calculate(x: decimal) -> decimal:
     return self._tau_to_the(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get the value of tau

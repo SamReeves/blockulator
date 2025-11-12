@@ -82,6 +82,9 @@ export const eventBus = new EventBus();
 
 // Common events
 export const EVENTS = {
+    // Network events
+    NETWORK_CHANGED: 'network:changed',
+    
     // Wallet events
     WALLET_CONNECTED: 'wallet:connected',
     WALLET_DISCONNECTED: 'wallet:disconnected',

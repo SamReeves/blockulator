@@ -34,7 +34,7 @@ LN_FACTORIALS: constant(decimal[21]) = [
 LN_2: constant(decimal) = 0.6931471806
 
 @external
-@view
+@pure
 def calculate(n: uint256) -> decimal:
     """
     @notice Calculate ln(n!) (FREE - no gas cost)
@@ -45,7 +45,7 @@ def calculate(n: uint256) -> decimal:
     return LN_FACTORIALS[n]
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get ln(2) constant

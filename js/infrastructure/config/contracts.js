@@ -9,7 +9,7 @@
  * objects by extracting them from the new unified registry.
  */
 
-import { NETWORK } from './network.js';
+import { getCurrentNetwork } from './network.js';
 import { CONTRACT_REGISTRY } from './contract-registry.js';
 
 // Sepolia Testnet Addresses - ZERO-FEE DEPLOYMENT (Nov 11, 2025)
@@ -113,8 +113,8 @@ const NETWORK_ADDRESSES = {
     mainnet: MAINNET_ADDRESSES
 };
 
-// Export active network addresses
-export const CONTRACT_ADDRESSES = NETWORK_ADDRESSES[NETWORK];
+// Export active network addresses (dynamically resolved)
+export const CONTRACT_ADDRESSES = NETWORK_ADDRESSES[getCurrentNetwork()];
 
 // Map contract addresses to their source files
 export const CONTRACT_SOURCES = {

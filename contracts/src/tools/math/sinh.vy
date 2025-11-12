@@ -24,7 +24,7 @@ TAB: constant(decimal[10][11]) = [
 E: constant(decimal) = 2.7182818285
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate sinh(x) = (e^x - e^(-x)) / 2 (FREE - no gas cost)
@@ -44,7 +44,7 @@ def calculate(x: decimal) -> decimal:
     return self._sinh(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get sinh(1)

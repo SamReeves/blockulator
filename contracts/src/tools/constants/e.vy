@@ -15,7 +15,7 @@ TAB: constant(decimal[10][11]) = [[1.0, 2.7182818285, 7.3890560989, 20.085536923
 E: constant(decimal) = 2.7182818285
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate e^x
@@ -27,7 +27,7 @@ def calculate(x: decimal) -> decimal:
     return self._e_to_the(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get Euler's number

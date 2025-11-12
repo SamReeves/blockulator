@@ -1,5 +1,5 @@
 #pragma enable-decimals
-# @version 0.4.0
+# @version 0.4.3
 # @author L1Ca$h
 
 # Error function erf(x) = (2/sqrt(pi)) * integral[0 to x] e^(-t^2) dt
@@ -35,7 +35,7 @@ EXP_NEG_X_SQ: constant(decimal[36]) = [
 ]
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate erf(x) - error function (FREE - no gas cost)
@@ -51,7 +51,7 @@ def calculate(x: decimal) -> decimal:
     return self._erf(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get 2/sqrt(pi) constant used in erf calculation

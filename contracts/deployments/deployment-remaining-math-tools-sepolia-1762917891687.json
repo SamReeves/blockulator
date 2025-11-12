@@ -1,0 +1,98 @@
+{
+  "network": "sepolia",
+  "timestamp": "2025-11-12T03:24:51.687Z",
+  "deployer": "0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4",
+  "contracts": [
+    {
+      "name": "LN",
+      "address": "0x97704a241B5bA93766dDB06B2Dd2EC23B86B2d9B",
+      "tx": "0x1f1c886809950732feb609cf37922512c99c7784f1b2e8c22114f3bcafcac8e5",
+      "gasUsed": "759510",
+      "category": "Math"
+    },
+    {
+      "name": "SQRT",
+      "address": "0xC999D88b2eC5156Ed7450f4e87F90d62a6fDfe7F",
+      "tx": "0xd0fab00508fb906b41e970436833ef351e9686ff461875095ab1a9c6e58d1277",
+      "gasUsed": "433577",
+      "category": "Math"
+    },
+    {
+      "name": "ERF",
+      "address": "0xF22CE9660d6ef35C89aE42bd5C4232c189d8c383",
+      "tx": "0x9590ad631354789524cedb4d236ff1207062810a24d1a6ca7afd8b00e3d7b287",
+      "gasUsed": "573585",
+      "category": "Math"
+    },
+    {
+      "name": "POW2",
+      "address": "0x319dB5B4f50fc59990B918f2795c2f20723F89fe",
+      "tx": "0x4092ecd816e76ce01c219b81d72d07af5bf3d170409a5e117f7f0468ff80bcdd",
+      "gasUsed": "444464",
+      "category": "Math"
+    },
+    {
+      "name": "POW10",
+      "address": "0xcF16024C6f5D932De5a536fAd936a0c8Bf183f09",
+      "tx": "0x33ae7bcb44b11bad051f4eecd448c0a948e5523036d295be46ad07d6124c8208",
+      "gasUsed": "447070",
+      "category": "Math"
+    },
+    {
+      "name": "LOG2",
+      "address": "0xa4ff03de97a32fcC676cc6feeB100Fb6204fdEfa",
+      "tx": "0x36b26ae64e980c3855546db2377da6ce56dd24d839545806e5559b52c53a0d8d",
+      "gasUsed": "758220",
+      "category": "Math"
+    },
+    {
+      "name": "LOG10",
+      "address": "0x46839Bf281922D5f3391E7c976cb3e37771F1d91",
+      "tx": "0x80be0ead376704613fa2a8355b43f96535f568d2f53062f063ec9200201451cf",
+      "gasUsed": "764046",
+      "category": "Math"
+    },
+    {
+      "name": "E",
+      "address": "0x0d9400E91be5Eb885f94cd2085E6D18afB6BfefC",
+      "tx": "0x685d154c11263620dbd26382b55861fe0e2aff4e950813804dced11d0ecf10d8",
+      "gasUsed": "445040",
+      "category": "Constants"
+    },
+    {
+      "name": "PI",
+      "address": "0x04bd1844fEA23089437eFab17117Dfb70a4eEFB0",
+      "tx": "0xc74ff144334f71d58719bde4fd8d2ebb0eb7204bac6fcdd6d043c8f89c6652da",
+      "gasUsed": "445208",
+      "category": "Constants"
+    },
+    {
+      "name": "TAU",
+      "address": "0x5291f42bF578B499ce23713eb8bCbaA9B42acaEE",
+      "tx": "0x4ea66faaad521e6485afe1897764513fc8357440f623805b1b7cee8f9c858967",
+      "gasUsed": "446482",
+      "category": "Constants"
+    },
+    {
+      "name": "SIN",
+      "address": "0x5c376D372B6E48836Be299D4Dd48D2017Af0665F",
+      "tx": "0xee47996239c16f2559e770afb5cdd8cd12e712c41cd8a7a683b53b57125084ad",
+      "gasUsed": "2377803",
+      "category": "Trig"
+    },
+    {
+      "name": "COS",
+      "address": "0x2A61002185aFDE7eFCA81A1E77f2F6d73AC1744F",
+      "tx": "0xab44617eb5fb701d18d139c30709f961498bd015fcbef0cfe51a1e149e6c484c",
+      "gasUsed": "2382135",
+      "category": "Trig"
+    },
+    {
+      "name": "TANH",
+      "address": "0xc43f9C03EA92e3cCe5f865cF704F35c75A364EE1",
+      "tx": "0x8236191aceddc5c33c34ffee125442f9d7e30a574dd520ff3e208c0207973f69",
+      "gasUsed": "2368185",
+      "category": "Trig"
+    }
+  ]
+}

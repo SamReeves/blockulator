@@ -3,24 +3,28 @@
 """
 @title Content - Immutable On-Chain Image or Text Storage
 @author L1Ca$h
-@notice Stores either an image (up to 64×64 RGB) or text (up to 16KB) on-chain
+@notice Stores either an image (up to 16KB RGB) or text (up to 16KB) on-chain
 @dev Deployed from content_factory.vy using blueprint pattern
 
 DESIGN PRINCIPLES:
 - IMMUTABLE content and ownership (permanent storage)
-- EFFICIENT storage (12KB for images, 16KB for text max)
+- EFFICIENT storage (16KB max for both images and text)
 - CODIFIED data (minimal contract, maximal content)
 - TYPE-SAFE (enforced at creation via factory)
 
 STORAGE LIMITS:
-- Images: 64×64×3 = 12,288 bytes (RGB pixel art)
+- Images: Up to 16KB RGB (5,461 pixels max - various dimensions supported)
+  * Square: 73×73 = 5,329 pixels = 15,987 bytes
+  * Wide: 128×42 = 5,376 pixels = 16,128 bytes
+  * Tall: 42×128 = 5,376 pixels = 16,128 bytes
+  * Custom: Any width×height where width×height×3 ≤ 16,384 and dimensions ≤ 128
 - Text: 16,384 bytes (16KB UTF-8 text)
 - Total per contract: Single content piece only
 
 ECONOMICS:
-- Creation cost: ~250K-330K gas depending on size
+- Creation cost: ~250K-500K gas depending on size
 - No ongoing costs (immutable storage)
-- Gas scales linearly with content size
+- Gas scales linearly with content size (~70 gas/byte)
 """
 
 # ============================================================================
@@ -37,9 +41,9 @@ event ContentCreated:
 # CONSTANTS
 # ============================================================================
 
-MAX_IMAGE_SIZE: constant(uint256) = 12288   # 64×64×3 RGB
+MAX_IMAGE_SIZE: constant(uint256) = 16384   # 16KB RGB (5,461 pixels max)
 MAX_TEXT_SIZE: constant(uint256) = 16384    # 16KB UTF-8
-MAX_IMAGE_DIMENSION: constant(uint256) = 64
+MAX_IMAGE_DIMENSION: constant(uint256) = 128  # Max width or height
 
 # ============================================================================
 # STATE VARIABLES

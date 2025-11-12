@@ -31,7 +31,7 @@ FACTORIALS: constant(uint256[21]) = [
 ]
 
 @external
-@view
+@pure
 def calculate(n: uint256) -> uint256:
     """
     @notice Calculate n! for small integers (FREE - no gas cost)
@@ -42,7 +42,7 @@ def calculate(n: uint256) -> uint256:
     return FACTORIALS[n]
 
 @external
-@view
+@pure
 def get_constant() -> uint256:
     """
     @notice Get e! (closest integer approximation)

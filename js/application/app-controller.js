@@ -7,7 +7,7 @@
 import { web3Provider } from '../infrastructure/blockchain/web3-provider.js';
 import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
 import { initConfetti } from '../presentation/effects/confetti-animation.js';
-import { WalletConnectComponent, ToastComponent } from '../presentation/components/index.js';
+import { WalletConnectComponent, NetworkSwitcherComponent, ToastComponent } from '../presentation/components/index.js';
 import { ModuleRegistry } from './module-registry.js';
 import { Router } from './router.js';
 
@@ -19,6 +19,7 @@ export class AppController {
         this.moduleRegistry = new ModuleRegistry();
         this.router = null;
         this.walletComponent = null;
+        this.networkSwitcher = null;
         this.toastComponent = null;
     }
 
@@ -32,6 +33,9 @@ export class AppController {
         // Initialize components
         this.walletComponent = new WalletConnectComponent(this.web3Provider);
         this.walletComponent.render();
+        
+        this.networkSwitcher = new NetworkSwitcherComponent();
+        this.networkSwitcher.render();
         
         this.toastComponent = new ToastComponent();
         

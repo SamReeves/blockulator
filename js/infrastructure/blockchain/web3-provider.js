@@ -5,7 +5,7 @@
  */
 
 import { eventBus, EVENTS } from '../events/event-bus.js';
-import { config } from '../config/network.js';
+import { getConfig } from '../config/network.js';
 
 class Web3Provider {
     constructor() {
@@ -18,6 +18,9 @@ class Web3Provider {
         
         // Initialize read-only provider immediately
         this.initReadOnlyProvider();
+        
+        // Listen for network changes
+        this.setupNetworkChangeListener();
     }
 
     /**
@@ -26,6 +29,7 @@ class Web3Provider {
      */
     initReadOnlyProvider() {
         try {
+            const config = getConfig();
             // Initialize with network from config
             this.readOnlyProvider = new ethers.providers.JsonRpcProvider(
                 config.rpcUrl
@@ -34,6 +38,17 @@ class Web3Provider {
         } catch (error) {
             console.error('Failed to initialize read-only provider:', error);
         }
+    }
+    
+    /**
+     * Listen for network changes and reinitialize provider
+     */
+    setupNetworkChangeListener() {
+        eventBus.on(EVENTS.NETWORK_CHANGED, ({ config }) => {
+            console.log(`🔄 Web3Provider: Network changed to ${config.name}`);
+            // Note: The actual page reload happens in NetworkSwitcherComponent
+            // This listener is here for future enhancement if we want to avoid full reload
+        });
     }
 
     /**
@@ -124,6 +139,9 @@ class Web3Provider {
                 chainIdHex: '0x' + this.chainId.toString(16),
                 address: this.address
             });
+            
+            // Get current network config
+            const config = getConfig();
             
             // Check if on correct network
             if (this.chainId !== config.chainId) {

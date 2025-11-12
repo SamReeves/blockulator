@@ -4,7 +4,7 @@
  * Consolidates addresses, source files, ABIs, and display metadata
  */
 
-import { NETWORK } from './network.js';
+import { getCurrentNetwork } from './network.js';
 
 /**
  * Contract Registry - All contract metadata in one place
@@ -542,20 +542,23 @@ export const CONTRACT_REGISTRY = {
 /**
  * Get contract metadata by name
  * @param {string} contractName - Contract identifier (e.g., 'dice-gods')
- * @param {string} network - Network name (default: from config)
+ * @param {string} network - Network name (default: current network)
  * @returns {object} Complete contract metadata
  */
-export function getContractMetadata(contractName, network = NETWORK) {
+export function getContractMetadata(contractName, network = null) {
     const metadata = CONTRACT_REGISTRY[contractName];
     
     if (!metadata) {
         throw new Error(`Unknown contract: ${contractName}`);
     }
     
+    // Use current network if not specified
+    const targetNetwork = network || getCurrentNetwork();
+    
     // Return metadata with resolved address for current network
     return {
         ...metadata,
-        contractAddress: metadata.addresses[network],
+        contractAddress: metadata.addresses[targetNetwork],
         sourceFile: metadata.source,
         abiFile: metadata.abi
     };
@@ -564,10 +567,10 @@ export function getContractMetadata(contractName, network = NETWORK) {
 /**
  * Get contract address only (backward compatibility helper)
  * @param {string} contractName - Contract identifier
- * @param {string} network - Network name (default: from config)
+ * @param {string} network - Network name (default: current network)
  * @returns {string} Contract address
  */
-export function getContractAddress(contractName, network = NETWORK) {
+export function getContractAddress(contractName, network = null) {
     return getContractMetadata(contractName, network).contractAddress;
 }
 

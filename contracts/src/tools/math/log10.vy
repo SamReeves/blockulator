@@ -1,5 +1,5 @@
 #pragma enable-decimals
-# @version 0.4.0
+# @version 0.4.3
 # @author L1Ca$h
 
 # Lookup table for calculating log10(x) using digit-by-digit extraction
@@ -24,7 +24,7 @@ TAB: constant(decimal[10][11]) = [
 BASE10: constant(decimal) = 10.0
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate log10(x) - common logarithm (FREE - no gas cost)
@@ -36,7 +36,7 @@ def calculate(x: decimal) -> decimal:
     return self._log10(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get the base value (10)

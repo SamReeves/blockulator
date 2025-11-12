@@ -111,7 +111,7 @@ TANH_TABLE: constant(decimal[500]) = [
 ]
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate tanh(x) - hyperbolic tangent
@@ -121,7 +121,7 @@ def calculate(x: decimal) -> decimal:
     return self._tanh(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get tanh(0) which equals 0

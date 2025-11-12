@@ -112,7 +112,7 @@ SIN_TABLE: constant(decimal[500]) = [
 ]
 
 @external
-@view
+@pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate sin(x) in radians
@@ -122,7 +122,7 @@ def calculate(x: decimal) -> decimal:
     return self._sin(x)
 
 @external
-@view
+@pure
 def get_constant() -> decimal:
     """
     @notice Get sin(pi/2) which equals 1

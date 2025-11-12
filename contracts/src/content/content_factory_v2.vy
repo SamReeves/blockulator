@@ -1,47 +1,64 @@
 # @version 0.4.3
 
 """
-@title Content Factory - Uploads Registry
+@title Content Factory V2 - Dual Blueprint Upload System
 @author L1Ca$h
 @notice Factory for creating immutable on-chain content (images and text)
-@dev Uses blueprint pattern for gas-efficient deployment
+@dev Uses TWO separate blueprints for type safety
 
 ARCHITECTURE:
-- Blueprint-based factory for creating content contracts
+- Two separate blueprints: ImageContent and TextContent
+- Type-safe creation (no runtime type checking in children)
 - HashMap registry for O(1) content lookup
 - DynArray tracking for browsing (Top 1000 pattern)
 - No marketplace (pure content codification)
-- Anti-spam cooldowns and fees
 
 CONTENT TYPES:
-- Type 0: Image (up to 16KB RGB = 5,461 pixels max, dimensions up to 128×128)
-- Type 1: Text (up to 16KB UTF-8 = 16,384 bytes)
+- Images: Via image_blueprint (ImageContent.vy)
+  * Up to 16KB RGB (5,461 pixels)
+  * Dimensions: 1-128 for width/height
+  * Format: Row-major RGB bytes
 
-SUPPORTED IMAGE DIMENSIONS:
-- Square: 73×73 (15,987 bytes), 64×64 (12,288 bytes), etc.
-- Wide: 128×42 (16,128 bytes), 96×56 (16,128 bytes), etc.
-- Tall: 42×128 (16,128 bytes), 56×96 (16,128 bytes), etc.
-- Custom: Any width×height where width×height×3 ≤ 16,384 and both ≤ 128
+- Text: Via text_blueprint (TextContent.vy)
+  * Up to 16KB UTF-8
+  * ~8,000 words
+  * Format: UTF-8 encoded string
+
+BENEFITS OF SEPARATION:
+- Type safety at compile time
+- Smaller per-contract bytecode
+- No conditional logic overhead
+- Cleaner interfaces
+- Easier to extend
 
 ECONOMICS:
 - Optional creation fee (configurable by owner)
 - Cooldown period between uploads (anti-spam)
-- Users pay their own gas (~$10-30 per upload depending on size)
+- Users pay their own gas (~$10-30 per upload)
 """
 
 # ============================================================================
 # EVENTS
 # ============================================================================
 
-event ContentCreated:
+event ImageCreated:
     content_address: indexed(address)
     creator: indexed(address)
-    content_type: uint8
+    width: uint256
+    height: uint256
+    size: uint256
+    timestamp: uint256
+    slot_index: uint256
+
+event TextCreated:
+    content_address: indexed(address)
+    creator: indexed(address)
     size: uint256
     timestamp: uint256
     slot_index: uint256
 
 event BlueprintUpdated:
+    blueprint_type: String[10]  # "image" or "text"
     old_blueprint: indexed(address)
     new_blueprint: indexed(address)
     timestamp: uint256
@@ -64,15 +81,20 @@ struct ContentEntry:
     data_hash: bytes32
 
 # ============================================================================
-# INTERFACE
+# INTERFACES
 # ============================================================================
 
-interface IContent:
+interface IImageContent:
     def creator() -> address: view
-    def content_type() -> uint8: view
-    def actual_size() -> uint256: view
-    def get_content_hash() -> bytes32: view
-    def get_metadata() -> (address, uint8, uint256, uint256, uint256, uint256): view
+    def width() -> uint256: view
+    def height() -> uint256: view
+    def data_size() -> uint256: view
+    def get_data_hash() -> bytes32: view
+
+interface ITextContent:
+    def creator() -> address: view
+    def data_size() -> uint256: view
+    def get_data_hash() -> bytes32: view
 
 # ============================================================================
 # CONSTANTS
@@ -89,10 +111,11 @@ DEFAULT_COOLDOWN: constant(uint256) = 300      # 5 minutes
 # STATE VARIABLES
 # ============================================================================
 
-# Blueprint for deploying content contracts
-content_blueprint: public(address)
+# Two separate blueprints for type safety
+image_blueprint: public(address)
+text_blueprint: public(address)
 
-# Content registry (Top 1000 pattern like board.vy/future_factory.vy)
+# Content registry (Top 1000 pattern)
 contents: public(DynArray[ContentEntry, MAX_CONTENTS])
 content_index: public(HashMap[address, uint256])  # address -> array index
 is_content: public(HashMap[address, bool])        # quick membership check
@@ -119,38 +142,48 @@ owner: public(address)
 # ============================================================================
 
 @deploy
-def __init__(_content_blueprint: address, _owner: address, _creation_fee: uint256, _creation_cooldown: uint256):
+def __init__(
+    _image_blueprint: address,
+    _text_blueprint: address,
+    _owner: address,
+    _creation_fee: uint256,
+    _creation_cooldown: uint256
+):
     """
-    @notice Initialize content factory
-    @param _content_blueprint Address of content contract blueprint
-    @param _owner Factory owner (can update blueprint, adjust fees)
-    @param _creation_fee Minimum ETH required to create content (0 = free)
-    @param _creation_cooldown Seconds between creations per address (0 = no limit)
+    @notice Initialize factory with two separate blueprints
+    @param _image_blueprint Blueprint address for ImageContent
+    @param _text_blueprint Blueprint address for TextContent
+    @param _owner Factory owner address
+    @param _creation_fee Fee in wei (0 for free)
+    @param _creation_cooldown Seconds between uploads (0 for no cooldown)
     """
-    assert _content_blueprint != empty(address), "Invalid blueprint address"
-    assert _owner != empty(address), "Invalid owner address"
+    assert _image_blueprint != empty(address), "Invalid image blueprint"
+    assert _text_blueprint != empty(address), "Invalid text blueprint"
+    assert _owner != empty(address), "Invalid owner"
     
-    self.content_blueprint = _content_blueprint
+    self.image_blueprint = _image_blueprint
+    self.text_blueprint = _text_blueprint
     self.owner = _owner
     self.creation_fee = _creation_fee
     self.creation_cooldown = _creation_cooldown
+    
     self.total_created = 0
     self.total_images = 0
     self.total_texts = 0
 
 # ============================================================================
-# FACTORY FUNCTIONS
+# FACTORY FUNCTIONS - Type Safe Creation
 # ============================================================================
 
 @external
 @payable
 def create_image(width: uint256, height: uint256, pixel_data: Bytes[16384]) -> address:
     """
-    @notice Create an immutable image (up to 16KB RGB, max dimensions 128×128)
+    @notice Create an immutable image (type-safe via ImageContent blueprint)
     @param width Image width in pixels (1-128)
     @param height Image height in pixels (1-128)
     @param pixel_data RGB pixel data in row-major order (max 16,384 bytes)
-    @return Address of deployed content contract
+    @return Address of deployed ImageContent contract
     """
     # Validation
     assert msg.value >= self.creation_fee, "Insufficient creation fee"
@@ -165,15 +198,14 @@ def create_image(width: uint256, height: uint256, pixel_data: Bytes[16384]) -> a
         if last_created > 0:
             assert block.timestamp >= last_created + self.creation_cooldown, "Cooldown active"
     
-    # Deploy from blueprint
+    # Deploy from IMAGE blueprint
     new_content: address = create_from_blueprint(
-        self.content_blueprint,
-        convert(0, uint8),  # content_type: image
-        pixel_data,     # content_data
-        width,          # width
-        height,         # height
-        msg.sender,     # creator
-        self,           # factory
+        self.image_blueprint,
+        width,          # _width
+        height,         # _height
+        pixel_data,     # _pixel_data
+        msg.sender,     # _creator
+        self,           # _factory
         code_offset=3
     )
     
@@ -184,15 +216,28 @@ def create_image(width: uint256, height: uint256, pixel_data: Bytes[16384]) -> a
     self.total_images += 1
     self.last_creation_time[msg.sender] = block.timestamp
     
+    # Get slot index for event
+    slot_index: uint256 = len(self.contents) - 1
+    
+    log ImageCreated(
+        content_address=new_content,
+        creator=msg.sender,
+        width=width,
+        height=height,
+        size=len(pixel_data),
+        timestamp=block.timestamp,
+        slot_index=slot_index
+    )
+    
     return new_content
 
 @external
 @payable
 def create_text(text_data: Bytes[16384]) -> address:
     """
-    @notice Create immutable text (up to 16KB UTF-8)
-    @param text_data UTF-8 encoded text data
-    @return Address of deployed content contract
+    @notice Create an immutable text (type-safe via TextContent blueprint)
+    @param text_data UTF-8 encoded text (max 16,384 bytes)
+    @return Address of deployed TextContent contract
     """
     # Validation
     assert msg.value >= self.creation_fee, "Insufficient creation fee"
@@ -205,18 +250,12 @@ def create_text(text_data: Bytes[16384]) -> address:
         if last_created > 0:
             assert block.timestamp >= last_created + self.creation_cooldown, "Cooldown active"
     
-    # Pad text_data to fit image data parameter (empty bytes for unused space)
-    padded_data: Bytes[16384] = text_data
-    
-    # Deploy from blueprint
+    # Deploy from TEXT blueprint
     new_content: address = create_from_blueprint(
-        self.content_blueprint,
-        convert(1, uint8),  # content_type: text
-        padded_data,    # content_data
-        convert(0, uint256),  # width (not used for text)
-        convert(0, uint256),  # height (not used for text)
-        msg.sender,     # creator
-        self,           # factory
+        self.text_blueprint,
+        text_data,      # _text_data
+        msg.sender,     # _creator
+        self,           # _factory
         code_offset=3
     )
     
@@ -227,6 +266,17 @@ def create_text(text_data: Bytes[16384]) -> address:
     self.total_texts += 1
     self.last_creation_time[msg.sender] = block.timestamp
     
+    # Get slot index for event
+    slot_index: uint256 = len(self.contents) - 1
+    
+    log TextCreated(
+        content_address=new_content,
+        creator=msg.sender,
+        size=len(text_data),
+        timestamp=block.timestamp,
+        slot_index=slot_index
+    )
+    
     return new_content
 
 # ============================================================================
@@ -234,181 +284,211 @@ def create_text(text_data: Bytes[16384]) -> address:
 # ============================================================================
 
 @internal
-def _register_content(content_addr: address, creator_addr: address, content_type: uint8, size: uint256):
+def _register_content(
+    content_addr: address,
+    creator_addr: address,
+    content_type: uint8,
+    size: uint256
+):
     """
-    @notice Register content in factory registry (Top 1000 pattern)
-    @param content_addr The deployed content contract address
-    @param creator_addr The creator's address
-    @param content_type 0=image, 1=text
-    @param size Size in bytes
+    @notice Register newly created content in registry
     """
-    # Get content hash for verification
-    data_hash: bytes32 = staticcall IContent(content_addr).get_content_hash()
+    # Get hash from content contract
+    data_hash: bytes32 = empty(bytes32)
+    if content_type == 0:  # Image
+        data_hash = staticcall IImageContent(content_addr).get_data_hash()
+    else:  # Text
+        data_hash = staticcall ITextContent(content_addr).get_data_hash()
     
     # Create entry
-    entry: ContentEntry = ContentEntry(
-        content_address=content_addr,
-        creator=creator_addr,
-        content_type=content_type,
-        creation_time=block.timestamp,
-        size=size,
-        data_hash=data_hash
-    )
+    entry: ContentEntry = ContentEntry({
+        content_address: content_addr,
+        creator: creator_addr,
+        content_type: content_type,
+        creation_time: block.timestamp,
+        size: size,
+        data_hash: data_hash
+    })
     
-    # Register in main array (Top 1000 pattern - oldest gets replaced when full)
-    slot_index: uint256 = 0
+    # Handle Top 1000 registry
     if len(self.contents) < MAX_CONTENTS:
-        # Array not full - append
+        # Room available - just append
         self.contents.append(entry)
-        slot_index = len(self.contents) - 1
+        idx: uint256 = len(self.contents) - 1
+        self.content_index[content_addr] = idx
     else:
-        # Array full - replace oldest
-        slot_index = 0
+        # Replace oldest entry (slot 0)
         old_content: address = self.contents[0].content_address
         
-        # Remove old content from registry
+        # Remove old content from index
         self.is_content[old_content] = False
         self.content_index[old_content] = 0
         
-        # Shift array left (remove first element)
+        # Shift all entries down
         for i: uint256 in range(MAX_CONTENTS - 1):
-            if i < MAX_CONTENTS - 1:
-                self.contents[i] = self.contents[i + 1]
-                self.content_index[self.contents[i].content_address] = i
+            self.contents[i] = self.contents[i + 1]
+            self.content_index[self.contents[i].content_address] = i
         
-        # Add new entry at end
+        # Add new content at end
         self.contents[MAX_CONTENTS - 1] = entry
-        slot_index = MAX_CONTENTS - 1
+        self.content_index[content_addr] = MAX_CONTENTS - 1
         
         log ContentReplaced(
             old_content=old_content,
             new_content=content_addr,
-            slot_index=slot_index
+            slot_index=MAX_CONTENTS - 1
         )
     
-    # Update maps
-    self.content_index[content_addr] = slot_index
+    # Mark as valid content
     self.is_content[content_addr] = True
     
-    # Track per-creator (max 50)
+    # Track creator's contents
     if self.creator_count[creator_addr] < 50:
         self.creator_contents[creator_addr].append(content_addr)
         self.creator_count[creator_addr] += 1
     
-    # Update total
+    # Increment total
     self.total_created += 1
-    
-    log ContentCreated(
-        content_address=content_addr,
-        creator=creator_addr,
-        content_type=content_type,
-        size=size,
-        timestamp=block.timestamp,
-        slot_index=slot_index
-    )
 
 # ============================================================================
-# VIEW FUNCTIONS - REGISTRY LOOKUPS
+# VIEW FUNCTIONS
 # ============================================================================
 
 @view
 @external
-def get_content_by_index(index: uint256) -> ContentEntry:
+def get_content_count() -> uint256:
     """
-    @notice Get content entry by array index
-    @param index Index in contents array (0 to total-1)
-    @return ContentEntry struct
+    @notice Get number of contents in registry
+    @return Number of contents (max 1000)
+    """
+    return len(self.contents)
+
+@view
+@external
+def get_content(index: uint256) -> ContentEntry:
+    """
+    @notice Get content entry by index
+    @param index Index in contents array
+    @return Content entry struct
     """
     assert index < len(self.contents), "Index out of bounds"
     return self.contents[index]
 
 @view
 @external
-def get_content_count() -> uint256:
+def get_recent_contents(count: uint256) -> DynArray[ContentEntry, 100]:
     """
-    @notice Get total number of content entries in registry
-    @return Number of registered contents (max 1000)
+    @notice Get most recent contents
+    @param count Number of contents to retrieve (max 100)
+    @return Array of content entries (newest first)
     """
-    return len(self.contents)
+    assert count <= 100, "Count too large"
+    
+    result: DynArray[ContentEntry, 100] = []
+    total: uint256 = len(self.contents)
+    
+    for i: uint256 in range(100):
+        if i >= count or i >= total:
+            break
+        result.append(self.contents[total - 1 - i])
+    
+    return result
 
 @view
 @external
 def get_creator_contents(creator_addr: address) -> DynArray[address, 50]:
     """
-    @notice Get all content addresses created by an address
-    @param creator_addr The creator's address
-    @return Array of content contract addresses (max 50)
+    @notice Get all contents created by an address
+    @param creator_addr Creator address
+    @return Array of content addresses
     """
     return self.creator_contents[creator_addr]
 
 @view
 @external
-def can_create(creator_addr: address) -> (bool, String[100]):
+def get_statistics() -> (uint256, uint256, uint256):
     """
-    @notice Check if an address can create content (with reason if not)
-    @param creator_addr The address to check
-    @return (can_create, reason)
+    @notice Get factory statistics
+    @return (total_created, total_images, total_texts)
     """
-    # Check cooldown
-    if self.creation_cooldown > 0:
-        last_created: uint256 = self.last_creation_time[creator_addr]
-        if last_created > 0:
-            next_allowed: uint256 = last_created + self.creation_cooldown
-            if block.timestamp < next_allowed:
-                return (False, "Creation cooldown active")
-    
-    return (True, "Can create content")
+    return (self.total_created, self.total_images, self.total_texts)
 
 # ============================================================================
-# GOVERNANCE FUNCTIONS
+# OWNER FUNCTIONS
 # ============================================================================
 
 @external
-def set_blueprint(new_blueprint: address):
+def update_image_blueprint(new_blueprint: address):
     """
-    @notice Update content blueprint (for future deployments)
-    @param new_blueprint New blueprint address
-    @dev Only owner, does NOT affect existing content
+    @notice Update image blueprint address
+    @param new_blueprint New ImageContent blueprint address
     """
     assert msg.sender == self.owner, "Only owner"
     assert new_blueprint != empty(address), "Invalid blueprint"
     
-    old_blueprint: address = self.content_blueprint
-    self.content_blueprint = new_blueprint
+    old_blueprint: address = self.image_blueprint
+    self.image_blueprint = new_blueprint
     
     log BlueprintUpdated(
+        blueprint_type="image",
         old_blueprint=old_blueprint,
         new_blueprint=new_blueprint,
         timestamp=block.timestamp
     )
 
 @external
-def set_creation_fee(new_fee: uint256):
+def update_text_blueprint(new_blueprint: address):
+    """
+    @notice Update text blueprint address
+    @param new_blueprint New TextContent blueprint address
+    """
+    assert msg.sender == self.owner, "Only owner"
+    assert new_blueprint != empty(address), "Invalid blueprint"
+    
+    old_blueprint: address = self.text_blueprint
+    self.text_blueprint = new_blueprint
+    
+    log BlueprintUpdated(
+        blueprint_type="text",
+        old_blueprint=old_blueprint,
+        new_blueprint=new_blueprint,
+        timestamp=block.timestamp
+    )
+
+@external
+def update_creation_fee(new_fee: uint256):
     """
     @notice Update creation fee
-    @param new_fee New minimum fee in wei (0 = free)
-    @dev Only owner
+    @param new_fee New fee in wei
     """
     assert msg.sender == self.owner, "Only owner"
     self.creation_fee = new_fee
 
 @external
-def set_creation_cooldown(new_cooldown: uint256):
+def update_cooldown(new_cooldown: uint256):
     """
-    @notice Update creation cooldown
-    @param new_cooldown New cooldown in seconds (0 = no cooldown)
-    @dev Only owner
+    @notice Update cooldown period
+    @param new_cooldown New cooldown in seconds
     """
     assert msg.sender == self.owner, "Only owner"
     self.creation_cooldown = new_cooldown
 
 @external
-def set_owner(new_owner: address):
+def transfer_ownership(new_owner: address):
     """
-    @notice Transfer ownership
+    @notice Transfer factory ownership
     @param new_owner New owner address
-    @dev Only current owner
     """
     assert msg.sender == self.owner, "Only owner"
     assert new_owner != empty(address), "Invalid owner"
     self.owner = new_owner
+
+@external
+def withdraw_fees():
+    """
+    @notice Withdraw collected fees
+    """
+    assert msg.sender == self.owner, "Only owner"
+    send(self.owner, self.balance)
+
+
