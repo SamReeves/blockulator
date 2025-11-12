@@ -513,20 +513,86 @@
                                 <!-- Image Upload Section -->
                                 <div id="image-upload-section" class="upload-section-content">
                                     <div class="upload-info">
-                                        <h3>Upload Image</h3>
-                                        <p><strong>All images resized to exactly 64×64 pixels (RGB)</strong></p>
-                                        <p>Any image will be stretched/compressed to fit this size</p>
+                                        <h3>🎨 Upload Compressed Image</h3>
+                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
+                                            Choose compression mode to maximize your on-chain storage capacity
+                                        </p>
                                     </div>
                                     
                                     <div class="upload-input-group">
                                         <label for="image-input" class="file-upload-label">
-                                            <span class="file-upload-text">Choose Image File</span>
+                                            <span class="file-upload-text">📁 Choose Image File</span>
                                             <input type="file" id="image-input" accept="image/*" class="file-input">
                                         </label>
                                     </div>
 
+                                    <!-- Compression Mode Selector -->
+                                    <div id="compression-mode-selector" class="compression-mode-selector" style="display:none; margin: 1.5rem 0;">
+                                        <h4 style="margin-bottom: 1rem; color: #667eea; font-size: 1rem;">
+                                            🔧 Select Compression Mode
+                                        </h4>
+                                        <div class="compression-modes">
+                                            <div class="compression-mode-card" data-mode="0">
+                                                <div class="mode-header">
+                                                    <span class="mode-icon">🌈</span>
+                                                    <span class="mode-name">RGB Full Color</span>
+                                                </div>
+                                                <div class="mode-capacity">Max: <strong>73×73</strong> (5,461 pixels)</div>
+                                                <div class="mode-description">16.7 million colors, best quality</div>
+                                                <div class="mode-size">3 bytes/pixel</div>
+                                            </div>
+                                            
+                                            <div class="compression-mode-card" data-mode="1">
+                                                <div class="mode-header">
+                                                    <span class="mode-icon">⬜</span>
+                                                    <span class="mode-name">Grayscale</span>
+                                                </div>
+                                                <div class="mode-capacity">Max: <strong>128×128</strong> (16,384 pixels)</div>
+                                                <div class="mode-description">256 shades of gray</div>
+                                                <div class="mode-size">1 byte/pixel • <strong class="gain">3× larger!</strong></div>
+                                            </div>
+                                            
+                                            <div class="compression-mode-card" data-mode="2">
+                                                <div class="mode-header">
+                                                    <span class="mode-icon">⬛</span>
+                                                    <span class="mode-name">Monochrome</span>
+                                                </div>
+                                                <div class="mode-capacity">Max: <strong>362×362</strong> (131,072 pixels)</div>
+                                                <div class="mode-description">Black & white with dithering</div>
+                                                <div class="mode-size">1 bit/pixel • <strong class="gain">24× larger!</strong></div>
+                                            </div>
+                                            
+                                            <div class="compression-mode-card" data-mode="3">
+                                                <div class="mode-header">
+                                                    <span class="mode-icon">🎨</span>
+                                                    <span class="mode-name">Indexed Color</span>
+                                                </div>
+                                                <div class="mode-capacity">Max: <strong>124×124</strong> (15,376 pixels)</div>
+                                                <div class="mode-description">256-color palette, ideal for pixel art</div>
+                                                <div class="mode-size">1 byte/pixel + palette • <strong class="gain">3× larger</strong></div>
+                                            </div>
+                                        </div>
+
+                                        <div id="mode-suggestion" class="mode-suggestion" style="display:none; margin-top: 1rem; padding: 1rem; background: rgba(102, 126, 234, 0.15); border-radius: 8px; border: 2px solid rgba(102, 126, 234, 0.3);">
+                                            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.9);">
+                                                <strong>💡 Smart Suggestion:</strong> <span id="suggestion-text"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image Preview -->
                                     <div class="image-preview">
-                                        <canvas id="image-preview-canvas" style="display:none; max-width: 100%; image-rendering: pixelated;"></canvas>
+                                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                            <div style="flex: 1; min-width: 250px;">
+                                                <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Original</h4>
+                                                <canvas id="image-preview-canvas" style="display:none; width: 100%; height: auto; image-rendering: pixelated; border: 2px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.3);"></canvas>
+                                            </div>
+                                            <div style="flex: 1; min-width: 250px;" id="compressed-preview-container" style="display:none;">
+                                                <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Compressed Preview</h4>
+                                                <canvas id="compressed-preview-canvas" style="width: 100%; height: auto; image-rendering: pixelated; border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 4px; background: rgba(0,0,0,0.3);"></canvas>
+                                            </div>
+                                        </div>
+                                        <div id="image-info" style="margin-top: 1rem;"></div>
                                     </div>
                                 </div>
 

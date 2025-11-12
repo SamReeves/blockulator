@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Image Contract</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 8px;
+        }
+        canvas {
+            border: 2px solid #666;
+            margin: 10px;
+            image-rendering: pixelated;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #4a7c59;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #5a8c69;
+        }
+        pre {
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        input {
+            width: 500px;
+            padding: 8px;
+            background: #333;
+            border: 1px solid #666;
+            color: #fff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Image Contract Debugger</h1>
+    
+    <div class="section">
+        <h2>1. Connect & Load</h2>
+        <div>
+            <label>Contract Address:</label><br>
+            <input type="text" id="contractAddress" value="0x82671E120993B2b61a03b092c251bAcEBD712593" />
+        </div>
+        <br>
+        <button onclick="loadContract()">Load Contract</button>
+        <button onclick="connectWallet()">Connect Wallet</button>
+        <div id="status" style="margin-top: 10px; color: #aaa;"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Contract Info</h2>
+        <pre id="contractInfo">Not loaded yet...</pre>
+    </div>
+
+    <div class="section">
+        <h2>3. Raw Data Analysis</h2>
+        <button onclick="analyzeData()">Analyze Raw Data</button>
+        <pre id="dataAnalysis">Click analyze...</pre>
+    </div>
+
+    <div class="section">
+        <h2>4. Render Attempts</h2>
+        <button onclick="renderAllVersions()">Try All Rendering Methods</button>
+        <div id="canvasContainer"></div>
+    </div>
+
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+    <script>
+        let provider = null;
+        let signer = null;
+        let contract = null;
+
+        const ABI = [
+            "function content_data() view returns (bytes)",
+            "function get_content() view returns (bytes)",
+            "function image_width() view returns (uint256)",
+            "function image_height() view returns (uint256)",
+            "function content_type() view returns (uint8)",
+            "function actual_size() view returns (uint256)",
+            "function creator() view returns (address)"
+        ];
+
+        function log(msg) {
+            document.getElementById('status').innerHTML += msg + '<br>';
+            console.log(msg);
+        }
+
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('Please install MetaMask!');
+                return;
+            }
+            
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                const address = await signer.getAddress();
+                log(`✅ Connected: ${address}`);
+            } catch (error) {
+                log(`❌ Connection failed: ${error.message}`);
+            }
+        }
+
+        async function loadContract() {
+            const address = document.getElementById('contractAddress').value;
+            
+            if (!provider) {
+                // Use public RPC if wallet not connected
+                provider = new ethers.providers.JsonRpcProvider('https://ethereum-sepolia-rpc.publicnode.com');
+            }
+            
+            try {
+                contract = new ethers.Contract(address, ABI, provider);
+                log(`✅ Contract loaded at ${address}`);
+                
+                // Get basic info
+                const [width, height, contentType, size, creator] = await Promise.all([
+                    contract.image_width(),
+                    contract.image_height(),
+                    contract.content_type(),
+                    contract.actual_size(),
+                    contract.creator()
+                ]);
+                
+                const info = `
+Type: ${contentType === 0 ? 'Image' : 'Text'}
+Width: ${width}
+Height: ${height}
+Expected Size: ${width * height * 3} bytes
+Actual Size: ${size}
+Creator: ${creator}
+                `;
+                
+                document.getElementById('contractInfo').textContent = info;
+                log('✅ Contract info loaded');
+                
+            } catch (error) {
+                log(`❌ Failed to load contract: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        async function analyzeData() {
+            if (!contract) {
+                alert('Load contract first!');
+                return;
+            }
+            
+            try {
+                log('🔍 Fetching data with content_data()...');
+                const data1 = await contract.content_data();
+                const bytes1 = ethers.utils.arrayify(data1);
+                
+                log('🔍 Fetching data with get_content()...');
+                let data2, bytes2;
+                try {
+                    data2 = await contract.get_content();
+                    bytes2 = ethers.utils.arrayify(data2);
+                } catch (e) {
+                    log('⚠️ get_content() not available');
+                }
+                
+                const width = await contract.image_width();
+                const height = await contract.image_height();
+                const expectedBytes = width * height * 3;
+                
+                let analysis = `
+=== content_data() ===
+Total bytes: ${bytes1.length}
+Expected bytes: ${expectedBytes}
+Difference: ${bytes1.length - expectedBytes}
+
+First 32 bytes (hex):
+${Array.from(bytes1.slice(0, 32)).map(b => b.toString(16).padStart(2, '0')).join(' ')}
+
+Bytes 32-64 (hex):
+${Array.from(bytes1.slice(32, 64)).map(b => b.toString(16).padStart(2, '0')).join(' ')}
+
+Bytes 64-96 (hex):
+${Array.from(bytes1.slice(64, 96)).map(b => b.toString(16).padStart(2, '0')).join(' ')}
+
+Last 16 bytes (hex):
+${Array.from(bytes1.slice(-16)).map(b => b.toString(16).padStart(2, '0')).join(' ')}
+
+First 16 bytes (decimal):
+${Array.from(bytes1.slice(0, 16)).join(', ')}
+
+Analysis:
+- If bytes 0-31 are all zeros or large numbers: ABI encoding offset
+- If bytes 32-63 contain the length: ABI encoding length
+- Actual data should start at byte ${bytes1.length > expectedBytes ? '64' : '0'}
+                `;
+
+                if (bytes2) {
+                    analysis += `\n\n=== get_content() ===
+Total bytes: ${bytes2.length}
+Match: ${bytes2.length === bytes1.length ? '✅ Same' : '❌ Different'}
+                    `;
+                }
+                
+                document.getElementById('dataAnalysis').textContent = analysis;
+                
+                // Store for rendering
+                window.imageData = bytes1;
+                window.imageDimensions = { width: width.toNumber(), height: height.toNumber() };
+                
+            } catch (error) {
+                log(`❌ Analysis failed: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function renderImage(bytes, width, height, startOffset, title) {
+            const container = document.getElementById('canvasContainer');
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'display: inline-block; margin: 10px; text-align: center;';
+            
+            const label = document.createElement('div');
+            label.textContent = title;
+            label.style.cssText = 'margin-bottom: 5px; font-weight: bold;';
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = '256px';
+            canvas.style.height = '256px';
+            
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(width, height);
+            
+            let byteIndex = startOffset;
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const pixelIndex = (y * width + x) * 4;
+                    imageData.data[pixelIndex] = bytes[byteIndex] || 0;        // R
+                    imageData.data[pixelIndex + 1] = bytes[byteIndex + 1] || 0; // G
+                    imageData.data[pixelIndex + 2] = bytes[byteIndex + 2] || 0; // B
+                    imageData.data[pixelIndex + 3] = 255;                        // A
+                    byteIndex += 3;
+                }
+            }
+            
+            ctx.putImageData(imageData, 0, 0);
+            
+            wrapper.appendChild(label);
+            wrapper.appendChild(canvas);
+            container.appendChild(wrapper);
+        }
+
+        async function renderAllVersions() {
+            if (!window.imageData || !window.imageDimensions) {
+                alert('Run "Analyze Raw Data" first!');
+                return;
+            }
+            
+            const container = document.getElementById('canvasContainer');
+            container.innerHTML = '';
+            
+            const bytes = window.imageData;
+            const { width, height } = window.imageDimensions;
+            
+            // Try different offsets
+            renderImage(bytes, width, height, 0, 'Offset 0 (No ABI encoding)');
+            renderImage(bytes, width, height, 32, 'Offset 32 (Skip offset)');
+            renderImage(bytes, width, height, 64, 'Offset 64 (Skip offset + length)');
+            
+            // Try column-major instead of row-major
+            const wrapper = document.createElement('div');
+            wrapper.style.cssText = 'display: inline-block; margin: 10px; text-align: center;';
+            const label = document.createElement('div');
+            label.textContent = 'Column-major order';
+            label.style.cssText = 'margin-bottom: 5px; font-weight: bold;';
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            canvas.style.width = '256px';
+            canvas.style.height = '256px';
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(width, height);
+            
+            let byteIndex = 0;
+            for (let x = 0; x < width; x++) {
+                for (let y = 0; y < height; y++) {
+                    const pixelIndex = (y * width + x) * 4;
+                    imageData.data[pixelIndex] = bytes[byteIndex];
+                    imageData.data[pixelIndex + 1] = bytes[byteIndex + 1];
+                    imageData.data[pixelIndex + 2] = bytes[byteIndex + 2];
+                    imageData.data[pixelIndex + 3] = 255;
+                    byteIndex += 3;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            wrapper.appendChild(label);
+            wrapper.appendChild(canvas);
+            container.appendChild(wrapper);
+            
+            log('✅ Rendered all versions');
+        }
+    </script>
+</body>
+</html>
+

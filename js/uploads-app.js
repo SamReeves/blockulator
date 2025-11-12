@@ -208,24 +208,71 @@ class UploadsApp {
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                // ENFORCE exactly 64x64 pixels
                 const ctx = canvas.getContext('2d');
-                const targetSize = 64;
-
-                canvas.width = targetSize;
-                canvas.height = targetSize;
+                
+                // Contract limits: max 128x128 dimensions, max 16,384 bytes (5,461 pixels)
+                const MAX_DIMENSION = 128;
+                const MAX_BYTES = 16384;
+                const MAX_PIXELS = Math.floor(MAX_BYTES / 3); // 5,461 pixels
+                
+                // Calculate optimal dimensions preserving aspect ratio
+                let targetWidth = img.width;
+                let targetHeight = img.height;
+                const aspectRatio = img.width / img.height;
+                
+                // Scale down if either dimension exceeds max
+                if (targetWidth > MAX_DIMENSION || targetHeight > MAX_DIMENSION) {
+                    if (aspectRatio > 1) {
+                        // Wider than tall
+                        targetWidth = MAX_DIMENSION;
+                        targetHeight = Math.round(MAX_DIMENSION / aspectRatio);
+                    } else {
+                        // Taller than wide
+                        targetHeight = MAX_DIMENSION;
+                        targetWidth = Math.round(MAX_DIMENSION * aspectRatio);
+                    }
+                }
+                
+                // Scale down if total pixels exceed max
+                const totalPixels = targetWidth * targetHeight;
+                if (totalPixels > MAX_PIXELS) {
+                    const scale = Math.sqrt(MAX_PIXELS / totalPixels);
+                    targetWidth = Math.floor(targetWidth * scale);
+                    targetHeight = Math.floor(targetHeight * scale);
+                }
+                
+                // Ensure at least 1x1
+                targetWidth = Math.max(1, targetWidth);
+                targetHeight = Math.max(1, targetHeight);
+                
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
                 
                 // Use high-quality scaling
                 ctx.imageSmoothingEnabled = true;
                 ctx.imageSmoothingQuality = 'high';
                 
-                // Draw image stretched to fill entire 64x64 canvas
-                ctx.drawImage(img, 0, 0, targetSize, targetSize);
+                // Draw image scaled to target dimensions (preserving aspect ratio)
+                ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
                 // Show preview
                 canvas.style.display = 'block';
                 
-                console.log(`✅ Image resized to ${targetSize}x${targetSize} (${targetSize * targetSize * 3} bytes)`);
+                const totalBytes = targetWidth * targetHeight * 3;
+                console.log(`✅ Image scaled to ${targetWidth}×${targetHeight} (${totalBytes.toLocaleString()} bytes, ${totalPixels.toLocaleString()} pixels)`);
+                console.log(`   Original: ${img.width}×${img.height}, Aspect ratio: ${aspectRatio.toFixed(2)}`);
+                
+                // Update UI to show dimensions
+                const infoDiv = document.getElementById('image-info');
+                if (infoDiv) {
+                    infoDiv.innerHTML = `
+                        <div style="padding: 0.5rem; background: rgba(102, 126, 234, 0.2); border-radius: 4px; margin-top: 0.5rem;">
+                            <strong>Dimensions:</strong> ${targetWidth}×${targetHeight} pixels<br>
+                            <strong>Size:</strong> ${totalBytes.toLocaleString()} bytes (${(totalBytes/1024).toFixed(2)} KB)<br>
+                            <strong>Original:</strong> ${img.width}×${img.height} → aspect ratio preserved ✓
+                        </div>
+                    `;
+                }
             };
             img.src = e.target.result;
         };
@@ -264,16 +311,23 @@ class UploadsApp {
         // Get pixel data from canvas
         const ctx = canvas.getContext('2d');
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        const pixelData = [];
-
-        // Convert to RGB bytes (removing alpha channel)
+        
+        // Convert to RGB bytes (removing alpha channel) - use Uint8Array for proper encoding
+        const pixelData = new Uint8Array(canvas.width * canvas.height * 3);
+        let writeIndex = 0;
+        
         for (let i = 0; i < imageData.data.length; i += 4) {
-            pixelData.push(imageData.data[i]);     // R
-            pixelData.push(imageData.data[i + 1]); // G
-            pixelData.push(imageData.data[i + 2]); // B
+            pixelData[writeIndex++] = imageData.data[i];     // R
+            pixelData[writeIndex++] = imageData.data[i + 1]; // G
+            pixelData[writeIndex++] = imageData.data[i + 2]; // B
         }
 
         const pixelBytes = window.ethers.utils.hexlify(pixelData);
+        
+        console.log(`📤 Uploading ${canvas.width}x${canvas.height} image`);
+        console.log(`   Pixel data: ${pixelData.length} bytes`);
+        console.log(`   First 16 bytes:`, Array.from(pixelData.slice(0, 16)));
+        console.log(`   Hex length:`, pixelBytes.length);
 
         this.toastComponent.show('Creating image on-chain...', 'info');
 
@@ -385,26 +439,43 @@ class UploadsApp {
         const typeName = entry.content_type === 0 ? 'Image' : 'Text';
         const date = new Date(entry.creation_time.toNumber() * 1000).toLocaleString();
         
-        // Link to Etherscan to view the contract
+        // Links to Etherscan
         const etherscanUrl = `https://sepolia.etherscan.io/address/${entry.content_address}`;
+        const creatorUrl = `https://sepolia.etherscan.io/address/${entry.creator}`;
 
         div.innerHTML = `
             <div class="content-entry-header">
                 <span class="content-type">${typeIcon} ${typeName}</span>
-                <span class="content-size">${entry.size.toNumber()} bytes</span>
+                <span class="content-size">${entry.size.toNumber().toLocaleString()} bytes</span>
             </div>
             <div class="content-entry-meta">
-                <span class="content-creator" title="${entry.creator}">${entry.creator.slice(0, 6)}...${entry.creator.slice(-4)}</span>
+                <a href="${creatorUrl}" target="_blank" rel="noopener noreferrer" 
+                   class="content-creator" 
+                   title="${entry.creator}"
+                   style="color: var(--md-sys-color-secondary); text-decoration: none; cursor: pointer;"
+                   onclick="event.stopPropagation()">
+                    ${entry.creator.slice(0, 6)}...${entry.creator.slice(-4)}
+                </a>
                 <span class="content-date">${date}</span>
             </div>
             <div class="content-preview" id="preview-${entry.content_address}">
                 <div style="padding: 0.5rem; color: rgba(255,255,255,0.5); font-style: italic;">Loading...</div>
             </div>
-            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem;">
-                <a href="${etherscanUrl}" target="_blank" class="content-link" style="font-size: 0.75rem;" onclick="event.stopPropagation()">
-                    View on Etherscan →
+            <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: 0.5rem; justify-content: space-between;">
+                <a href="${etherscanUrl}" target="_blank" rel="noopener noreferrer" 
+                   class="content-link" 
+                   style="font-size: 0.75rem; color: var(--md-sys-color-primary); text-decoration: none;" 
+                   onclick="event.stopPropagation()">
+                    🔗 View on Etherscan
                 </a>
-                <span style="font-size: 0.7rem; color: rgba(255,255,255,0.3);">${entry.content_address.slice(0, 8)}...</span>
+                <span style="font-size: 0.7rem; color: rgba(255,255,255,0.3); display: flex; gap: 0.25rem; align-items: center;">
+                    ${entry.content_address.slice(0, 10)}...
+                    <button onclick="event.stopPropagation(); navigator.clipboard.writeText('${entry.content_address}').then(() => uploadsApp.toastComponent.show('Address copied!', 'success'))" 
+                            style="padding: 0.15rem 0.3rem; background: rgba(102, 126, 234, 0.2); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 3px; cursor: pointer; font-size: 0.65rem;"
+                            title="Copy contract address">
+                        📋
+                    </button>
+                </span>
             </div>
         `;
 
@@ -439,30 +510,24 @@ class UploadsApp {
                     contentContract.image_height()
                 ]);
                 
-                const w = width.toNumber();
-                const h = height.toNumber();
-                console.log(`Image dimensions: ${w}x${h}`);
-                
-                // Convert hex data to RGB pixels
-                const bytes = window.ethers.utils.arrayify(data);
-                console.log(`Image data: ${bytes.length} bytes (expected ${w * h * 3})`);
-                
-                // Check if data has ABI encoding (offset + length = 64 bytes)
-                // Bytes returned from contract include the ABI encoding prefix
-                let dataStartIndex = 0;
-                const expectedBytes = w * h * 3;
-                
-                if (bytes.length > expectedBytes) {
-                    // ABI encoding has 32 bytes offset + 32 bytes length = skip 64 bytes
-                    dataStartIndex = 64;
-                    console.log('Detected ABI encoding, skipping first 64 bytes (offset + length)');
-                    console.log('First 64 bytes:', Array.from(bytes.slice(0, 64)));
-                }
-                
-                // Validate data size
-                if (bytes.length - dataStartIndex < expectedBytes) {
-                    throw new Error(`Insufficient image data: got ${bytes.length - dataStartIndex} bytes, need ${expectedBytes}`);
-                }
+            const w = width.toNumber();
+            const h = height.toNumber();
+            console.log(`Image dimensions: ${w}x${h}`);
+            
+            // Convert hex data to RGB pixels
+            const bytes = window.ethers.utils.arrayify(data);
+            console.log(`Image data: ${bytes.length} bytes (expected ${w * h * 3})`);
+            
+            // Ethers.js automatically handles ABI decoding when using the ABI
+            // The returned bytes should be the raw pixel data without encoding prefix
+            const expectedBytes = w * h * 3;
+            
+            // Validate data size
+            if (bytes.length !== expectedBytes) {
+                console.error(`Data size mismatch: got ${bytes.length} bytes, expected ${expectedBytes} bytes`);
+                console.log('First 16 bytes:', Array.from(bytes.slice(0, 16)));
+                console.log('Last 16 bytes:', Array.from(bytes.slice(-16)));
+            }
                 
                 // Create canvas to render image
                 const canvas = document.createElement('canvas');
@@ -474,21 +539,21 @@ class UploadsApp {
                 canvas.style.border = '1px solid rgba(102, 126, 234, 0.3)';
                 canvas.style.borderRadius = '4px';
                 
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.createImageData(w, h);
-                
-                // Convert RGB bytes to RGBA pixels
-                let byteIndex = dataStartIndex;  // Start from correct offset
-                for (let y = 0; y < h; y++) {
-                    for (let x = 0; x < w; x++) {
-                        const pixelIndex = (y * w + x) * 4;
-                        imageData.data[pixelIndex] = bytes[byteIndex];       // R
-                        imageData.data[pixelIndex + 1] = bytes[byteIndex + 1]; // G
-                        imageData.data[pixelIndex + 2] = bytes[byteIndex + 2]; // B
-                        imageData.data[pixelIndex + 3] = 255;                  // A
-                        byteIndex += 3;
-                    }
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(w, h);
+            
+            // Convert RGB bytes to RGBA pixels (no offset needed - ethers.js handles ABI)
+            let byteIndex = 0;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const pixelIndex = (y * w + x) * 4;
+                    imageData.data[pixelIndex] = bytes[byteIndex];       // R
+                    imageData.data[pixelIndex + 1] = bytes[byteIndex + 1]; // G
+                    imageData.data[pixelIndex + 2] = bytes[byteIndex + 2]; // B
+                    imageData.data[pixelIndex + 3] = 255;                  // A
+                    byteIndex += 3;
                 }
+            }
                 
                 ctx.putImageData(imageData, 0, 0);
                 previewDiv.innerHTML = '';
@@ -588,6 +653,7 @@ class UploadsApp {
             const typeName = entry.content_type === 0 ? 'Image' : 'Text';
             const date = new Date(entry.creation_time.toNumber() * 1000).toLocaleString();
             const etherscanUrl = `https://sepolia.etherscan.io/address/${entry.content_address}`;
+            const creatorUrl = `https://sepolia.etherscan.io/address/${entry.creator}`;
             
             // Build detail view header
             let detailHTML = `
@@ -596,15 +662,37 @@ class UploadsApp {
                     <div class="content-detail-meta">
                         <div class="content-detail-meta-item">
                             <span class="content-detail-meta-label">Creator</span>
-                            <span class="content-detail-meta-value">${entry.creator}</span>
+                            <span class="content-detail-meta-value">
+                                <a href="${creatorUrl}" target="_blank" rel="noopener noreferrer" 
+                                   style="color: var(--md-sys-color-primary); text-decoration: none; border-bottom: 1px solid var(--md-sys-color-primary);"
+                                   title="View creator on Etherscan">
+                                    ${entry.creator}
+                                </a>
+                                <button onclick="navigator.clipboard.writeText('${entry.creator}').then(() => uploadsApp.toastComponent.show('Creator address copied!', 'success'))" 
+                                        style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; background: rgba(102, 126, 234, 0.2); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 4px; cursor: pointer; font-size: 0.8rem;"
+                                        title="Copy creator address">
+                                    📋
+                                </button>
+                            </span>
                         </div>
                         <div class="content-detail-meta-item">
                             <span class="content-detail-meta-label">Contract Address</span>
-                            <span class="content-detail-meta-value">${entry.content_address}</span>
+                            <span class="content-detail-meta-value">
+                                <a href="${etherscanUrl}" target="_blank" rel="noopener noreferrer" 
+                                   style="color: var(--md-sys-color-primary); text-decoration: none; border-bottom: 1px solid var(--md-sys-color-primary);"
+                                   title="View contract on Etherscan">
+                                    ${entry.content_address}
+                                </a>
+                                <button onclick="navigator.clipboard.writeText('${entry.content_address}').then(() => uploadsApp.toastComponent.show('Contract address copied!', 'success'))" 
+                                        style="margin-left: 0.5rem; padding: 0.25rem 0.5rem; background: rgba(102, 126, 234, 0.2); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 4px; cursor: pointer; font-size: 0.8rem;"
+                                        title="Copy contract address">
+                                    📋
+                                </button>
+                            </span>
                         </div>
                         <div class="content-detail-meta-item">
                             <span class="content-detail-meta-label">Size</span>
-                            <span class="content-detail-meta-value">${entry.size.toNumber()} bytes</span>
+                            <span class="content-detail-meta-value">${entry.size.toNumber().toLocaleString()} bytes</span>
                         </div>
                         <div class="content-detail-meta-item">
                             <span class="content-detail-meta-label">Created</span>
@@ -623,42 +711,37 @@ class UploadsApp {
                     contentContract.image_height()
                 ]);
                 
-                const w = width.toNumber();
-                const h = height.toNumber();
-                
-                // Convert hex data to RGB pixels
-                const bytes = window.ethers.utils.arrayify(data);
-                
-                // Skip ABI encoding (64 bytes)
-                let dataStartIndex = 0;
-                const expectedBytes = w * h * 3;
-                if (bytes.length > expectedBytes) {
-                    dataStartIndex = 64;
+            const w = width.toNumber();
+            const h = height.toNumber();
+            
+            // Convert hex data to RGB pixels
+            const bytes = window.ethers.utils.arrayify(data);
+            
+            // Ethers.js handles ABI decoding - no offset needed
+            
+            // Create canvas to render image
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            canvas.style.maxWidth = '400px';
+            canvas.style.width = '100%';
+            canvas.style.height = 'auto';
+            
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(w, h);
+            
+            // Convert RGB bytes to RGBA pixels
+            let byteIndex = 0;
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const pixelIndex = (y * w + x) * 4;
+                    imageData.data[pixelIndex] = bytes[byteIndex];
+                    imageData.data[pixelIndex + 1] = bytes[byteIndex + 1];
+                    imageData.data[pixelIndex + 2] = bytes[byteIndex + 2];
+                    imageData.data[pixelIndex + 3] = 255;
+                    byteIndex += 3;
                 }
-                
-                // Create canvas to render image
-                const canvas = document.createElement('canvas');
-                canvas.width = w;
-                canvas.height = h;
-                canvas.style.maxWidth = '400px';
-                canvas.style.width = '100%';
-                canvas.style.height = 'auto';
-                
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.createImageData(w, h);
-                
-                // Convert RGB bytes to RGBA pixels
-                let byteIndex = dataStartIndex;
-                for (let y = 0; y < h; y++) {
-                    for (let x = 0; x < w; x++) {
-                        const pixelIndex = (y * w + x) * 4;
-                        imageData.data[pixelIndex] = bytes[byteIndex];
-                        imageData.data[pixelIndex + 1] = bytes[byteIndex + 1];
-                        imageData.data[pixelIndex + 2] = bytes[byteIndex + 2];
-                        imageData.data[pixelIndex + 3] = 255;
-                        byteIndex += 3;
-                    }
-                }
+            }
                 
                 ctx.putImageData(imageData, 0, 0);
                 
@@ -674,9 +757,16 @@ class UploadsApp {
                 
                 detailContainer.innerHTML = detailHTML + `
                     </div>
-                    <div class="content-detail-actions">
-                        <a href="${etherscanUrl}" target="_blank" class="btn-secondary" style="text-align: center; text-decoration: none;">
-                            View on Etherscan →
+                    <div class="content-detail-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; margin-top: 1rem;">
+                        <a href="${etherscanUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="btn-secondary" 
+                           style="flex: 1; min-width: 200px; text-align: center; text-decoration: none; padding: 0.75rem; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: 8px; font-weight: bold;">
+                            🔗 View Contract on Etherscan
+                        </a>
+                        <a href="${creatorUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="btn-secondary" 
+                           style="flex: 1; min-width: 200px; text-align: center; text-decoration: none; padding: 0.75rem; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-radius: 8px; font-weight: bold;">
+                            👤 View Creator on Etherscan
                         </a>
                     </div>
                 `;
@@ -687,25 +777,27 @@ class UploadsApp {
                     previewDiv.querySelector('div').appendChild(canvas);
                 }
                 
-            } else {
-                // Text content
-                const data = await contentContract.content_data();
-                const bytes = window.ethers.utils.arrayify(data);
-                
-                // Skip ABI encoding if present
-                let textBytes = bytes;
-                if (bytes.length > entry.size.toNumber()) {
-                    textBytes = bytes.slice(64);
-                }
-                
-                const text = window.ethers.utils.toUtf8String(textBytes);
+        } else {
+            // Text content
+            const data = await contentContract.content_data();
+            const bytes = window.ethers.utils.arrayify(data);
+            
+            // Ethers.js handles ABI decoding - use bytes directly
+            const text = window.ethers.utils.toUtf8String(bytes);
                 
                 detailHTML += `
                     <div class="content-detail-text">${text}</div>
                     </div>
-                    <div class="content-detail-actions">
-                        <a href="${etherscanUrl}" target="_blank" class="btn-secondary" style="text-align: center; text-decoration: none;">
-                            View on Etherscan →
+                    <div class="content-detail-actions" style="display: flex; gap: 1rem; flex-wrap: wrap; padding: 1rem; background: rgba(0,0,0,0.2); border-radius: 8px; margin-top: 1rem;">
+                        <a href="${etherscanUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="btn-secondary" 
+                           style="flex: 1; min-width: 200px; text-align: center; text-decoration: none; padding: 0.75rem; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-radius: 8px; font-weight: bold;">
+                            🔗 View Contract on Etherscan
+                        </a>
+                        <a href="${creatorUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="btn-secondary" 
+                           style="flex: 1; min-width: 200px; text-align: center; text-decoration: none; padding: 0.75rem; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); border-radius: 8px; font-weight: bold;">
+                            👤 View Creator on Etherscan
                         </a>
                     </div>
                 `;
