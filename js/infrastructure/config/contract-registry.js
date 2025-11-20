@@ -516,7 +516,7 @@ export const CONTRACT_REGISTRY = {
         type: 'content',
         name: 'Content Factory',
         emoji: '🏭',
-        description: 'Create on-chain images and text',
+        description: 'Create on-chain images and text (RGB only)',
         addresses: {
             sepolia: '0x657D5E7A3568C8b26Dc63797f2634B063bE9277e',
             mainnet: '0x0000000000000000000000000000000000000000'
@@ -529,13 +529,40 @@ export const CONTRACT_REGISTRY = {
         type: 'content',
         name: 'Content Blueprint',
         emoji: '📄',
-        description: 'Content contract blueprint',
+        description: 'Content contract blueprint (legacy)',
         addresses: {
             sepolia: '0x571bd6BCE1245e8bdA37db84caeC8adb1cCecc2F',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/content/content.vy',
         abi: 'contracts/build/abis/content.json'
+    },
+    
+    // ========== CONTENT V3 (5-MODE COMPRESSION) ==========
+    'content-factory-v3': {
+        type: 'content',
+        name: 'Content Factory V3',
+        emoji: '🏭✨',
+        description: '5-mode compression: RGB, Grayscale, Monochrome, Indexed, RGB565',
+        addresses: {
+            sepolia: '0x0E3250cAb6c3648a18330c846a7A814574E92143',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/content/content_factory_v3.vy',
+        abi: 'contracts/build/abis/content_factory_v3.json'
+    },
+    
+    'image-content-blueprint-v3': {
+        type: 'content',
+        name: 'Image Content Blueprint V3',
+        emoji: '🖼️',
+        description: 'Multi-mode compressed image storage',
+        addresses: {
+            sepolia: '0xF5793ff8457983Ab6a6b739315069a954C30A238',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/content/image_content_v3.vy',
+        abi: 'contracts/build/abis/image_content_v3.json'
     }
 };
 

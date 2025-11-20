@@ -502,7 +502,10 @@
                         <div class="upload-panel">
                             <div class="upload-type-selector">
                                 <button id="upload-type-image" class="upload-type-btn active" data-type="image">
-                                    🖼️ Image
+                                    🖼️ Upload
+                                </button>
+                                <button id="upload-type-draw" class="upload-type-btn" data-type="draw">
+                                    🎨 Draw
                                 </button>
                                 <button id="upload-type-text" class="upload-type-btn" data-type="text">
                                     📝 Text
@@ -571,6 +574,16 @@
                                                 <div class="mode-description">256-color palette, ideal for pixel art</div>
                                                 <div class="mode-size">1 byte/pixel + palette • <strong class="gain">3× larger</strong></div>
                                             </div>
+                                            
+                                            <div class="compression-mode-card" data-mode="5">
+                                                <div class="mode-header">
+                                                    <span class="mode-icon">📸</span>
+                                                    <span class="mode-name">RGB565 (Photos)</span>
+                                                </div>
+                                                <div class="mode-capacity">Max: <strong>90×90</strong> (8,192 pixels)</div>
+                                                <div class="mode-description">16-bit color (65,536 colors)</div>
+                                                <div class="mode-size">2 bytes/pixel • <strong class="gain">1.5× larger</strong></div>
+                                            </div>
                                         </div>
 
                                         <div id="mode-suggestion" class="mode-suggestion" style="display:none; margin-top: 1rem; padding: 1rem; background: rgba(102, 126, 234, 0.15); border-radius: 8px; border: 2px solid rgba(102, 126, 234, 0.3);">
@@ -580,18 +593,35 @@
                                         </div>
                                     </div>
 
-                                    <!-- Image Preview -->
-                                    <div class="image-preview">
-                                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                                            <div style="flex: 1; min-width: 250px;">
-                                                <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Original</h4>
-                                                <canvas id="image-preview-canvas" style="display:none; width: 100%; height: auto; image-rendering: pixelated; border: 2px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(0,0,0,0.3);"></canvas>
+                                    <!-- Crop Tool -->
+                                    <div id="crop-tool-container" style="display:none; margin-bottom: 1rem;">
+                                        <div style="background: rgba(102, 126, 234, 0.15); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 8px; padding: 1rem;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                                                <h4 style="margin: 0; color: #667eea;">✂️ Crop Tool</h4>
+                                                <div style="display: flex; gap: 0.5rem;">
+                                                    <button type="button" id="crop-mode-scale" class="crop-mode-btn active" style="padding: 0.4rem 0.8rem; background: rgba(102, 126, 234, 0.3); border: 1px solid rgba(102, 126, 234, 0.5); border-radius: 4px; color: white; cursor: pointer; font-size: 0.85rem;">📏 Scale</button>
+                                                    <button type="button" id="crop-mode-crop" class="crop-mode-btn" style="padding: 0.4rem 0.8rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 4px; color: white; cursor: pointer; font-size: 0.85rem;">✂️ Crop</button>
+                                                </div>
                                             </div>
-                                            <div style="flex: 1; min-width: 250px;" id="compressed-preview-container" style="display:none;">
-                                                <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: rgba(255,255,255,0.7);">Compressed Preview</h4>
-                                                <canvas id="compressed-preview-canvas" style="width: 100%; height: auto; image-rendering: pixelated; border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 4px; background: rgba(0,0,0,0.3);"></canvas>
+                                            <div id="crop-canvas-container" style="position: relative; display: inline-block; max-width: 100%; background: #000;">
+                                                <canvas id="crop-source-canvas" style="display: block; max-width: 100%; height: auto; cursor: crosshair;"></canvas>
+                                                <div id="crop-selection" style="position: absolute; border: 2px solid #667eea; background: rgba(102, 126, 234, 0.2); display: none; pointer-events: none;">
+                                                    <div style="position: absolute; top: -20px; left: 0; background: #667eea; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75rem; white-space: nowrap;"></div>
+                                                </div>
+                                            </div>
+                                            <div style="margin-top: 0.75rem; font-size: 0.85rem; color: rgba(255,255,255,0.8);" id="crop-instructions">
+                                                <strong>Scale mode:</strong> Entire image will be scaled to fit. Click "✂️ Crop" to select a region instead.
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <!-- Image Preview -->
+                                    <div class="image-preview">
+                                        <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: rgba(255,255,255,0.9);">
+                                            📤 Preview - <span id="compression-mode-label">Full Color RGB</span>
+                                        </h4>
+                                        <canvas id="image-preview-canvas" style="display:none; width: 100%; max-width: 600px; height: auto; image-rendering: pixelated; border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 4px; background: rgba(0,0,0,0.3);"></canvas>
+                                        <div id="compression-stats" style="margin-top: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);"></div>
                                         <div id="image-info" style="margin-top: 1rem;"></div>
                                     </div>
                                 </div>
@@ -616,6 +646,86 @@
                                             <span id="text-char-count">0</span> / 16,384 characters
                                         </div>
                                     </div>
+                                </div>
+
+                                <!-- Draw/Pixel Editor Section -->
+                                <div id="draw-upload-section" class="upload-section-content" style="display:none;">
+                                    <div class="upload-info">
+                                        <h3>🎨 Pixel Art Editor</h3>
+                                        <p>Create pixel art directly on the blockchain!</p>
+                                    </div>
+                                    
+                                    <div class="pixel-editor-container" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
+                                        <!-- Toolbar -->
+                                        <div class="editor-toolbar" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(255,255,255,0.1);">
+                                            <!-- Canvas size selector -->
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">Size:</label>
+                                                <select id="pixel-editor-size" style="padding: 0.5rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
+                                                    <option value="16">16×16</option>
+                                                    <option value="32">32×32</option>
+                                                    <option value="64" selected>64×64</option>
+                                                    <option value="128">128×128</option>
+                                                    <option value="256">256×256</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- Zoom -->
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">Zoom:</label>
+                                                <select id="pixel-editor-zoom" style="padding: 0.5rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
+                                                    <option value="4">4×</option>
+                                                    <option value="8" selected>8×</option>
+                                                    <option value="16">16×</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- Tools -->
+                                            <div style="display: flex; gap: 0.5rem; padding-left: 1rem; border-left: 2px solid rgba(255,255,255,0.1);">
+                                                <button class="tool-btn active" data-tool="pen" title="Pen" style="width: 40px; height: 40px; background: rgba(102, 126, 234, 0.2); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">✏️</button>
+                                                <button class="tool-btn" data-tool="fill" title="Fill" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">🪣</button>
+                                                <button class="tool-btn" data-tool="eyedropper" title="Eyedropper" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">💧</button>
+                                                <button class="tool-btn" data-tool="eraser" title="Eraser" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">🧹</button>
+                                            </div>
+                                            
+                                            <!-- Color picker -->
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; padding-left: 1rem; border-left: 2px solid rgba(255,255,255,0.1);">
+                                                <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">Color:</label>
+                                                <input type="color" id="pixel-editor-color" value="#000000" style="width: 50px; height: 40px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; background: none;">
+                                            </div>
+                                            
+                                            <!-- Actions -->
+                                            <div style="display: flex; gap: 0.5rem; margin-left: auto;">
+                                                <button id="pixel-editor-undo" title="Undo" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; color: white;">↶ Undo</button>
+                                                <button id="pixel-editor-redo" title="Redo" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; color: white;">↷ Redo</button>
+                                                <button id="pixel-editor-clear" title="Clear" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 6px; cursor: pointer; color: white;">🗑️ Clear</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Canvas container -->
+                                        <div id="pixel-editor-canvas-container" style="display: flex; justify-content: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: auto;">
+                                            <!-- Canvas will be inserted here by PixelEditor -->
+                                        </div>
+                                        
+                                        <!-- Color palette -->
+                                        <div class="color-palette" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid rgba(255,255,255,0.1);">
+                                            <!-- Common colors -->
+                                            <div class="palette-color" data-color="#000000" style="width: 30px; height: 30px; background: #000000; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#FFFFFF" style="width: 30px; height: 30px; background: #FFFFFF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#FF0000" style="width: 30px; height: 30px; background: #FF0000; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#00FF00" style="width: 30px; height: 30px; background: #00FF00; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#0000FF" style="width: 30px; height: 30px; background: #0000FF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#FFFF00" style="width: 30px; height: 30px; background: #FFFF00; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#FF00FF" style="width: 30px; height: 30px; background: #FF00FF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#00FFFF" style="width: 30px; height: 30px; background: #00FFFF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#FFA500" style="width: 30px; height: 30px; background: #FFA500; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#800080" style="width: 30px; height: 30px; background: #800080; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#FFC0CB" style="width: 30px; height: 30px; background: #FFC0CB; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                            <div class="palette-color" data-color="#A52A2A" style="width: 30px; height: 30px; background: #A52A2A; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="pixel-editor-info" style="margin-top: 1rem;"></div>
                                 </div>
 
                                 <button type="submit" class="btn-primary upload-submit-btn">

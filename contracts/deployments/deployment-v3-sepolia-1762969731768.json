@@ -1,0 +1,21 @@
+{
+  "network": "sepolia",
+  "timestamp": "2025-11-12T17:48:51.756Z",
+  "deployer": "0xca9D2574655b0c414AD11b6F5A5969b5109c5EE4",
+  "contracts": {
+    "blueprint": {
+      "address": "0x61C74A01873288d99692269A21F577292Ca77874",
+      "txHash": "0x8315668d06c50e4b866e172ecba287e5e7927c7e85a4cdc8b44c57dfec6f0388"
+    },
+    "factory": {
+      "address": "0xd3e77cc9c057d4a67A992C3d34578B4906850eA6",
+      "txHash": "0x8510d7775241a8afee93e9e80fa7b6e26d37b8cdbeea52417756c6550cfbbbad",
+      "creationFee": "0.0",
+      "creationCooldown": 0
+    }
+  },
+  "etherscanUrls": {
+    "blueprint": "https://sepolia.etherscan.io/address/0x61C74A01873288d99692269A21F577292Ca77874",
+    "factory": "https://sepolia.etherscan.io/address/0xd3e77cc9c057d4a67A992C3d34578B4906850eA6"
+  }
+}

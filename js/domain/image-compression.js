@@ -17,7 +17,9 @@ export const CompressionMode = {
     RGB: 0,
     GRAYSCALE: 1,
     MONOCHROME: 2,
-    INDEXED: 3
+    INDEXED: 3,
+    RLE: 4,           // Run-Length Encoding (best for logos/solid areas)
+    RGB565: 5         // 16-bit color (best for photos with reduced palette)
 };
 
 export const MAX_IMAGE_SIZE = 16384;  // 16KB blockchain limit
@@ -60,6 +62,22 @@ export function getModeCapacity(mode) {
                 maxDimension: 128,
                 paletteSize: 256,
                 description: "256 Colors (Palette)"
+            };
+        case CompressionMode.RLE:
+            return {
+                bytesPerPixel: 'variable',
+                maxPixels: 999999,  // Variable! Can be HUGE for solid colors
+                maxSquare: 512,
+                maxDimension: 512,
+                description: "Run-Length Encoding (Logos)"
+            };
+        case CompressionMode.RGB565:
+            return {
+                bytesPerPixel: 2,
+                maxPixels: Math.floor(MAX_IMAGE_SIZE / 2),  // 8,192
+                maxSquare: 90,
+                maxDimension: 128,
+                description: "16-bit Color (65K colors)"
             };
     }
 }
@@ -414,6 +432,150 @@ export function decompressIndexed(data, width, height, paletteSize) {
 }
 
 // ============================================================================
+// RLE MODE (Mode 4) - Run-Length Encoding
+// ============================================================================
+
+export function compressRLE(imageData, width, height) {
+    const pixels = width * height;
+    const compressed = [];
+    
+    // Format: [count_low, count_high, R, G, B, ...]
+    // Supports runs up to 65535 pixels
+    
+    let currentR = imageData.data[0];
+    let currentG = imageData.data[1];
+    let currentB = imageData.data[2];
+    let runLength = 1;
+    
+    for (let i = 1; i < pixels; i++) {
+        const idx = i * 4;
+        const r = imageData.data[idx];
+        const g = imageData.data[idx + 1];
+        const b = imageData.data[idx + 2];
+        
+        // Check if same color
+        if (r === currentR && g === currentG && b === currentB && runLength < 65535) {
+            runLength++;
+        } else {
+            // Write run
+            compressed.push(runLength & 0xFF);         // Low byte
+            compressed.push((runLength >> 8) & 0xFF);  // High byte
+            compressed.push(currentR);
+            compressed.push(currentG);
+            compressed.push(currentB);
+            
+            // Start new run
+            currentR = r;
+            currentG = g;
+            currentB = b;
+            runLength = 1;
+        }
+    }
+    
+    // Write final run
+    compressed.push(runLength & 0xFF);
+    compressed.push((runLength >> 8) & 0xFF);
+    compressed.push(currentR);
+    compressed.push(currentG);
+    compressed.push(currentB);
+    
+    return new Uint8Array(compressed);
+}
+
+export function decompressRLE(data, width, height) {
+    const pixels = width * height;
+    const imageData = new ImageData(width, height);
+    
+    let writeIndex = 0;
+    let readIndex = 0;
+    
+    while (readIndex < data.length && writeIndex < pixels * 4) {
+        // Read run length (16-bit little-endian)
+        const countLow = data[readIndex++];
+        const countHigh = data[readIndex++];
+        const count = countLow | (countHigh << 8);
+        
+        // Read color
+        const r = data[readIndex++];
+        const g = data[readIndex++];
+        const b = data[readIndex++];
+        
+        // Write pixels
+        for (let i = 0; i < count && writeIndex < pixels * 4; i++) {
+            imageData.data[writeIndex++] = r;
+            imageData.data[writeIndex++] = g;
+            imageData.data[writeIndex++] = b;
+            imageData.data[writeIndex++] = 255; // A
+        }
+    }
+    
+    return imageData;
+}
+
+// ============================================================================
+// RGB565 MODE (Mode 5) - 16-bit Color
+// ============================================================================
+
+export function compressRGB565(imageData, width, height) {
+    const pixels = width * height;
+    const data = new Uint8Array(pixels * 2); // 2 bytes per pixel
+    
+    for (let i = 0; i < pixels; i++) {
+        const srcIndex = i * 4;
+        const dstIndex = i * 2;
+        
+        // Extract RGB (8-bit each)
+        const r = imageData.data[srcIndex];
+        const g = imageData.data[srcIndex + 1];
+        const b = imageData.data[srcIndex + 2];
+        
+        // Convert to RGB565 (5-6-5 bits)
+        const r5 = (r >> 3) & 0x1F;  // 5 bits
+        const g6 = (g >> 2) & 0x3F;  // 6 bits
+        const b5 = (b >> 3) & 0x1F;  // 5 bits
+        
+        // Pack into 16 bits: RRRRRGGG GGGBBBBB
+        const rgb565 = (r5 << 11) | (g6 << 5) | b5;
+        
+        // Store as little-endian
+        data[dstIndex] = rgb565 & 0xFF;         // Low byte
+        data[dstIndex + 1] = (rgb565 >> 8) & 0xFF; // High byte
+    }
+    
+    return data;
+}
+
+export function decompressRGB565(data, width, height) {
+    const pixels = width * height;
+    const imageData = new ImageData(width, height);
+    
+    for (let i = 0; i < pixels; i++) {
+        const srcIndex = i * 2;
+        const dstIndex = i * 4;
+        
+        // Read 16-bit value (little-endian)
+        const rgb565 = data[srcIndex] | (data[srcIndex + 1] << 8);
+        
+        // Extract RGB565
+        const r5 = (rgb565 >> 11) & 0x1F;
+        const g6 = (rgb565 >> 5) & 0x3F;
+        const b5 = rgb565 & 0x1F;
+        
+        // Convert to 8-bit (scale up)
+        const r = (r5 << 3) | (r5 >> 2);  // 5→8 bits
+        const g = (g6 << 2) | (g6 >> 4);  // 6→8 bits
+        const b = (b5 << 3) | (b5 >> 2);  // 5→8 bits
+        
+        imageData.data[dstIndex] = r;
+        imageData.data[dstIndex + 1] = g;
+        imageData.data[dstIndex + 2] = b;
+        imageData.data[dstIndex + 3] = 255;
+    }
+    
+    return imageData;
+}
+
+// ============================================================================
 // SMART COMPRESSION - Auto-select best mode
 // ============================================================================
 
@@ -422,6 +584,8 @@ export function analyzeImage(imageData, width, height) {
     const colorSet = new Set();
     let hasColor = false;
     let isMonochrome = true;
+    let rleRuns = 0;
+    let currentColor = null;
     
     for (let i = 0; i < pixels; i++) {
         const idx = i * 4;
@@ -442,43 +606,87 @@ export function analyzeImage(imageData, width, height) {
         // Count unique colors
         const key = (r << 16) | (g << 8) | b;
         colorSet.add(key);
+        
+        // Count RLE runs (for compression estimation)
+        if (currentColor === null || currentColor !== key) {
+            rleRuns++;
+            currentColor = key;
+        }
     }
+    
+    // Calculate potential RLE compression
+    const rleSize = rleRuns * 5; // 5 bytes per run (count + RGB)
+    const rgbSize = pixels * 3;
+    const rleRatio = rgbSize / rleSize;
     
     return {
         hasColor,
         isMonochrome,
         uniqueColors: colorSet.size,
-        pixels
+        pixels,
+        rleRuns,
+        rleCompressionRatio: rleRatio
     };
 }
 
 export function suggestMode(imageData, width, height) {
     const analysis = analyzeImage(imageData, width, height);
     
+    // Check RLE first (best for logos/solid areas)
+    if (analysis.rleCompressionRatio > 10) {
+        return {
+            mode: CompressionMode.RLE,
+            reason: `${analysis.rleCompressionRatio.toFixed(1)}× compression with RLE (${analysis.rleRuns} runs)`,
+            compressionRatio: analysis.rleCompressionRatio
+        };
+    }
+    
     if (analysis.isMonochrome) {
         return {
             mode: CompressionMode.MONOCHROME,
-            reason: "Pure black & white detected"
+            reason: "Pure black & white detected",
+            compressionRatio: 24
+        };
+    }
+    
+    // RLE beats grayscale if >3× compression
+    if (analysis.rleCompressionRatio > 3 && analysis.rleRuns < 1000) {
+        return {
+            mode: CompressionMode.RLE,
+            reason: `${analysis.rleCompressionRatio.toFixed(1)}× compression (better than grayscale)`,
+            compressionRatio: analysis.rleCompressionRatio
         };
     }
     
     if (!analysis.hasColor) {
         return {
             mode: CompressionMode.GRAYSCALE,
-            reason: "Grayscale image detected"
+            reason: "Grayscale image detected",
+            compressionRatio: 3
         };
     }
     
     if (analysis.uniqueColors <= 256) {
         return {
             mode: CompressionMode.INDEXED,
-            reason: `Only ${analysis.uniqueColors} colors (fits palette)`
+            reason: `Only ${analysis.uniqueColors} colors (fits palette)`,
+            compressionRatio: 3
+        };
+    }
+    
+    // For photos, suggest RGB565 if acceptable quality loss
+    if (analysis.uniqueColors > 5000) {
+        return {
+            mode: CompressionMode.RGB565,
+            reason: "Photo detected - RGB565 gives 1.5× compression with 65K colors",
+            compressionRatio: 1.5
         };
     }
     
     return {
         mode: CompressionMode.RGB,
-        reason: "Full color image with many unique colors"
+        reason: "Full color image with many unique colors",
+        compressionRatio: 1
     };
 }
 
@@ -487,18 +695,34 @@ export function suggestMode(imageData, width, height) {
 // ============================================================================
 
 export function compress(imageData, width, height, mode) {
+    let data;
+    let paletteSize = 0;
+    
     switch(mode) {
         case CompressionMode.RGB:
-            return compressRGB(imageData, width, height);
+            data = compressRGB(imageData, width, height);
+            break;
         case CompressionMode.GRAYSCALE:
-            return compressGrayscale(imageData, width, height);
+            data = compressGrayscale(imageData, width, height);
+            break;
         case CompressionMode.MONOCHROME:
-            return compressMonochrome(imageData, width, height);
+            data = compressMonochrome(imageData, width, height);
+            break;
         case CompressionMode.INDEXED:
-            return compressIndexed(imageData, width, height, 256);
+            paletteSize = 256;
+            data = compressIndexed(imageData, width, height, paletteSize);
+            break;
+        case CompressionMode.RLE:
+            data = compressRLE(imageData, width, height);
+            break;
+        case CompressionMode.RGB565:
+            data = compressRGB565(imageData, width, height);
+            break;
         default:
             throw new Error(`Unknown compression mode: ${mode}`);
     }
+    
+    return { data, paletteSize };
 }
 
 export function decompress(data, width, height, mode, paletteSize = 0) {
@@ -511,6 +735,10 @@ export function decompress(data, width, height, mode, paletteSize = 0) {
             return decompressMonochrome(data, width, height);
         case CompressionMode.INDEXED:
             return decompressIndexed(data, width, height, paletteSize);
+        case CompressionMode.RLE:
+            return decompressRLE(data, width, height);
+        case CompressionMode.RGB565:
+            return decompressRGB565(data, width, height);
         default:
             throw new Error(`Unknown compression mode: ${mode}`);
     }

@@ -14,6 +14,10 @@ export class DiceGods extends Game {
         this.selectedNumber = null;
         this.donationInput = null;
         this.dice3D = null;
+        
+        // Constants for dice display
+        this.DICE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+        this.DICE_EMOJIS = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
     }
 
     getContractName() {
@@ -76,8 +80,8 @@ export class DiceGods extends Game {
         
         // Initialize ValueInput component
         this.donationInput = new this.components.ValueInput('play-amount-input', {
-            label: 'Donation Amount',
-            hint: 'Vote with wei for your lucky number',
+            label: 'Bet Amount',
+            hint: 'Your bet for your chosen number',
             defaultUnit: 'gwei',
             minWei: '1',
             required: true
@@ -103,105 +107,28 @@ export class DiceGods extends Game {
         this.updatePlayButton();
     }
 
+    updatePlayButton() {
+        const playButton = document.getElementById('play-button');
+        if (playButton) {
+            playButton.disabled = !this.selectedNumber;
+            playButton.style.opacity = this.selectedNumber ? '1' : '0.5';
+        }
+    }
+
     updateSelectedNumberDisplay() {
         const displayText = document.getElementById('selected-number-text');
         if (!displayText) return;
         
-        const numberEmojis = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        const colors = ['', '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
-        
         if (this.selectedNumber) {
+            const emoji = this.DICE_EMOJIS[this.selectedNumber - 1];
+            const color = this.DICE_COLORS[this.selectedNumber - 1];
             displayText.innerHTML = `
-                <span style="font-size: 1.5rem; display: block;">${numberEmojis[this.selectedNumber]}</span>
-                <span style="color: ${colors[this.selectedNumber]}; font-weight: 700; font-size: 0.9rem;">Number ${this.selectedNumber}</span>
+                <span style="font-size: 1.5rem; display: block;">${emoji}</span>
+                <span style="color: ${color}; font-weight: 700; font-size: 0.9rem;">Number ${this.selectedNumber}</span>
             `;
         } else {
             displayText.textContent = '—';
         }
-    }
-
-    renderDiceButtons() {
-        // Legacy method - now replaced by renderDice3D
-        // Keeping for backward compatibility but not used
-        const diceGrid = document.getElementById('dice-grid');
-        if (!diceGrid) return;
-        
-        const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
-        
-        diceGrid.innerHTML = '';
-        for (let i = 1; i <= 6; i++) {
-            const button = document.createElement('button');
-            button.className = 'dice-button';
-            button.dataset.number = i;
-            button.style.cssText = `
-                padding: 1.5rem;
-                background: var(--md-sys-color-surface-variant);
-                border: 2px solid var(--md-sys-color-outline);
-                border-radius: 12px;
-                cursor: pointer;
-                transition: all 0.3s;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.5rem;
-            `;
-            button.innerHTML = `
-                <div class="dice-face" style="font-size: 3rem;">${diceEmojis[i-1]}</div>
-                <div class="dice-number" style="font-size: 1.5rem; font-weight: bold; color: ${colors[i-1]};">${i}</div>
-                <div class="dice-votes" id="dice-votes-${i}" style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">0 votes</div>
-            `;
-            button.addEventListener('click', () => this.selectNumber(i));
-            button.addEventListener('mouseenter', () => {
-                if (!button.classList.contains('selected')) {
-                    button.style.borderColor = colors[i-1];
-                    button.style.transform = 'translateY(-4px)';
-                    button.style.boxShadow = `0 4px 12px ${colors[i-1]}33`;
-                }
-            });
-            button.addEventListener('mouseleave', () => {
-                if (!button.classList.contains('selected')) {
-                    button.style.borderColor = 'var(--md-sys-color-outline)';
-                    button.style.transform = 'translateY(0)';
-                    button.style.boxShadow = 'none';
-                }
-            });
-            diceGrid.appendChild(button);
-        }
-    }
-
-    selectNumber(number) {
-        this.selectedNumber = number;
-        
-        const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
-        
-        document.querySelectorAll('.dice-button').forEach(btn => {
-            btn.classList.remove('selected');
-            const num = parseInt(btn.dataset.number);
-            btn.style.borderColor = 'var(--md-sys-color-outline)';
-            btn.style.transform = 'translateY(0)';
-            btn.style.boxShadow = 'none';
-        });
-        
-        const selectedBtn = document.querySelector(`.dice-button[data-number="${number}"]`);
-        if (selectedBtn) {
-            selectedBtn.classList.add('selected');
-            selectedBtn.style.borderColor = colors[number-1];
-            selectedBtn.style.borderWidth = '3px';
-            selectedBtn.style.transform = 'translateY(-4px) scale(1.05)';
-            selectedBtn.style.boxShadow = `0 6px 20px ${colors[number-1]}55`;
-        }
-        
-        const playButton = document.getElementById('play-button');
-        if (playButton) {
-            playButton.disabled = false;
-            playButton.style.opacity = '1';
-        }
-        
-        this.events.bus.emit(this.events.EVENTS.TOAST, {
-            message: `Number ${number} selected!`,
-            type: 'info'
-        });
     }
 
     renderCompactRoundPanel() {
@@ -222,18 +149,6 @@ export class DiceGods extends Game {
                 </div>
             </div>
         `;
-    }
-    
-    renderRoundPanel() {
-        const panel = this.dom.createInfoPanel('🏆 Current Round', [
-            { label: 'Round Number', id: 'round-number' },
-            { label: 'Plays', id: 'plays-count' },
-            { label: 'Prize Pool', id: 'prize-pool' },
-            { label: 'Your Donation', id: 'your-donation' },
-            { label: 'Your Number', id: 'your-number' }
-        ]);
-        
-        return panel;
     }
 
     renderVoteDistribution() {
@@ -319,7 +234,7 @@ export class DiceGods extends Game {
         
         if (!weiAmount || weiAmount.eq(0)) {
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Please enter a valid donation amount',
+                message: 'Please enter a valid bet amount',
                 type: 'warning'
             });
             return;
@@ -337,10 +252,8 @@ export class DiceGods extends Game {
             
             this.donationInput.reset();
             this.selectedNumber = null;
-            document.querySelectorAll('.dice-button').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            document.getElementById('play-button').disabled = true;
+            this.updateSelectedNumberDisplay();
+            this.updatePlayButton();
             
             await this.refreshState();
             
@@ -443,8 +356,6 @@ export class DiceGods extends Game {
             return;
         }
         
-        const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        
         listContainer.innerHTML = plays.map((play, index) => {
             const playIndex = typeof play.play_index === 'number' ? play.play_index : play.play_index.toNumber();
             const number = typeof play.number === 'number' ? play.number : play.number.toNumber();
@@ -456,7 +367,7 @@ export class DiceGods extends Game {
                 <div style="padding: 0.75rem; background: ${isCurrentUser ? 'rgba(59, 130, 246, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isCurrentUser ? '#3b82f6' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span style="font-size: 1.5rem;">${diceEmojis[number - 1]}</span>
+                            <span style="font-size: 1.5rem;">${this.DICE_EMOJIS[number - 1]}</span>
                             <div>
                                 <div style="font-weight: bold; font-size: 0.875rem; color: var(--md-sys-color-on-surface);">
                                     #${playIndex} ${isCurrentUser ? '(You)' : ''}

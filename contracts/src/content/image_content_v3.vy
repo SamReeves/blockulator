@@ -52,6 +52,7 @@ MODE_RGB: constant(uint8) = 0          # 3 bytes/pixel
 MODE_GRAYSCALE: constant(uint8) = 1    # 1 byte/pixel
 MODE_MONOCHROME: constant(uint8) = 2   # 1 bit/pixel (packed)
 MODE_INDEXED: constant(uint8) = 3      # 1 byte/pixel + palette
+MODE_RGB565: constant(uint8) = 5       # 2 bytes/pixel (16-bit color)
 
 # ============================================================================
 # IMMUTABLE STATE
@@ -102,7 +103,7 @@ def __init__(
     assert _factory != empty(address), "Factory cannot be zero"
     
     # Validate mode
-    assert _mode <= MODE_INDEXED, "Invalid mode"
+    assert _mode <= MODE_RGB565, "Invalid mode"
     
     # Validate dimensions
     assert _width >= MIN_DIMENSION and _width <= MAX_DIMENSION, "Invalid width"
@@ -127,7 +128,7 @@ def __init__(
         
     elif _mode == MODE_MONOCHROME:
         # 1 bit per pixel, packed into bytes
-        expected: uint256 = (pixel_count + 7) / 8  # Ceiling division
+        expected: uint256 = (pixel_count + 7) // 8  # Ceiling division
         assert len(_image_data) == expected, "Monochrome size mismatch"
         assert _palette_size == 0, "Monochrome has no palette"
         
@@ -137,6 +138,12 @@ def __init__(
         palette_bytes: uint256 = _palette_size * 3  # RGB palette
         expected: uint256 = palette_bytes + pixel_count
         assert len(_image_data) == expected, "Indexed size mismatch"
+        
+    elif _mode == MODE_RGB565:
+        # 2 bytes per pixel (16-bit color)
+        expected: uint256 = pixel_count * 2
+        assert len(_image_data) == expected, "RGB565 size mismatch"
+        assert _palette_size == 0, "RGB565 has no palette"
     
     # Set immutables
     creator = _creator
@@ -220,7 +227,7 @@ def get_compression_ratio() -> uint256:
     uncompressed: uint256 = width * height * 3  # RGB baseline
     if data_size == 0:
         return 0
-    return (uncompressed * 10000) / data_size
+    return (uncompressed * 10000) // data_size
 
 @view
 @external
@@ -253,7 +260,9 @@ def mode_name() -> String[12]:
         return "Grayscale"
     elif mode == MODE_MONOCHROME:
         return "Monochrome"
-    else:  # MODE_INDEXED
+    elif mode == MODE_INDEXED:
         return "Indexed"
+    else:  # MODE_RGB565
+        return "RGB565"
 
 
