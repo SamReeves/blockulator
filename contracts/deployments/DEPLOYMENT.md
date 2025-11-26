@@ -49,7 +49,7 @@ export NETWORK="sepolia"  # Default: sepolia, Options: mainnet, sepolia, etc.
 Deploy everything in one transaction batch:
 
 ```bash
-node contracts/deployments/deploy-zero-fee-complete.js
+node contracts/deployments/active/deploy-zero-fee-complete.js
 ```
 
 **What it deploys:**
@@ -68,7 +68,7 @@ node contracts/deployments/deploy-zero-fee-complete.js
 Deploy just the 9 game contracts:
 
 ```bash
-node contracts/deployments/deploy-games-only.js
+node contracts/deployments/active/deploy-games-only.js
 ```
 
 **Estimated time:** 2-3 minutes  
@@ -80,16 +80,16 @@ Deploy components separately using existing scripts:
 
 ```bash
 # Future Factory
-node contracts/deployments/deploy-factory.js
+node contracts/deployments/active/deploy-factory.js
 
 # Discussion Board
-node contracts/deployments/deploy-discussions.js
+node contracts/deployments/active/deploy-discussions.js
 
 # Content System
-node contracts/deployments/deploy-content.js
+node contracts/deployments/active/deploy-content.js
 
 # Badge System
-node contracts/deployments/deploy-badges.js
+node contracts/deployments/active/deploy-badges.js
 ```
 
 ## Post-Deployment

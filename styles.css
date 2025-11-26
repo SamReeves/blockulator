@@ -1876,22 +1876,92 @@ body {
 @media (max-width: 768px) {
     .app-header {
         grid-template-columns: 1fr;
-        gap: var(--md-sys-spacing-3);
+        gap: var(--md-sys-spacing-2);
+        padding: var(--md-sys-spacing-2) var(--md-sys-spacing-3);
+    }
+
+    .header-left {
+        gap: var(--md-sys-spacing-2);
+    }
+
+    .brand-logo {
+        height: 50px !important;
+    }
+
+    .testnet-badge, .readonly-badge {
+        font-size: 0.7rem;
+        padding: 2px 6px;
     }
 
     .header-nav {
         order: 3;
         width: 100%;
         justify-content: flex-start;
+        gap: var(--md-sys-spacing-1);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE/Edge */
+        padding: var(--md-sys-spacing-1) 0;
+    }
+
+    .header-nav::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+
+    .nav-link {
+        font-size: 0.8125rem;
+        padding: 6px 10px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .header-right {
         justify-content: flex-start;
     }
 
+    .btn-connect {
+        font-size: 0.875rem;
+        padding: 6px 12px;
+    }
+
+    .wallet-info {
+        font-size: 0.875rem;
+    }
+
     .contract-info {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .app-header {
+        padding: var(--md-sys-spacing-2);
+    }
+
+    .brand-logo {
+        height: 40px !important;
+    }
+
+    .app-title {
+        font-size: 1.1rem;
+    }
+
+    .testnet-badge, .readonly-badge {
+        font-size: 0.65rem;
+        padding: 2px 4px;
+    }
+
+    .nav-link {
+        font-size: 0.75rem;
+        padding: 5px 8px;
+    }
+
+    .btn-connect {
+        font-size: 0.8125rem;
+        padding: 5px 10px;
     }
 }
 

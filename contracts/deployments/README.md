@@ -10,7 +10,7 @@ This directory contains all deployment scripts and documentation for the WhaleGa
 
 # 2. Deploy everything
 export PRIVATE_KEY="0x..."
-node deploy-zero-fee-complete.js
+node active/deploy-zero-fee-complete.js
 ```
 
 That's it! See `QUICK_START.md` for details.
@@ -21,12 +21,15 @@ That's it! See `QUICK_START.md` for details.
 
 | File | Purpose | What It Deploys |
 |------|---------|-----------------|
-| **`deploy-zero-fee-complete.js`** | Full protocol deployment | All 9 games + 4 factories + 4 blueprints |
-| **`deploy-games-only.js`** | Games only deployment | Just the 9 game contracts |
-| **`deploy-factory.js`** | Futures market only | Future Factory + Blueprint |
-| **`deploy-discussions.js`** | Discussion board only | Board + Blueprint |
-| **`deploy-content.js`** | Content system only | Content Factory + Blueprint |
-| **`deploy-badges.js`** | Badge system only | Badge Factory + Blueprint |
+| **`active/deploy-zero-fee-complete.js`** | Full protocol deployment | All 9 games + 4 factories + 4 blueprints |
+| **`active/deploy-games-only.js`** | Games only deployment | Just the 9 game contracts |
+| **`active/deploy-factory.js`** | Futures market only | Future Factory + Blueprint |
+| **`active/deploy-discussions.js`** | Discussion board only | Board + Blueprint |
+| **`active/deploy-content.js`** | Content system only | Content Factory + Blueprint |
+| **`active/deploy-badges.js`** | Badge system only | Badge Factory + Blueprint |
+| **`active/deploy-v3.js`** | V3 compression system | ImageContentV3 + ContentFactoryV3 |
+| **`active/deploy-v4.js`** | V4 unified content | TextContentV4 + ImageContentV3 + ContentFactoryV4 |
+| **`math-tools/deploy-all-math-tools.js`** | Math tools deployment | All 20 math tool contracts |
 
 ### Utilities
 
@@ -34,7 +37,8 @@ That's it! See `QUICK_START.md` for details.
 |------|---------|
 | **`pre-deploy-check.sh`** | Pre-deployment verification (run this first!) |
 | **`compile-and-prepare.sh`** | Compile all Vyper contracts |
-| **`update-addresses.sh`** | Update address configuration files |
+| **`utils/update-addresses.sh`** | Update address configuration files |
+| **`utils/prepare-blueprint.js`** | Prepare blueprint contracts with EIP-5202 preamble |
 
 ### Documentation
 
@@ -57,7 +61,7 @@ After deployment, you'll see:
 ```bash
 export PRIVATE_KEY="0x..."
 export NETWORK="sepolia"
-node deploy-zero-fee-complete.js
+node active/deploy-zero-fee-complete.js
 ```
 
 ### Deploy to Mainnet
@@ -65,13 +69,13 @@ node deploy-zero-fee-complete.js
 export PRIVATE_KEY="0x..."
 export NETWORK="mainnet"
 export RPC_URL="https://eth.llamarpc.com"
-node deploy-zero-fee-complete.js
+node active/deploy-zero-fee-complete.js
 ```
 
 ### Deploy Only Games
 ```bash
 export PRIVATE_KEY="0x..."
-node deploy-games-only.js
+node active/deploy-games-only.js
 ```
 
 ### Check Before Deploying

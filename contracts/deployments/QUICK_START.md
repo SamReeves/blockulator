@@ -10,7 +10,7 @@ export PRIVATE_KEY="0x..."
 ./contracts/deployments/pre-deploy-check.sh
 
 # 3. Deploy everything
-node contracts/deployments/deploy-zero-fee-complete.js
+node contracts/deployments/active/deploy-zero-fee-complete.js
 
 # Done! 🎉
 ```
@@ -62,12 +62,12 @@ This verifies:
 
 **Option A: Deploy Everything**
 ```bash
-node contracts/deployments/deploy-zero-fee-complete.js
+node contracts/deployments/active/deploy-zero-fee-complete.js
 ```
 
 **Option B: Deploy Games Only**
 ```bash
-node contracts/deployments/deploy-games-only.js
+node contracts/deployments/active/deploy-games-only.js
 ```
 
 ### 5️⃣ Update Frontend
@@ -83,33 +83,33 @@ js/infrastructure/config/contracts.js
 ```bash
 export NETWORK="sepolia"
 export RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
-node contracts/deployments/deploy-zero-fee-complete.js
+node contracts/deployments/active/deploy-zero-fee-complete.js
 ```
 
 ### Mainnet
 ```bash
 export NETWORK="mainnet"
 export RPC_URL="https://eth.llamarpc.com"
-node contracts/deployments/deploy-zero-fee-complete.js
+node contracts/deployments/active/deploy-zero-fee-complete.js
 ```
 
 ### Polygon
 ```bash
 export NETWORK="polygon"
 export RPC_URL="https://polygon-rpc.com"
-node contracts/deployments/deploy-zero-fee-complete.js
+node contracts/deployments/active/deploy-zero-fee-complete.js
 ```
 
 ### Arbitrum
 ```bash
 export NETWORK="arbitrum"
 export RPC_URL="https://arb1.arbitrum.io/rpc"
-node contracts/deployments/deploy-zero-fee-complete.js
+node contracts/deployments/active/deploy-zero-fee-complete.js
 ```
 
 ## What Gets Deployed
 
-### Complete Deployment (deploy-zero-fee-complete.js)
+### Complete Deployment (active/deploy-zero-fee-complete.js)
 
 1. **Games (9 contracts)**
    - King of the Hill
@@ -140,7 +140,7 @@ node contracts/deployments/deploy-zero-fee-complete.js
 
 **Total: 14 blueprints + 14 contracts = 28 deployments**
 
-### Games Only Deployment (deploy-games-only.js)
+### Games Only Deployment (active/deploy-games-only.js)
 
 Just the 9 game contracts (no factories/blueprints)
 

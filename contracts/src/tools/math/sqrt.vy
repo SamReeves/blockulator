@@ -65,6 +65,9 @@ def _sqrt(_x: decimal) -> decimal:
         else:
             break
     
+    # Check if number is too large
+    assert x < 10.0000000000, "Input number too large for sqrt calculation"
+    
     # Handle small numbers: multiply by 100, divide result by 10
     for _: uint256 in range(50):
         if x < 1.0000000000:
@@ -73,23 +76,29 @@ def _sqrt(_x: decimal) -> decimal:
         else:
             break
     
+    # Check if number is too small (but not zero, which is handled earlier)
+    assert x >= 1.0000000000, "Input number too small for sqrt calculation"
+    
     # Now x is in [1, 10), get initial estimate from lookup table
     int_part: uint256 = convert(x, uint256)
+    assert int_part <= 9, "Normalization failed: value out of range"
     estimate: decimal = SQRT_TAB[0][int_part]
     
     # Refine with fractional parts
-    x_work: decimal = x
+    x_work: decimal = x - convert(int_part, decimal)  # Get fractional part
     for i: uint256 in range(1, 5):
-        if x_work >= convert(int_part, decimal):
-            x_work -= convert(int_part, decimal)
-            x_work *= 10.0000000000
-            frac_digit: uint256 = convert(x_work, uint256)
-            estimate *= SQRT_TAB[i][frac_digit]
+        x_work *= 10.0000000000
+        frac_digit: uint256 = convert(x_work, uint256)
+        assert frac_digit <= 9, "Invalid fractional digit in sqrt calculation"
+        estimate *= SQRT_TAB[i][frac_digit]
+        x_work -= convert(frac_digit, decimal)  # Remove the digit we just extracted
     
     # Newton-Raphson iterations: x_new = (x_old + n/x_old) / 2
     # 3 iterations gives us ~10 decimal places of accuracy
+    # Perform iterations on normalized x to avoid overflow
     for _: uint256 in range(3):
-        estimate = (estimate + _x / (estimate * scale_factor * scale_factor)) / 2.0000000000
+        assert estimate > 0.0000000000, "Estimate became zero during iteration"
+        estimate = (estimate + x / estimate) / 2.0000000000
     
     return estimate * scale_factor
 

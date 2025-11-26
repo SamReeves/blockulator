@@ -33,3 +33,12 @@ contracts/build/bytecode/
 # Keep ABIs - they're interface definitions for deployed contracts
 !contracts/build/abis/
 
+# Deployment artifacts
+contracts/deployments/deployment-*.json
+contracts/deployments/*.log
+
+# Test outputs
+tests/*-local-*.json
+tests/*-output.txt
+tests/storage-*.json
+

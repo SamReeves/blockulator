@@ -25,6 +25,8 @@ class UploadsApp {
         this.factoryContract = null;
         this.factoryAbi = null;
         this.contentAbi = null;
+        this.contentAbiV3 = null; // V3 ABI with get_image_data()
+        this.contentAbiOld = null; // Old ABI with get_content()
         this.walletComponent = null;
         this.toastComponent = toastComponent; // Use shared toast or create new one
         this.currentView = 'upload'; // 'upload' or 'browse'
@@ -103,7 +105,8 @@ class UploadsApp {
             
             // Get content factory metadata
             const factoryMeta = getContractMetadata('content-factory-v3');
-            const contentMeta = getContractMetadata('content-blueprint');
+            const contentMetaV3 = getContractMetadata('image-content-blueprint-v3');
+            const contentMetaOld = getContractMetadata('content-blueprint');
 
             console.log('Factory address:', factoryMeta.contractAddress);
             console.log('Factory ABI path:', factoryMeta.abi);
@@ -116,12 +119,24 @@ class UploadsApp {
             this.factoryAbi = await factoryResponse.json();
             console.log('✅ Factory ABI loaded, functions:', this.factoryAbi.filter(x => x.type === 'function').map(x => x.name));
 
-            const contentResponse = await fetch(contentMeta.abi);
-            if (!contentResponse.ok) {
-                throw new Error(`Failed to load content ABI: ${contentResponse.status}`);
+            // Load V3 content ABI (with get_image_data)
+            const contentResponseV3 = await fetch(contentMetaV3.abi);
+            if (!contentResponseV3.ok) {
+                throw new Error(`Failed to load V3 content ABI: ${contentResponseV3.status}`);
             }
-            this.contentAbi = await contentResponse.json();
-            console.log('✅ Content ABI loaded');
+            this.contentAbiV3 = await contentResponseV3.json();
+            console.log('✅ Content ABI V3 loaded, functions:', this.contentAbiV3.filter(x => x.type === 'function').map(x => x.name));
+
+            // Load old content ABI (with get_content)
+            const contentResponseOld = await fetch(contentMetaOld.abi);
+            if (!contentResponseOld.ok) {
+                throw new Error(`Failed to load old content ABI: ${contentResponseOld.status}`);
+            }
+            this.contentAbiOld = await contentResponseOld.json();
+            console.log('✅ Content ABI (old) loaded, functions:', this.contentAbiOld.filter(x => x.type === 'function').map(x => x.name));
+            
+            // Set default content ABI to V3
+            this.contentAbi = this.contentAbiV3;
 
             // Initialize factory contract
             if (factoryMeta.contractAddress && factoryMeta.contractAddress !== '0x0000000000000000000000000000000000000000') {
@@ -922,31 +937,53 @@ class UploadsApp {
     
     async loadAndRenderContent(entry) {
         try {
-            // Get content contract instance
+            // V3 factory entries have 'mode' field, old entries have 'content_type'
+            const isV3Image = entry.mode !== undefined;
+            const isOldImage = entry.content_type === 0;
+            
+            // Choose the correct ABI based on contract version
+            const abi = isV3Image ? this.contentAbiV3 : this.contentAbiOld;
+            
+            // Get content contract instance with appropriate ABI
             const contentContract = this.web3Provider.getContract(
                 entry.content_address,
-                this.contentAbi
+                abi
             );
             
             const previewDiv = document.getElementById(`preview-${entry.content_address}`);
             if (!previewDiv) return;
             
-            // V3 factory entries have 'mode' field, old entries have 'content_type'
-            const isV3Image = entry.mode !== undefined;
-            const isOldImage = entry.content_type === 0;
-            
             if (isV3Image || isOldImage) {
                 // Image content
                 console.log('Loading image from:', entry.content_address, isV3Image ? '(V3)' : '(old)');
-                const [data, metadata] = await Promise.all([
-                    contentContract.get_image_data(),
-                    contentContract.get_metadata()
-                ]);
                 
-                const mode = metadata[0];
-                const w = metadata[1].toNumber();
-                const h = metadata[2].toNumber();
-                const paletteSize = metadata[3].toNumber();
+                let data, w, h, mode, paletteSize;
+                
+                if (isV3Image) {
+                    // V3 contract: use get_image_data() and get_metadata()
+                    const [imageData, metadata] = await Promise.all([
+                        contentContract.get_image_data(),
+                        contentContract.get_metadata()
+                    ]);
+                    data = imageData;
+                    mode = metadata[0];
+                    w = metadata[1].toNumber();
+                    h = metadata[2].toNumber();
+                    paletteSize = metadata[3].toNumber();
+                } else {
+                    // Old contract: use get_content() and get_metadata()
+                    const [contentData, metadata] = await Promise.all([
+                        contentContract.get_content(),
+                        contentContract.get_metadata()
+                    ]);
+                    data = contentData;
+                    // Old metadata format: [creator, content_type, size, timestamp, width, height]
+                    w = metadata[4].toNumber();
+                    h = metadata[5].toNumber();
+                    mode = 0; // Old contracts use RGB mode
+                    paletteSize = 0; // No palette
+                }
+                
                 console.log(`Image: ${w}×${h}, mode ${mode}, palette ${paletteSize}`);
                 
                 // Convert to Uint8Array
@@ -1070,14 +1107,19 @@ class UploadsApp {
         detailContainer.innerHTML = '<div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.6);">Loading content...</div>';
         
         try {
-            // Get content contract instance
+            // V3 entries have 'mode' field, old entries have 'content_type'
+            const isV3Image = entry.mode !== undefined;
+            const isImage = isV3Image || entry.content_type === 0;
+            
+            // Choose the correct ABI based on contract version
+            const abi = isV3Image ? this.contentAbiV3 : this.contentAbiOld;
+            
+            // Get content contract instance with appropriate ABI
             const contentContract = this.web3Provider.getContract(
                 entry.content_address,
-                this.contentAbi
+                abi
             );
             
-            // V3 entries have 'mode' field, old entries have 'content_type'
-            const isImage = entry.mode !== undefined || entry.content_type === 0;
             const typeIcon = isImage ? '🖼️' : '📝';
             const typeName = isImage ? 'Image' : 'Text';
             const date = new Date(entry.creation_time.toNumber() * 1000).toLocaleString();
@@ -1133,16 +1175,32 @@ class UploadsApp {
             `;
             
             if (isImage) {
-                // Image content - V3 format
-                const [data, metadata] = await Promise.all([
-                    contentContract.get_image_data(),
-                    contentContract.get_metadata()
-                ]);
+                let data, w, h, mode, paletteSize;
                 
-                const mode = metadata[0];
-                const w = metadata[1].toNumber();
-                const h = metadata[2].toNumber();
-                const paletteSize = metadata[3].toNumber();
+                if (isV3Image) {
+                    // V3 contract: use get_image_data() and get_metadata()
+                    const [imageData, metadata] = await Promise.all([
+                        contentContract.get_image_data(),
+                        contentContract.get_metadata()
+                    ]);
+                    data = imageData;
+                    mode = metadata[0];
+                    w = metadata[1].toNumber();
+                    h = metadata[2].toNumber();
+                    paletteSize = metadata[3].toNumber();
+                } else {
+                    // Old contract: use get_content() and get_metadata()
+                    const [contentData, metadata] = await Promise.all([
+                        contentContract.get_content(),
+                        contentContract.get_metadata()
+                    ]);
+                    data = contentData;
+                    // Old metadata format: [creator, content_type, size, timestamp, width, height]
+                    w = metadata[4].toNumber();
+                    h = metadata[5].toNumber();
+                    mode = 0; // Old contracts use RGB mode
+                    paletteSize = 0; // No palette
+                }
                 
                 // Convert and decompress
                 const bytes = window.ethers.utils.arrayify(data);

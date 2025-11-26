@@ -33,12 +33,12 @@
 
 ```bash
 cd /home/s/whalegames/contracts/deployments
-PRIVATE_KEY=0x... node deploy-all-math-tools.js
+PRIVATE_KEY=0x... node math-tools/deploy-all-math-tools.js
 ```
 
 Or with custom RPC:
 ```bash
-SEPOLIA_RPC=https://your-rpc-url PRIVATE_KEY=0x... node deploy-all-math-tools.js
+SEPOLIA_RPC=https://your-rpc-url PRIVATE_KEY=0x... node math-tools/deploy-all-math-tools.js
 ```
 
 ---
