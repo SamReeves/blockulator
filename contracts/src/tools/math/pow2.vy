@@ -23,16 +23,19 @@ TAB: constant(decimal[10][11]) = [
 # Base 2 constant
 BASE2: constant(decimal) = 2.0
 
+# Maximum exponent: 2^133 ~ 1.08e40 fits in Vyper decimal (max ~1.87e40)
+MAX_POW2: constant(uint256) = 133
+
 @external
 @pure
 def calculate(x: decimal) -> decimal:
     """
     @notice Calculate 2^x (FREE - no gas cost)
-    @param x The exponent (must be in range [0, 10))
+    @param x The exponent (must be in range [0, 133))
     @return The result of 2^x
     """
     assert x >= 0.0, "Negative powers are not supported."
-    assert x < 10.0, "The power limit is 9.999999999"
+    assert x < 133.0, "The power limit is 132.999999999"
     return self._pow2_to_the(x)
 
 @external
@@ -48,18 +51,38 @@ def get_constant() -> decimal:
 @pure
 def _pow2_to_the(_x: decimal) -> decimal:
     """
-    @notice Internal function to calculate 2^x using digit-by-digit method
+    @notice Internal function to calculate 2^x using range reduction
+    @dev 2^x = 2^floor(x) * 2^frac(x)
     @param _x The exponent
     @return The result of 2^x
     """
     x: decimal = _x
-    y: decimal = 1.0
-    for i: uint256 in range(11):
-        if x != 0.0:
-            d: uint256 = convert(x, uint256)
-            y *= TAB[i][d]
-            x -= convert(d, decimal)
-            x *= 10.0
-        else:
+    
+    # Extract integer and fractional parts
+    n: uint256 = convert(x, uint256)
+    frac: decimal = x - convert(n, decimal)
+    
+    # Compute 2^n via repeated multiplication
+    int_result: decimal = 1.0
+    n_work: uint256 = n
+    for _: uint256 in range(MAX_POW2):
+        if n_work == 0:
             break
-    return y
+        int_result *= 2.0
+        n_work -= 1
+    
+    # Compute 2^frac via TAB (frac is in [0, 1))
+    # Multiply by 10 to extract each fractional digit
+    frac_result: decimal = 1.0
+    frac_work: decimal = frac * 10.0
+    
+    # Process fractional digits: TAB[1] is tenths, TAB[2] is hundredths, etc.
+    for i: uint256 in range(1, 11):
+        if frac_work == 0.0:
+            break
+        d: uint256 = convert(frac_work, uint256)
+        frac_result *= TAB[i][d]
+        frac_work -= convert(d, decimal)
+        frac_work *= 10.0
+    
+    return int_result * frac_result

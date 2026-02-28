@@ -10,6 +10,7 @@ import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { getExplorerUrl } from '../../infrastructure/config/network.js';
 import { PixelEditor } from '../../presentation/components/pixel-editor.js';
 import { BadgeViewer } from '../../presentation/components/badge-viewer.js';
 import { ImageUploader } from '../../presentation/components/image-uploader.js';

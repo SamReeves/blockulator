@@ -24,6 +24,7 @@
                 <a href="#/calculator" class="nav-link" data-route="calculator">Calculator</a>
                 <a href="#/futures" class="nav-link" data-route="futures">Futures</a>
                 <a href="#/badges" class="nav-link" data-route="badges">Badges</a>
+                <a href="https://sepolia-faucet.pk910.de/" target="_blank" class="nav-link">Faucet</a>
                 <a href="#/about" class="nav-link" data-route="about">About</a>
             </nav>
             <div class="header-right">
@@ -360,59 +361,63 @@
                     
                     <!-- Hero Section -->
                     <section class="about-hero">
-                        <h1>Bridging Data Science & Blockchain</h1>
+                        <h1>Math & Games on the Blockchain</h1>
                         <p class="hero-subtitle">
-                            Exploring the possibilities of on-chain scientific computing and autonomous markets
+                            A personal experiment in putting scientific computing and weird games entirely on-chain
                         </p>
                     </section>
 
-                    <!-- Mission -->
+                    <!-- What This Is -->
                     <section class="about-section">
-                        <h2>🎯 Our Mission</h2>
+                        <h2>🔬 What This Is</h2>
                         <p>
-                            Blockulator is an experimental platform demonstrating that complex scientific computing 
-                            and autonomous market mechanisms can operate entirely on-chain. Every calculation, 
-                            every transaction, every piece of data lives on the Ethereum blockchain—nothing is 
-                            stored in traditional databases.
+                            Blockulator is my experiment to see what happens when you put complex math and 
+                            game mechanics directly on the blockchain. Everything lives on-chain—calculations, 
+                            game state, pixel art badges, all of it. No databases, no APIs, just smart contracts.
+                        </p>
+                        <p>
+                            It's a research project. I'm figuring out what's possible, not what's profitable. 
+                            Expect bugs, weird UX, and things that don't make economic sense.
                         </p>
                     </section>
 
-                    <!-- What We're Building -->
+                    <!-- What's Here -->
                     <section class="about-section">
-                        <h2>🔬 What We're Building</h2>
+                        <h2>🧮 What's Here</h2>
                         
                         <div class="about-grid">
                             <div class="about-card">
-                                <h3>🧮 On-Chain Scientific Computing</h3>
+                                <h3>🔢 Math Library</h3>
                                 <p>
-                                    Complete mathematical library implemented as smart contracts: trigonometric 
-                                    functions, logarithms, exponentials, and special functions. All computations 
-                                    happen on-chain with precision comparable to traditional floating-point arithmetic.
+                                    Trig functions, logs, exponentials, statistical distributions—all implemented 
+                                    as smart contracts. Use them in your own contracts or just play with the 
+                                    calculator to see what's possible on-chain.
                                 </p>
                             </div>
 
                             <div class="about-card">
-                                <h3>🎯 Autonomous Futures Markets</h3>
+                                <h3>📈 Futures Markets</h3>
                                 <p>
-                                    Time-weighted payout contracts with multiple distribution types (Gaussian, 
-                                    exponential, uniform). These markets operate autonomously—no centralized 
-                                    oracle, no external price feed, just pure on-chain logic.
+                                    Time-weighted payout contracts with different distribution curves. 
+                                    No oracles, no price feeds, just math and time. Place a bet, pick a time, 
+                                    see what happens.
                                 </p>
                             </div>
 
                             <div class="about-card">
-                                <h3>🎖️ On-Chain Identity Badges</h3>
+                                <h3>🎖️ Pixel Badges</h3>
                                 <p>
-                                    Create and edit a unique 32x32 pixel badge stored entirely on-chain. 
-                                    Your identity, your art, permanently on the blockchain.
+                                    Draw a 32x32 pixel badge and store it entirely on-chain. Edit it whenever 
+                                    you want. It's your on-chain identity, permanently stored in the contract.
                                 </p>
                             </div>
 
                             <div class="about-card">
-                                <h3>🎮 Experimental Games</h3>
+                                <h3>🎮 Weird Games</h3>
                                 <p>
-                                    Various game mechanics exploring different economic primitives and incentive 
-                                    structures. Each game is a smart contract experiment in mechanism design.
+                                    Pissing contests, demon worship, last-call timers—each game is an experiment 
+                                    in mechanism design. Some are fun, some are dumb, all are fully autonomous 
+                                    smart contracts.
                                 </p>
                             </div>
                         </div>
@@ -461,95 +466,17 @@
                         </div>
                     </section>
 
-                    <!-- Why This Matters -->
+                    <!-- Status -->
                     <section class="about-section">
-                        <h2>💡 Why This Matters</h2>
-                        
-                        <div class="why-grid">
-                            <div class="why-item">
-                                <h4>Composability</h4>
-                                <p>
-                                    On-chain math functions can be used by any other smart contract. Build 
-                                    DeFi protocols with Gaussian distributions, NFTs with logarithmic decay, 
-                                    DAOs with error function-based voting.
-                                </p>
-                            </div>
-
-                            <div class="why-item">
-                                <h4>Trustless Verification</h4>
-                                <p>
-                                    Every calculation is verifiable on-chain. No trusting centralized computation 
-                                    or oracle networks—the blockchain itself performs and validates the math.
-                                </p>
-                            </div>
-
-                            <div class="why-item">
-                                <h4>Autonomous Markets</h4>
-                                <p>
-                                    Markets that require no human intervention or centralized parties. Pure 
-                                    algorithmic trading based on time and mathematical distributions.
-                                </p>
-                            </div>
-
-                            <div class="why-item">
-                                <h4>Data Science Primitives</h4>
-                                <p>
-                                    Building blocks for on-chain data science: statistical functions, probability 
-                                    distributions, numerical methods. The foundation for complex on-chain analytics.
-                                </p>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- Current Status -->
-                    <section class="about-section">
-                        <h2>🚀 Current Status</h2>
+                        <h2>🚀 Status</h2>
                         <p>
-                            <strong>Testnet Deployment:</strong> All features are live on Sepolia testnet. 
-                            This is experimental software—use testnet ETH only.
+                            Everything's live on Sepolia testnet. This is experimental software—use testnet ETH only. 
+                            All contract source is in <code>/contracts/src/</code>. Frontend is vanilla JavaScript, 
+                            no build step, no frameworks.
                         </p>
                         <p>
-                            <strong>Open Source:</strong> All smart contract source code is available in 
-                            <code>/contracts/src/</code> directory. Frontend code is vanilla JavaScript with 
-                            no obfuscation.
-                        </p>
-                        <p>
-                            <strong>Active Development:</strong> This is a research project. We're exploring 
-                            what's possible, not what's profitable. Expect bugs, weird UX, and experimental features.
-                        </p>
-                    </section>
-
-                    <!-- Faucet -->
-                    <section class="about-section faucet-section">
-                        <div class="faucet-panel">
-                            <h2>💰 Need Free Money?</h2>
-                            <p class="faucet-message">
-                                Good thing you're on Sepolia testnet! Head to the faucet to get free test ETH 
-                                so you can try out all the features without spending real money.
-                            </p>
-                            <a href="https://sepolia-faucet.pk910.de/" target="_blank" class="btn-faucet">
-                                🚰 Get Test ETH from Faucet
-                            </a>
-                        </div>
-                    </section>
-
-                    <!-- Vision -->
-                    <section class="about-section about-vision">
-                        <h2>🌟 The Vision</h2>
-                        <p class="vision-text">
-                            To demonstrate that blockchain technology can be more than just token transfers 
-                            and financial speculation. By bringing scientific computing on-chain, we're building 
-                            the foundation for a new class of decentralized applications that can perform 
-                            complex analysis, create autonomous markets, and make data-driven decisions—all 
-                            without centralized infrastructure.
-                        </p>
-                        <p class="vision-text">
-                            This is just the beginning. Imagine DAOs that make statistically-informed decisions, 
-                            DeFi protocols with sophisticated risk models, NFTs with dynamic properties based on 
-                            real mathematics, and fully autonomous markets that require no human operators.
-                        </p>
-                        <p class="vision-text">
-                            <strong>The future of blockchain is computational.</strong>
+                            If something breaks or doesn't make sense, that's expected. This is a playground 
+                            for ideas, not a product.
                         </p>
                     </section>
 

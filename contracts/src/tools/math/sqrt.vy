@@ -58,7 +58,7 @@ def _sqrt(_x: decimal) -> decimal:
     scale_factor: decimal = 1.0000000000
     
     # Handle large numbers: divide by 100, multiply result by 10
-    for _: uint256 in range(50):
+    for _: uint256 in range(75):
         if x >= 10.0000000000:
             x /= 100.0000000000
             scale_factor *= 10.0000000000
@@ -69,7 +69,7 @@ def _sqrt(_x: decimal) -> decimal:
     assert x < 10.0000000000, "Input number too large for sqrt calculation"
     
     # Handle small numbers: multiply by 100, divide result by 10
-    for _: uint256 in range(50):
+    for _: uint256 in range(75):
         if x < 1.0000000000:
             x *= 100.0000000000
             scale_factor /= 10.0000000000

@@ -160,12 +160,13 @@ def transfer(new_owner: address):
     @notice Transfer ownership and pay out accumulated value
     @param new_owner Address of the new owner
     """
-    assert msg.sender == self.current_owner, "Only owner can transfer"
+    assert msg.sender == self.current_owner or msg.sender == factory, "Only owner or factory can transfer"
     assert new_owner != empty(address), "New owner cannot be zero address"
     assert msg.value == 0, "No ETH should be sent with transfer"
     assert new_owner != self.current_owner, "New owner must be different"
     assert not self.expired, "Contract has expired"
-    assert not self.locked, "Future is locked (listed on marketplace)"
+    if msg.sender != factory:
+        assert not self.locked, "Future is locked (listed on marketplace)"
     
     # Check if contract has expired
     if block.timestamp >= self.start_time + self.lifetime:

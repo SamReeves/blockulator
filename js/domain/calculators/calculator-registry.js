@@ -276,14 +276,14 @@ export const CALCULATOR_REGISTRY = [
         input: {
             label: 'Exponent (x)',
             placeholder: 'Enter exponent (e.g., 10)',
-            min: -10,
-            max: 100,
+            min: 0,
+            max: 133,
             step: 0.1,
-            hint: 'Range: [-10, 100]'
+            hint: 'Range: [0, 133)'
         },
         result: {
             label: '2^x =',
-            examples: ['2^0 = 1', '2^10 = 1024', '2^-1 = 0.5']
+            examples: ['2^0 = 1', '2^10 = 1024', '2^20 ≈ 1M', '2^32 ≈ 4.3B', '2^64 ≈ 1.8e19']
         },
         info: {
             description: '<p><strong>2^x</strong> calculates powers of 2, fundamental to binary computing.</p>',
@@ -294,13 +294,13 @@ export const CALCULATOR_REGISTRY = [
                 'Powers of 2 appear everywhere in CS'
             ],
             notes: [
-                '💡 <strong>CS Fact:</strong> 2^10 = 1024 ≈ 1K, 2^20 ≈ 1M, 2^30 ≈ 1G',
-                '🔒 <strong>On-chain calculation:</strong> Efficient bit-shifting for integer powers, exp approximation for fractional.'
+                '💡 <strong>CS Fact:</strong> 2^10 = 1024 ≈ 1K, 2^20 ≈ 1M, 2^30 ≈ 1G, 2^64 = 18.4 quintillion',
+                '🔒 <strong>On-chain calculation:</strong> Range reduction splits integer/fractional parts, supports up to 2^133.'
             ]
         },
         calculate: {
-            min: -10,
-            max: 100
+            min: 0,
+            max: 133
         }
     },
     {
@@ -620,6 +620,106 @@ export const CALCULATOR_REGISTRY = [
     
     // Statistics
     {
+        id: 'zscore',
+        name: 'Z-Score',
+        symbol: 'z',
+        emoji: '📏',
+        description: 'Calculate z-score (standardized distance from mean) on-chain! Essential for statistics and normal distributions.',
+        className: 'ZScoreCalculator',
+        category: 'statistics',
+        input: {
+            label: 'Value (t)',
+            placeholder: 'Enter value (e.g., 105)',
+            min: null,
+            max: null,
+            step: 0.1,
+            hint: 'The value to evaluate'
+        },
+        additionalInputs: [
+            {
+                label: 'Mean (μ)',
+                placeholder: 'Enter mean (e.g., 100)',
+                name: 'mu',
+                min: null,
+                max: null,
+                step: 0.1,
+                hint: 'Center of the distribution'
+            },
+            {
+                label: 'Std Dev (σ)',
+                placeholder: 'Enter std dev (e.g., 15)',
+                name: 'sigma',
+                min: 0.000001,
+                max: null,
+                step: 0.1,
+                hint: 'Standard deviation (must be positive)'
+            }
+        ],
+        result: {
+            title: '📏 Z-Score',
+            label: 'z =',
+            examples: ['z(105, 100, 15) ≈ 0.333', 'z(115, 100, 15) = 1.0', 'z(130, 100, 15) = 2.0'],
+            hint: 'Number of standard deviations from the mean'
+        },
+        info: {
+            description: '<p><strong>Z-Score</strong> measures how many standard deviations a value is from the mean. Formula: z = (x - μ) / σ</p>',
+            features: [
+                'Standardizes values for comparison across distributions',
+                'Essential for hypothesis testing and confidence intervals',
+                'Used with normal distribution tables and CDF',
+                'Absolute value version always returns positive values'
+            ],
+            notes: [
+                '💡 <strong>Stats Tip:</strong> z ≈ 1.96 corresponds to 95% confidence interval',
+                '🔒 <strong>On-chain calculation:</strong> Pure arithmetic with no dependencies, minimal gas cost.'
+            ]
+        },
+        calculate: {
+            min: null,
+            max: null
+        }
+    },
+    {
+        id: 'gaussian-tail',
+        name: 'Gaussian Tail',
+        symbol: 'Tail(z)',
+        emoji: '📉',
+        description: 'Calculate Gaussian tail probability on-chain! Uses Lin 1990 approximation for standard normal distribution tails.',
+        className: 'GaussianTailCalculator',
+        category: 'statistics',
+        input: {
+            label: 'Z-Score (z)',
+            placeholder: 'Enter z-score (e.g., 1.96)',
+            min: 0,
+            max: 8.999,
+            step: 0.1,
+            hint: 'Z-score must be non-negative (0 to 9)'
+        },
+        result: {
+            title: '📉 Tail Probability',
+            label: 'P(Z > z) =',
+            examples: ['Tail(0) = 0.5', 'Tail(1.96) ≈ 0.025 (2.5%)', 'Tail(2.58) ≈ 0.005 (0.5%)'],
+            hint: 'Probability that a standard normal variable is > z standard deviations from mean'
+        },
+        info: {
+            description: '<p><strong>Gaussian Tail Probability</strong> calculates the probability mass in the tail of a standard normal distribution using the Lin 1990 approximation.</p>',
+            features: [
+                'Fast computation using Lin 1990 formula',
+                'Used in futures contracts for Gaussian payouts',
+                'Complements normal CDF: P(Z > z) = 1 - Φ(z)',
+                'Essential for risk calculations and statistical bounds'
+            ],
+            notes: [
+                '💡 <strong>Stats Tip:</strong> For 95% confidence interval, z ≈ 1.96 gives tail ≈ 0.025',
+                '🔒 <strong>On-chain calculation:</strong> Uses Lin 1990 y-constant formula with external exp calculator.'
+            ]
+        },
+        calculate: {
+            min: 0,
+            max: 8.999
+        }
+    },
+    {
         id: 'norm-cdf',
         name: 'Normal CDF',
         symbol: 'Φ(x)',
@@ -773,6 +873,156 @@ export const CALCULATOR_REGISTRY = [
             min: -10,
             max: 10
         }
+    },
+    
+    // Binomial Coefficient
+    {
+        id: 'binomial-coeff',
+        name: 'Binomial Coefficient',
+        symbol: 'C(n,k)',
+        emoji: '🎲',
+        description: 'Calculate C(n,k) = n!/(k!(n-k)!) on-chain! Essential for combinatorics, probability, and counting problems.',
+        className: 'BinomialCoeffCalculator',
+        category: 'combinatorics',
+        input: {
+            label: 'Total Items (n)',
+            placeholder: 'Enter n (e.g., 10)',
+            min: 0,
+            max: 20,
+            step: 1,
+            hint: 'Range: [0, 20] integers only'
+        },
+        additionalInputs: [
+            {
+                label: 'Items to Choose (k)',
+                placeholder: 'Enter k (e.g., 5)',
+                name: 'k',
+                min: 0,
+                max: 20,
+                step: 1,
+                hint: 'k must be ≤ n'
+            }
+        ],
+        result: {
+            title: '🎲 Binomial Coefficient',
+            label: 'C(n,k) =',
+            examples: ['C(5,2) = 10', 'C(10,5) = 252', 'C(20,10) = 184,756'],
+            hint: 'Number of ways to choose k items from n'
+        },
+        info: {
+            description: '<p><strong>C(n,k)</strong> calculates "n choose k" - the number of ways to select k items from n items without regard to order.</p>',
+            features: [
+                'Essential for probability calculations',
+                'Pascal\'s triangle values',
+                'Used in polynomial expansions',
+                'Lottery and combination counting'
+            ],
+            notes: [
+                '💡 <strong>Fun Fact:</strong> C(n,k) = C(n, n-k) - choosing k items is same as choosing which n-k to exclude',
+                '🔒 <strong>On-chain calculation:</strong> Uses external factorial calculator via staticcall.'
+            ]
+        },
+        calculate: {
+            min: 0,
+            max: 21,
+            integerCheck: true,
+            message: 'Binomial coefficient requires integer values for n and k'
+        }
+    },
+    
+    // Normal PDF
+    {
+        id: 'norm-pdf',
+        name: 'Normal PDF',
+        symbol: 'φ(z)',
+        emoji: '🔔',
+        description: 'Calculate φ(z) on-chain! The normal probability density function describes the bell curve shape.',
+        className: 'NormPdfCalculator',
+        category: 'statistics',
+        input: {
+            label: 'Z-Score (z)',
+            placeholder: 'Enter z-score (e.g., 0)',
+            min: null,
+            max: null,
+            step: 0.1,
+            hint: 'Standard normal: mean=0, std=1'
+        },
+        result: {
+            title: '🔔 Probability Density',
+            label: 'φ(z) =',
+            examples: ['φ(0) ≈ 0.399', 'φ(1) ≈ 0.242', 'φ(2) ≈ 0.054'],
+            hint: 'Height of the bell curve at z standard deviations'
+        },
+        info: {
+            description: '<p><strong>φ(z)</strong> is the probability density function of the standard normal distribution, defining the famous bell curve shape.</p>',
+            features: [
+                'Maximum at z=0 (mean): φ(0) ≈ 0.399',
+                'Symmetric around zero',
+                'Used with CDF to calculate probabilities',
+                'Essential for hypothesis testing'
+            ],
+            notes: [
+                '💡 <strong>Stats Tip:</strong> The area under φ from -∞ to ∞ equals 1',
+                '🔒 <strong>On-chain calculation:</strong> Uses external exp calculator for e^(-z²/2).'
+            ]
+        },
+        calculate: {
+            formatResult: 'custom'
+        }
+    },
+    
+    // GCD
+    {
+        id: 'gcd',
+        name: 'GCD / LCM',
+        symbol: 'GCD(a,b)',
+        emoji: '🔢',
+        description: 'Calculate Greatest Common Divisor and Least Common Multiple on-chain! Fundamental for number theory and fraction simplification.',
+        className: 'GcdCalculator',
+        category: 'number-theory',
+        input: {
+            label: 'First Number (a)',
+            placeholder: 'Enter a (e.g., 12)',
+            min: 0,
+            max: null,
+            step: 1,
+            hint: 'Positive integer'
+        },
+        additionalInputs: [
+            {
+                label: 'Second Number (b)',
+                placeholder: 'Enter b (e.g., 8)',
+                name: 'b',
+                min: 0,
+                max: null,
+                step: 1,
+                hint: 'Positive integer'
+            }
+        ],
+        result: {
+            title: '🔢 GCD & LCM',
+            label: 'GCD(a,b) =',
+            examples: ['GCD(12,8) = 4', 'GCD(100,75) = 25', 'LCM(4,6) = 12'],
+            hint: 'Greatest common divisor and least common multiple'
+        },
+        info: {
+            description: '<p><strong>GCD</strong> finds the largest number that divides both a and b. <strong>LCM</strong> finds the smallest number divisible by both.</p>',
+            features: [
+                'Simplifying fractions: a/b = (a/GCD)/(b/GCD)',
+                'Finding common denominators using LCM',
+                'Euclidean algorithm - extremely efficient',
+                'Used in cryptography and modular arithmetic'
+            ],
+            notes: [
+                '💡 <strong>Number Theory:</strong> LCM(a,b) × GCD(a,b) = a × b',
+                '🔒 <strong>On-chain calculation:</strong> Pure arithmetic, minimal gas cost.'
+            ]
+        },
+        calculate: {
+            min: 0,
+            integerCheck: true,
+            message: 'GCD requires positive integer values'
+        }
     }
 ];
 
@@ -785,7 +1035,8 @@ export const CATEGORIES = {
     combinatorics: { name: 'Combinatorics', icon: '🎲', order: 5 },
     statistics: { name: 'Statistics', icon: '📈', order: 6 },
     hyperbolic: { name: 'Hyperbolic', icon: '〰️', order: 7 },
-    special: { name: 'Special Functions', icon: '∫', order: 8 }
+    special: { name: 'Special Functions', icon: '∫', order: 8 },
+    'number-theory': { name: 'Number Theory', icon: '🔢', order: 9 }
 };
 
 // Helper functions

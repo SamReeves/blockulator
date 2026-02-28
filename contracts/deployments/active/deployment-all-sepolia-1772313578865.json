@@ -1,0 +1,396 @@
+{
+  "timestamp": "2026-02-28T21:05:54.047Z",
+  "network": "sepolia",
+  "deployer": "0x4AA72012f9bE862442D38Aca966b9E3680D816c0",
+  "contracts": {
+    "exp": {
+      "address": "0x214E417CeA3A20c7e9e583b30bc03253DCcC5a1C",
+      "displayName": "Exponential (e^x)",
+      "txHash": "0xc5d724add70d28a2d083447115b53a0115c27ff10c14e1f5875e0c02b3ba6cbf",
+      "blockNumber": 10357069,
+      "gasUsed": "445100",
+      "constructorArgs": []
+    },
+    "ln": {
+      "address": "0xd133A5E0a7e8eDF1FDEA4cd06AC1F1D8325eB768",
+      "displayName": "Natural Log (ln)",
+      "txHash": "0x444a7be242fba056d1e384c99423e872d175055a33d52bfe6d8e270f863ff360",
+      "blockNumber": 10357070,
+      "gasUsed": "759510",
+      "constructorArgs": []
+    },
+    "sqrt": {
+      "address": "0x5989EB39217eb102aaba8dF1a7c53995EbfAA85b",
+      "displayName": "Square Root",
+      "txHash": "0x21f0499de12d89175ed3c3474388f1648963a06922f597e9f948a2477219580b",
+      "blockNumber": 10357071,
+      "gasUsed": "596770",
+      "constructorArgs": []
+    },
+    "factorial": {
+      "address": "0x987B55f5025361F7D438e47f27973B5129F9Bb48",
+      "displayName": "Factorial",
+      "txHash": "0xa0a08696e784c28227351292a1125a1de055dc0512499721dd1993ae64ec8f5c",
+      "blockNumber": 10357072,
+      "gasUsed": "150644",
+      "constructorArgs": []
+    },
+    "atan": {
+      "address": "0xE1974FF18f7f387bcb02f996D8ddC04be078b293",
+      "displayName": "Arctangent",
+      "txHash": "0x1dd78f8ed7fb74606207055c0d6a31cfb4d273c32009a8f81aec419f0060d35b",
+      "blockNumber": 10357073,
+      "gasUsed": "2273828",
+      "constructorArgs": []
+    },
+    "pow2": {
+      "address": "0x762D5A7a2a35a4eBb4412345532177c726B44E04",
+      "displayName": "Power of 2",
+      "txHash": "0xdb0a2b7e3f56baaf28baa922dadad842fb7cc8c8e0830d9fbf34067e451c7690",
+      "blockNumber": 10357074,
+      "gasUsed": "512046",
+      "constructorArgs": []
+    },
+    "pow10": {
+      "address": "0x4cdb4e0b80fA70848679e3FDb6dC4D57B0646841",
+      "displayName": "Power of 10",
+      "txHash": "0x3d659e09d7907589508efc9c36e9f0a384e90efe03978d3d855acaac03fb9311",
+      "blockNumber": 10357075,
+      "gasUsed": "447070",
+      "constructorArgs": []
+    },
+    "log2": {
+      "address": "0xbBf23C4340CB4D10e608a6d62C907EC2FdEDb517",
+      "displayName": "Log Base 2",
+      "txHash": "0x1bbcc75903cbc1213ace59c8cc7ed78bf99d83b15e336c18b2229abac78e5fe4",
+      "blockNumber": 10357076,
+      "gasUsed": "758220",
+      "constructorArgs": []
+    },
+    "log10": {
+      "address": "0x29359A46A4FAec3452dbDEa8715FD78cd06Cb9aa",
+      "displayName": "Log Base 10",
+      "txHash": "0x0cc219e2ec5484059e82fa56752456b17d835f38b0225c595220b3d32a1a19d3",
+      "blockNumber": 10357077,
+      "gasUsed": "764046",
+      "constructorArgs": []
+    },
+    "zscore": {
+      "address": "0x1090C2d12230B45077e19eF9725d94a0f78B39ea",
+      "displayName": "Z-Score",
+      "txHash": "0x4963ad9cf007bac0b18eea972e60d52b2d6abbc46f23232b6c00871bd2bf133b",
+      "blockNumber": 10357078,
+      "gasUsed": "202062",
+      "constructorArgs": []
+    },
+    "gcd": {
+      "address": "0xc2779e341D2B47ef3cE12Fd4171847DAd4cee152",
+      "displayName": "GCD/LCM",
+      "txHash": "0x9f290ea50e9fb923ad9fd51226525dce1ded1c2f1073e6c955f0239ed4f040b8",
+      "blockNumber": 10357079,
+      "gasUsed": "155270",
+      "constructorArgs": []
+    },
+    "sin": {
+      "address": "0x54133558fac25a8BE06818450A949E1788f8d36d",
+      "displayName": "Sine",
+      "txHash": "0x6037c338ad48d289b703b8a762e956387c9e561617fd6388bb5c3afa9a7024a8",
+      "blockNumber": 10357080,
+      "gasUsed": "2377803",
+      "constructorArgs": []
+    },
+    "cos": {
+      "address": "0xd105DEc01140cD654c3f529a734EFf4197661eAE",
+      "displayName": "Cosine",
+      "txHash": "0xf1a28dad11b8cc08b18883998eddea68d91de1b88313aedbce1f650251944640",
+      "blockNumber": 10357081,
+      "gasUsed": "2382135",
+      "constructorArgs": []
+    },
+    "tanh": {
+      "address": "0x0033D56AAa908d789f4de02e58304B46FFC4Fd34",
+      "displayName": "Hyperbolic Tangent",
+      "txHash": "0x990c84b329d1d1f61c72e68e621a5ab7c70f94aa1d318556a2b6fa8bdd29cf4c",
+      "blockNumber": 10357082,
+      "gasUsed": "2368185",
+      "constructorArgs": []
+    },
+    "e": {
+      "address": "0xE87ee976517CfA35945BFc51A697cCa9df4adc3a",
+      "displayName": "Euler's Number (e)",
+      "txHash": "0xc36f39cc69fb0069e258cc6382238f85efd06f220c41662b37720ffffff416d1",
+      "blockNumber": 10357083,
+      "gasUsed": "445040",
+      "constructorArgs": []
+    },
+    "pi": {
+      "address": "0x9859707734328ca8DEB52ADA5d770ff11A5C4CFB",
+      "displayName": "Pi",
+      "txHash": "0xd0dae82a570cc8de61cfde931cc18aa890e58cc1b5f8939229d39bb393c77ab8",
+      "blockNumber": 10357084,
+      "gasUsed": "445208",
+      "constructorArgs": []
+    },
+    "tau": {
+      "address": "0x7e2111cbE6a364f4de2210D2809b49eF6b159A09",
+      "displayName": "Tau",
+      "txHash": "0x05084d2a90e4af8c985d7505fea6c0281d31f42d52cb0cc8942499e8b23c0330",
+      "blockNumber": 10357085,
+      "gasUsed": "446482",
+      "constructorArgs": []
+    },
+    "ln-factorial": {
+      "address": "0x21F8a75C0D60A5504A9FF7773F1e451bA4c8f479",
+      "displayName": "Ln Factorial",
+      "txHash": "0x476b129bfe316ddeddab0d8d5514473501dc6babc43dcdb1d4c5680398cbb885",
+      "blockNumber": 10357109,
+      "gasUsed": "154766",
+      "constructorArgs": []
+    },
+    "erf": {
+      "address": "0x090285f2952ac6dCC8b6B40d90CD417B8789c1Df",
+      "displayName": "Error Function",
+      "txHash": "0x38655d9d5f42aadfa90046f67ec4002c904d6fe65b2e91aaac415526e8eaafc4",
+      "blockNumber": 10357110,
+      "gasUsed": "573597",
+      "constructorArgs": []
+    },
+    "norm-cdf": {
+      "address": "0x412f9e6d1B231f4Cb96BbD67fcCEF9435Fb37FD2",
+      "displayName": "Normal CDF",
+      "txHash": "0xe7c236ef4e29a839d363574c224143f11e20981348a17dcc9eb3a12e07816f4e",
+      "blockNumber": 10357111,
+      "gasUsed": "673589",
+      "constructorArgs": []
+    },
+    "sinh": {
+      "address": "0xa5E15aFCb50b8B4241d41f9B8847Df277A6941Ad",
+      "displayName": "Hyperbolic Sine",
+      "txHash": "0x2fcd5a036cfdb296f173a9e5c6958a7c442dcff772c04cd01c9cc738132e48ce",
+      "blockNumber": 10357112,
+      "gasUsed": "485745",
+      "constructorArgs": []
+    },
+    "cosh": {
+      "address": "0x117d0a451fa16AADBE344A80d944e9Ba35317295",
+      "displayName": "Hyperbolic Cosine",
+      "txHash": "0x425a44a59a2b5c95315d4d4ccad635dbffda5826ecc0ca1c8ea1203f6d79fd1f",
+      "blockNumber": 10357113,
+      "gasUsed": "467579",
+      "constructorArgs": []
+    },
+    "norm-pdf": {
+      "address": "0xcF60383e6b9a385a644675956C6c1c49f7234e5F",
+      "displayName": "Normal PDF",
+      "txHash": "0xb5fcbe250028029719760a0ebf9442e07b2cfa135b243bbb7604ac312ac2f4d7",
+      "blockNumber": 10357114,
+      "gasUsed": "324920",
+      "constructorArgs": [
+        "0x214E417CeA3A20c7e9e583b30bc03253DCcC5a1C"
+      ]
+    },
+    "gaussian-tail": {
+      "address": "0xD2B7D1031E6a9e54B7329Fa71de667BfD6CeDE51",
+      "displayName": "Gaussian Tail",
+      "txHash": "0x072d28cfe02b5abe63add30a75573ce4e56236fa746a2b1bff0fcb489b070c2c",
+      "blockNumber": 10357115,
+      "gasUsed": "315756",
+      "constructorArgs": [
+        "0x214E417CeA3A20c7e9e583b30bc03253DCcC5a1C"
+      ]
+    },
+    "binomial-coeff": {
+      "address": "0x4D024D9D815a50e0F6B0fA9D4D87D0CBAB716eC2",
+      "displayName": "Binomial Coefficient",
+      "txHash": "0xd11547d1d7b20f97cb2fcf39129cbae00dffe51a82bfa43059353de23a8d4ddd",
+      "blockNumber": 10357116,
+      "gasUsed": "319632",
+      "constructorArgs": [
+        "0x987B55f5025361F7D438e47f27973B5129F9Bb48"
+      ]
+    },
+    "uniform-future-blueprint": {
+      "address": "0xC630C3876cB4b84e6d7b3DD859Cc6078d2fCb1CB",
+      "displayName": "Uniform Future Blueprint",
+      "txHash": "0x381e907ce3464578a3f821c2a9bc69f79a593f8ed1c51da173910a1e5489c069",
+      "blockNumber": 10357117,
+      "gasUsed": "750984"
+    },
+    "gaussian-future-blueprint": {
+      "address": "0x452754b1b5b7421371537245192C682B409adB5d",
+      "displayName": "Gaussian Future Blueprint",
+      "txHash": "0xb1ecfbe4b81b818698502bdbd925323a0d11bc0c7792a401ac058fb41056e602",
+      "blockNumber": 10357118,
+      "gasUsed": "907304"
+    },
+    "exponential-future-blueprint": {
+      "address": "0xA0662156296480a8d69a24a52F829701183aA915",
+      "displayName": "Exponential Future Blueprint",
+      "txHash": "0x35b120a1e560c614b0c9192588e239e515114a9b08370c6b48d42eee4a754bf3",
+      "blockNumber": 10357119,
+      "gasUsed": "933388"
+    },
+    "linear-future-blueprint": {
+      "address": "0x5dE0BC82DcEbA8F1152198f4c810Dd44b9235698",
+      "displayName": "Linear Future Blueprint",
+      "txHash": "0x7f6edc9a6062281249a8f0ee8986025306494230be09be270871d3e39351653d",
+      "blockNumber": 10357120,
+      "gasUsed": "1052467"
+    },
+    "inverted-gaussian-future-blueprint": {
+      "address": "0xA79a88290Ec19F6Cad38C40C5ff4c9fAf9ecE6F0",
+      "displayName": "Inverted Gaussian Future Blueprint",
+      "txHash": "0x917e3ea71ba889834e69df1e52887b790d58a3bf7cfd9f9e940b5a95d94994ab",
+      "blockNumber": 10357121,
+      "gasUsed": "897165"
+    },
+    "badge-blueprint": {
+      "address": "0x906E93e3901C87e0E3158B8eE8D4bF56d887C1D0",
+      "displayName": "Badge Blueprint",
+      "txHash": "0x60c3894a7eccf36a71eff318e29d65fb5d8ff63b2455dd711254330570248f7b",
+      "blockNumber": 10357122,
+      "gasUsed": "626849"
+    },
+    "image-content-v3-blueprint": {
+      "address": "0x609798Eb02e4Fb49B3e8eCf41432A2e64F22050a",
+      "displayName": "Image Content V3 Blueprint",
+      "txHash": "0x970b01059a15ac26cd168c2ba906034cef24e7b056305e54f140104a89f6715c",
+      "blockNumber": 10357123,
+      "gasUsed": "499336"
+    },
+    "text-content-v4-blueprint": {
+      "address": "0x3088506F35f48D43c5946993D11D5e67624EDd83",
+      "displayName": "Text Content V4 Blueprint",
+      "txHash": "0x9ac8756a2c17a32f88cb337f5689045dc551027c9f02e26ffb56caa0572bf9a5",
+      "blockNumber": 10357124,
+      "gasUsed": "290506"
+    },
+    "future-factory": {
+      "address": "0x23D6C1D2e9050f0DA6e8Df5812c886b755ba3dA2",
+      "displayName": "Future Factory",
+      "txHash": "0x57b3993b1dcb1ec6d062d0c39a53d2d0150d50caa2b4d6724013a8c6ac043087",
+      "blockNumber": 10357125,
+      "gasUsed": "2649372",
+      "constructorArgs": [
+        "0xC630C3876cB4b84e6d7b3DD859Cc6078d2fCb1CB",
+        "0x452754b1b5b7421371537245192C682B409adB5d",
+        "0xA0662156296480a8d69a24a52F829701183aA915",
+        "0xA0662156296480a8d69a24a52F829701183aA915",
+        "0x5dE0BC82DcEbA8F1152198f4c810Dd44b9235698",
+        "0xA79a88290Ec19F6Cad38C40C5ff4c9fAf9ecE6F0",
+        "0x5dE0BC82DcEbA8F1152198f4c810Dd44b9235698",
+        "0x214E417CeA3A20c7e9e583b30bc03253DCcC5a1C",
+        "0xD2B7D1031E6a9e54B7329Fa71de667BfD6CeDE51",
+        "0x4AA72012f9bE862442D38Aca966b9E3680D816c0"
+      ]
+    },
+    "badge-factory": {
+      "address": "0x5802f9121018aabC887b9686bA2eB1EFABB70BB7",
+      "displayName": "Badge Factory",
+      "txHash": "0xff8c5d4c9711073c0a6b1de11ba3954f3e24562cbe7aec9c011a9ec0680ba087",
+      "blockNumber": 10357126,
+      "gasUsed": "822554",
+      "constructorArgs": [
+        "0x906E93e3901C87e0E3158B8eE8D4bF56d887C1D0",
+        "0x4AA72012f9bE862442D38Aca966b9E3680D816c0",
+        "0",
+        "0"
+      ]
+    },
+    "content-factory-v4": {
+      "address": "0x010EFFB50047820Fe8cEADD04877B427c92008B2",
+      "displayName": "Content Factory V4",
+      "txHash": "0x8000234c8a58381c8623c0f6e61a243da14c3b50f05d21501e2b9f6cb2ac2ac3",
+      "blockNumber": 10357127,
+      "gasUsed": "1071470",
+      "constructorArgs": [
+        "0x3088506F35f48D43c5946993D11D5e67624EDd83",
+        "0x609798Eb02e4Fb49B3e8eCf41432A2e64F22050a",
+        "0",
+        "0"
+      ]
+    },
+    "pissing-contest": {
+      "address": "0x09CB63309F854788C76D9b6750598b2d86EADC8b",
+      "displayName": "Pissing Contest",
+      "txHash": "0xfe4817493becfc89d725aee975bb02a91752327ea710a1b6381b1d0fac21aa51",
+      "blockNumber": 10357128,
+      "gasUsed": "1487348",
+      "constructorArgs": [
+        "100",
+        "1000000000000000"
+      ]
+    },
+    "message-board": {
+      "address": "0xE93Ac949Fe806d8b1cA93EB14e5f4d799cAc0d55",
+      "displayName": "Message Board",
+      "txHash": "0x23cb7f55b68d9ee0d1853a86061e00b552fab662bd17d82a63172b21091ef5ba",
+      "blockNumber": 10357129,
+      "gasUsed": "592448",
+      "constructorArgs": [
+        "100000000000000",
+        "60"
+      ]
+    },
+    "pay-it-forward": {
+      "address": "0x338C316e1FE9535e3569597D63267A8a1AD78855",
+      "displayName": "Pay It Forward",
+      "txHash": "0x453ba6368b825a8644ca6d18c6dac75576a1951e3ded77c74c97675fadd81634",
+      "blockNumber": 10357130,
+      "gasUsed": "139420",
+      "constructorArgs": []
+    },
+    "pay-it-backward": {
+      "address": "0x478A53b021639CFbAbe45d222B240ffE409FEE3f",
+      "displayName": "Pay It Backward",
+      "txHash": "0x2d4054a645aa2c1787b680926925d4f1fba34f1df284cda4016be2be21ffd8ce",
+      "blockNumber": 10357131,
+      "gasUsed": "172524",
+      "constructorArgs": []
+    },
+    "king-of-the-hill": {
+      "address": "0x0DEEBef3228B5d0cD4158Dc367A5C4b31B6414A6",
+      "displayName": "King of the Hill",
+      "txHash": "0x58337eb0e83ca48144fef91b6a80458dbddc2d2337463d7c6641327f14b1e21b",
+      "blockNumber": 10357132,
+      "gasUsed": "456568",
+      "constructorArgs": [
+        "10000000000000000"
+      ]
+    },
+    "last-call": {
+      "address": "0xE0e1E3778d75E757fd4718FdF44bD4e0F5E73baa",
+      "displayName": "Last Call",
+      "txHash": "0x2da4c15b8cf75452340ff1e590e5278a95a8b79f947746d57ca1b8a780ac5621",
+      "blockNumber": 10357133,
+      "gasUsed": "366860",
+      "constructorArgs": []
+    },
+    "time-to-make-the-donuts": {
+      "address": "0xD222eCe3C1D844B23384F56d62E59F556e925C85",
+      "displayName": "Time to Make the Donuts",
+      "txHash": "0x4dee5ade105c45cb3b966350448c475de8f3fcb92439252239ef746f09496cc1",
+      "blockNumber": 10357134,
+      "gasUsed": "314942",
+      "constructorArgs": []
+    },
+    "dice-gods": {
+      "address": "0x61d97822209D3B375c7B214597f1077F4879fD84",
+      "displayName": "Dice Gods",
+      "txHash": "0x2b5503fc0b937d1f3061484d4909c5f136978436109da28b5553546dd07238f4",
+      "blockNumber": 10357135,
+      "gasUsed": "620271",
+      "constructorArgs": [
+        "1000000000000000"
+      ]
+    },
+    "satan-moloch-baal": {
+      "address": "0x55Ec2808F3c2B55c02E065e1693c61a4A56967A2",
+      "displayName": "Satan Moloch Baal",
+      "txHash": "0x0efe91ecbf759148098b6a98f8ac67b02273b36d3dfc454414c8b8127076a621",
+      "blockNumber": 10357136,
+      "gasUsed": "619506",
+      "constructorArgs": []
+    }
+  }
+}

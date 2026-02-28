@@ -31,20 +31,7 @@ KEY DIFFERENCES FROM BOARD.VY:
 - Futures collect FEES on sales (not on creation)
 """
 
-# High-precision e^x lookup table for valuation calculations
-E_TAB: constant(decimal[10][11]) = [
-    [1.0, 2.7182818285, 7.3890560989, 20.0855369232, 54.5981500331, 148.4131591026, 403.4287934927, 1096.6331584285, 2980.9579870417, 8103.0839275754],
-    [1.0, 1.1051709181, 1.2214027582, 1.3498588076, 1.4918246976, 1.6487212707, 1.8221188004, 2.0137527075, 2.2255409285, 2.4596031112],
-    [1.0, 1.0100501671, 1.02020134, 1.030454534, 1.0408107742, 1.0512710964, 1.0618365465, 1.0725081813, 1.0832870677, 1.0941742837],
-    [1.0, 1.0010005002, 1.0020020013, 1.0030045045, 1.0040080107, 1.0050125209, 1.0060180361, 1.0070245573, 1.0080320855, 1.0090406218],
-    [1.0, 1.000100005, 1.00020002, 1.000300045, 1.00040008, 1.000500125, 1.00060018, 1.0007002451, 1.0008003201, 1.0009004051],
-    [1.0, 1.00001, 1.0000200002, 1.0000300005, 1.0000400008, 1.0000500013, 1.0000600018, 1.0000700025, 1.0000800032, 1.0000900041],
-    [1.0, 1.000001, 1.000002, 1.000003, 1.000004, 1.000005, 1.000006, 1.000007, 1.000008, 1.000009],
-    [1.0, 1.0000001, 1.0000002, 1.0000003, 1.0000004, 1.0000005, 1.0000006, 1.0000007, 1.0000008, 1.0000009],
-    [1.0, 1.00000001, 1.00000002, 1.00000003, 1.00000004, 1.00000005, 1.00000006, 1.00000007, 1.00000008, 1.00000009],
-    [1.0, 1.000000001, 1.000000002, 1.000000003, 1.000000004, 1.000000005, 1.000000006, 1.000000007, 1.000000008, 1.000000009],
-    [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0000000001, 1.0000000001, 1.0000000001, 1.0000000001]
-]
+# No embedded math - use external calculators for valuation
 
 # ============================================================================
 # EVENTS
@@ -122,6 +109,14 @@ interface IFuture:
     def expired() -> bool: view
     def initial_value() -> uint256: view
 
+# Interfaces for external calculators
+interface IExp:
+    def calculate(x: decimal) -> decimal: pure
+
+interface IGaussianTail:
+    def calculate(z: decimal) -> decimal: view
+    def z_score(t: decimal, mu: decimal, sigma: decimal) -> decimal: pure
+
 # ============================================================================
 # CONSTANTS
 # ============================================================================
@@ -153,20 +148,72 @@ total_trades: public(uint256)
 market_balance: public(uint256)  # Accumulated fees from creation + trades
 
 owner: public(immutable(address))
-future_blueprint: public(immutable(address))
+
+# Multiple blueprints - one per distribution type
+uniform_blueprint: public(immutable(address))           # Type 0
+gaussian_blueprint: public(immutable(address))          # Type 1
+exp_decay_blueprint: public(immutable(address))         # Type 2
+exp_growth_blueprint: public(immutable(address))        # Type 3
+linear_decay_blueprint: public(immutable(address))      # Type 4
+inverted_gaussian_blueprint: public(immutable(address)) # Type 5
+linear_growth_blueprint: public(immutable(address))     # Type 6
+
+# Calculator addresses
+exp_calculator: public(immutable(address))
+gaussian_tail_calculator: public(immutable(address))
 
 # ============================================================================
 # INITIALIZATION
 # ============================================================================
 
 @deploy
-def __init__(_future_blueprint: address, _owner: address):
-    """Initialize market with blueprint and owner"""
-    assert _future_blueprint != empty(address), "Invalid blueprint address"
+def __init__(
+    _uniform_bp: address,
+    _gaussian_bp: address,
+    _exp_decay_bp: address,
+    _exp_growth_bp: address,
+    _linear_decay_bp: address,
+    _inverted_gaussian_bp: address,
+    _linear_growth_bp: address,
+    _exp_calc: address,
+    _gaussian_calc: address,
+    _owner: address
+):
+    """
+    @notice Initialize market with multiple blueprints and calculator addresses
+    @param _uniform_bp Blueprint for uniform distribution (type 0)
+    @param _gaussian_bp Blueprint for Gaussian distribution (type 1)
+    @param _exp_decay_bp Blueprint for exponential decay (type 2)
+    @param _exp_growth_bp Blueprint for exponential growth (type 3)
+    @param _linear_decay_bp Blueprint for linear decay (type 4)
+    @param _inverted_gaussian_bp Blueprint for inverted Gaussian (type 5)
+    @param _linear_growth_bp Blueprint for linear growth (type 6)
+    @param _exp_calc Address of exp calculator contract
+    @param _gaussian_calc Address of gaussian_tail calculator contract
+    @param _owner Factory owner address
+    """
+    assert _uniform_bp != empty(address), "Invalid uniform blueprint"
+    assert _gaussian_bp != empty(address), "Invalid gaussian blueprint"
+    assert _exp_decay_bp != empty(address), "Invalid exp decay blueprint"
+    assert _exp_growth_bp != empty(address), "Invalid exp growth blueprint"
+    assert _linear_decay_bp != empty(address), "Invalid linear decay blueprint"
+    assert _inverted_gaussian_bp != empty(address), "Invalid inverted gaussian blueprint"
+    assert _linear_growth_bp != empty(address), "Invalid linear growth blueprint"
+    assert _exp_calc != empty(address), "Invalid exp calculator"
+    assert _gaussian_calc != empty(address), "Invalid gaussian calculator"
     assert _owner != empty(address), "Invalid owner address"
     
     owner = _owner
-    future_blueprint = _future_blueprint
+    uniform_blueprint = _uniform_bp
+    gaussian_blueprint = _gaussian_bp
+    exp_decay_blueprint = _exp_decay_bp
+    exp_growth_blueprint = _exp_growth_bp
+    linear_decay_blueprint = _linear_decay_bp
+    inverted_gaussian_blueprint = _inverted_gaussian_bp
+    linear_growth_blueprint = _linear_growth_bp
+    exp_calculator = _exp_calc
+    gaussian_tail_calculator = _gaussian_calc
+    
     self.total_created = 0
     self.total_trades = 0
     self.market_balance = 0
@@ -196,17 +243,88 @@ def create_future(lifetime: uint256, distribution_type: uint8) -> address:
     if last_created > 0:
         assert block.timestamp >= last_created + CREATION_COOLDOWN, "Cooldown active"
     
-    # Deploy from blueprint (pass msg.sender as the owner, self as factory)
-    # No fees - creator deposits 100% of value into future
-    new_future: address = create_from_blueprint(
-        future_blueprint,
-        lifetime,
-        distribution_type,
-        msg.sender,
-        self,
-        value=msg.value,
-        code_offset=3
-    )
+    # Select appropriate blueprint and deploy future
+    # Each blueprint has different constructor parameters
+    new_future: address = empty(address)
+    
+    if distribution_type == 0:
+        # UNIFORM: No calculator needed
+        new_future = create_from_blueprint(
+            uniform_blueprint,
+            lifetime,
+            msg.sender,
+            self,
+            value=msg.value,
+            code_offset=3
+        )
+    elif distribution_type == 1:
+        # GAUSSIAN: Needs gaussian_tail calculator
+        new_future = create_from_blueprint(
+            gaussian_blueprint,
+            lifetime,
+            msg.sender,
+            self,
+            gaussian_tail_calculator,
+            value=msg.value,
+            code_offset=3
+        )
+    elif distribution_type == 2:
+        # EXPONENTIAL DECAY: Needs exp calculator, is_growth=False
+        new_future = create_from_blueprint(
+            exp_decay_blueprint,
+            lifetime,
+            False,  # is_growth
+            msg.sender,
+            self,
+            exp_calculator,
+            value=msg.value,
+            code_offset=3
+        )
+    elif distribution_type == 3:
+        # EXPONENTIAL GROWTH: Needs exp calculator, is_growth=True
+        new_future = create_from_blueprint(
+            exp_growth_blueprint,
+            lifetime,
+            True,  # is_growth
+            msg.sender,
+            self,
+            exp_calculator,
+            value=msg.value,
+            code_offset=3
+        )
+    elif distribution_type == 4:
+        # LINEAR DECAY: No calculator, is_growth=False
+        new_future = create_from_blueprint(
+            linear_decay_blueprint,
+            lifetime,
+            False,  # is_growth
+            msg.sender,
+            self,
+            value=msg.value,
+            code_offset=3
+        )
+    elif distribution_type == 5:
+        # INVERTED GAUSSIAN: Needs gaussian_tail calculator
+        new_future = create_from_blueprint(
+            inverted_gaussian_blueprint,
+            lifetime,
+            msg.sender,
+            self,
+            gaussian_tail_calculator,
+            value=msg.value,
+            code_offset=3
+        )
+    else:
+        # LINEAR GROWTH: No calculator, is_growth=True
+        new_future = create_from_blueprint(
+            linear_growth_blueprint,
+            lifetime,
+            True,  # is_growth
+            msg.sender,
+            self,
+            value=msg.value,
+            code_offset=3
+        )
     
     # Create future entry
     expiry_time: uint256 = block.timestamp + lifetime
@@ -259,7 +377,7 @@ def create_future(lifetime: uint256, distribution_type: uint8) -> address:
     log FutureCreated(
         future_address=new_future,
         creator=msg.sender,
-        initial_value=future_value,
+        initial_value=msg.value,
         lifetime=lifetime,
         distribution_type=distribution_type,
         slot_index=slot_index,
@@ -421,10 +539,13 @@ def _get_expected_value_internal(future_addr: address) -> uint256:
         lambda_param: decimal = 0.0
         mean, stddev, lambda_param = staticcall IFuture(future_addr).get_distribution_params()
         
-        z_end: decimal = self._z_score(lifetime, mean, stddev)
-        y_end: decimal = self._y_constant(z_end)
-        exp_y_end: decimal = self._e_power(y_end)
-        tail_end: decimal = self._tail(exp_y_end)
+        # Use external gaussian_tail calculator
+        z_end: decimal = staticcall IGaussianTail(gaussian_tail_calculator).z_score(
+            convert(lifetime, decimal), 
+            convert(mean, decimal), 
+            convert(stddev, decimal)
+        )
+        tail_end: decimal = staticcall IGaussianTail(gaussian_tail_calculator).calculate(z_end)
         
         phase: uint8 = self._determine_phase(last_t, lifetime, mean)
         remaining_mass = self._weight_gaussian(last_cache, tail_end, phase)
@@ -436,7 +557,20 @@ def _get_expected_value_internal(future_addr: address) -> uint256:
         lambda_param: decimal = 0.0
         mean, stddev, lambda_param = staticcall IFuture(future_addr).get_distribution_params()
         
-        exp_end: decimal = self._exp_decay(lambda_param, lifetime)
+        # Calculate e^(-λt) = 1/e^(λt) using external exp calculator
+        exponent: decimal = lambda_param * convert(lifetime, decimal)
+        exp_end: decimal = 0.0
+        if exponent >= 10.0:
+            exp_end = 0.0
+        elif exponent < 0.0:
+            exp_end = 1.0
+        else:
+            exp_pos: decimal = staticcall IExp(exp_calculator).calculate(exponent)
+            if exp_pos > 0.0:
+                exp_end = 1.0 / exp_pos
+            else:
+                exp_end = 0.0
+        
         # Remaining mass is from last_t to end
         if last_cache > 0.0:
             remaining_mass = (last_cache - exp_end) / last_cache
@@ -450,7 +584,20 @@ def _get_expected_value_internal(future_addr: address) -> uint256:
         lambda_param: decimal = 0.0
         mean, stddev, lambda_param = staticcall IFuture(future_addr).get_distribution_params()
         
-        exp_end: decimal = self._exp_decay(lambda_param, lifetime)
+        # Calculate e^(-λt) = 1/e^(λt) using external exp calculator
+        exponent: decimal = lambda_param * convert(lifetime, decimal)
+        exp_end: decimal = 0.0
+        if exponent >= 10.0:
+            exp_end = 0.0
+        elif exponent < 0.0:
+            exp_end = 1.0
+        else:
+            exp_pos: decimal = staticcall IExp(exp_calculator).calculate(exponent)
+            if exp_pos > 0.0:
+                exp_end = 1.0 / exp_pos
+            else:
+                exp_end = 0.0
+        
         cdf_end: decimal = 1.0 - exp_end
         
         # Remaining mass from current CDF to end
@@ -473,10 +620,13 @@ def _get_expected_value_internal(future_addr: address) -> uint256:
         lambda_param: decimal = 0.0
         mean, stddev, lambda_param = staticcall IFuture(future_addr).get_distribution_params()
         
-        z_end: decimal = self._z_score(lifetime, mean, stddev)
-        y_end: decimal = self._y_constant(z_end)
-        exp_y_end: decimal = self._e_power(y_end)
-        tail_end: decimal = self._tail(exp_y_end)
+        # Use external gaussian_tail calculator
+        z_end: decimal = staticcall IGaussianTail(gaussian_tail_calculator).z_score(
+            convert(lifetime, decimal), 
+            convert(mean, decimal), 
+            convert(stddev, decimal)
+        )
+        tail_end: decimal = staticcall IGaussianTail(gaussian_tail_calculator).calculate(z_end)
         
         phase: uint8 = self._determine_phase(last_t, lifetime, mean)
         
@@ -616,58 +766,7 @@ def get_futures_count() -> uint256:
 # ============================================================================
 
 @internal
-@pure
-def _z_score(t: uint256, mu: uint256, sigma: uint256) -> decimal:
-    """Calculate z-score (standard deviations from mean)"""
-    if sigma == 0:
-        return 0.0
-    
-    if t > mu:
-        return convert(t - mu, decimal) / convert(sigma, decimal)
-    else:
-        return convert(mu - t, decimal) / convert(sigma, decimal)
-
-@internal
-@pure
-def _y_constant(z: decimal) -> decimal:
-    """Lin 1990 y-constant calculation"""
-    if z >= 9.0:
-        return 10.0  # Cap to prevent division issues
-    return 13.194689145 * z / (9.0 - z)
-
-@internal
-@pure
-def _e_power(x: decimal) -> decimal:
-    """Calculate e^x using high-precision lookup table"""
-    y: decimal = 1.0
-    x_work: decimal = x
-    
-    # Clamp x to valid range [0, 10)
-    if x_work < 0.0:
-        x_work = 0.0
-    if x_work >= 10.0:
-        x_work = 9.9999999999
-    
-    # Process each decimal digit using table multiplication
-    for i: uint256 in range(11):
-        if x_work != 0.0:
-            digit: uint256 = convert(x_work, uint256)
-            y *= E_TAB[i][digit]
-            x_work -= convert(digit, decimal)
-            x_work *= 10.0
-        else:
-            break
-    
-    return y
-
-@internal
-@pure
-def _tail(exp_y: decimal) -> decimal:
-    """Lin 1990 tail probability calculation"""
-    return 1.0 - 1.0 / (1.0 + exp_y)
-
-@internal
-@pure
+@view
 def _weight_gaussian(left: decimal, right: decimal, phase: uint8) -> decimal:
     """Calculate Gaussian weight between two times based on phase"""
     if phase == 0:
@@ -681,31 +780,7 @@ def _weight_gaussian(left: decimal, right: decimal, phase: uint8) -> decimal:
         return (1.0 - left) - (1.0 - right)
 
 @internal
-@pure
-def _exp_decay(lambda_param: decimal, t: uint256) -> decimal:
-    """Calculate e^(-λt) for exponential distribution using e^(-x) = 1/e^x"""
-    # Calculate exponent: λt (positive value)
-    exponent: decimal = lambda_param * convert(t, decimal)
-    
-    # Handle underflow: if exponent >= 10, return ~0
-    if exponent >= 10.0:
-        return 0.0
-    
-    # Clamp to valid range
-    if exponent < 0.0:
-        exponent = 0.0
-    
-    # Calculate e^x using table
-    exp_pos: decimal = self._e_power(exponent)
-    
-    # Return reciprocal: e^(-x) = 1 / e^x
-    if exp_pos > 0.0:
-        return 1.0 / exp_pos
-    else:
-        return 0.0
-
-@internal
-@pure
+@view
 def _determine_phase(t_last: uint256, t_current: uint256, mean: uint256) -> uint8:
     """
     Determine phase for Gaussian calculations

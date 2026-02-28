@@ -28,7 +28,7 @@ export class GameStatusService {
             { name: 'last-call', title: 'Last Call', emoji: '⏰', description: 'Last donor wins after timer' },
             { name: 'time-to-make-the-donuts', title: 'Make the Donuts', emoji: '🍩', description: 'First donor daily at midnight' },
             { name: 'dice-gods', title: 'Dice Gods', emoji: '🎲', description: 'Pick the least popular number' },
-            { name: 'satan-moloch-baal', title: 'Satan, Moloch, Baal', emoji: '🔥', description: 'Vote for demons or burn to void' }
+            { name: 'satan-moloch-baal', title: 'Satan, Moloch, Baal', emoji: '🔥', description: 'Sacrifice ETH to your chosen demon' }
         ];
 
         const statuses = new Map();

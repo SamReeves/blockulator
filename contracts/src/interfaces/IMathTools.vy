@@ -42,11 +42,35 @@ interface ILnFactorial:
     def calculate(n: uint256) -> decimal: pure
     def get_constant() -> decimal: pure  # Returns ln(2)
 
+interface IBinomialCoeff:
+    """Binomial coefficient: C(n,k) = n! / (k! * (n-k)!)"""
+    def calculate(n: uint256, k: uint256) -> uint256: view
+    def permutations(n: uint256, k: uint256) -> uint256: view
+    def get_constant() -> uint256: pure  # Returns 1
+
 interface INormCDF:
     """Normal CDF: Φ(x; μ, σ)"""
     def calculate(x: decimal, mu: decimal, sigma: decimal) -> decimal: pure
     def standard_cdf(z: decimal) -> decimal: pure
     def get_constant() -> decimal: pure  # Returns √2
+
+interface IGaussianTail:
+    """Gaussian tail probability using Lin 1990 approximation"""
+    def calculate(z: decimal) -> decimal: view
+    def z_score(t: decimal, mu: decimal, sigma: decimal) -> decimal: pure
+    def get_constant() -> decimal: pure  # Returns 4.2π ≈ 13.195
+
+interface IZScore:
+    """Z-score calculator: standardized distance from mean"""
+    def calculate(t: decimal, mu: decimal, sigma: decimal) -> decimal: pure
+    def z_score_signed(t: decimal, mu: decimal, sigma: decimal) -> decimal: pure
+    def get_constant() -> decimal: pure  # Returns 1.0
+
+interface INormPdf:
+    """Normal probability density function: φ(z)"""
+    def calculate(z: decimal) -> decimal: view
+    def calculate_general(x: decimal, mu: decimal, sigma: decimal) -> decimal: view
+    def get_constant() -> decimal: pure  # Returns 1/√(2π)
 
 # ========================================
 # POWER FUNCTIONS
@@ -109,6 +133,16 @@ interface ICosh:
     """Hyperbolic cosine: cosh(x)"""
     def calculate(x: decimal) -> decimal: pure
     def get_constant() -> decimal: pure  # Returns cosh(0) = 1
+
+# ========================================
+# NUMBER THEORY
+# ========================================
+
+interface IGCD:
+    """Greatest common divisor and least common multiple"""
+    def calculate(a: uint256, b: uint256) -> uint256: pure  # GCD
+    def lcm(a: uint256, b: uint256) -> uint256: pure  # LCM
+    def get_constant() -> uint256: pure  # Returns 1
 
 # ========================================
 # MATHEMATICAL CONSTANTS

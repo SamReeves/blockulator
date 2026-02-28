@@ -18,7 +18,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '💦',
         description: 'Biggest donation takes the pot',
         addresses: {
-            sepolia: '0x483470B5B779360b70d4CD7e5253d4d6380aA07d',
+            sepolia: '0x09CB63309F854788C76D9b6750598b2d86EADC8b',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/pissing_contest.vy',
@@ -31,7 +31,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '💬',
         description: 'Permanent on-chain messages',
         addresses: {
-            sepolia: '0xf90592207441eeef27845dE4B87a5259851EBa75',
+            sepolia: '0xE93Ac949Fe806d8b1cA93EB14e5f4d799cAc0d55',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/message_board.vy',
@@ -44,7 +44,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '⏩',
         description: 'Get previous player\'s donation',
         addresses: {
-            sepolia: '0xB9Bc4f8D9d41a8dcBCDD99D7081d5c9170786679',
+            sepolia: '0x338C316e1FE9535e3569597D63267A8a1AD78855',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/pay_it_forward.vy',
@@ -57,7 +57,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '⏪',
         description: 'Reward the previous donor',
         addresses: {
-            sepolia: '0x137E7907709898571948BddE2e0eCbAC1C343d8C',
+            sepolia: '0x478A53b021639CFbAbe45d222B240ffE409FEE3f',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/pay_it_backward.vy',
@@ -70,7 +70,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '👑',
         description: 'Dethrone king, stakes grow',
         addresses: {
-            sepolia: '0x159317d877BbF41dE895465B576e706Ebcb0e30e',
+            sepolia: '0x0DEEBef3228B5d0cD4158Dc367A5C4b31B6414A6',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/king_of_the_hill.vy',
@@ -83,7 +83,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '⏰',
         description: 'Last donor wins after timer',
         addresses: {
-            sepolia: '0xaCffb1F658E1fD7A50E49Ef55f8fbEA2F1df1528',
+            sepolia: '0xE0e1E3778d75E757fd4718FdF44bD4e0F5E73baa',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/last_call.vy',
@@ -96,7 +96,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🍩',
         description: 'First donor daily at midnight',
         addresses: {
-            sepolia: '0x98C52B972bDa78a009dE20837d406D96Eb14A3C0',
+            sepolia: '0xD222eCe3C1D844B23384F56d62E59F556e925C85',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/time_to_make_the_donuts.vy',
@@ -109,7 +109,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🎲',
         description: 'Pick the least popular number',
         addresses: {
-            sepolia: '0xfE76b636ea9dD2881c72Ba1e6A66998B60B2b07d',
+            sepolia: '0x61d97822209D3B375c7B214597f1077F4879fD84',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/dice_gods.vy',
@@ -120,9 +120,9 @@ export const CONTRACT_REGISTRY = {
         type: 'game',
         name: 'Satan, Moloch, Baal',
         emoji: '🔥',
-        description: 'Vote for demons or burn to void',
+        description: 'Sacrifice ETH to your chosen demon',
         addresses: {
-            sepolia: '0x1C5596AF550A33bc73d5bB401D6Fd9a0e17751f6',
+            sepolia: '0x55Ec2808F3c2B55c02E065e1693c61a4A56967A2',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/games/satan_moloch_baal.vy',
@@ -138,7 +138,7 @@ export const CONTRACT_REGISTRY = {
         category: 'exponential',
         description: 'Calculate e^x on-chain',
         addresses: {
-            sepolia: '0xE62DAA640895ca022Abc53A2963A8542f6760138',
+            sepolia: '0x214E417CeA3A20c7e9e583b30bc03253DCcC5a1C',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/exp.vy',
@@ -153,7 +153,7 @@ export const CONTRACT_REGISTRY = {
         category: 'basic',
         description: 'Calculate factorial on-chain',
         addresses: {
-            sepolia: '0xd38460Acbf04E3A7a6D40423367f6fd2a876c0d6',
+            sepolia: '0x987B55f5025361F7D438e47f27973B5129F9Bb48',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/factorial.vy',
@@ -168,7 +168,7 @@ export const CONTRACT_REGISTRY = {
         category: 'probability',
         description: 'Standard normal cumulative distribution function',
         addresses: {
-            sepolia: '0x96C2DC2C0A02dAba9E9aDFd21079F3DF863636d6',
+            sepolia: '0x412f9e6d1B231f4Cb96BbD67fcCEF9435Fb37FD2',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/norm_cdf.vy',
@@ -183,7 +183,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Natural log of factorial',
         addresses: {
-            sepolia: '0x3f1E462e882bB09d95040b16184D1105f6E8D2E8',
+            sepolia: '0x21F8a75C0D60A5504A9FF7773F1e451bA4c8f479',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/ln_factorial.vy',
@@ -198,7 +198,7 @@ export const CONTRACT_REGISTRY = {
         category: 'trigonometric',
         description: 'Calculate arctangent on-chain',
         addresses: {
-            sepolia: '0xd1Cd4E090d61a2347319C62991D602A614C7C1E5',
+            sepolia: '0xE1974FF18f7f387bcb02f996D8ddC04be078b293',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/atan.vy',
@@ -213,7 +213,7 @@ export const CONTRACT_REGISTRY = {
         category: 'hyperbolic',
         description: 'Calculate hyperbolic sine',
         addresses: {
-            sepolia: '0x306e141415d87B03B987Eee6912BF8051E213A08',
+            sepolia: '0xa5E15aFCb50b8B4241d41f9B8847Df277A6941Ad',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/sinh.vy',
@@ -228,7 +228,7 @@ export const CONTRACT_REGISTRY = {
         category: 'hyperbolic',
         description: 'Calculate hyperbolic cosine',
         addresses: {
-            sepolia: '0xA713c8F56BB9133026FA617f4cbbAC2518b2a7d8',
+            sepolia: '0x117d0a451fa16AADBE344A80d944e9Ba35317295',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/cosh.vy',
@@ -243,7 +243,7 @@ export const CONTRACT_REGISTRY = {
         category: 'constants',
         description: 'Mathematical constant e',
         addresses: {
-            sepolia: '0x0df17535A8C9B68C426F4bf872E3F4EE1c57Aab8',
+            sepolia: '0xE87ee976517CfA35945BFc51A697cCa9df4adc3a',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/constants/e.vy',
@@ -258,7 +258,7 @@ export const CONTRACT_REGISTRY = {
         category: 'constants',
         description: 'Mathematical constant pi',
         addresses: {
-            sepolia: '0xeBFaB280b828153b0419bFc866BF8639b485C1da',
+            sepolia: '0x9859707734328ca8DEB52ADA5d770ff11A5C4CFB',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/constants/pi.vy',
@@ -273,7 +273,7 @@ export const CONTRACT_REGISTRY = {
         category: 'constants',
         description: 'Mathematical constant tau (2π)',
         addresses: {
-            sepolia: '0x4D4FF41BbF40BF3edE475686Cfd84Ea356647511',
+            sepolia: '0x7e2111cbE6a364f4de2210D2809b49eF6b159A09',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/constants/tau.vy',
@@ -288,7 +288,7 @@ export const CONTRACT_REGISTRY = {
         category: 'trigonometric',
         description: 'Calculate sine on-chain',
         addresses: {
-            sepolia: '0x2b974E0C5AD3c1377Ff9d13C341e796B07627f8b',
+            sepolia: '0x54133558fac25a8BE06818450A949E1788f8d36d',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/trig/sin.vy',
@@ -303,7 +303,7 @@ export const CONTRACT_REGISTRY = {
         category: 'trigonometric',
         description: 'Calculate cosine on-chain',
         addresses: {
-            sepolia: '0x85DABC736AA6DE75940cA7C33fc970cB703AcE04',
+            sepolia: '0xd105DEc01140cD654c3f529a734EFf4197661eAE',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/trig/cos.vy',
@@ -318,7 +318,7 @@ export const CONTRACT_REGISTRY = {
         category: 'hyperbolic',
         description: 'Calculate hyperbolic tangent',
         addresses: {
-            sepolia: '0x4bB456891e1e703Bc3bd23F69B6D6d91323622E1',
+            sepolia: '0x0033D56AAa908d789f4de02e58304B46FFC4Fd34',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/trig/tanh.vy',
@@ -333,7 +333,7 @@ export const CONTRACT_REGISTRY = {
         category: 'exponential',
         description: 'Calculate powers of 10',
         addresses: {
-            sepolia: '0x86C5081545f7c8Ab322e8308b5D772e3311DD499',
+            sepolia: '0x4cdb4e0b80fA70848679e3FDb6dC4D57B0646841',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/pow10.vy',
@@ -348,7 +348,7 @@ export const CONTRACT_REGISTRY = {
         category: 'exponential',
         description: 'Calculate powers of 2',
         addresses: {
-            sepolia: '0x038c3931BB2eA55e564292D64bfC4d595F162059',
+            sepolia: '0x762D5A7a2a35a4eBb4412345532177c726B44E04',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/pow2.vy',
@@ -363,7 +363,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Calculate natural logarithm',
         addresses: {
-            sepolia: '0x349dC7858Ff7389F8a132d82aD505627E213391F',
+            sepolia: '0xd133A5E0a7e8eDF1FDEA4cd06AC1F1D8325eB768',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/ln.vy',
@@ -378,7 +378,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Calculate logarithm base 2',
         addresses: {
-            sepolia: '0xDfA68b0fcC5fca85BB3c3749Ade5F364744AB65E',
+            sepolia: '0xbBf23C4340CB4D10e608a6d62C907EC2FdEDb517',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/log2.vy',
@@ -393,7 +393,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Calculate logarithm base 10',
         addresses: {
-            sepolia: '0xC39b9A0aDE77f8b8428f2BB5F0a7f457CFb68a6c',
+            sepolia: '0x29359A46A4FAec3452dbDEa8715FD78cd06Cb9aa',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/log10.vy',
@@ -408,7 +408,7 @@ export const CONTRACT_REGISTRY = {
         category: 'basic',
         description: 'Calculate square root',
         addresses: {
-            sepolia: '0xb7DdD29478DFC6318f48BeA493f6ae8df1C39226',
+            sepolia: '0x5989EB39217eb102aaba8dF1a7c53995EbfAA85b',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/sqrt.vy',
@@ -423,11 +423,86 @@ export const CONTRACT_REGISTRY = {
         category: 'probability',
         description: 'Gaussian error function',
         addresses: {
-            sepolia: '0x774f4e29521d0AE16E4101419dD059785345F142',
+            sepolia: '0x090285f2952ac6dCC8b6B40d90CD417B8789c1Df',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/erf.vy',
         abi: 'contracts/build/abis/erf-calculator.json'
+    },
+    
+    'zscore': {
+        type: 'calculator',
+        name: 'Z-Score',
+        symbol: 'z',
+        emoji: '📏',
+        category: 'statistics',
+        description: 'Standardized distance from mean',
+        addresses: {
+            sepolia: '0x1090C2d12230B45077e19eF9725d94a0f78B39ea',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/tools/math/zscore.vy',
+        abi: 'contracts/build/abis/zscore.json'
+    },
+    
+    'gaussian-tail': {
+        type: 'calculator',
+        name: 'Gaussian Tail',
+        symbol: 'Tail(z)',
+        emoji: '📉',
+        category: 'statistics',
+        description: 'Gaussian tail probability (Lin 1990)',
+        addresses: {
+            sepolia: '0xD2B7D1031E6a9e54B7329Fa71de667BfD6CeDE51',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/tools/math/gaussian_tail.vy',
+        abi: 'contracts/build/abis/gaussian-tail.json'
+    },
+    
+    'binomial-coeff': {
+        type: 'calculator',
+        name: 'Binomial Coefficient',
+        symbol: 'C(n,k)',
+        emoji: '🎲',
+        category: 'combinatorics',
+        description: 'n choose k - combinations calculator',
+        addresses: {
+            sepolia: '0x4D024D9D815a50e0F6B0fA9D4D87D0CBAB716eC2',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/tools/math/binomial_coeff.vy',
+        abi: 'contracts/build/abis/binomial-coeff.json'
+    },
+    
+    'norm-pdf': {
+        type: 'calculator',
+        name: 'Normal PDF',
+        symbol: 'φ(z)',
+        emoji: '🔔',
+        category: 'statistics',
+        description: 'Normal probability density function',
+        addresses: {
+            sepolia: '0xcF60383e6b9a385a644675956C6c1c49f7234e5F',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/tools/math/norm_pdf.vy',
+        abi: 'contracts/build/abis/norm-pdf.json'
+    },
+    
+    'gcd': {
+        type: 'calculator',
+        name: 'GCD / LCM',
+        symbol: 'GCD(a,b)',
+        emoji: '🔢',
+        category: 'number-theory',
+        description: 'Greatest common divisor and least common multiple',
+        addresses: {
+            sepolia: '0xc2779e341D2B47ef3cE12Fd4171847DAd4cee152',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/tools/math/gcd.vy',
+        abi: 'contracts/build/abis/gcd.json'
     },
     
     // ========== FUTURES ==========
@@ -437,25 +512,15 @@ export const CONTRACT_REGISTRY = {
         emoji: '🏭',
         description: 'Eulerian futures marketplace',
         addresses: {
-            sepolia: '0x8cf41fbE9abE00e47fDed94FdbdC75C2d07f8193',
+            sepolia: '0x23D6C1D2e9050f0DA6e8Df5812c886b755ba3dA2',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/market/future_factory.vy',
         abi: 'contracts/build/abis/future-factory.json'
     },
     
-    'eulerian-future-blueprint': {
-        type: 'future',
-        name: 'Eulerian Future Blueprint',
-        emoji: '📋',
-        description: 'Future contract blueprint',
-        addresses: {
-            sepolia: '0x2E942C37B0ED14017E502E2aFB038E8657eD5F67',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/market/eulerian_future.vy',
-        abi: 'contracts/build/abis/eulerian-future.json'
-    },
+    // Note: eulerian-future-blueprint was replaced by specific distribution blueprints
+    // (uniform, gaussian, exponential, linear, inverted-gaussian) in the latest deployment
     
     // ========== IDENTITY ==========
     'badge-factory': {
@@ -464,7 +529,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🏭',
         description: 'Badge creation factory',
         addresses: {
-            sepolia: '0xb79F5c67e616F913012af413891B2A71764D2294',
+            sepolia: '0x5802f9121018aabC887b9686bA2eB1EFABB70BB7',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/identity/badge_factory.vy',
@@ -477,7 +542,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🎖️',
         description: 'Badge contract blueprint',
         addresses: {
-            sepolia: '0x32C7C4A4426bf1cBBb1F60Fd706514F1846A828E',
+            sepolia: '0x906E93e3901C87e0E3158B8eE8D4bF56d887C1D0',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/identity/badge.vy',
