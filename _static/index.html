@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Blockulator - Blockchain games, on-chain calculators, futures markets, and identity badges on Sepolia testnet">
+    <title>Blockulator</title>
+    <link rel="icon" type="image/png" href="/blockulator_favicon.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header - Loaded once, never reloaded -->
+        <header class="app-header">
+            <div class="header-left">
+                <h1 class="app-title">
+                    <img src="/blockulator.png" alt="Blockulator" class="brand-logo">
+                </h1>
+                <span class="testnet-badge">TESTNET</span>
+                <span id="readonly-badge" class="readonly-badge hidden">Browsing</span>
+            </div>
+            <nav class="header-nav">
+                <a href="#/games" class="nav-link" data-route="games">Games</a>
+                <a href="#/calculator" class="nav-link" data-route="calculator">Calculator</a>
+                <a href="#/futures" class="nav-link" data-route="futures">Futures</a>
+                <a href="#/badges" class="nav-link" data-route="badges">Badges</a>
+                <a href="https://sepolia-faucet.pk910.de/" target="_blank" class="nav-link">Faucet</a>
+                <a href="#/about" class="nav-link" data-route="about">About</a>
+            </nav>
+            <div class="header-right">
+                <button id="connect-wallet" class="btn-connect">Connect</button>
+                <div id="wallet-info" class="wallet-info hidden">
+                    <div class="wallet-line">
+                        <span id="wallet-address" class="wallet-value"></span>
+                        <button id="copy-address" class="copy-btn">📋</button>
+                    </div>
+                    <div class="wallet-line">
+                        <span id="wallet-balance" class="wallet-value"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area - Contains all views -->
+        <main id="main-content">
+            
+            <!-- GAMES VIEW -->
+            <div id="games-view" class="view-container hidden" data-view="games">
+                <div id="content" class="content">
+                    <!-- Games List with Status -->
+                    <div id="games-list-container" class="status-list-container">
+                        <div class="view-header">
+                            <h2 class="view-title">🎮 Blockchain Games</h2>
+                            <button id="refresh-games" class="btn-secondary">🔄 Refresh</button>
+                        </div>
+                        <div id="games-list" class="status-column">
+                            <!-- Status cards will be inserted here -->
+                            <div class="loading-state">Loading games...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Game Detail View -->
+                    <div id="game-detail" class="game-detail hidden">
+                        <button id="back-to-games" class="btn-back">← Back to Games</button>
+                        <div id="game-container"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CALCULATOR VIEW -->
+            <div id="calculator-view" class="view-container hidden" data-view="calculator">
+                <div id="calculator-content" class="content">
+                    <div id="tool-container"></div>
+                </div>
+            </div>
+
+
+            <!-- FUTURES VIEW -->
+            <div id="futures-view" class="view-container hidden" data-view="futures">
+                <div id="futures-content" class="content">
+                    <div class="section-layout">
+                        
+                        <!-- Elegant Page Header -->
+                        <div class="futures-page-header">
+                            <div class="futures-header-content">
+                                <h1 class="futures-title">🎯 Eulerian Futures</h1>
+                                <p class="futures-subtitle">Time-weighted payout contracts with customizable distributions</p>
+                            </div>
+                            <button id="create-future-btn" class="btn-primary btn-large">
+                                ➕ Create Future
+                            </button>
+                        </div>
+                        
+                        <!-- PRIMARY VIEW AREA (State-driven: Market Table OR Future Detail) -->
+                        <div class="primary-view-area">
+                            
+                            <!-- MARKET VIEW (Level 1) -->
+                            <div id="market-view" class="view-container">
+
+                                <!-- Create Future Form (Hidden by default) -->
+                                <div id="create-future-form-container" class="form-panel hidden">
+                                    <div class="form-panel-header">
+                                        <h3>🚀 Create New Future</h3>
+                                        <button id="close-create-form" class="btn-close">✖</button>
+                                    </div>
+
+                                    <form id="create-future-form" class="create-form">
+                                        <div class="form-group">
+                                            <label for="distribution-type">
+                                                <span>Distribution Type</span>
+                                            </label>
+                                            <select id="distribution-type" name="distribution_type" required>
+                                                <option value="0">Uniform - Constant rate</option>
+                                                <option value="1">Gaussian - Bell curve (peak at midpoint)</option>
+                                                <option value="2">Exponential Decay - Early payouts favored</option>
+                                                <option value="3">Exponential Growth - Late payouts favored</option>
+                                                <option value="4">Linear Decay - Triangular (high at start)</option>
+                                                <option value="5">Inverted Gaussian - U-shape (high at extremes)</option>
+                                                <option value="6">Linear Growth - Triangular (low at start, high at end)</option>
+                                            </select>
+                                            <div id="distribution-description" class="form-hint">
+                                                Predictable, constant rate. Value declines linearly from 100% to 0%.
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="lifetime">
+                                                <span>Lifetime (minutes to years)</span>
+                                                <span id="lifetime-display" class="char-counter">1 hour</span>
+                                            </label>
+                                            <input type="range" id="lifetime" name="lifetime" 
+                                                   min="0" max="1000" value="300" step="1">
+                                            <div class="form-hint">
+                                                Minimum: 5 minutes | Maximum: 1000 years (logarithmic scale)
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div id="initial-value-input"></div>
+                                            <div id="value-warning" class="value-warning"></div>
+                                            <div class="form-hint">
+                                                100% of deposited value goes into the future contract (no fees).
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div id="valuation-preview" class="valuation-preview">
+                                                <canvas id="distribution-chart"></canvas>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-actions">
+                                            <button type="button" id="cancel-create-btn" class="btn-secondary">
+                                                Cancel
+                                            </button>
+                                            <button type="submit" id="create-submit-btn" class="btn-submit">
+                                                🚀 Create Future
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Filter & Sort Controls -->
+                                <div class="table-controls">
+                                    <div class="filter-controls-group">
+                                        <label class="filter-toggle">
+                                            <input type="checkbox" id="show-my-futures">
+                                            <span>My Futures only</span>
+                                        </label>
+                                        <div class="filter-select">
+                                            <label for="distribution-filter">Type:</label>
+                                            <select id="distribution-filter">
+                                                <option value="all">All Distributions</option>
+                                                <option value="uniform">Uniform</option>
+                                                <option value="gaussian">Gaussian</option>
+                                                <option value="decay">Exp Decay</option>
+                                                <option value="growth">Exp Growth</option>
+                                                <option value="linear-decay">Linear Decay</option>
+                                                <option value="inverted">Inverted Gaussian</option>
+                                                <option value="linear-growth">Linear Growth</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="sort-controls">
+                                        <label for="market-sort-select">Sort by:</label>
+                                        <select id="market-sort-select">
+                                            <option value="recent">Most Recent</option>
+                                            <option value="expiry">Soonest Expiry</option>
+                                            <option value="value">Highest Value</option>
+                                            <option value="expected">Expected Value</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Market Table Container -->
+                                <div id="market-table-container" class="table-view"></div>
+                            </div>
+
+                            <!-- FUTURE DETAIL VIEW (Level 2) - Initially Hidden -->
+                            <div id="future-view" class="view-container hidden">
+                                <!-- Future detail view rendered here by FutureDetailView component -->
+                            </div>
+
+                        </div>
+
+                        <!-- DIRECT TRANSFER TOOL -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>🔄 Direct Transfer Tool</h3>
+                                <p class="section-subtitle">Transfer ownership of unlocked futures without the marketplace</p>
+                            </div>
+                            <div class="transfer-tool-panel">
+                                <form id="direct-transfer-form" class="transfer-form">
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="transfer-future-address">Future Contract Address</label>
+                                            <input type="text" id="transfer-future-address" placeholder="0x..." required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="transfer-new-owner">New Owner Address</label>
+                                            <input type="text" id="transfer-new-owner" placeholder="0x..." required>
+                                        </div>
+                                        <div class="form-group form-group-button">
+                                            <button type="submit" class="btn-primary">Transfer Ownership</button>
+                                        </div>
+                                    </div>
+                                    <div class="form-hint">
+                                        ⚠️ Only unlocked futures can be transferred directly. Listed futures must be delisted first.
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- HOW IT WORKS SECTION -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>📖 How It Works</h3>
+                            </div>
+                            <div class="how-it-works-grid">
+                                <div class="work-step">
+                                    <div class="step-number">1</div>
+                                    <h4>Create</h4>
+                                    <p>Deploy a future with ETH and choose a distribution type (Uniform, Gaussian, Exponential, etc.) and lifetime (5 minutes to 1000 years).</p>
+                                </div>
+                                <div class="work-step">
+                                    <div class="step-number">2</div>
+                                    <h4>Hold or Trade</h4>
+                                    <p>List your future on the marketplace or transfer it directly to another address. Each transfer pays out accumulated value.</p>
+                                </div>
+                                <div class="work-step">
+                                    <div class="step-number">3</div>
+                                    <h4>Extract Value</h4>
+                                    <p>Transfer ownership to claim payout based on the distribution curve. The new owner receives the contract with reduced balance.</p>
+                                </div>
+                                <div class="work-step">
+                                    <div class="step-number">4</div>
+                                    <h4>Repeat or Expire</h4>
+                                    <p>The new owner can transfer again. After expiry, the final owner claims all remaining ETH.</p>
+                                </div>
+                            </div>
+                            <div class="key-features">
+                                <div class="feature">
+                                    <span class="feature-icon">✅</span>
+                                    <div>
+                                        <strong>Deterministic</strong>
+                                        <p>Calculate exact payouts before transferring</p>
+                                    </div>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">🔒</span>
+                                    <div>
+                                        <strong>Trustless</strong>
+                                        <p>All logic enforced by smart contracts</p>
+                                    </div>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">📊</span>
+                                    <div>
+                                        <strong>Flexible</strong>
+                                        <p>7 distribution types for different strategies</p>
+                                    </div>
+                                </div>
+                                <div class="feature">
+                                    <span class="feature-icon">💹</span>
+                                    <div>
+                                        <strong>Tradeable</strong>
+                                        <p>Marketplace with fair value pricing</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TECHNICAL DETAILS SECTION -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>⚙️ Technical Details</h3>
+                            </div>
+                            <div class="technical-grid">
+                                <div class="technical-item">
+                                    <h4>Distribution Types</h4>
+                                    <ul>
+                                        <li><strong>Uniform (Type 0):</strong> Constant payout rate, linear accumulation</li>
+                                        <li><strong>Gaussian (Type 1):</strong> Bell curve, peak value at midpoint</li>
+                                        <li><strong>Exponential Decay (Type 2):</strong> Front-loaded, 95% paid by ~60% of lifetime</li>
+                                        <li><strong>Exponential Growth (Type 3):</strong> Back-loaded, 95% paid in final ~40%</li>
+                                        <li><strong>Linear Decay (Type 4):</strong> Triangular, high at start, accelerating accumulation</li>
+                                        <li><strong>Inverted Gaussian (Type 5):</strong> U-shaped, high at extremes</li>
+                                        <li><strong>Linear Growth (Type 6):</strong> Triangular, low at start, decelerating accumulation</li>
+                                    </ul>
+                                </div>
+                                <div class="technical-item">
+                                    <h4>Contract Parameters</h4>
+                                    <ul>
+                                        <li><strong>Lifetime Range:</strong> 300 seconds (5 min) to 31.5B seconds (1000 years)</li>
+                                        <li><strong>Minimum Value:</strong> Any amount ≥ 0.0001 ETH</li>
+                                        <li><strong>Fees:</strong> None - 100% of value flows to players/users</li>
+                                    </ul>
+                                </div>
+                                <div class="technical-item">
+                                    <h4>Payout Formula</h4>
+                                    <p>Payout calculation uses the probability density function (PDF) of each distribution type:</p>
+                                    <code>payout = balance × ∫[pdf(t)] dt</code>
+                                    <p>Where t is the time since creation. The remaining balance after transfer is:</p>
+                                    <code>new_balance = balance - payout</code>
+                                </div>
+                                <div class="technical-item">
+                                    <h4>Marketplace Mechanics</h4>
+                                    <ul>
+                                        <li><strong>Listing:</strong> Futures are "locked" when listed, preventing direct transfers</li>
+                                        <li><strong>Buying:</strong> Automatically unlocks and transfers to buyer</li>
+                                        <li><strong>Delisting:</strong> Unlocks the future for direct transfers</li>
+                                        <li><strong>Fair Pricing:</strong> Expected value calculated as balance × remaining_time_factor</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CONTRACT INFO SECTION -->
+                        <div class="info-section">
+                            <div class="section-header">
+                                <h3>📜 Smart Contracts</h3>
+                                <p class="section-subtitle">Eulerian futures marketplace with time-weighted payouts</p>
+                            </div>
+                            <div id="futures-contract-info" class="contracts-grid">
+                                <!-- Will be populated by JavaScript -->
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- BADGES VIEW -->
+            <div id="badges-view" class="view-container hidden" data-view="badges">
+                <!-- Badge content will be dynamically loaded here -->
+            </div>
+
+            <!-- ABOUT VIEW -->
+            <div id="about-view" class="view-container hidden" data-view="about">
+                <div class="about-content">
+                    
+                    <!-- Hero Section -->
+                    <section class="about-hero">
+                        <h1>Math & Games on the Blockchain</h1>
+                        <p class="hero-subtitle">
+                            A personal experiment in putting scientific computing and weird games entirely on-chain
+                        </p>
+                    </section>
+
+                    <!-- What This Is -->
+                    <section class="about-section">
+                        <h2>🔬 What This Is</h2>
+                        <p>
+                            Blockulator is my experiment to see what happens when you put complex math and 
+                            game mechanics directly on the blockchain. Everything lives on-chain—calculations, 
+                            game state, pixel art badges, all of it. No databases, no APIs, just smart contracts.
+                        </p>
+                        <p>
+                            It's a research project. I'm figuring out what's possible, not what's profitable. 
+                            Expect bugs, weird UX, and things that don't make economic sense.
+                        </p>
+                    </section>
+
+                    <!-- What's Here -->
+                    <section class="about-section">
+                        <h2>🧮 What's Here</h2>
+                        
+                        <div class="about-grid">
+                            <div class="about-card">
+                                <h3>🔢 Math Library</h3>
+                                <p>
+                                    Trig functions, logs, exponentials, statistical distributions—all implemented 
+                                    as smart contracts. Use them in your own contracts or just play with the 
+                                    calculator to see what's possible on-chain.
+                                </p>
+                            </div>
+
+                            <div class="about-card">
+                                <h3>📈 Futures Markets</h3>
+                                <p>
+                                    Time-weighted payout contracts with different distribution curves. 
+                                    No oracles, no price feeds, just math and time. Place a bet, pick a time, 
+                                    see what happens.
+                                </p>
+                            </div>
+
+                            <div class="about-card">
+                                <h3>🎖️ Pixel Badges</h3>
+                                <p>
+                                    Draw a 32x32 pixel badge and store it entirely on-chain. Edit it whenever 
+                                    you want. It's your on-chain identity, permanently stored in the contract.
+                                </p>
+                            </div>
+
+                            <div class="about-card">
+                                <h3>🎮 Weird Games</h3>
+                                <p>
+                                    Pissing contests, demon worship, last-call timers—each game is an experiment 
+                                    in mechanism design. Some are fun, some are dumb, all are fully autonomous 
+                                    smart contracts.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- The Stack -->
+                    <section class="about-section">
+                        <h2>🛠️ The Stack</h2>
+                        
+                        <div class="tech-stack">
+                            <div class="stack-layer">
+                                <div class="stack-label">Smart Contracts</div>
+                                <div class="stack-content">
+                                    <strong>Vyper</strong> - All contracts written in Vyper for clarity and safety
+                                </div>
+                            </div>
+
+                            <div class="stack-layer">
+                                <div class="stack-label">Blockchain</div>
+                                <div class="stack-content">
+                                    <strong>Ethereum (Sepolia Testnet)</strong> - EVM-compatible, battle-tested infrastructure
+                                </div>
+                            </div>
+
+                            <div class="stack-layer">
+                                <div class="stack-label">Frontend</div>
+                                <div class="stack-content">
+                                    <strong>Vanilla JavaScript</strong> - Zero frameworks, direct DOM manipulation, 
+                                    no build step required
+                                </div>
+                            </div>
+
+                            <div class="stack-layer">
+                                <div class="stack-label">Architecture</div>
+                                <div class="stack-content">
+                                    <strong>Embedded SPA</strong> - Lazy loading, instant navigation, mobile-first design
+                                </div>
+                            </div>
+
+                            <div class="stack-layer">
+                                <div class="stack-label">Data Storage</div>
+                                <div class="stack-content">
+                                    <strong>100% On-Chain</strong> - No databases, no APIs, no centralized servers
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Status -->
+                    <section class="about-section">
+                        <h2>🚀 Status</h2>
+                        <p>
+                            Everything's live on Sepolia testnet. This is experimental software—use testnet ETH only. 
+                            All contract source is in <code>/contracts/src/</code>. Frontend is vanilla JavaScript, 
+                            no build step, no frameworks.
+                        </p>
+                        <p>
+                            If something breaks or doesn't make sense, that's expected. This is a playground 
+                            for ideas, not a product.
+                        </p>
+                    </section>
+
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Global Footer -->
+        <footer class="global-footer">
+            <p>Secure Data Research © 2026</p>
+        </footer>
+
+        <!-- Shared Components (loaded once) -->
+        <div id="toast-container" class="toast-container"></div>
+        <canvas id="effects-canvas" class="effects-canvas"></canvas>
+    </div>
+
+    <!-- External Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <!-- Chart.js is lazy-loaded only when /futures view is accessed -->
+
+    <!-- Single Entry Point - Bootstrap the entire SPA -->
+    <script type="module">
+        import { MasterApp } from './js/application/master-app.js';
+        
+        const app = new MasterApp();
+        app.init().then(() => {
+            console.log('🐋 Blockulator SPA ready!');
+        }).catch(err => {
+            console.error('Failed to initialize app:', err);
+        });
+    </script>
+</body>
+</html>

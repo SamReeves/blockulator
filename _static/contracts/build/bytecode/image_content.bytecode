@@ -1,0 +1,9 @@
+Error compiling: contracts/src/content/image_content.vy
+vyper.exceptions.TypeMismatch: Given reference has type Bytes[16384], expected Bytes[384]
+
+  contract "contracts/src/content/image_content.vy:171", function "get_row", line 171:11 
+       170
+  ---> 171     return slice(self.pixel_data, offset, row_size)
+  --------------------^
+       172
+
