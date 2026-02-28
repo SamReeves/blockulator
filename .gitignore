@@ -27,7 +27,6 @@ Thumbs.db
 
 # Build artifacts (compilation outputs)
 dist/
-_static/
 contracts/build/bins/
 contracts/build/bytecode/
 
