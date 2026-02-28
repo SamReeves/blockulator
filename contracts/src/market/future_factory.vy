@@ -3,7 +3,7 @@
 
 """
 @title Futures Market Factory
-@author L1Ca$h
+@author Sam Reeves
 @notice Factory and marketplace for Eulerian futures (Top 100 structure like board.vy)
 @dev Creates futures from blueprint, tracks active futures, facilitates trading
 

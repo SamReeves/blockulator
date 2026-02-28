@@ -6,6 +6,7 @@
 import { ExpectedValueCalculator } from '../components/expected-value-calc.js';
 import { PriceSuggester } from '../components/price-suggester.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
+import { getExplorerUrl } from '../../infrastructure/config/network.js';
 
 export class FutureDetailView {
     constructor(futureAddress, factory, web3Provider, futureAbi) {
@@ -130,13 +131,13 @@ export class FutureDetailView {
                             <span class="metadata-label">Contract:</span>
                             <code title="${this.futureData.address}">${this.futureData.address.slice(0, 14)}...${this.futureData.address.slice(-10)}</code>
                             <button class="btn-copy-inline" data-copy="${this.futureData.address}">📋</button>
-                            <a href="https://sepolia.etherscan.io/address/${this.futureData.address}" 
+                            <a href="${getExplorerUrl(this.futureData.address)}" 
                                target="_blank" class="btn-etherscan-inline">↗</a>
                         </div>
                         <div class="metadata-item">
                             <span class="metadata-label">Owner:</span>
                             <code title="${this.futureData.owner}">${ownerShort}</code>
-                            <a href="https://sepolia.etherscan.io/address/${this.futureData.owner}" 
+                            <a href="${getExplorerUrl(this.futureData.owner)}" 
                                target="_blank" class="btn-etherscan-inline">↗</a>
                         </div>
                         <div class="metadata-item">

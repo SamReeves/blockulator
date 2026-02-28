@@ -2,7 +2,7 @@
 
 """
 @title Last Call - The Race to Be Last
-@author L1Ca$h
+@author Sam Reeves
 @notice A game where being LAST wins. Rush to donate at the end of each 10-day round!
 @dev Simplified time-based rounds
 

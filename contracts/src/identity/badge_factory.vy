@@ -2,7 +2,7 @@
 
 """
 @title Badge Factory - One Badge Per Wallet
-@author L1Ca$h
+@author Sam Reeves
 @notice Factory for creating wallet identity badges
 @dev Enforces one badge per wallet, uses blueprint pattern for deployment
 

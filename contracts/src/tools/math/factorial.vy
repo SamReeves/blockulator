@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Factorial function n!
 # Simple lookup table for integers 0 to 20

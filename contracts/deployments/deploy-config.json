@@ -1,7 +1,7 @@
 {
-  "contractName": "MATH_TOOLS_CALLER",
-  "contractFile": "math_tools_caller.vy",
-  "abiPath": "contracts/build/abis/math-tools-caller.json",
-  "bytecodePath": "contracts/build/bytecode/math-tools-caller.json",
-  "timestamp": "2025-11-12T03:00:36Z"
+  "contractName": "CONTENT_FACTORY_V4_OPTIMIZED",
+  "contractFile": "content_factory_v4_optimized.vy",
+  "abiPath": "contracts/build/abis/content-factory-v4-optimized.json",
+  "bytecodePath": "contracts/build/bytecode/content-factory-v4-optimized.json",
+  "timestamp": "2025-11-28T00:05:08Z"
 }

@@ -2,7 +2,7 @@
 
 """
 @title King of the Hill - Winner Takes All Edition
-@author L1Ca$h
+@author Sam Reeves
 @notice Pay to dethrone and claim the prize. Stakes grow with dual constraints.
 @dev Perpetual king game where you pay to win the previous stake
 

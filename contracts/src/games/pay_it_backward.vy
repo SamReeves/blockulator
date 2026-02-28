@@ -2,7 +2,7 @@
 
 """
 @title Pay It Backward (Simplified)
-@author L1Ca$h
+@author Sam Reeves
 @notice Minimal donation chain where your donation goes to the previous donor
 @dev Each donor immediately pays the previous donor, first donation burns to ensure no owner extraction
 """

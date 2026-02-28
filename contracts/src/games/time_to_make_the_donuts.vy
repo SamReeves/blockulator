@@ -2,7 +2,7 @@
 
 """
 @title Time to Make the Donuts - The Race to Be First
-@author L1Ca$h
+@author Sam Reeves
 @notice A game where being FIRST wins. Rush to be the first donor of each day!
 @dev Day-based rounds using UTC days
 

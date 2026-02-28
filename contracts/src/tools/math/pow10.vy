@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Lookup table for calculating 10^x using digit-by-digit multiplication
 # Row i contains 10^(d * 10^(-i)) for d = 0..9

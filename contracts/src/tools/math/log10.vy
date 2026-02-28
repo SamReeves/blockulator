@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Lookup table for calculating log10(x) using digit-by-digit extraction
 # Row i contains 10^(d * 10^(-i)) for d = 0..9

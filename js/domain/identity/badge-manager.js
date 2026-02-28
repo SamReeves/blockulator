@@ -386,7 +386,7 @@ export class BadgeManager extends InteractiveContract {
             const addressLink = document.getElementById('badge-address-link');
             if (addressLink) {
                 addressLink.textContent = `${this.userBadgeAddress.slice(0, 6)}...${this.userBadgeAddress.slice(-4)}`;
-                addressLink.href = `https://sepolia.etherscan.io/address/${this.userBadgeAddress}`;
+                addressLink.href = getExplorerUrl(this.userBadgeAddress);
             }
 
             // Create editor with existing data

@@ -2,7 +2,7 @@
 
 """
 @title Badge - Wallet Identity Pixel Art
-@author L1Ca$h
+@author Sam Reeves
 @notice One badge per wallet - immutable ownership, editable pixel art
 @dev 32x32 RGB pixel matrix (3,072 bytes) representing wallet identity
 

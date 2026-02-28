@@ -3,7 +3,7 @@
 
 """
 @title Math Tools Interfaces
-@author L1Ca$h
+@author Sam Reeves
 @notice Standard interfaces for calling pure mathematical tool contracts
 @dev All functions are @pure - no state access, deterministic gas estimation
 """

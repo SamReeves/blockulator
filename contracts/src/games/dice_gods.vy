@@ -2,7 +2,7 @@
 
 """
 @title Dice Gods - Reverse Popularity Contest
-@author L1Ca$h
+@author Sam Reeves
 @notice Choose the LEAST popular number (1-6) to win
 @dev After 10 plays, winners who chose the rarest number split the pot weighted by order
 """

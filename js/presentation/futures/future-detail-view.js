@@ -487,8 +487,9 @@ export class FutureDetailView {
                 
             } else if (distributionType === 3) {
                 // EXPONENTIAL GROWTH: Back-loaded payouts
+                // CDF: F(t) = (e^(λt) - 1) / (e^(λT) - 1) where λ = 3/T
                 const lambda = 3 / lifetime;
-                value = (Math.exp(lambda * t / 3) - 1) / (Math.exp(lambda) - 1);
+                value = (Math.exp(lambda * t) - 1) / (Math.exp(lambda * lifetime) - 1);
                 
             } else if (distributionType === 4) {
                 // LINEAR DECAY: Accelerating accumulation

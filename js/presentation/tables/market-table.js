@@ -197,7 +197,7 @@ export class MarketTable {
      */
     renderTableHTML() {
         return `
-            <table class="discussion-table">
+            <table class="data-table">
                 <thead>
                     <tr>
                         <th>Type</th>

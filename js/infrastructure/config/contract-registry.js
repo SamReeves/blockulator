@@ -430,33 +430,6 @@ export const CONTRACT_REGISTRY = {
         abi: 'contracts/build/abis/erf-calculator.json'
     },
     
-    // ========== DISCUSSIONS ==========
-    'discussion-board': {
-        type: 'discussion',
-        name: 'Discussion Board',
-        emoji: '💬',
-        description: 'On-chain discussion platform',
-        addresses: {
-            sepolia: '0xb216dfcDDB1A465675Ab1A79CA519A7e00fd8D63',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/discussions/board.vy',
-        abi: 'contracts/build/abis/board.json'
-    },
-    
-    'discussion-blueprint': {
-        type: 'discussion',
-        name: 'Discussion Blueprint',
-        emoji: '📝',
-        description: 'Discussion contract blueprint',
-        addresses: {
-            sepolia: '0x057bE4BD7892f7f85538a33567f3C8e2E9A39413',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/discussions/discussion.vy',
-        abi: 'contracts/build/abis/discussion.json'
-    },
-    
     // ========== FUTURES ==========
     'future-factory': {
         type: 'future',
@@ -511,59 +484,6 @@ export const CONTRACT_REGISTRY = {
         abi: 'contracts/build/abis/badge-v2.json'
     },
     
-    // ========== CONTENT / UPLOADS ==========
-    'content-factory': {
-        type: 'content',
-        name: 'Content Factory',
-        emoji: '🏭',
-        description: 'Create on-chain images and text (RGB only)',
-        addresses: {
-            sepolia: '0x657D5E7A3568C8b26Dc63797f2634B063bE9277e',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/content/content_factory.vy',
-        abi: 'contracts/build/abis/content-factory.json'
-    },
-    
-    'content-blueprint': {
-        type: 'content',
-        name: 'Content Blueprint',
-        emoji: '📄',
-        description: 'Content contract blueprint (legacy)',
-        addresses: {
-            sepolia: '0x571bd6BCE1245e8bdA37db84caeC8adb1cCecc2F',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/content/content.vy',
-        abi: 'contracts/build/abis/content.json'
-    },
-    
-    // ========== CONTENT V3 (5-MODE COMPRESSION) ==========
-    'content-factory-v3': {
-        type: 'content',
-        name: 'Content Factory V3',
-        emoji: '🏭✨',
-        description: '5-mode compression: RGB, Grayscale, Monochrome, Indexed, RGB565',
-        addresses: {
-            sepolia: '0x0E3250cAb6c3648a18330c846a7A814574E92143',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/content/content_factory_v3.vy',
-        abi: 'contracts/build/abis/content_factory_v3.json'
-    },
-    
-    'image-content-blueprint-v3': {
-        type: 'content',
-        name: 'Image Content Blueprint V3',
-        emoji: '🖼️',
-        description: 'Multi-mode compressed image storage',
-        addresses: {
-            sepolia: '0xF5793ff8457983Ab6a6b739315069a954C30A238',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/content/image_content_v3.vy',
-        abi: 'contracts/build/abis/image_content_v3.json'
-    }
 };
 
 /**
@@ -623,9 +543,7 @@ export function hasContract(contractName) {
 // Export lists of contracts by type for convenience
 export const GAMES = getContractsByType('game');
 export const CALCULATORS = getContractsByType('calculator');
-export const DISCUSSIONS = getContractsByType('discussion');
 export const FUTURES = getContractsByType('future');
 export const IDENTITY = getContractsByType('identity');
-export const CONTENT = getContractsByType('content');
 
 

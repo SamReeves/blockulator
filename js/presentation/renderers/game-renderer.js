@@ -4,6 +4,7 @@
  */
 
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
+import { getExplorerUrl } from '../../infrastructure/config/network.js';
 
 export class GameRenderer {
     /**
@@ -202,7 +203,7 @@ export class GameRenderer {
         
         const addressLink = document.createElement('a');
         addressLink.className = 'contract-address';
-        addressLink.href = `https://sepolia.etherscan.io/address/${contractAddress}`;
+        addressLink.href = getExplorerUrl(contractAddress);
         addressLink.target = '_blank';
         addressLink.rel = 'noopener noreferrer';
         addressLink.textContent = this.formatAddress(contractAddress);
@@ -210,7 +211,7 @@ export class GameRenderer {
         
         const viewBadge = document.createElement('a');
         viewBadge.className = 'contract-badge';
-        viewBadge.href = `https://sepolia.etherscan.io/address/${contractAddress}#code`;
+        viewBadge.href = `${getExplorerUrl(contractAddress)}#code`;
         viewBadge.target = '_blank';
         viewBadge.rel = 'noopener noreferrer';
         viewBadge.innerHTML = '📜 View on Etherscan';

@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # General exponential function e^x
 # Lookup table for calculating e^x using digit-by-digit multiplication

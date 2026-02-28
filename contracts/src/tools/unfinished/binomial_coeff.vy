@@ -1,5 +1,5 @@
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 # PSEUDOCODE - NOT IMPLEMENTED YET
 
 # Binomial coefficient: C(n,k) = n! / (k! * (n-k)!)

@@ -2,7 +2,7 @@
 
 """
 @title Pissing Contest - Enhanced Continuous Rounds Edition
-@author L1Ca$h
+@author Sam Reeves
 @notice A perpetual contest where the largest donor wins each round
 @dev Automatically resets after each round, maintains historical data
 """

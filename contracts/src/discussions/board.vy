@@ -2,7 +2,7 @@
 
 """
 @title Discussion Board - Algorithmic Curation
-@author L1Ca$h
+@author Sam Reeves
 @notice A self-organizing discussion board with up to 100 discussions
 @dev Fully algorithmic - no owner, rule-based termination and replacement
 

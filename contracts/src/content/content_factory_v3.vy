@@ -2,7 +2,7 @@
 
 """
 @title ContentFactoryV3 - Multi-Mode Compressed Image Factory
-@author L1Ca$h
+@author Sam Reeves
 @notice Factory for creating compressed on-chain images with 4 modes
 @dev Uses CREATE2 for deterministic deployment, supports RGB/Grayscale/Mono/Indexed
 

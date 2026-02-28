@@ -34,13 +34,17 @@ echo "────────────────────────�
 echo "STEP 1: Compile TextContentV4 Blueprint"
 echo "─────────────────────────────────────────────────────────────"
 
-vyper "$SRC_DIR/text_content_v4.vy" -f blueprint_bytecode > "$BYTECODE_DIR/text_content_v4.bin"
+# Compile runtime bytecode (NOT blueprint_bytecode!)
+vyper "$SRC_DIR/text_content_v4.vy" -f bytecode_runtime > "$BYTECODE_DIR/text_content_v4_runtime.bin"
 vyper "$SRC_DIR/text_content_v4.vy" -f abi > "$ABIS_DIR/text_content_v4.json"
 
-echo "✅ TextContentV4 compiled"
-echo "   Bytecode: $BYTECODE_DIR/text_content_v4.bin"
+# Wrap with EIP-5202 preamble + initcode
+node utils/prepare-text-blueprint.js
+
+echo "✅ TextContentV4 compiled with blueprint wrapper"
+echo "   Runtime: $BYTECODE_DIR/text_content_v4_runtime.bin"
+echo "   Blueprint: $BYTECODE_DIR/text_content_v4_blueprint.bin"
 echo "   ABI: $ABIS_DIR/text_content_v4.json"
-echo "   (Blueprint preamble will be added during deployment)"
 
 # ============================================================================
 # STEP 2: Compile ContentFactoryV4

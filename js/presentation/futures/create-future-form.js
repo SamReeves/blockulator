@@ -165,11 +165,10 @@ export class CreateFutureForm {
                 
             } else if (distributionType === 3) {
                 // EXPONENTIAL GROWTH: Heavily weighted toward late payouts  
-                // Value accumulates slowly at first, rapidly at end
-                // Using λe^(αt) form where α is positive
+                // CDF: F(t) = (e^(λt) - 1) / (e^(λT) - 1) where λ = 3/T
+                // Starts near 0, accelerates to 100% at end
                 const lambda = 3 / lifetime;
-                // Inverse: starts near 0, accelerates to ~95% at end
-                value = (Math.exp(lambda * t / 3) - 1) / (Math.exp(lambda) - 1);
+                value = (Math.exp(lambda * t) - 1) / (Math.exp(lambda * lifetime) - 1);
                 
             } else if (distributionType === 4) {
                 // LINEAR DECAY: Triangular, high rate at start

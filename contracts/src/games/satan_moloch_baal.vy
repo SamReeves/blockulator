@@ -2,7 +2,7 @@
 
 """
 @title Satan, Moloch, Baal - The Infernal Voting Game
-@author L1Ca$h
+@author Sam Reeves
 @notice Vote for your favorite demon by burning ETH in their name
 @dev All donations are sent to the null address - money goes to the void
 

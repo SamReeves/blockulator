@@ -2,7 +2,7 @@
 
 """
 @title TextContentV4 - On-Chain Text Storage
-@author L1Ca$h
+@author Sam Reeves
 @notice Blueprint for storing UTF-8 text up to 16KB on-chain
 @dev Deployed via ContentFactoryV4 using create_from_blueprint
 
@@ -82,20 +82,6 @@ def get_text() -> Bytes[16384]:
 
 @view
 @external
-def get_text_slice(start: uint256, length: uint256) -> Bytes[16384]:
-    """
-    @notice Get substring of text (for large texts)
-    @param start Starting byte position
-    @param length Number of bytes to return
-    @return Text slice
-    """
-    assert start < self.data_size, "Start out of bounds"
-    assert start + length <= self.data_size, "Length out of bounds"
-    
-    return slice(self.text_data, start, length)
-
-@view
-@external
 def get_metadata() -> (uint256, address, address, uint256):
     """
     @notice Get text metadata
@@ -107,22 +93,4 @@ def get_metadata() -> (uint256, address, address, uint256):
         factory,
         creation_time
     )
-
-@view
-@external
-def get_data_hash() -> bytes32:
-    """
-    @notice Content hash for verification
-    @return Keccak256 hash of text data
-    """
-    return keccak256(self.text_data)
-
-@view
-@external
-def get_content_type() -> String[10]:
-    """
-    @notice Get content type
-    @return "text"
-    """
-    return "text"
 

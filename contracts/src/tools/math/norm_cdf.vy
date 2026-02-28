@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Normal (Gaussian) Cumulative Distribution Function
 # Φ(x) = P(X ≤ x) for X ~ N(μ, σ²)

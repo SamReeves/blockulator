@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Hyperbolic cosine: cosh(x) = (e^x + e^(-x)) / 2
 # Composed from exp function using digit-by-digit method

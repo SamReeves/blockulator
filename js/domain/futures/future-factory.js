@@ -40,12 +40,30 @@ export class FutureFactory {
 
         const signer = this.web3Provider.signer;
         const contractWithSigner = this.contract.connect(signer);
+        const valueBN = ethers.BigNumber.from(value);
+
+        // Estimate gas with buffer for complex distributions (e.g., Gaussian, Inverted Gaussian)
+        let gasLimit;
+        try {
+            const gasEstimate = await contractWithSigner.estimateGas.create_future(
+                lifetime,
+                distributionType,
+                { value: valueBN }
+            );
+            // Add 30% buffer for safety (complex math in contract initialization)
+            gasLimit = gasEstimate.mul(130).div(100);
+        } catch (estimateError) {
+            console.warn('Gas estimation failed, using fallback:', estimateError.message);
+            // Fallback gas limit for contract deployment with math initialization
+            gasLimit = ethers.BigNumber.from(3000000);
+        }
 
         const tx = await contractWithSigner.create_future(
             lifetime,
             distributionType,
             {
-                value: ethers.BigNumber.from(value)
+                value: valueBN,
+                gasLimit: gasLimit
             }
         );
 

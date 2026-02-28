@@ -2,7 +2,7 @@
 
 """
 @title Message Board - Minimalist Edition
-@author L1Ca$h
+@author Sam Reeves
 @notice Pay to post messages on-chain with rate limiting
 @dev Ultra-simple message board with essential features only
 """

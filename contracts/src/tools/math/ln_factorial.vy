@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Natural log of factorial: ln(n!)
 # Lookup table for n = 0 to 20

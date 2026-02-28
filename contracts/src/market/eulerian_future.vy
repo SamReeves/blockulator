@@ -3,7 +3,7 @@
 
 """
 @title Eulerian Future - Multi-Distribution Time-Based Future
-@author L1Ca$h
+@author Sam Reeves
 @license MIT
 @notice Tradeable future supporting 7 distribution types: Uniform, Gaussian, Exponential, Linear, Inverted
 @dev All distributions use the same high-precision E_TAB table for calculations

@@ -2,7 +2,7 @@
 
 """
 @title Pay It Forward (Simplified)
-@author L1Ca$h
+@author Sam Reeves
 @notice Minimal donation chain where your donation goes to the next donor
 @dev First donor becomes pending, each subsequent donor receives the previous pending amount
 """

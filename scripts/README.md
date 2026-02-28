@@ -297,6 +297,6 @@ MIT - See project root LICENSE file.
 ---
 
 **Last Updated**: 2025-11-08  
-**Maintainer**: L1Ca$h  
+**Maintainer**: Sam Reeves  
 **Project**: Blockulator
 

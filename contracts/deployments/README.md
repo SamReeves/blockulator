@@ -1,237 +1,101 @@
-# Zero-Fee Protocol Deployment Scripts
+# Blockulator Deployment Scripts
 
-This directory contains all deployment scripts and documentation for the WhaleGames zero-fee protocol.
+Clean, focused deployment setup for **Badges** and **Uploads** systems.
 
-## 🚀 Quick Start
+## Directory Structure
 
-```bash
-# 1. Check if you're ready
-./pre-deploy-check.sh
-
-# 2. Deploy everything
-export PRIVATE_KEY="0x..."
-node active/deploy-zero-fee-complete.js
+```
+deployments/
+├── compile-and-prepare.sh          # Compile any Vyper contract
+├── deploy.html                     # Web UI for deployment
+└── active/
+    ├── deploy-badges.js            # Deploy badges to Sepolia
+    ├── test-content-anvil.js       # Test uploads on Anvil
+    └── deployment-content-v4-anvil.json  # Anvil deployment record
 ```
 
-That's it! See `QUICK_START.md` for details.
+## Quick Start
 
-## 📁 Files in This Directory
+### 1. Compile Contracts
 
-### Deployment Scripts
-
-| File | Purpose | What It Deploys |
-|------|---------|-----------------|
-| **`active/deploy-zero-fee-complete.js`** | Full protocol deployment | All 9 games + 4 factories + 4 blueprints |
-| **`active/deploy-games-only.js`** | Games only deployment | Just the 9 game contracts |
-| **`active/deploy-factory.js`** | Futures market only | Future Factory + Blueprint |
-| **`active/deploy-discussions.js`** | Discussion board only | Board + Blueprint |
-| **`active/deploy-content.js`** | Content system only | Content Factory + Blueprint |
-| **`active/deploy-badges.js`** | Badge system only | Badge Factory + Blueprint |
-| **`active/deploy-v3.js`** | V3 compression system | ImageContentV3 + ContentFactoryV3 |
-| **`active/deploy-v4.js`** | V4 unified content | TextContentV4 + ImageContentV3 + ContentFactoryV4 |
-| **`math-tools/deploy-all-math-tools.js`** | Math tools deployment | All 20 math tool contracts |
-
-### Utilities
-
-| File | Purpose |
-|------|---------|
-| **`pre-deploy-check.sh`** | Pre-deployment verification (run this first!) |
-| **`compile-and-prepare.sh`** | Compile all Vyper contracts |
-| **`utils/update-addresses.sh`** | Update address configuration files |
-| **`utils/prepare-blueprint.js`** | Prepare blueprint contracts with EIP-5202 preamble |
-
-### Documentation
-
-| File | Content |
-|------|---------|
-| **`QUICK_START.md`** | 📖 Start here! Deploy in 5 minutes |
-| **`DEPLOYMENT.md`** | 📚 Complete deployment guide |
-| **`README.md`** | 📄 This file |
-
-### Output Files (Generated)
-
-After deployment, you'll see:
-- `deployment-zero-fee-{network}-{timestamp}.json` - Full deployment details
-- `addresses-{network}-{timestamp}.js` - Ready-to-use addresses
-- `deployment-partial-{network}-{timestamp}.json` - If deployment fails midway
-
-## 🎯 Common Tasks
-
-### Deploy to Sepolia Testnet
+**Badge System:**
 ```bash
-export PRIVATE_KEY="0x..."
-export NETWORK="sepolia"
-node active/deploy-zero-fee-complete.js
+./compile-and-prepare.sh ../src/identity/badge.vy BADGE
+./compile-and-prepare.sh ../src/identity/badge_factory.vy BADGE_FACTORY
 ```
 
-### Deploy to Mainnet
+**Upload System:**
 ```bash
-export PRIVATE_KEY="0x..."
-export NETWORK="mainnet"
-export RPC_URL="https://eth.llamarpc.com"
-node active/deploy-zero-fee-complete.js
+./compile-and-prepare.sh ../src/content/image_content_v3.vy IMAGE_CONTENT_V3
+./compile-and-prepare.sh ../src/content/text_content_v4.vy TEXT_CONTENT_V4
+./compile-and-prepare.sh ../src/content/content_factory_v4.vy CONTENT_FACTORY_V4
 ```
 
-### Deploy Only Games
+### 2. Test on Anvil
+
+**Start Anvil:**
 ```bash
-export PRIVATE_KEY="0x..."
-node active/deploy-games-only.js
+anvil
 ```
 
-### Check Before Deploying
+**Test Uploads (includes deployment):**
 ```bash
-./pre-deploy-check.sh
+cd active
+node test-content-anvil.js
 ```
 
-### Compile Contracts
+This will:
+- Deploy both blueprints (text + image)
+- Deploy factory V4
+- Test 5 different upload scenarios
+- Save results to `deployment-content-v4-anvil.json`
+
+### 3. Deploy to Sepolia
+
+**Set environment:**
 ```bash
-./compile-and-prepare.sh
-```
-
-## 📋 Pre-Deployment Checklist
-
-- [ ] Node.js and npm installed
-- [ ] ethers.js installed (`npm install ethers@5.7.2`)
-- [ ] Vyper installed
-- [ ] Contracts compiled (`./compile-and-prepare.sh`)
-- [ ] Private key set (`export PRIVATE_KEY="0x..."`)
-- [ ] Sufficient ETH in deployer wallet
-- [ ] Run pre-deployment check (`./pre-deploy-check.sh`)
-
-## 🔍 What Gets Deployed
-
-### Complete Deployment (17 contracts)
-
-**Games (9):**
-1. King of the Hill
-2. Time to Make the Donuts
-3. Last Call
-4. Pissing Contest
-5. Pay It Forward
-6. Pay It Backward
-7. Message Board
-8. Dice Gods
-9. Satan Moloch Baal
-
-**Factories (4):**
-1. Future Factory
-2. Discussion Board
-3. Content Factory
-4. Badge Factory
-
-**Blueprints (4):**
-1. Eulerian Future Blueprint
-2. Discussion Blueprint
-3. Content Blueprint
-4. Badge Blueprint
-
-## 💰 Gas Estimates
-
-| Deployment | Sepolia | Mainnet (30 gwei) |
-|------------|---------|-------------------|
-| Complete   | ~0.15 ETH | ~0.3-0.5 ETH |
-| Games Only | ~0.05 ETH | ~0.1-0.15 ETH |
-| Single Factory | ~0.02 ETH | ~0.05-0.08 ETH |
-
-## ✅ Zero-Fee Guarantee
-
-All deployed contracts have:
-- ✅ **Zero owner extraction** - No fees go to deployer
-- ✅ **Zero withdrawal functions** - Cannot extract later
-- ✅ **100% payouts** - All value to players/users
-- ✅ **Trustless** - No owner privileges
-- ✅ **Permanent** - Cannot be changed
-
-## 🆘 Troubleshooting
-
-### Common Errors
-
-**"PRIVATE_KEY not set"**
-```bash
-export PRIVATE_KEY="0x..."
-```
-
-**"ABI not found"**
-```bash
-./compile-and-prepare.sh
-```
-
-**"Insufficient funds"**
-- Check wallet balance
-- Get testnet ETH from faucet
-
-**Deployment fails midway**
-- Check `deployment-partial-*.json` 
-- Note which contracts deployed
-- Comment out completed sections
-- Re-run deployment
-
-### Getting Help
-
-1. Read error message carefully
-2. Check pre-deployment script output
-3. Review `DEPLOYMENT.md` for details
-4. Verify environment variables are set
-
-## 📚 Documentation
-
-- **Start Here**: `QUICK_START.md` - Deploy in 5 minutes
-- **Complete Guide**: `DEPLOYMENT.md` - Full documentation
-- **Implementation Summary**: `../ZERO_FEE_IMPLEMENTATION.md` - What changed
-
-## 🔗 Network-Specific RPCs
-
-### Testnets
-```bash
-# Sepolia
+export PRIVATE_KEY="your_private_key"
 export RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
-
-# Goerli (deprecated)
-export RPC_URL="https://ethereum-goerli-rpc.publicnode.com"
 ```
 
-### Mainnets
+**Deploy badges:**
 ```bash
-# Ethereum
-export RPC_URL="https://eth.llamarpc.com"
-
-# Polygon
-export RPC_URL="https://polygon-rpc.com"
-
-# Arbitrum
-export RPC_URL="https://arb1.arbitrum.io/rpc"
-
-# Optimism
-export RPC_URL="https://mainnet.optimism.io"
+cd active
+node deploy-badges.js
 ```
 
-## 🎉 After Deployment
+## System Specifications
 
-1. **Save addresses** - They're in `addresses-{network}-{timestamp}.js`
-2. **Update frontend** - Copy to `js/infrastructure/config/contracts.js`
-3. **Test thoroughly** - Try all features
-4. **Verify zero-fee** - Check constants on Etherscan
-5. **Celebrate!** - You've deployed a true public good 🎊
+### Badge System ✅ (Working on Sepolia)
+- **Size**: 32×32 pixels (3,072 bytes)
+- **Features**: Editable, one per wallet
+- **Factory**: `0x35e626194E0691FaA54EFA289D90CA0e6D610FA1`
 
-## 📞 Support
+### Upload System 🧪 (Testing on Anvil)
+- **Max Image**: 73×73 pixels (15,987 bytes) - RGB only
+- **Max Text**: 16KB (16,384 bytes)
+- **Features**: Immutable, unlimited per creator
+- **Factory V4**: Dual blueprint (text + image)
 
-Need help?
-1. Check `QUICK_START.md` first
-2. Review `DEPLOYMENT.md` for details
-3. Run `./pre-deploy-check.sh` for diagnostics
-4. Check console output for specific errors
+## Test Results (Anvil)
 
-## 🔐 Security Reminders
+All 5 tests passing:
+1. ✅ Tiny (2×2) - 12 bytes
+2. ✅ Small (16×16) - 768 bytes  
+3. ✅ Badge-sized (32×32) - 3,072 bytes
+4. ✅ Maximum (73×73) - 15,987 bytes
+5. ✅ Text - 16,384 bytes
 
-- ⚠️ **Never commit private keys**
-- ⚠️ Use environment variables only
-- ⚠️ Test on testnet first
-- ⚠️ Verify zero-fee constants after deployment
-- ⚠️ Double-check addresses before using
+## Next Steps
 
----
+1. ✅ Badges working on Sepolia
+2. ✅ Uploads tested and working on Anvil
+3. 🎯 Deploy uploads to Sepolia
+4. 🎯 Update frontend config with new addresses
 
-**Zero-Fee Protocol** | **100% to Players** | **No Owner Extraction**
+## Built Artifacts
 
-*Deploy with confidence!* 🚀
-
+Located in `../build/`:
+- `abis/` - Contract ABIs
+- `bytecode/` - Compiled bytecode
+- `bytecode/*-blueprint.json` - EIP-5202 blueprints

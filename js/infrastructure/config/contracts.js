@@ -25,17 +25,9 @@ const SEPOLIA_ADDRESSES = {
     DICE_GODS: '0x6eaaA99e735702b05A3F033E347eD7b863b742Ea',
     SATAN_MOLOCH_BAAL: '0x1d105ef94cbA02dc3dd519C32475844942284796',
     
-    // Discussions (0% board fee)
-    DISCUSSION_BOARD: '0x58743322473f17Bd741853bB4B79b4B23F79AB46',
-    DISCUSSION_BLUEPRINT: '0xb122fE99199f1b52B30179b3Bcfce27253b57753',
-    
     // Futures Market (0% creation fee, 0% trade fee)
     FUTURE_FACTORY: '0x768E0e56d2597B17FC4b433C6A41BC947DAb774F',
     EULERIAN_FUTURE_BLUEPRINT: '0xa1Ef99A9612B8c97F7E4E00aDEFecEdFAD4d3257',
-    
-    // Content System (0% creation fee)
-    CONTENT_FACTORY: '0xA37262Ef4eD684621468B6433B109a24a72F5b62',
-    CONTENT_BLUEPRINT: '0x4F5a6c26B62052AC19E4d21bF9b18bA5a1e178A9',
     
     // Identity (0% creation fee)
     BADGE_FACTORY: '0x35e626194E0691FaA54EFA289D90CA0e6D610FA1',
@@ -78,10 +70,6 @@ const MAINNET_ADDRESSES = {
     TIME_TO_MAKE_THE_DONUTS: '0x0000000000000000000000000000000000000000',
     DICE_GODS: '0x0000000000000000000000000000000000000000',
     SATAN_MOLOCH_BAAL: '0x0000000000000000000000000000000000000000',
-    
-    // Discussions
-    DISCUSSION_BOARD: '0x0000000000000000000000000000000000000000',
-    DISCUSSION_BLUEPRINT: '0x0000000000000000000000000000000000000000',
     
     // Futures Market
     FUTURE_FACTORY: '0x0000000000000000000000000000000000000000',
@@ -127,14 +115,10 @@ export const CONTRACT_SOURCES = {
     TIME_TO_MAKE_THE_DONUTS: 'contracts/src/games/time_to_make_the_donuts.vy',
     DICE_GODS: 'contracts/src/games/dice_gods.vy',
     SATAN_MOLOCH_BAAL: 'contracts/src/games/satan_moloch_baal.vy',
-    DISCUSSION_BOARD: 'contracts/src/discussions/board.vy',
-    DISCUSSION_BLUEPRINT: 'contracts/src/discussions/discussion.vy',
     FUTURE_FACTORY: 'contracts/src/market/future_factory.vy',
     EULERIAN_FUTURE_BLUEPRINT: 'contracts/src/market/eulerian_future.vy',
     BADGE_FACTORY: 'contracts/src/identity/badge_factory.vy',
     BADGE_BLUEPRINT: 'contracts/src/identity/badge.vy',
-    CONTENT_FACTORY: 'contracts/src/content/content_factory.vy',
-    CONTENT_BLUEPRINT: 'contracts/src/content/content.vy',
     E_CALCULATOR: 'contracts/src/tools/constants/e.vy',
     PI_CALCULATOR: 'contracts/src/tools/constants/pi.vy',
     TAU_CALCULATOR: 'contracts/src/tools/constants/tau.vy',
@@ -161,14 +145,10 @@ export const CONTRACT_ABIS = {
     TIME_TO_MAKE_THE_DONUTS: 'contracts/build/abis/time-to-make-the-donuts.json',
     DICE_GODS: 'contracts/build/abis/dice-gods.json',
     SATAN_MOLOCH_BAAL: 'contracts/build/abis/satan-moloch-baal.json',
-    DISCUSSION_BOARD: 'contracts/build/abis/board.json',
-    DISCUSSION_BLUEPRINT: 'contracts/build/abis/discussion.json',
     FUTURE_FACTORY: 'contracts/build/abis/future-factory.json',
     EULERIAN_FUTURE_BLUEPRINT: 'contracts/build/abis/eulerian-future.json',
     BADGE_FACTORY: 'contracts/build/abis/badge-factory-v2.json',
     BADGE: 'contracts/build/abis/badge-v2.json',
-    CONTENT_FACTORY: 'contracts/build/abis/content-factory.json',
-    CONTENT: 'contracts/build/abis/content.json',
     E_CALCULATOR: 'contracts/build/abis/e-calculator.json',
     PI_CALCULATOR: 'contracts/build/abis/pi-calculator.json',
     TAU_CALCULATOR: 'contracts/build/abis/tau-calculator.json',

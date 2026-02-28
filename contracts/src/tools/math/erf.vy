@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Error function erf(x) = (2/sqrt(pi)) * integral[0 to x] e^(-t^2) dt
 # Using Abramowitz and Stegun approximation (formula 7.1.26)

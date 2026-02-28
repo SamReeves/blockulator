@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Blockulator - Blockchain games, tools, discussions, and futures on Sepolia testnet">
+    <meta name="description" content="Blockulator - Blockchain games, on-chain calculators, futures markets, and identity badges on Sepolia testnet">
     <title>Blockulator</title>
     <link rel="icon" type="image/png" href="/blockulator_favicon.png">
     <link rel="stylesheet" href="styles.css">
@@ -14,7 +14,7 @@
         <header class="app-header">
             <div class="header-left">
                 <h1 class="app-title">
-                    <img src="/blockulator.png" alt="Blockulator" class="brand-logo" style="height: 80px; vertical-align: middle;">
+                    <img src="/blockulator.png" alt="Blockulator" class="brand-logo">
                 </h1>
                 <span class="testnet-badge">TESTNET</span>
                 <span id="readonly-badge" class="readonly-badge hidden">Browsing</span>
@@ -22,9 +22,8 @@
             <nav class="header-nav">
                 <a href="#/games" class="nav-link" data-route="games">Games</a>
                 <a href="#/calculator" class="nav-link" data-route="calculator">Calculator</a>
-                <a href="#/uploads" class="nav-link" data-route="uploads">Uploads</a>
-                <a href="#/discussions" class="nav-link" data-route="discussions">Discussions</a>
                 <a href="#/futures" class="nav-link" data-route="futures">Futures</a>
+                <a href="#/badges" class="nav-link" data-route="badges">Badges</a>
                 <a href="#/about" class="nav-link" data-route="about">About</a>
             </nav>
             <div class="header-right">
@@ -74,145 +73,11 @@
                 </div>
             </div>
 
-            <!-- DISCUSSIONS VIEW -->
-            <div id="discussions-view" class="view-container hidden" data-view="discussions">
-                <div id="discussions-content" class="content">
-                    <div class="discussions-layout">
-                        
-                        <!-- PRIMARY VIEW AREA (State-driven: Board Table OR Discussion Detail) -->
-                        <div class="primary-view-area">
-                            
-                            <!-- BOARD VIEW (Level 1) -->
-                            <div id="board-view" class="view-container">
-                                
-                                <!-- Create Discussion Button -->
-                                <div class="view-header">
-                                    <h2 class="view-title">Discussions</h2>
-                                    <button id="create-discussion-btn" class="btn-primary">
-                                        ➕ Create Discussion
-                                    </button>
-                                </div>
-
-                                <!-- Create Discussion Form (Hidden by default) -->
-                                <div id="create-discussion-form-container" class="form-panel hidden">
-                                    <div class="form-panel-header">
-                                        <h3>✍️ Create New Discussion</h3>
-                                        <button id="close-create-form" class="btn-close">✖</button>
-                                    </div>
-
-                                    <form id="create-form" class="discussion-form">
-                                        <div class="form-group">
-                                            <label for="discussion-subject">
-                                                <span>Subject</span>
-                                                <span id="subject-counter" class="char-counter">0/200</span>
-                                            </label>
-                                            <input type="text" id="discussion-subject" name="subject" 
-                                                   placeholder="Enter discussion subject..." maxlength="200" required>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label for="discussion-body">
-                                            <span>Description</span>
-                                                <span id="body-counter" class="char-counter">0/1000</span>
-                                        </label>
-                                            <textarea id="discussion-body" name="body" 
-                                                      placeholder="Describe your discussion topic..." 
-                                                      maxlength="1000" rows="4" required></textarea>
-                                    </div>
-
-                                        <div class="form-group">
-                                        <div id="initial-value-input"></div>
-                                            <div id="value-warning" class="value-warning"></div>
-                                    </div>
-
-                                        <details class="advanced-config">
-                                            <summary>
-                                                <span>▶</span>
-                                            <span>⚙️ Advanced Configuration (Optional)</span>
-                                        </summary>
-                                            <div class="advanced-config-content">
-                                                <div class="config-grid">
-                                                    <div class="form-group">
-                                                        <label for="max-messages">Max Messages (1-1000)</label>
-                                                        <input type="number" id="max-messages" name="max_messages" 
-                                                               value="100" min="1" max="1000" required>
-                                                    </div>
-                                                <div class="form-group">
-                                                        <label for="max-message-length">Max Length (1-500)</label>
-                                                        <input type="number" id="max-message-length" name="max_message_length" 
-                                                               value="200" min="1" max="500" required>
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div id="min-donation-input"></div>
-                                            </div>
-                                        </div>
-                                    </details>
-
-                                        <div class="form-actions">
-                                            <button type="button" id="cancel-create-btn" class="btn-secondary">
-                                            Cancel
-                                        </button>
-                                            <button type="submit" id="create-submit-btn" class="btn-submit">
-                                            🚀 Create Discussion
-                                        </button>
-                                    </div>
-                                </form>
-                        </div>
-
-                                <!-- Filter & Sort Controls -->
-                                <div class="table-controls">
-                                    <label class="filter-toggle">
-                                        <input type="checkbox" id="show-inactive-discussions">
-                                        <span>Show inactive discussions</span>
-                                    </label>
-                                    <div class="sort-controls">
-                                        <label for="board-sort-select">Sort by:</label>
-                                        <select id="board-sort-select">
-                                            <option value="recent">Most Recent</option>
-                                            <option value="activity">Last Activity</option>
-                                            <option value="pool">Highest Pool</option>
-                                            <option value="messages">Most Messages</option>
-                                        </select>
-                                    </div>
-                        </div>
-
-                                <!-- Board Table Container -->
-                                <div id="board-table-container" class="table-view"></div>
-                        </div>
-
-                            <!-- DISCUSSION VIEW (Level 2) - Initially Hidden -->
-                            <div id="discussion-view" class="view-container hidden">
-                                <!-- Discussion detail view rendered here by DiscussionDetailView component -->
-                            </div>
-
-                        </div>
-
-                        <!-- CONTRACT INFO SECTION -->
-                        <div class="info-section">
-                            <div class="section-header">
-                                <h3>📜 Smart Contracts</h3>
-                                <p class="section-subtitle">On-chain discussion board with algorithmic curation</p>
-                            </div>
-                            <div id="discussions-contract-info" class="contracts-grid">
-                                <!-- Will be populated by JavaScript -->
-                            </div>
-                        </div>
-
-                        <!-- MECHANICS PANEL (Collapsible) -->
-                        <div id="mechanics-panel" class="info-panel-container"></div>
-
-                        <!-- TECHNICAL PANEL (Collapsible) -->
-                        <div id="technical-panel" class="info-panel-container"></div>
-
-                    </div>
-                </div>
-            </div>
 
             <!-- FUTURES VIEW -->
             <div id="futures-view" class="view-container hidden" data-view="futures">
                 <div id="futures-content" class="content">
-                    <div class="discussions-layout">
+                    <div class="section-layout">
                         
                         <!-- Elegant Page Header -->
                         <div class="futures-page-header">
@@ -238,7 +103,7 @@
                                         <button id="close-create-form" class="btn-close">✖</button>
                                     </div>
 
-                                    <form id="create-future-form" class="discussion-form">
+                                    <form id="create-future-form" class="create-form">
                                         <div class="form-group">
                                             <label for="distribution-type">
                                                 <span>Distribution Type</span>
@@ -489,283 +354,6 @@
                 <!-- Badge content will be dynamically loaded here -->
             </div>
 
-            <!-- UPLOADS VIEW -->
-            <div id="uploads-view" class="view-container hidden" data-view="uploads">
-                <div class="content">
-                    <div class="view-header">
-                        <h2 class="view-title">📤 Content Uploads</h2>
-                        <p class="view-subtitle">Immutable on-chain storage for images and text</p>
-                    </div>
-
-                    <!-- Upload Section -->
-                    <div id="upload-section" class="upload-section">
-                        <div class="upload-panel">
-                            <div class="upload-type-selector">
-                                <button id="upload-type-image" class="upload-type-btn active" data-type="image">
-                                    🖼️ Upload
-                                </button>
-                                <button id="upload-type-draw" class="upload-type-btn" data-type="draw">
-                                    🎨 Draw
-                                </button>
-                                <button id="upload-type-text" class="upload-type-btn" data-type="text">
-                                    📝 Text
-                                </button>
-                            </div>
-
-                            <form id="upload-form" class="upload-form">
-                                <!-- Image Upload Section -->
-                                <div id="image-upload-section" class="upload-section-content">
-                                    <div class="upload-info">
-                                        <h3>🎨 Upload Compressed Image</h3>
-                                        <p style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">
-                                            Choose compression mode to maximize your on-chain storage capacity
-                                        </p>
-                                    </div>
-                                    
-                                    <div class="upload-input-group">
-                                        <label for="image-input" class="file-upload-label">
-                                            <span class="file-upload-text">📁 Choose Image File</span>
-                                            <input type="file" id="image-input" accept="image/*" class="file-input">
-                                        </label>
-                                    </div>
-
-                                    <!-- Compression Mode Selector -->
-                                    <div id="compression-mode-selector" class="compression-mode-selector" style="display:none; margin: 1.5rem 0;">
-                                        <h4 style="margin-bottom: 1rem; color: #667eea; font-size: 1rem;">
-                                            🔧 Select Compression Mode
-                                        </h4>
-                                        <div class="compression-modes">
-                                            <div class="compression-mode-card" data-mode="0">
-                                                <div class="mode-header">
-                                                    <span class="mode-icon">🌈</span>
-                                                    <span class="mode-name">RGB Full Color</span>
-                                                </div>
-                                                <div class="mode-capacity">Max: <strong>73×73</strong> (5,461 pixels)</div>
-                                                <div class="mode-description">16.7 million colors, best quality</div>
-                                                <div class="mode-size">3 bytes/pixel</div>
-                                            </div>
-                                            
-                                            <div class="compression-mode-card" data-mode="1">
-                                                <div class="mode-header">
-                                                    <span class="mode-icon">⬜</span>
-                                                    <span class="mode-name">Grayscale</span>
-                                                </div>
-                                                <div class="mode-capacity">Max: <strong>128×128</strong> (16,384 pixels)</div>
-                                                <div class="mode-description">256 shades of gray</div>
-                                                <div class="mode-size">1 byte/pixel • <strong class="gain">3× larger!</strong></div>
-                                            </div>
-                                            
-                                            <div class="compression-mode-card" data-mode="2">
-                                                <div class="mode-header">
-                                                    <span class="mode-icon">⬛</span>
-                                                    <span class="mode-name">Monochrome</span>
-                                                </div>
-                                                <div class="mode-capacity">Max: <strong>362×362</strong> (131,072 pixels)</div>
-                                                <div class="mode-description">Black & white with dithering</div>
-                                                <div class="mode-size">1 bit/pixel • <strong class="gain">24× larger!</strong></div>
-                                            </div>
-                                            
-                                            <div class="compression-mode-card" data-mode="3">
-                                                <div class="mode-header">
-                                                    <span class="mode-icon">🎨</span>
-                                                    <span class="mode-name">Indexed Color</span>
-                                                </div>
-                                                <div class="mode-capacity">Max: <strong>124×124</strong> (15,376 pixels)</div>
-                                                <div class="mode-description">256-color palette, ideal for pixel art</div>
-                                                <div class="mode-size">1 byte/pixel + palette • <strong class="gain">3× larger</strong></div>
-                                            </div>
-                                            
-                                            <div class="compression-mode-card" data-mode="5">
-                                                <div class="mode-header">
-                                                    <span class="mode-icon">📸</span>
-                                                    <span class="mode-name">RGB565 (Photos)</span>
-                                                </div>
-                                                <div class="mode-capacity">Max: <strong>90×90</strong> (8,192 pixels)</div>
-                                                <div class="mode-description">16-bit color (65,536 colors)</div>
-                                                <div class="mode-size">2 bytes/pixel • <strong class="gain">1.5× larger</strong></div>
-                                            </div>
-                                        </div>
-
-                                        <div id="mode-suggestion" class="mode-suggestion" style="display:none; margin-top: 1rem; padding: 1rem; background: rgba(102, 126, 234, 0.15); border-radius: 8px; border: 2px solid rgba(102, 126, 234, 0.3);">
-                                            <div style="font-size: 0.9rem; color: rgba(255,255,255,0.9);">
-                                                <strong>💡 Smart Suggestion:</strong> <span id="suggestion-text"></span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Crop Tool -->
-                                    <div id="crop-tool-container" style="display:none; margin-bottom: 1rem;">
-                                        <div style="background: rgba(102, 126, 234, 0.15); border: 2px solid rgba(102, 126, 234, 0.3); border-radius: 8px; padding: 1rem;">
-                                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                                                <h4 style="margin: 0; color: #667eea;">✂️ Crop Tool</h4>
-                                                <div style="display: flex; gap: 0.5rem;">
-                                                    <button type="button" id="crop-mode-scale" class="crop-mode-btn active" style="padding: 0.4rem 0.8rem; background: rgba(102, 126, 234, 0.3); border: 1px solid rgba(102, 126, 234, 0.5); border-radius: 4px; color: white; cursor: pointer; font-size: 0.85rem;">📏 Scale</button>
-                                                    <button type="button" id="crop-mode-crop" class="crop-mode-btn" style="padding: 0.4rem 0.8rem; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 4px; color: white; cursor: pointer; font-size: 0.85rem;">✂️ Crop</button>
-                                                </div>
-                                            </div>
-                                            <div id="crop-canvas-container" style="position: relative; display: inline-block; max-width: 100%; background: #000;">
-                                                <canvas id="crop-source-canvas" style="display: block; max-width: 100%; height: auto; cursor: crosshair;"></canvas>
-                                                <div id="crop-selection" style="position: absolute; border: 2px solid #667eea; background: rgba(102, 126, 234, 0.2); display: none; pointer-events: none;">
-                                                    <div style="position: absolute; top: -20px; left: 0; background: #667eea; color: white; padding: 2px 6px; border-radius: 3px; font-size: 0.75rem; white-space: nowrap;"></div>
-                                                </div>
-                                            </div>
-                                            <div style="margin-top: 0.75rem; font-size: 0.85rem; color: rgba(255,255,255,0.8);" id="crop-instructions">
-                                                <strong>Scale mode:</strong> Entire image will be scaled to fit. Click "✂️ Crop" to select a region instead.
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Image Preview -->
-                                    <div class="image-preview">
-                                        <h4 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: rgba(255,255,255,0.9);">
-                                            📤 Preview - <span id="compression-mode-label">Full Color RGB</span>
-                                        </h4>
-                                        <canvas id="image-preview-canvas" style="display:none; width: 100%; max-width: 600px; height: auto; image-rendering: pixelated; border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 4px; background: rgba(0,0,0,0.3);"></canvas>
-                                        <div id="compression-stats" style="margin-top: 0.5rem; font-size: 0.85rem; color: rgba(255,255,255,0.7);"></div>
-                                        <div id="image-info" style="margin-top: 1rem;"></div>
-                                    </div>
-                                </div>
-
-                                <!-- Text Upload Section -->
-                                <div id="text-upload-section" class="upload-section-content" style="display:none;">
-                                    <div class="upload-info">
-                                        <h3>Upload Text</h3>
-                                        <p>Maximum size: 16KB (UTF-8)</p>
-                                        <p>Approximately 8,000 words</p>
-                                    </div>
-                                    
-                                    <div class="upload-input-group">
-                                        <textarea 
-                                            id="text-input" 
-                                            class="text-upload-textarea" 
-                                            placeholder="Enter your text content here..."
-                                            maxlength="16384"
-                                            rows="10"
-                                        ></textarea>
-                                        <div class="text-counter">
-                                            <span id="text-char-count">0</span> / 16,384 characters
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Draw/Pixel Editor Section -->
-                                <div id="draw-upload-section" class="upload-section-content" style="display:none;">
-                                    <div class="upload-info">
-                                        <h3>🎨 Pixel Art Editor</h3>
-                                        <p>Create pixel art directly on the blockchain!</p>
-                                    </div>
-                                    
-                                    <div class="pixel-editor-container" style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 1.5rem; margin: 1rem 0;">
-                                        <!-- Toolbar -->
-                                        <div class="editor-toolbar" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px solid rgba(255,255,255,0.1);">
-                                            <!-- Canvas size selector -->
-                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">Size:</label>
-                                                <select id="pixel-editor-size" style="padding: 0.5rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
-                                                    <option value="16">16×16</option>
-                                                    <option value="32">32×32</option>
-                                                    <option value="64" selected>64×64</option>
-                                                    <option value="128">128×128</option>
-                                                    <option value="256">256×256</option>
-                                                </select>
-                                            </div>
-                                            
-                                            <!-- Zoom -->
-                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">Zoom:</label>
-                                                <select id="pixel-editor-zoom" style="padding: 0.5rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; color: white;">
-                                                    <option value="4">4×</option>
-                                                    <option value="8" selected>8×</option>
-                                                    <option value="16">16×</option>
-                                                </select>
-                                            </div>
-                                            
-                                            <!-- Tools -->
-                                            <div style="display: flex; gap: 0.5rem; padding-left: 1rem; border-left: 2px solid rgba(255,255,255,0.1);">
-                                                <button class="tool-btn active" data-tool="pen" title="Pen" style="width: 40px; height: 40px; background: rgba(102, 126, 234, 0.2); border: 2px solid rgba(102, 126, 234, 0.5); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">✏️</button>
-                                                <button class="tool-btn" data-tool="fill" title="Fill" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">🪣</button>
-                                                <button class="tool-btn" data-tool="eyedropper" title="Eyedropper" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">💧</button>
-                                                <button class="tool-btn" data-tool="eraser" title="Eraser" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; font-size: 1.2rem;">🧹</button>
-                                            </div>
-                                            
-                                            <!-- Color picker -->
-                                            <div style="display: flex; align-items: center; gap: 0.5rem; padding-left: 1rem; border-left: 2px solid rgba(255,255,255,0.1);">
-                                                <label style="font-size: 0.9rem; color: rgba(255,255,255,0.8);">Color:</label>
-                                                <input type="color" id="pixel-editor-color" value="#000000" style="width: 50px; height: 40px; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; background: none;">
-                                            </div>
-                                            
-                                            <!-- Actions -->
-                                            <div style="display: flex; gap: 0.5rem; margin-left: auto;">
-                                                <button id="pixel-editor-undo" title="Undo" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; color: white;">↶ Undo</button>
-                                                <button id="pixel-editor-redo" title="Redo" style="padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; cursor: pointer; color: white;">↷ Redo</button>
-                                                <button id="pixel-editor-clear" title="Clear" style="padding: 0.5rem 1rem; background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); border-radius: 6px; cursor: pointer; color: white;">🗑️ Clear</button>
-                                            </div>
-                                        </div>
-                                        
-                                        <!-- Canvas container -->
-                                        <div id="pixel-editor-canvas-container" style="display: flex; justify-content: center; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; overflow: auto;">
-                                            <!-- Canvas will be inserted here by PixelEditor -->
-                                        </div>
-                                        
-                                        <!-- Color palette -->
-                                        <div class="color-palette" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(30px, 1fr)); gap: 4px; margin-top: 1rem; padding-top: 1rem; border-top: 2px solid rgba(255,255,255,0.1);">
-                                            <!-- Common colors -->
-                                            <div class="palette-color" data-color="#000000" style="width: 30px; height: 30px; background: #000000; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#FFFFFF" style="width: 30px; height: 30px; background: #FFFFFF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#FF0000" style="width: 30px; height: 30px; background: #FF0000; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#00FF00" style="width: 30px; height: 30px; background: #00FF00; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#0000FF" style="width: 30px; height: 30px; background: #0000FF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#FFFF00" style="width: 30px; height: 30px; background: #FFFF00; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#FF00FF" style="width: 30px; height: 30px; background: #FF00FF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#00FFFF" style="width: 30px; height: 30px; background: #00FFFF; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#FFA500" style="width: 30px; height: 30px; background: #FFA500; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#800080" style="width: 30px; height: 30px; background: #800080; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#FFC0CB" style="width: 30px; height: 30px; background: #FFC0CB; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                            <div class="palette-color" data-color="#A52A2A" style="width: 30px; height: 30px; background: #A52A2A; border: 2px solid rgba(255,255,255,0.3); border-radius: 4px; cursor: pointer;"></div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div id="pixel-editor-info" style="margin-top: 1rem;"></div>
-                                </div>
-
-                                <button type="submit" class="btn-primary upload-submit-btn">
-                                    Upload to Blockchain
-                                </button>
-                            </form>
-
-                            <div class="upload-cost-info">
-                                <p><strong>Estimated Cost:</strong></p>
-                                <ul>
-                                    <li>Images: ~$10-25 USD in gas</li>
-                                    <li>Text: ~$10-30 USD in gas</li>
-                                    <li>Content is permanently stored on-chain</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Uploads List -->
-                    <div id="content-list-section" style="margin-top: 3rem; border-top: 2px solid rgba(255,255,255,0.1); padding-top: 2rem;">
-                        <h3 style="margin-bottom: 1rem; color: #667eea;">📚 Recent Uploads</h3>
-                        <div id="content-list" class="content-list">
-                            <div class="loading-state">Loading recent uploads...</div>
-                        </div>
-                    </div>
-
-                    <!-- Content Detail View -->
-                    <div id="content-detail-section" style="display: none; margin-top: 3rem; border-top: 2px solid rgba(255,255,255,0.1); padding-top: 2rem;">
-                        <button id="back-to-list-btn" class="btn-secondary" style="margin-bottom: 1.5rem;">
-                            ← Back to Uploads
-                        </button>
-                        
-                        <div id="content-detail-container" class="content-detail-container">
-                            <!-- Detail content will be injected here -->
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
             <!-- ABOUT VIEW -->
             <div id="about-view" class="view-container hidden" data-view="about">
                 <div class="about-content">
@@ -813,10 +401,10 @@
                             </div>
 
                             <div class="about-card">
-                                <h3>💬 Algorithmic Curation</h3>
+                                <h3>🎖️ On-Chain Identity Badges</h3>
                                 <p>
-                                    Discussion boards where message visibility is determined by economic stake, 
-                                    not algorithms or moderators. Pure on-chain governance through value signals.
+                                    Create and edit a unique 32x32 pixel badge stored entirely on-chain. 
+                                    Your identity, your art, permanently on the blockchain.
                                 </p>
                             </div>
 
@@ -972,7 +560,7 @@
 
         <!-- Global Footer -->
         <footer class="global-footer">
-            <p>Secure Data Research © 2025</p>
+            <p>Secure Data Research © 2026</p>
         </footer>
 
         <!-- Shared Components (loaded once) -->

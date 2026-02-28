@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Arctangent function atan(x)
 # Returns angle in radians [-π/2, π/2]

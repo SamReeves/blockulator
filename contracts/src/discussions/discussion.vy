@@ -2,7 +2,7 @@
 
 """
 @title Discussion Contract
-@author L1Ca$h
+@author Sam Reeves
 @notice A discussion with configurable message limits
 @dev Survivors at termination split the pool evenly
 

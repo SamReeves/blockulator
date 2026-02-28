@@ -5,6 +5,7 @@
 
 import { web3Provider } from './infrastructure/blockchain/web3-provider.js';
 import { eventBus, EVENTS } from './infrastructure/events/event-bus.js';
+import { getExplorerUrl } from './infrastructure/config/network.js';
 import { WalletConnectComponent, ToastComponent } from './presentation/components/index.js';
 import { initConfetti } from './presentation/effects/confetti-animation.js';
 import { FutureFactory } from './domain/futures/future-factory.js';
@@ -346,10 +347,8 @@ class FuturesApp {
         if (etherscanLink) {
             etherscanLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                const networkId = this.web3Provider.networkId;
                 const factoryAddress = this.factory.contractAddress;
-                const baseUrl = networkId === 11155111 ? 'https://sepolia.etherscan.io' : 'https://etherscan.io';
-                window.open(`${baseUrl}/address/${factoryAddress}`, '_blank');
+                window.open(getExplorerUrl(factoryAddress), '_blank');
             });
         }
     }

@@ -3,7 +3,7 @@
 
 """
 @title Math Tools Caller Test Contract
-@author L1Ca$h
+@author Sam Reeves
 @notice Test contract to verify cross-contract calls to pure math functions
 @dev This contract demonstrates that gas estimation now works correctly
 """

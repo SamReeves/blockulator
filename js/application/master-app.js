@@ -19,10 +19,8 @@ export class MasterApp {
         // Sub-apps (lazy loaded)
         this.gamesApp = null;
         this.calculatorApp = null;
-        this.discussionsApp = null;
         this.futuresApp = null;
         this.badgesModule = null;
-        this.uploadsApp = null;
         
         console.log('🐋 MasterApp created');
     }
@@ -83,10 +81,8 @@ export class MasterApp {
         
         this.masterRouter.registerView('games', () => this.initGamesView());
         this.masterRouter.registerView('calculator', () => this.initCalculatorView());
-        this.masterRouter.registerView('discussions', () => this.initDiscussionsView());
         this.masterRouter.registerView('futures', () => this.initFuturesView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
-        this.masterRouter.registerView('uploads', () => this.initUploadsView());
         this.masterRouter.registerView('about', () => this.initAboutView());
         
         // Register sub-route handlers
@@ -129,27 +125,6 @@ export class MasterApp {
         }
         
         console.log('✅ Calculator view initialized');
-    }
-
-    /**
-     * Initialize Discussions view (lazy loaded)
-     */
-    async initDiscussionsView() {
-        console.log('💬 Initializing Discussions view...');
-        
-        if (!this.discussionsApp) {
-            // Import and create discussions app
-            const { DiscussionsApp } = await import('../discussions-app.js');
-            this.discussionsApp = new DiscussionsApp();
-            
-            // Don't re-initialize shared components, but do initialize view-specific things
-            await this.discussionsApp.initViewOnly();
-        } else {
-            // Refresh data if already loaded
-            await this.discussionsApp.refresh();
-        }
-        
-        console.log('✅ Discussions view initialized');
     }
 
     /**
@@ -197,24 +172,6 @@ export class MasterApp {
         }
         
         console.log('✅ Badges view initialized');
-    }
-
-    /**
-     * Initialize Uploads view (lazy loaded)
-     */
-    async initUploadsView() {
-        console.log('📤 Initializing Uploads view...');
-        
-        if (!this.uploadsApp) {
-            // Import and create uploads app
-            const { UploadsApp } = await import('../uploads-app.js');
-            this.uploadsApp = new UploadsApp(this.toastComponent);
-            
-            // Don't re-initialize shared components, but do initialize view-specific things
-            await this.uploadsApp.initViewOnly();
-        }
-        
-        console.log('✅ Uploads view initialized');
     }
 
     /**

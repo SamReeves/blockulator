@@ -1,6 +1,6 @@
 #pragma enable-decimals
 # @version 0.4.3
-# @author L1Ca$h
+# @author Sam Reeves
 
 # Lookup table for sqrt initial estimates
 # Row 0: sqrt(d) for d = 0..9
