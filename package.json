@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "build": "mkdir -p dist && cp index.html styles.css blockulator.png blockulator_favicon.png dist/ && cp -r js dist/js && cp -r styles dist/styles && cp -r contracts dist/contracts"
+    "build": "mkdir -p dist && cp index.html styles.css blockulator.png blockulator_favicon.png dist/ && cp -r js dist/js && cp -r contracts dist/contracts",
+    "heroku-postbuild": "npm run build"
   },
   "dependencies": {
     "ethers": "^5.8.0"
