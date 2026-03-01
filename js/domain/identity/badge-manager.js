@@ -7,7 +7,7 @@
 import { InteractiveContract } from '../models/interactive-contract.js';
 import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
-import { GameRenderer } from '../../presentation/renderers/game-renderer.js';
+import { ContractInfoRenderer } from '../../presentation/renderers/contract-info-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
 import { getExplorerUrl } from '../../infrastructure/config/network.js';
@@ -110,7 +110,7 @@ export class BadgeManager extends InteractiveContract {
                 <p class="contract-card-description">Creates and manages badge instances</p>
             </div>
         `;
-        const factoryInfo = GameRenderer.createContractInfo(
+        const factoryInfo = ContractInfoRenderer.createContractInfo(
             CONTRACT_ADDRESSES.BADGE_FACTORY,
             CONTRACT_SOURCES.BADGE_FACTORY,
             CONTRACT_ABIS.BADGE_FACTORY
@@ -127,7 +127,7 @@ export class BadgeManager extends InteractiveContract {
                 <p class="contract-card-description">Template contract for individual badges</p>
             </div>
         `;
-        const blueprintInfo = GameRenderer.createContractInfo(
+        const blueprintInfo = ContractInfoRenderer.createContractInfo(
             CONTRACT_ADDRESSES.BADGE_BLUEPRINT,
             CONTRACT_SOURCES.BADGE_BLUEPRINT,
             CONTRACT_ABIS.BADGE
