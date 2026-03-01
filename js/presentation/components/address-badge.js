@@ -6,6 +6,7 @@
 
 import { BadgeViewer } from './badge-viewer.js';
 import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { DOMHelpers } from '../dom/dom-helpers.js';
 
 export class AddressBadge {
     static factoryContract = null;
@@ -129,7 +130,7 @@ export class AddressBadge {
         // Add address
         const addressSpan = document.createElement('span');
         addressSpan.textContent = formatAddress 
-            ? `${address.slice(0, 6)}...${address.slice(-4)}`
+            ? DOMHelpers.formatAddress(address)
             : address;
         addressSpan.style.cssText = addressStyle;
         container.appendChild(addressSpan);

@@ -3,6 +3,8 @@
  * Shows addresses flowing through with payouts
  */
 
+import { DOMHelpers } from '../dom/dom-helpers.js';
+
 export class AddressFlow {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -73,8 +75,8 @@ export class AddressFlow {
             highlightEl.style.display = 'none';
         } else {
             highlightEl.style.display = 'block';
-            const formatted = this.formatAddress(address);
-            addressEl.innerHTML = amount ? 
+            const formatted = DOMHelpers.formatAddress(address);
+            addressEl.innerHTML = amount ?
                 `${formatted}<br><span style="font-size: 0.7rem; opacity: 0.8;">${amount}</span>` :
                 formatted;
         }
@@ -157,7 +159,7 @@ export class AddressFlow {
                 ">
                     <div style="min-width: 0; flex: 1;">
                         <div style="font-family: monospace; font-size: 0.75rem; font-weight: 500; color: ${color};">
-                            ${this.formatAddress(item.address)}
+                            ${DOMHelpers.formatAddress(item.address)}
                         </div>
                         <div style="font-size: 0.65rem; opacity: 0.7; margin-top: 0.1rem;">
                             ${this.getTimeAgo(item.timestamp)}
@@ -171,10 +173,6 @@ export class AddressFlow {
         }).join('');
     }
     
-    formatAddress(address) {
-        if (!address || address.length < 10) return address;
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
     
     getTimeAgo(timestamp) {
         const seconds = Math.floor((Date.now() - timestamp) / 1000);

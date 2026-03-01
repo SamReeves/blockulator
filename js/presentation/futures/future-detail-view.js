@@ -5,6 +5,9 @@
 
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { EulerianFuture } from '../../domain/futures/eulerian-future.js';
+import { StatusCardRenderer } from '../components/status-card-renderer.js';
+import { DOMHelpers } from '../dom/dom-helpers.js';
+import { computeCdfValue } from './distribution-cdf.js';
 
 export class FutureDetailView {
     constructor(futureData, factory, web3Provider, futureAbi) {
@@ -27,7 +30,8 @@ export class FutureDetailView {
             return;
         }
 
-        this.containerElement.innerHTML = '<div class="loading-state">Loading future details...</div>';
+        this.containerElement.innerHTML = '';
+        this.containerElement.appendChild(StatusCardRenderer.createLoadingState('Loading future details...'));
 
         try {
             console.log('📊 Starting future detail render for:', this.futureData.address);
@@ -71,19 +75,22 @@ export class FutureDetailView {
 
         } catch (error) {
             console.error('Failed to render future view:', error);
-            this.containerElement.innerHTML = `
-                <div class="error-state">
-                    <p>Failed to load future details</p>
-                    <button id="back-to-market-btn">← Back to Market</button>
-                </div>
-            `;
             
-            const backBtn = this.containerElement.querySelector('#back-to-market-btn');
-            if (backBtn) {
-                backBtn.addEventListener('click', () => {
-                    eventBus.emit('NAVIGATE_TO_MARKET');
-                });
-            }
+            const errorContainer = document.createElement('div');
+            errorContainer.className = 'error-state';
+            
+            errorContainer.appendChild(StatusCardRenderer.createErrorState('Failed to load future details'));
+            
+            const backBtn = document.createElement('button');
+            backBtn.id = 'back-to-market-btn';
+            backBtn.textContent = '← Back to Market';
+            backBtn.addEventListener('click', () => {
+                eventBus.emit('NAVIGATE_TO_MARKET');
+            });
+            
+            errorContainer.appendChild(backBtn);
+            this.containerElement.innerHTML = '';
+            this.containerElement.appendChild(errorContainer);
         }
     }
 
@@ -115,7 +122,7 @@ export class FutureDetailView {
         // Calculate lifetime if not present
         const lifetime = this.futureData.lifetime || (this.futureData.expiryTime - this.futureData.creationTime);
         const timeRemaining = this.futureData.timeRemaining !== undefined ? this.futureData.timeRemaining : lifetime;
-        const timeLeft = this.formatDuration(timeRemaining);
+        const timeLeft = DOMHelpers.formatDuration(timeRemaining);
         
         // Calculate elapsed time more carefully to handle near-zero values
         const elapsed = Math.max(0, lifetime - timeRemaining);
@@ -242,7 +249,7 @@ export class FutureDetailView {
                         </div>
                         <div class="info-row">
                             <span class="label">Lifetime:</span>
-                            <span class="value">${this.formatDuration(this.futureData.lifetime)}</span>
+                            <span class="value">${DOMHelpers.formatDuration(this.futureData.lifetime)}</span>
                         </div>
                     </div>
 
@@ -467,50 +474,7 @@ export class FutureDetailView {
             }
             labels.push(tLabel);
             
-            let value = 1.0;
-            
-            if (distributionType === 0) {
-                // UNIFORM: Constant rate → Linear payout
-                value = (t / lifetime);
-                
-            } else if (distributionType === 1) {
-                // GAUSSIAN: Bell curve - cumulative payout
-                const mean = lifetime / 2;
-                const stddev = lifetime / 3.464101615;
-                const z = (t - mean) / stddev;
-                value = 0.5 * (1 + Math.tanh(z / Math.sqrt(2)));
-                
-            } else if (distributionType === 2) {
-                // EXPONENTIAL DECAY: Front-loaded payouts
-                const lambda = 3 / lifetime;
-                value = 1.0 - Math.exp(-lambda * t);
-                
-            } else if (distributionType === 3) {
-                // EXPONENTIAL GROWTH: Back-loaded payouts
-                // CDF: F(t) = (e^(λt) - 1) / (e^(λT) - 1) where λ = 3/T
-                const lambda = 3 / lifetime;
-                value = (Math.exp(lambda * t) - 1) / (Math.exp(lambda * lifetime) - 1);
-                
-            } else if (distributionType === 4) {
-                // LINEAR DECAY: Accelerating accumulation
-                const ratio = t / lifetime;
-                value = 2 * ratio - ratio * ratio;
-                
-            } else if (distributionType === 5) {
-                // INVERTED GAUSSIAN: U-shaped
-                const mean = lifetime / 2;
-                if (t < mean) {
-                    value = 0.5 * (1.0 - Math.exp(-6 * t / lifetime));
-                } else {
-                    const secondHalfRatio = (t - mean) / (lifetime / 2);
-                    value = 0.5 + 0.5 * Math.exp(3 * (secondHalfRatio - 1));
-                }
-                
-            } else if (distributionType === 6) {
-                // LINEAR GROWTH: Decelerating accumulation
-                const ratio = t / lifetime;
-                value = ratio * ratio;
-            }
+            const value = computeCdfValue(t, lifetime, distributionType);
             
             // Scale to actual ETH amounts
             values.push(value * initialValueEth);
@@ -628,39 +592,5 @@ export class FutureDetailView {
         await this.render();
     }
 
-    formatDuration(seconds) {
-        if (seconds <= 0) return 'Expired';
-        if (seconds < 60) return `${Math.floor(seconds)}s`;
-        if (seconds < 3600) {
-            const mins = Math.floor(seconds / 60);
-            return `${mins}m`;
-        }
-        if (seconds < 86400) {
-            const hours = Math.floor(seconds / 3600);
-            return `${hours}h`;
-        }
-        if (seconds < 31557600) {  // Less than 1 year
-            const days = Math.floor(seconds / 86400);
-            return `${days}d`;
-        }
-        // 1 year or more - use decimal years for large durations
-        const years = seconds / 31557600;
-        if (years >= 100) {
-            // For 100+ years, show as whole years
-            return `${Math.floor(years)}y`;
-        } else if (years >= 10) {
-            // For 10-99 years, show 1 decimal
-            return `${years.toFixed(1)}y`;
-        } else {
-            // For 1-9 years, show months
-            const wholeYears = Math.floor(years);
-            const remainingSeconds = seconds % 31557600;
-            const months = Math.floor(remainingSeconds / (86400 * 30.44));
-            if (months > 0) {
-                return `${wholeYears}y ${months}mo`;
-            }
-            return `${wholeYears}y`;
-        }
-    }
 }
 

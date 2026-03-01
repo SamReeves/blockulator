@@ -611,6 +611,46 @@ export const CONTRACT_REGISTRY = {
         abi: 'contracts/build/abis/badge-v2.json'
     },
     
+    // ========== CONTENT ==========
+    'content-factory-v4': {
+        type: 'content',
+        name: 'Content Factory V4',
+        emoji: '🏭',
+        description: 'Content creation factory',
+        addresses: {
+            sepolia: '0x010EFFB50047820Fe8cEADD04877B427c92008B2',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/content/content_factory_v4.vy',
+        abi: 'contracts/build/abis/content-factory-v4.json'
+    },
+    
+    'image-content-v3-blueprint': {
+        type: 'content',
+        name: 'Image Content V3 Blueprint',
+        emoji: '🖼️',
+        description: 'Image content blueprint',
+        addresses: {
+            sepolia: '0x609798Eb02e4Fb49B3e8eCf41432A2e64F22050a',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/content/image_content_v3.vy',
+        abi: 'contracts/build/abis/image-content-v3.json'
+    },
+    
+    'text-content-v4-blueprint': {
+        type: 'content',
+        name: 'Text Content V4 Blueprint',
+        emoji: '📝',
+        description: 'Text content blueprint',
+        addresses: {
+            sepolia: '0x3088506F35f48D43c5946993D11D5e67624EDd83',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/content/text_content_v4.vy',
+        abi: 'contracts/build/abis/text-content-v4.json'
+    },
+    
 };
 
 /**

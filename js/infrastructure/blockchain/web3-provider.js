@@ -6,6 +6,7 @@
 
 import { eventBus, EVENTS } from '../events/event-bus.js';
 import { getConfig } from '../config/network.js';
+import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 
 class Web3Provider {
     constructor() {
@@ -92,7 +93,7 @@ class Web3Provider {
                     chainId: this.chainId
                 });
                 
-                console.log('✅ Wallet connection restored:', this.formatAddress(this.address));
+                console.log('✅ Wallet connection restored:', DOMHelpers.formatAddress(this.address));
                 return true;
             }
             
@@ -328,7 +329,7 @@ class Web3Provider {
      */
     formatAddress(address = this.address) {
         if (!address) return '';
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
+        return DOMHelpers.formatAddress(address);
     }
 
     /**

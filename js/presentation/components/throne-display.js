@@ -3,6 +3,8 @@
  * Shows the current king with power meter and reign duration
  */
 
+import { DOMHelpers } from '../dom/dom-helpers.js';
+
 export class ThroneDisplay {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -167,7 +169,7 @@ export class ThroneDisplay {
             
             infoEl.innerHTML = `
                 <div style="font-size: 0.85rem; font-weight: bold; font-family: monospace; word-break: break-all;">
-                    ${this.formatAddress(this.currentKing)}
+                    ${DOMHelpers.formatAddress(this.currentKing)}
                 </div>
                 ${youBadge}
             `;
@@ -180,7 +182,7 @@ export class ThroneDisplay {
         
         // Update prize and reign
         prizeEl.textContent = this.prize;
-        reignEl.textContent = this.formatDuration(this.reignDuration);
+        reignEl.textContent = DOMHelpers.formatDuration(this.reignDuration);
         
         // Update power bar (decays over time)
         this.updatePowerBar();
@@ -227,23 +229,6 @@ export class ThroneDisplay {
         }, 1000);
     }
     
-    formatAddress(address) {
-        if (!address || address.length < 10) return address;
-        return `${address.slice(0, 8)}...${address.slice(-6)}`;
-    }
-    
-    formatDuration(seconds) {
-        if (seconds < 60) return `${seconds}s`;
-        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
-        if (seconds < 86400) {
-            const hours = Math.floor(seconds / 3600);
-            const mins = Math.floor((seconds % 3600) / 60);
-            return `${hours}h ${mins}m`;
-        }
-        const days = Math.floor(seconds / 86400);
-        const hours = Math.floor((seconds % 86400) / 3600);
-        return `${days}d ${hours}h`;
-    }
     
     destroy() {
         if (this.updateInterval) {

@@ -1,7 +1,0 @@
-{
-  "contractName": "CONTENT_FACTORY_V4_OPTIMIZED",
-  "contractFile": "content_factory_v4_optimized.vy",
-  "abiPath": "contracts/build/abis/content-factory-v4-optimized.json",
-  "bytecodePath": "contracts/build/bytecode/content-factory-v4-optimized.json",
-  "timestamp": "2025-11-28T00:05:08Z"
-}

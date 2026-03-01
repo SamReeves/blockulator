@@ -5,20 +5,10 @@
  */
 
 import { ModuleRegistry } from './module-registry.js';
+import { MODULE_MANIFEST } from './module-manifest.js';
 import { gameStatusService } from './game-status-service.js';
 import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
 import { StatusCardRenderer } from '../presentation/components/status-card-renderer.js';
-
-// Import all game modules
-import { PissingContest } from '../domain/games/pissing-contest.js';
-import { PayItForward } from '../domain/games/pay-it-forward.js';
-import { MessageBoard } from '../domain/games/message-board.js';
-import { PayItBackward } from '../domain/games/pay-it-backward.js';
-import { KingOfTheHill } from '../domain/games/king-of-the-hill.js';
-import { LastCall } from '../domain/games/last-call.js';
-import { TimeToMakeTheDonuts } from '../domain/games/time-to-make-the-donuts.js';
-import { DiceGods } from '../domain/games/dice-gods.js';
-import { SatanMolochBaal } from '../domain/games/satan-moloch-baal.js';
 
 export class GamesApp {
     constructor(web3Provider, walletComponent, toastComponent) {
@@ -50,20 +40,27 @@ export class GamesApp {
     }
 
     /**
-     * Register all game modules
+     * Register all game modules from MODULE_MANIFEST
      */
-    registerGames() {
-        console.log('🎮 Registering games...');
+    async registerGames() {
+        console.log('🎮 Registering games from manifest...');
         
-        this.moduleRegistry.register('pissing-contest', PissingContest, 'game');
-        this.moduleRegistry.register('pay-it-forward', PayItForward, 'game');
-        this.moduleRegistry.register('message-board', MessageBoard, 'game');
-        this.moduleRegistry.register('pay-it-backward', PayItBackward, 'game');
-        this.moduleRegistry.register('king-of-the-hill', KingOfTheHill, 'game');
-        this.moduleRegistry.register('last-call', LastCall, 'game');
-        this.moduleRegistry.register('time-to-make-the-donuts', TimeToMakeTheDonuts, 'game');
-        this.moduleRegistry.register('dice-gods', DiceGods, 'game');
-        this.moduleRegistry.register('satan-moloch-baal', SatanMolochBaal, 'game');
+        // Get all game modules from manifest
+        const gameModules = Object.entries(MODULE_MANIFEST)
+            .filter(([_, config]) => config.category === 'game');
+        
+        // Dynamically import and register each game
+        for (const [moduleName, config] of gameModules) {
+            try {
+                const module = await import(config.path);
+                const GameClass = module[config.export];
+                this.moduleRegistry.register(moduleName, GameClass, 'game');
+            } catch (error) {
+                console.error(`Failed to register game ${moduleName}:`, error);
+            }
+        }
+        
+        console.log(`✅ Registered ${gameModules.length} games`);
     }
 
     /**

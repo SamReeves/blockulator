@@ -3,6 +3,8 @@
  * Shows messages in a sleek, Twitter-like feed
  */
 
+import { DOMHelpers } from '../dom/dom-helpers.js';
+
 export class MessageFeed {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -127,7 +129,7 @@ export class MessageFeed {
                         </div>
                         <div>
                             <div style="font-family: monospace; font-size: 0.75rem; color: ${isYou ? '#10b981' : '#3b82f6'}; font-weight: 600; display: flex; align-items: center;">
-                                ${this.formatAddress(msg.poster)}
+                                ${DOMHelpers.formatAddress(msg.poster)}
                                 ${youBadge}
                             </div>
                             <div style="font-size: 0.65rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.8;">
@@ -159,10 +161,6 @@ export class MessageFeed {
         return address.slice(2, 4).toUpperCase();
     }
     
-    formatAddress(address) {
-        if (!address || address.length < 10) return address;
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
     
     formatTimestamp(timestamp) {
         const num = typeof timestamp === 'number' ? timestamp : timestamp.toNumber?.() || parseInt(timestamp);

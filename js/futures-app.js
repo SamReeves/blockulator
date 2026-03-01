@@ -13,7 +13,7 @@ import { ViewRouter, ViewState } from './presentation/router/view-router.js';
 import { MarketTable } from './presentation/tables/market-table.js';
 import { FutureDetailView } from './presentation/futures/future-detail-view.js';
 import { CreateFutureForm } from './presentation/futures/create-future-form.js';
-import { GameRenderer } from './presentation/renderers/game-renderer.js';
+import { ContractInfoRenderer } from './presentation/renderers/contract-info-renderer.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from './infrastructure/config/contracts.js';
 import { getContractsByType, getContractMetadata } from './infrastructure/config/contract-registry.js';
 
@@ -128,7 +128,7 @@ class FuturesApp {
                 </div>
             `;
             
-            const contractInfo = GameRenderer.createContractInfo(
+                    const contractInfo = ContractInfoRenderer.createContractInfo(
                 metadata.contractAddress,
                 metadata.sourceFile,
                 metadata.abiFile

@@ -6,6 +6,7 @@
 
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { EulerianFuture } from '../../domain/futures/eulerian-future.js';
+import { DOMHelpers } from '../dom/dom-helpers.js';
 
 export class MarketTable {
     constructor(factory, web3Provider, futureAbi) {
@@ -224,10 +225,10 @@ export class MarketTable {
         const distEmoji = EulerianFuture.getDistributionEmoji(future.distributionType);
         const distName = EulerianFuture.getDistributionName(future.distributionType);
         const createdAgo = this.formatTimeAgo(future.creationTime);
-        const timeLeft = this.formatDuration(future.timeRemaining);
+        const timeLeft = DOMHelpers.formatDuration(future.timeRemaining);
         const balance = parseFloat(ethers.utils.formatEther(future.balance)).toFixed(6);
         const expected = parseFloat(ethers.utils.formatEther(future.expectedValue)).toFixed(6);
-        const ownerShort = this.shortenAddress(future.owner);
+        const ownerShort = DOMHelpers.formatAddress(future.owner);
         
         const isMyFuture = this.web3Provider.currentAddress?.toLowerCase() === future.owner.toLowerCase();
         
@@ -481,22 +482,5 @@ export class MarketTable {
         return `${Math.floor(diff / 86400)}d ago`;
     }
 
-    /**
-     * Format duration in seconds to human readable
-     */
-    formatDuration(seconds) {
-        if (seconds <= 0) return 'Expired';
-        if (seconds < 60) return `${seconds}s`;
-        if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-        return `${Math.floor(seconds / 86400)}d`;
-    }
-
-    /**
-     * Shorten address
-     */
-    shortenAddress(address) {
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
 }
 

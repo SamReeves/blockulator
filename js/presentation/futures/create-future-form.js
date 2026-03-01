@@ -5,6 +5,8 @@
 
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { ValueInput } from '../components/value-input.js';
+import { DOMHelpers } from '../dom/dom-helpers.js';
+import { computeCdfValue } from './distribution-cdf.js';
 
 export class CreateFutureForm {
     constructor(factory, web3Provider) {
@@ -114,7 +116,7 @@ export class CreateFutureForm {
 
         const sliderValue = parseInt(lifetimeSlider.value);
         const seconds = this.sliderToLifetime(sliderValue);
-        displaySpan.textContent = this.formatDuration(seconds);
+        displaySpan.textContent = DOMHelpers.formatDuration(seconds);
     }
 
     updateChart() {
@@ -138,67 +140,10 @@ export class CreateFutureForm {
 
         for (let i = 0; i <= points; i++) {
             const t = (i / points) * lifetime;
-            const tLabel = this.formatDuration(t);
+            const tLabel = DOMHelpers.formatDuration(t);
             labels.push(i % 10 === 0 ? tLabel : ''); // Only show every 10th label
             
-            let value = 1.0;
-            
-            if (distributionType === 0) {
-                // UNIFORM: Constant rate → Linear payout
-                // If you hold from 0 to t, you extract t/T of total value
-                value = (t / lifetime);
-                
-            } else if (distributionType === 1) {
-                // GAUSSIAN: Bell curve - cumulative payout via error function
-                // Approximation of cumulative distribution
-                const mean = lifetime / 2;
-                const stddev = lifetime / 3.464101615;
-                const z = (t - mean) / stddev;
-                // Approximate CDF using tanh approximation
-                value = 0.5 * (1 + Math.tanh(z / Math.sqrt(2)));
-                
-            } else if (distributionType === 2) {
-                // EXPONENTIAL DECAY: Heavily weighted toward early payouts
-                // CDF: F(t) = 1 - e^(-λt), most value extracted early
-                const lambda = 3 / lifetime;
-                value = 1.0 - Math.exp(-lambda * t);
-                
-            } else if (distributionType === 3) {
-                // EXPONENTIAL GROWTH: Heavily weighted toward late payouts  
-                // CDF: F(t) = (e^(λt) - 1) / (e^(λT) - 1) where λ = 3/T
-                // Starts near 0, accelerates to 100% at end
-                const lambda = 3 / lifetime;
-                value = (Math.exp(lambda * t) - 1) / (Math.exp(lambda * lifetime) - 1);
-                
-            } else if (distributionType === 4) {
-                // LINEAR DECAY: Triangular, high rate at start
-                // CDF of P(t) = (T-t)/T → F(t) = 1 - (1-t/T)^2 = 2t/T - (t/T)^2
-                const ratio = t / lifetime;
-                value = 2 * ratio - ratio * ratio;
-                
-            } else if (distributionType === 5) {
-                // INVERTED GAUSSIAN: U-shaped, high at extremes
-                // Fast payout at start, slow in middle, fast at end
-                const mean = lifetime / 2;
-                const stddev = lifetime / 3.464101615;
-                
-                // For inverted: integrate U-shaped PDF
-                // Approximation: fast early (like exp decay), slow middle, fast late
-                if (t < mean) {
-                    // First half: fast start, slowing down
-                    value = 0.5 * (1.0 - Math.exp(-6 * t / lifetime));
-                } else {
-                    // Second half: slow start, accelerating
-                    const secondHalfRatio = (t - mean) / (lifetime / 2);
-                    value = 0.5 + 0.5 * Math.exp(3 * (secondHalfRatio - 1));
-                }
-                
-            } else if (distributionType === 6) {
-                // LINEAR GROWTH: Triangular, high rate at end
-                // CDF of P(t) = t/T → F(t) = (t/T)^2
-                const ratio = t / lifetime;
-                value = ratio * ratio;
-            }
+            const value = computeCdfValue(t, lifetime, distributionType);
             
             values.push(value);
         }
@@ -363,36 +308,5 @@ export class CreateFutureForm {
         }
     }
 
-    formatDuration(seconds) {
-        if (seconds < 60) return `${seconds} seconds`;
-        if (seconds < 3600) {
-            const mins = Math.floor(seconds / 60);
-            return `${mins} minute${mins > 1 ? 's' : ''}`;
-        }
-        if (seconds < 86400) {
-            const hours = Math.floor(seconds / 3600);
-            return `${hours} hour${hours > 1 ? 's' : ''}`;
-        }
-        if (seconds < 31557600) {  // Less than 1 year
-        const days = Math.floor(seconds / 86400);
-        const hours = Math.floor((seconds % 86400) / 3600);
-        if (hours > 0) {
-            return `${days} day${days > 1 ? 's' : ''} ${hours}h`;
-        }
-        return `${days} day${days > 1 ? 's' : ''}`;
-        }
-        // 1 year or more
-        const years = Math.floor(seconds / 31557600);
-        const remainingSeconds = seconds % 31557600;
-        const days = Math.floor(remainingSeconds / 86400);
-        if (days > 30) {
-            const months = Math.floor(days / 30.44);
-            return `${years} year${years > 1 ? 's' : ''} ${months} month${months > 1 ? 's' : ''}`;
-        }
-        if (days > 0) {
-            return `${years} year${years > 1 ? 's' : ''} ${days} day${days > 1 ? 's' : ''}`;
-        }
-        return `${years} year${years > 1 ? 's' : ''}`;
-    }
 }
 

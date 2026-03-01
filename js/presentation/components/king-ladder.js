@@ -3,6 +3,8 @@
  * Shows recent kings in a clean ladder format
  */
 
+import { DOMHelpers } from '../dom/dom-helpers.js';
+
 export class KingLadder {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -90,11 +92,11 @@ export class KingLadder {
             addressDisplay.innerHTML = '<span style="opacity: 0.7;">Vacant</span>';
         } else {
             const youBadge = isYou ? ' <span style="background: #ffd700; color: #000; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.65rem; font-weight: 700;">YOU</span>' : '';
-            addressDisplay.innerHTML = this.formatAddress(address) + youBadge;
+            addressDisplay.innerHTML = DOMHelpers.formatAddress(address) + youBadge;
         }
         
         prizeDisplay.textContent = prize;
-        reignDisplay.textContent = this.formatDuration(reignDuration);
+        reignDisplay.textContent = DOMHelpers.formatDuration(reignDuration);
     }
     
     /**
@@ -164,7 +166,7 @@ export class KingLadder {
                     <!-- Address -->
                     <div style="flex: 1; min-width: 0;">
                         <div style="font-family: monospace; font-size: 0.75rem; font-weight: 500; color: ${isYou ? '#10b981' : 'inherit'};">
-                            ${this.formatAddress(king)}
+                            ${DOMHelpers.formatAddress(king)}
                             ${isYou ? '<span style="color: #10b981; font-weight: 700; margin-left: 0.25rem;">←</span>' : ''}
                         </div>
                     </div>
@@ -173,17 +175,5 @@ export class KingLadder {
         }).join('');
     }
     
-    formatAddress(address) {
-        if (!address || address.length < 10) return address;
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
-    
-    formatDuration(seconds) {
-        if (seconds < 60) return `${seconds}s`;
-        if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
-        if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
-        const days = Math.floor(seconds / 86400);
-        return `${days}d`;
-    }
 }
 

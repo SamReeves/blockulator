@@ -7,6 +7,7 @@
 import { web3Provider } from '../infrastructure/blockchain/web3-provider.js';
 import { CONTRACT_ADDRESSES } from '../infrastructure/config/contracts.js';
 import { AddressBadge } from '../presentation/components/address-badge.js';
+import { DOMHelpers } from '../presentation/dom/dom-helpers.js';
 
 export class GameStatusService {
     constructor() {
@@ -163,7 +164,7 @@ export class GameStatusService {
         
         return {
             status: hasLeader ? leaderBadge : 'No donations yet',
-            details: `Pool: ${this.formatWei(totalValue.toString())} • ${donationCount.toString()} donations • ${uniqueDonors.toString()} ${playerLabel}`
+            details: `Pool: ${DOMHelpers.formatWei(totalValue.toString())} • ${donationCount.toString()} donations • ${uniqueDonors.toString()} ${playerLabel}`
         };
     }
 
@@ -183,7 +184,7 @@ export class GameStatusService {
         
         return {
             status: hasPending ? pendingBadge : 'Awaiting first donor',
-            details: hasPending ? `Reward: ${this.formatWei(pendingAmount.toString())}` : 'Start the chain!'
+            details: hasPending ? `Reward: ${DOMHelpers.formatWei(pendingAmount.toString())}` : 'Start the chain!'
         };
     }
 
@@ -254,7 +255,7 @@ export class GameStatusService {
         
         return {
             status: hasKing ? kingBadge : 'No king yet',
-            details: `${totalDethronements.toString()} dethronements • Prize: ${this.formatWei(currentPrize.toString())}`
+            details: `${totalDethronements.toString()} dethronements • Prize: ${DOMHelpers.formatWei(currentPrize.toString())}`
         };
     }
 
@@ -277,13 +278,13 @@ export class GameStatusService {
         if (canEnd) {
             return {
                 status: hasLeader ? leaderBadge : 'Round can end',
-                details: `Round ${roundNumber.toString()} • Pot: ${this.formatWei(potValue.toString())}`
+                details: `Round ${roundNumber.toString()} • Pot: ${DOMHelpers.formatWei(potValue.toString())}`
             };
         }
         
         return {
             status: hasLeader ? leaderBadge : 'No leader yet',
-            details: `Round ${roundNumber.toString()} • Pot: ${this.formatWei(potValue.toString())}`
+            details: `Round ${roundNumber.toString()} • Pot: ${DOMHelpers.formatWei(potValue.toString())}`
         };
     }
 
@@ -305,7 +306,7 @@ export class GameStatusService {
         
         return {
             status: hasWinner ? winnerBadge : 'No winner yet',
-            details: `Day ${currentDay.toString()} • Pot: ${this.formatWei(potValue.toString())}`
+            details: `Day ${currentDay.toString()} • Pot: ${DOMHelpers.formatWei(potValue.toString())}`
         };
     }
 
@@ -322,7 +323,7 @@ export class GameStatusService {
         
         return {
             status: isActive ? 'Round active' : 'New round starting',
-            details: `Round ${roundNumber.toString()} • Pot: ${this.formatWei(totalPot.toString())} • ${playCount.toString()} ${playLabel}`
+            details: `Round ${roundNumber.toString()} • Pot: ${DOMHelpers.formatWei(totalPot.toString())} • ${playCount.toString()} ${playLabel}`
         };
     }
 
@@ -338,30 +339,11 @@ export class GameStatusService {
         const totalBurned = BigInt(satanTotal.toString()) + BigInt(molochTotal.toString()) + BigInt(baalTotal.toString()) + BigInt(voidBurned.toString());
         
         return {
-            status: `Total burned: ${this.formatWei(totalBurned.toString())}`,
-            details: `Satan: ${this.formatWei(satanTotal.toString())} • Moloch: ${this.formatWei(molochTotal.toString())} • Baal: ${this.formatWei(baalTotal.toString())}`
+            status: `Total burned: ${DOMHelpers.formatWei(totalBurned.toString())}`,
+            details: `Satan: ${DOMHelpers.formatWei(satanTotal.toString())} • Moloch: ${DOMHelpers.formatWei(molochTotal.toString())} • Baal: ${DOMHelpers.formatWei(baalTotal.toString())}`
         };
     }
 
-    // Utility functions
-    formatAddress(address) {
-        if (!address || address === '0x0000000000000000000000000000000000000000') {
-            return 'None';
-        }
-        return `${address.slice(0, 6)}...${address.slice(-4)}`;
-    }
-
-    formatWei(wei) {
-        if (!wei || wei === '0') return '0 ETH';
-        const eth = Number(wei) / 1e18;
-        if (eth < 0.000001) {
-            return `${(Number(wei) / 1e9).toFixed(2)} gwei`;
-        }
-        if (eth < 0.001) {
-            return `${eth.toFixed(8)} ETH`;
-        }
-        return `${eth.toFixed(6)} ETH`;
-    }
 
     formatTime(seconds) {
         if (seconds < 60) return `${seconds}s`;
