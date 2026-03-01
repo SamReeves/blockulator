@@ -240,52 +240,22 @@
                                 <div class="work-step">
                                     <div class="step-number">1</div>
                                     <h4>Create</h4>
-                                    <p>Deploy a future with ETH and choose a distribution type (Uniform, Gaussian, Exponential, etc.) and lifetime (5 minutes to 1000 years).</p>
+                                    <p>Deposit ETH, pick a distribution and lifetime. A contract is deployed holding your ETH.</p>
                                 </div>
                                 <div class="work-step">
                                     <div class="step-number">2</div>
-                                    <h4>Hold or Trade</h4>
-                                    <p>List your future on the marketplace or transfer it directly to another address. Each transfer pays out accumulated value.</p>
+                                    <h4>Accumulate</h4>
+                                    <p>Value accrues to the current owner according to the distribution curve over time.</p>
                                 </div>
                                 <div class="work-step">
                                     <div class="step-number">3</div>
-                                    <h4>Extract Value</h4>
-                                    <p>Transfer ownership to claim payout based on the distribution curve. The new owner receives the contract with reduced balance.</p>
+                                    <h4>Transfer</h4>
+                                    <p>Transfer ownership to extract the accumulated payout. The remaining balance passes to the new owner.</p>
                                 </div>
                                 <div class="work-step">
                                     <div class="step-number">4</div>
-                                    <h4>Repeat or Expire</h4>
-                                    <p>The new owner can transfer again. After expiry, the final owner claims all remaining ETH.</p>
-                                </div>
-                            </div>
-                            <div class="key-features">
-                                <div class="feature">
-                                    <span class="feature-icon">✅</span>
-                                    <div>
-                                        <strong>Deterministic</strong>
-                                        <p>Calculate exact payouts before transferring</p>
-                                    </div>
-                                </div>
-                                <div class="feature">
-                                    <span class="feature-icon">🔒</span>
-                                    <div>
-                                        <strong>Trustless</strong>
-                                        <p>All logic enforced by smart contracts</p>
-                                    </div>
-                                </div>
-                                <div class="feature">
-                                    <span class="feature-icon">📊</span>
-                                    <div>
-                                        <strong>Flexible</strong>
-                                        <p>7 distribution types for different strategies</p>
-                                    </div>
-                                </div>
-                                <div class="feature">
-                                    <span class="feature-icon">💹</span>
-                                    <div>
-                                        <strong>Tradeable</strong>
-                                        <p>Marketplace with fair value pricing</p>
-                                    </div>
+                                    <h4>Expire</h4>
+                                    <p>At end of lifetime, the final owner can withdraw all remaining ETH.</p>
                                 </div>
                             </div>
                         </div>
@@ -299,38 +269,23 @@
                                 <div class="technical-item">
                                     <h4>Distribution Types</h4>
                                     <ul>
-                                        <li><strong>Uniform (Type 0):</strong> Constant payout rate, linear accumulation</li>
-                                        <li><strong>Gaussian (Type 1):</strong> Bell curve, peak value at midpoint</li>
-                                        <li><strong>Exponential Decay (Type 2):</strong> Front-loaded, 95% paid by ~60% of lifetime</li>
-                                        <li><strong>Exponential Growth (Type 3):</strong> Back-loaded, 95% paid in final ~40%</li>
-                                        <li><strong>Linear Decay (Type 4):</strong> Triangular, high at start, accelerating accumulation</li>
-                                        <li><strong>Inverted Gaussian (Type 5):</strong> U-shaped, high at extremes</li>
-                                        <li><strong>Linear Growth (Type 6):</strong> Triangular, low at start, decelerating accumulation</li>
-                                    </ul>
-                                </div>
-                                <div class="technical-item">
-                                    <h4>Contract Parameters</h4>
-                                    <ul>
-                                        <li><strong>Lifetime Range:</strong> 300 seconds (5 min) to 31.5B seconds (1000 years)</li>
-                                        <li><strong>Minimum Value:</strong> Any amount ≥ 0.0001 ETH</li>
-                                        <li><strong>Fees:</strong> None - 100% of value flows to players/users</li>
+                                        <li><strong>Uniform:</strong> Constant rate</li>
+                                        <li><strong>Gaussian:</strong> Bell curve, peak at midpoint</li>
+                                        <li><strong>Exponential Decay:</strong> Front-loaded, 95% paid by 60% of lifetime</li>
+                                        <li><strong>Exponential Growth:</strong> Back-loaded, 95% paid in final 40%</li>
+                                        <li><strong>Linear Decay:</strong> Triangular, high at start</li>
+                                        <li><strong>Inverted Gaussian:</strong> U-shaped, high at extremes</li>
+                                        <li><strong>Linear Growth:</strong> Triangular, low at start</li>
                                     </ul>
                                 </div>
                                 <div class="technical-item">
                                     <h4>Payout Formula</h4>
-                                    <p>Payout calculation uses the probability density function (PDF) of each distribution type:</p>
+                                    <p>Payout uses the distribution's probability density function:</p>
                                     <code>payout = balance × ∫[pdf(t)] dt</code>
-                                    <p>Where t is the time since creation. The remaining balance after transfer is:</p>
                                     <code>new_balance = balance - payout</code>
-                                </div>
-                                <div class="technical-item">
-                                    <h4>Marketplace Mechanics</h4>
-                                    <ul>
-                                        <li><strong>Listing:</strong> Futures are "locked" when listed, preventing direct transfers</li>
-                                        <li><strong>Buying:</strong> Automatically unlocks and transfers to buyer</li>
-                                        <li><strong>Delisting:</strong> Unlocks the future for direct transfers</li>
-                                        <li><strong>Fair Pricing:</strong> Expected value calculated as balance × remaining_time_factor</li>
-                                    </ul>
+                                    <p><strong>Lifetime:</strong> 5 minutes to 1000 years<br>
+                                    <strong>Minimum value:</strong> 0.0001 ETH<br>
+                                    <strong>Fees:</strong> None</p>
                                 </div>
                             </div>
                         </div>
@@ -361,9 +316,9 @@
                     
                     <!-- Hero Section -->
                     <section class="about-hero">
-                        <h1>Math & Games on the Blockchain</h1>
+                        <h1>On-Chain Math, Markets, and Games</h1>
                         <p class="hero-subtitle">
-                            A personal experiment in putting scientific computing and weird games entirely on-chain
+                            Scientific computing and mechanism design, implemented entirely as smart contracts
                         </p>
                     </section>
 
@@ -371,13 +326,10 @@
                     <section class="about-section">
                         <h2>🔬 What This Is</h2>
                         <p>
-                            Blockulator is my experiment to see what happens when you put complex math and 
-                            game mechanics directly on the blockchain. Everything lives on-chain—calculations, 
-                            game state, pixel art badges, all of it. No databases, no APIs, just smart contracts.
-                        </p>
-                        <p>
-                            It's a research project. I'm figuring out what's possible, not what's profitable. 
-                            Expect bugs, weird UX, and things that don't make economic sense.
+                            Blockulator is a collection of smart contracts that implement mathematical functions, 
+                            financial instruments, and game mechanics directly on the Ethereum blockchain. 
+                            Everything runs on-chain -- calculations, state, assets, payouts. No databases, 
+                            no APIs, no off-chain dependencies.
                         </p>
                     </section>
 
@@ -389,35 +341,34 @@
                             <div class="about-card">
                                 <h3>🔢 Math Library</h3>
                                 <p>
-                                    Trig functions, logs, exponentials, statistical distributions—all implemented 
-                                    as smart contracts. Use them in your own contracts or just play with the 
-                                    calculator to see what's possible on-chain.
+                                    30+ on-chain math contracts: trig, logarithms, exponentials, 
+                                    statistical distributions, combinatorics. Callable from other contracts 
+                                    or through the calculator interface.
                                 </p>
                             </div>
 
                             <div class="about-card">
-                                <h3>📈 Futures Markets</h3>
+                                <h3>📈 Futures</h3>
                                 <p>
-                                    Time-weighted payout contracts with different distribution curves. 
-                                    No oracles, no price feeds, just math and time. Place a bet, pick a time, 
-                                    see what happens.
+                                    Time-weighted payout contracts with 7 distribution curves. 
+                                    Value accrues according to the chosen distribution; ownership 
+                                    transfers extract the accumulated payout.
                                 </p>
                             </div>
 
                             <div class="about-card">
                                 <h3>🎖️ Pixel Badges</h3>
                                 <p>
-                                    Draw a 32x32 pixel badge and store it entirely on-chain. Edit it whenever 
-                                    you want. It's your on-chain identity, permanently stored in the contract.
+                                    32x32 pixel art stored entirely on-chain. Draw, edit, and 
+                                    use as your on-chain identity. All image data lives in the contract.
                                 </p>
                             </div>
 
                             <div class="about-card">
-                                <h3>🎮 Weird Games</h3>
+                                <h3>🎮 Games</h3>
                                 <p>
-                                    Pissing contests, demon worship, last-call timers—each game is an experiment 
-                                    in mechanism design. Some are fun, some are dumb, all are fully autonomous 
-                                    smart contracts.
+                                    Nine autonomous game contracts exploring different mechanism designs: 
+                                    auctions, timers, coordination games, and adversarial dynamics.
                                 </p>
                             </div>
                         </div>
@@ -425,42 +376,27 @@
 
                     <!-- The Stack -->
                     <section class="about-section">
-                        <h2>🛠️ The Stack</h2>
+                        <h2>🛠️ Stack</h2>
                         
                         <div class="tech-stack">
                             <div class="stack-layer">
-                                <div class="stack-label">Smart Contracts</div>
+                                <div class="stack-label">Contracts</div>
                                 <div class="stack-content">
-                                    <strong>Vyper</strong> - All contracts written in Vyper for clarity and safety
-                                </div>
-                            </div>
-
-                            <div class="stack-layer">
-                                <div class="stack-label">Blockchain</div>
-                                <div class="stack-content">
-                                    <strong>Ethereum (Sepolia Testnet)</strong> - EVM-compatible, battle-tested infrastructure
+                                    <strong>Vyper 0.4</strong> on Ethereum Sepolia
                                 </div>
                             </div>
 
                             <div class="stack-layer">
                                 <div class="stack-label">Frontend</div>
                                 <div class="stack-content">
-                                    <strong>Vanilla JavaScript</strong> - Zero frameworks, direct DOM manipulation, 
-                                    no build step required
+                                    <strong>Vanilla JS</strong> -- no frameworks, no build step
                                 </div>
                             </div>
 
                             <div class="stack-layer">
-                                <div class="stack-label">Architecture</div>
+                                <div class="stack-label">Storage</div>
                                 <div class="stack-content">
-                                    <strong>Embedded SPA</strong> - Lazy loading, instant navigation, mobile-first design
-                                </div>
-                            </div>
-
-                            <div class="stack-layer">
-                                <div class="stack-label">Data Storage</div>
-                                <div class="stack-content">
-                                    <strong>100% On-Chain</strong> - No databases, no APIs, no centralized servers
+                                    <strong>100% on-chain</strong> -- all state and data lives in contracts
                                 </div>
                             </div>
                         </div>
@@ -470,13 +406,8 @@
                     <section class="about-section">
                         <h2>🚀 Status</h2>
                         <p>
-                            Everything's live on Sepolia testnet. This is experimental software—use testnet ETH only. 
-                            All contract source is in <code>/contracts/src/</code>. Frontend is vanilla JavaScript, 
-                            no build step, no frameworks.
-                        </p>
-                        <p>
-                            If something breaks or doesn't make sense, that's expected. This is a playground 
-                            for ideas, not a product.
+                            Live on Sepolia testnet. All contract source is viewable from each contract's 
+                            info panel or in <code>/contracts/src/</code>.
                         </p>
                     </section>
 
@@ -487,7 +418,7 @@
 
         <!-- Global Footer -->
         <footer class="global-footer">
-            <p>Secure Data Research © 2026</p>
+            <p><a href="https://securedataresearch.net" target="_blank" rel="noopener noreferrer">Secure Data Research</a> © 2026</p>
         </footer>
 
         <!-- Shared Components (loaded once) -->

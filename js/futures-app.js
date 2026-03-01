@@ -15,6 +15,7 @@ import { FutureDetailView } from './presentation/futures/future-detail-view.js';
 import { CreateFutureForm } from './presentation/futures/create-future-form.js';
 import { GameRenderer } from './presentation/renderers/game-renderer.js';
 import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from './infrastructure/config/contracts.js';
+import { getContractsByType, getContractMetadata } from './infrastructure/config/contract-registry.js';
 
 class FuturesApp {
     constructor() {
@@ -108,40 +109,34 @@ class FuturesApp {
 
         container.innerHTML = '';
         container.style.display = 'grid';
-        container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
-        container.style.gap = '1rem';
+        container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+        container.style.gap = '1.5rem';
 
-        // Factory Contract
-        const factoryInfo = document.createElement('div');
-        factoryInfo.className = 'contract-info-card';
-        factoryInfo.innerHTML = `
-            <div class="contract-card-header">
-                <h4>🏭 Future Factory</h4>
-                <p class="contract-card-description">Creates and manages Eulerian future contracts</p>
-            </div>
-        `;
-        factoryInfo.appendChild(GameRenderer.createContractInfo(
-            CONTRACT_ADDRESSES.FUTURE_FACTORY,
-            CONTRACT_SOURCES.FUTURE_FACTORY,
-            CONTRACT_ABIS.FUTURE_FACTORY
-        ));
-        container.appendChild(factoryInfo);
+        // Get all future contracts from registry
+        const futureContracts = getContractsByType('future');
 
-        // Blueprint Contract
-        const blueprintInfo = document.createElement('div');
-        blueprintInfo.className = 'contract-info-card';
-        blueprintInfo.innerHTML = `
-            <div class="contract-card-header">
-                <h4>📋 Eulerian Future Blueprint</h4>
-                <p class="contract-card-description">Template for individual future contracts with time-weighted payouts</p>
-            </div>
-        `;
-        blueprintInfo.appendChild(GameRenderer.createContractInfo(
-            CONTRACT_ADDRESSES.EULERIAN_FUTURE_BLUEPRINT,
-            CONTRACT_SOURCES.EULERIAN_FUTURE_BLUEPRINT,
-            CONTRACT_ABIS.EULERIAN_FUTURE_BLUEPRINT
-        ));
-        container.appendChild(blueprintInfo);
+        // Render each contract
+        futureContracts.forEach(contractKey => {
+            const metadata = getContractMetadata(contractKey);
+            
+            const contractCard = document.createElement('div');
+            contractCard.className = 'contract-info-card';
+            contractCard.innerHTML = `
+                <div class="contract-card-header">
+                    <h4>${metadata.emoji} ${metadata.name}</h4>
+                    <p class="contract-card-description">${metadata.description}</p>
+                </div>
+            `;
+            
+            const contractInfo = GameRenderer.createContractInfo(
+                metadata.contractAddress,
+                metadata.sourceFile,
+                metadata.abiFile
+            );
+            contractInfo.style.marginTop = '1rem';
+            contractCard.appendChild(contractInfo);
+            container.appendChild(contractCard);
+        });
     }
 
     /**

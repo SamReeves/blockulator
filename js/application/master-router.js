@@ -64,7 +64,7 @@ export class MasterRouter {
         let path = window.location.hash.slice(1); // Remove #
         
         if (!path || path === '/') {
-            path = '/games'; // Default route
+            path = '/calculator'; // Default route
         }
         
         // Remove leading slash if present
@@ -73,7 +73,7 @@ export class MasterRouter {
         }
         
         const parts = path.split('/').filter(Boolean);
-        const view = parts[0] || 'games';
+        const view = parts[0] || 'calculator';
         const subRoute = parts.slice(1).join('/') || null;
         
         return { view, subRoute };

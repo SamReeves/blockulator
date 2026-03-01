@@ -27,6 +27,7 @@ const SEPOLIA_ADDRESSES = {
     
     // Futures Market
     FUTURE_FACTORY: '0x23D6C1D2e9050f0DA6e8Df5812c886b755ba3dA2',
+    EULERIAN_FUTURE_BLUEPRINT: '0x452754b1b5b7421371537245192C682B409adB5d', // Using Gaussian as the primary blueprint example
     UNIFORM_FUTURE_BLUEPRINT: '0xC630C3876cB4b84e6d7b3DD859Cc6078d2fCb1CB',
     GAUSSIAN_FUTURE_BLUEPRINT: '0x452754b1b5b7421371537245192C682B409adB5d',
     EXPONENTIAL_FUTURE_BLUEPRINT: '0xA0662156296480a8d69a24a52F829701183aA915',
@@ -95,6 +96,7 @@ const MAINNET_ADDRESSES = {
     
     // Futures Market
     FUTURE_FACTORY: '0x0000000000000000000000000000000000000000',
+    EULERIAN_FUTURE_BLUEPRINT: '0x0000000000000000000000000000000000000000',
     UNIFORM_FUTURE_BLUEPRINT: '0x0000000000000000000000000000000000000000',
     GAUSSIAN_FUTURE_BLUEPRINT: '0x0000000000000000000000000000000000000000',
     EXPONENTIAL_FUTURE_BLUEPRINT: '0x0000000000000000000000000000000000000000',
@@ -169,6 +171,7 @@ export const CONTRACT_SOURCES = {
     DICE_GODS: 'contracts/src/games/dice_gods.vy',
     SATAN_MOLOCH_BAAL: 'contracts/src/games/satan_moloch_baal.vy',
     FUTURE_FACTORY: 'contracts/src/market/future_factory.vy',
+    EULERIAN_FUTURE_BLUEPRINT: 'contracts/src/market/eulerian_future.vy',
     UNIFORM_FUTURE_BLUEPRINT: 'contracts/src/market/uniform_future.vy',
     GAUSSIAN_FUTURE_BLUEPRINT: 'contracts/src/market/gaussian_future.vy',
     EXPONENTIAL_FUTURE_BLUEPRINT: 'contracts/src/market/exponential_future.vy',
@@ -218,6 +221,7 @@ export const CONTRACT_ABIS = {
     DICE_GODS: 'contracts/build/abis/dice-gods.json',
     SATAN_MOLOCH_BAAL: 'contracts/build/abis/satan-moloch-baal.json',
     FUTURE_FACTORY: 'contracts/build/abis/future-factory.json',
+    EULERIAN_FUTURE_BLUEPRINT: 'contracts/build/abis/eulerian-future.json',
     UNIFORM_FUTURE_BLUEPRINT: 'contracts/build/abis/uniform-future.json',
     GAUSSIAN_FUTURE_BLUEPRINT: 'contracts/build/abis/gaussian-future.json',
     EXPONENTIAL_FUTURE_BLUEPRINT: 'contracts/build/abis/exponential-future.json',

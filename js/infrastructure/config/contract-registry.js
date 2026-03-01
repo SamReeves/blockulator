@@ -519,8 +519,70 @@ export const CONTRACT_REGISTRY = {
         abi: 'contracts/build/abis/future-factory.json'
     },
     
-    // Note: eulerian-future-blueprint was replaced by specific distribution blueprints
-    // (uniform, gaussian, exponential, linear, inverted-gaussian) in the latest deployment
+    'uniform-future-blueprint': {
+        type: 'future',
+        name: 'Uniform Future Blueprint',
+        emoji: '📏',
+        description: 'Constant payout rate, linear accumulation',
+        addresses: {
+            sepolia: '0xC630C3876cB4b84e6d7b3DD859Cc6078d2fCb1CB',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/market/uniform_future.vy',
+        abi: 'contracts/build/abis/uniform-future.json'
+    },
+    
+    'gaussian-future-blueprint': {
+        type: 'future',
+        name: 'Gaussian Future Blueprint',
+        emoji: '🔔',
+        description: 'Bell curve distribution, peak at midpoint',
+        addresses: {
+            sepolia: '0x452754b1b5b7421371537245192C682B409adB5d',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/market/gaussian_future.vy',
+        abi: 'contracts/build/abis/gaussian-future.json'
+    },
+    
+    'exponential-future-blueprint': {
+        type: 'future',
+        name: 'Exponential Future Blueprint',
+        emoji: '📉',
+        description: 'Front-loaded or back-loaded payouts',
+        addresses: {
+            sepolia: '0xA0662156296480a8d69a24a52F829701183aA915',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/market/exponential_future.vy',
+        abi: 'contracts/build/abis/exponential-future.json'
+    },
+    
+    'linear-future-blueprint': {
+        type: 'future',
+        name: 'Linear Future Blueprint',
+        emoji: '🔺',
+        description: 'Triangular distribution, linear growth or decay',
+        addresses: {
+            sepolia: '0x5dE0BC82DcEbA8F1152198f4c810Dd44b9235698',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/market/linear_future.vy',
+        abi: 'contracts/build/abis/linear-future.json'
+    },
+    
+    'inverted-gaussian-future-blueprint': {
+        type: 'future',
+        name: 'Inverted Gaussian Future Blueprint',
+        emoji: '🆄',
+        description: 'U-shaped curve, high at extremes',
+        addresses: {
+            sepolia: '0xA79a88290Ec19F6Cad38C40C5ff4c9fAf9ecE6F0',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/market/inverted_gaussian_future.vy',
+        abi: 'contracts/build/abis/inverted-gaussian-future.json'
+    },
     
     // ========== IDENTITY ==========
     'badge-factory': {
