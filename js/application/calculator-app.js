@@ -4,6 +4,8 @@
 
 import { CALCULATOR_REGISTRY, CATEGORIES, getCalculatorById } from '../domain/calculators/calculator-registry.js';
 import { ContractLoader } from '../infrastructure/blockchain/contract-loader.js';
+import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js';
+import { getContractsByType, getContractMetadata } from '../infrastructure/config/contract-registry.js';
 
 // Explicit key layout — every function has a visible button.
 // 6 columns, spatial grouping replaces category headers.
@@ -32,6 +34,7 @@ export class CalculatorApp {
         await this.loadContracts();
         this.buildButtons();
         this.setupListeners();
+        this.renderContractInfo();
 
         console.log(`Calculator app initialized (${CALCULATOR_REGISTRY.length} calculators)`);
     }
@@ -365,6 +368,40 @@ export class CalculatorApp {
                     .ti-result { font-size: 1.25rem; }
                 }
             </style>
+
+            <!-- Smart Contracts Section -->
+            <div class="calculator-contracts-section">
+                <h2 class="section-title">Smart Contracts</h2>
+                <div id="calculator-contract-info"></div>
+            </div>
+
+            <style>
+                .calculator-contracts-section {
+                    max-width: 1200px;
+                    margin: 3rem auto 2rem;
+                    padding: 0 1rem;
+                }
+
+                .calculator-contracts-section .section-title {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    margin-bottom: 1.5rem;
+                    color: #fff;
+                    text-align: center;
+                }
+
+                #calculator-contract-info {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                    gap: 1.5rem;
+                }
+
+                @media (max-width: 480px) {
+                    #calculator-contract-info {
+                        grid-template-columns: 1fr;
+                    }
+                }
+            </style>
         `;
     }
 
@@ -375,6 +412,42 @@ export class CalculatorApp {
                 this.contracts[calc.id] = contract;
             }
         }
+    }
+
+    /**
+     * Render contract info section with links to contracts
+     */
+    renderContractInfo() {
+        const container = document.getElementById('calculator-contract-info');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        // Get all calculator contracts from registry
+        const calculatorContracts = getContractsByType('calculator');
+
+        // Render each contract
+        calculatorContracts.forEach(contractKey => {
+            const metadata = getContractMetadata(contractKey);
+            
+            const contractCard = document.createElement('div');
+            contractCard.className = 'contract-info-card';
+            contractCard.innerHTML = `
+                <div class="contract-card-header">
+                    <h4>${metadata.emoji} ${metadata.name}</h4>
+                    <p class="contract-card-description">${metadata.description}</p>
+                </div>
+            `;
+            
+            const contractInfo = ContractInfoRenderer.createContractInfo(
+                metadata.contractAddress,
+                metadata.sourceFile,
+                metadata.abiFile
+            );
+            contractInfo.style.marginTop = '1rem';
+            contractCard.appendChild(contractInfo);
+            container.appendChild(contractCard);
+        });
     }
 
     buildButtons() {
