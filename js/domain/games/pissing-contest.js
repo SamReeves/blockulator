@@ -29,51 +29,55 @@ export class PissingContest extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-            <div class="game-sections">
+            <div class="game-sections" style="--panel-color: #3b82f6; --hero-color: #3b82f6; --btn-color: #10b981;">
                 <!-- Main Consolidated Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);">
-                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                <div class="contest-info-panel game-panel">
+                    <div class="game-panel-grid">
                         <!-- Left: Current Leader & Play -->
-                        <div style="min-width: 0;">
-                            <div style="background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                                <div style="font-size: 0.7rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">🏆 Current Leader</div>
-                                <div id="current-leader" style="font-size: 0.9rem; font-weight: bold; word-break: break-all; margin-bottom: 0.75rem;">
+                        <div class="min-w-0">
+                            <div class="hero-card" style="margin-bottom: 1rem;">
+                                <div class="hero-card-label">🏆 Current Leader</div>
+                                <div id="current-leader" class="hero-card-content">
                                     No donations yet
                                 </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.75rem;">
+                                <div class="hero-card-stats stat-grid">
                                     <div>
-                                        <div style="opacity: 0.8;">Prize Pool</div>
-                                        <div id="prize-pool" style="font-weight: bold;">0 wei</div>
+                                        <div>Prize Pool</div>
+                                        <div id="prize-pool" class="value">0 wei</div>
                                     </div>
                                     <div>
-                                        <div style="opacity: 0.8;">Donations</div>
-                                        <div id="donations-count" style="font-weight: bold;">0 / 0</div>
+                                        <div>Donations</div>
+                                        <div id="donations-count" class="value">0 / 0</div>
                                     </div>
                                 </div>
                             </div>
                             
                             <div id="donate-amount-input" style="margin-bottom: 0.75rem;"></div>
-                            <button id="donate-button" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
-                                💰 Donate & Compete
+                            <button id="donate-button" class="btn-action">
+                                💰 Donate
                             </button>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem;">
-                                <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.15); border-radius: 6px; font-size: 0.75rem;">
-                                    <div style="opacity: 0.7; margin-bottom: 0.25rem;">Your Donation</div>
-                                    <div id="your-donation" style="font-weight: bold; font-size: 0.85rem;">0 wei</div>
+                            <div class="stat-grid-3" style="margin-top: 0.75rem;">
+                                <div class="stat-box" style="--stat-color: #10b981;">
+                                    <div class="stat-box-label">Your Donation</div>
+                                    <div id="your-donation" class="stat-box-value">0 wei</div>
                                 </div>
-                                <div style="padding: 0.5rem; background: rgba(251, 191, 36, 0.15); border-radius: 6px; font-size: 0.75rem;">
-                                    <div style="opacity: 0.7; margin-bottom: 0.25rem;">Status</div>
-                                    <div id="your-status" style="font-weight: bold; font-size: 0.85rem;">Not playing</div>
+                                <div class="stat-box" style="--stat-color: #fbbf24;">
+                                    <div class="stat-box-label">Status</div>
+                                    <div id="your-status" class="stat-box-value">Not playing</div>
+                                </div>
+                                <div class="stat-box" style="--stat-color: #f59e0b;">
+                                    <div class="stat-box-label">Minimum</div>
+                                    <div id="min-donation" class="stat-box-value">-</div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Right: Histogram -->
-                        <div style="min-width: 0;">
-                            <div style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-                                <h3 style="color: #3b82f6; margin: 0; font-size: 1rem;">📊 Donation Histogram</h3>
-                                <span style="font-size: 0.75rem; color: #3b82f6; opacity: 0.8;">Top 10</span>
+                        <div class="min-w-0">
+                            <div class="flex-between" style="margin-bottom: 0.5rem;">
+                                <h3 class="game-panel-header" style="font-size: 1rem;">📊 Donation Histogram</h3>
+                                <span style="font-size: 0.75rem; opacity: 0.8;">Top 10</span>
                             </div>
                             <div id="donations-3d-graph"></div>
                         </div>
@@ -81,30 +85,26 @@ export class PissingContest extends Game {
                 </div>
 
                 <!-- Admin Panel (only visible to owner) -->
-                <div id="admin-panel" class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); display: none;">
-                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ef4444; margin: 0; font-size: 0.95rem;">
+                <div id="admin-panel" class="contest-info-panel admin-panel" style="display: none;">
+                    <h3 class="admin-panel-header">
                         <span>⚙️</span>
                         <span>Admin</span>
                     </h3>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin: 0.75rem 0; font-size: 0.75rem;">
-                        <div style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem; font-size: 0.65rem;">Status</div>
-                            <div id="contract-paused" style="font-weight: bold; font-size: 0.8rem;">No</div>
+                    <div class="stat-grid-3" style="margin: 0.75rem 0; font-size: 0.75rem; --stat-color: #ef4444;">
+                        <div class="stat-box">
+                            <div class="stat-box-label">Status</div>
+                            <div id="contract-paused" class="stat-box-value">No</div>
                         </div>
-                        <div style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem; font-size: 0.65rem;">Fee</div>
-                            <div id="config-fee" style="font-weight: bold; font-size: 0.8rem;">-</div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">Min Donation</div>
+                            <div id="config-min" class="stat-box-value">-</div>
                         </div>
-                        <div style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem; font-size: 0.65rem;">Min</div>
-                            <div id="config-min" style="font-weight: bold; font-size: 0.8rem;">-</div>
-                        </div>
-                        <div style="padding: 0.5rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem; font-size: 0.65rem;">Max</div>
-                            <div id="config-max" style="font-weight: bold; font-size: 0.8rem;">-</div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">Max Donations</div>
+                            <div id="config-max" class="stat-box-value">-</div>
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div class="stat-grid">
                         <button id="toggle-pause-btn" class="btn-secondary" style="padding: 0.5rem; font-size: 0.8rem;">🔄 Pause</button>
                         <button id="end-round-early-btn" class="btn-secondary" style="padding: 0.5rem; font-size: 0.8rem;">🏁 End</button>
                     </div>
@@ -112,35 +112,35 @@ export class PissingContest extends Game {
 
                 <!-- Your Stats - Collapsible -->
                 <details class="contest-info-panel">
-                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span style="font-size: 0.85rem;">▶</span>
-                        <span style="font-weight: 600;">📈 Your Stats</span>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>📈 Your Stats</span>
                     </summary>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.75rem;">
-                        <div style="padding: 0.5rem; background: rgba(236, 72, 153, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Lifetime Donated</div>
-                            <div id="lifetime-donated" style="font-weight: bold;">0 wei</div>
+                    <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.8rem;">
+                        <div class="stat-box" style="--stat-color: #ec4899;">
+                            <div class="stat-box-label">Lifetime Donated</div>
+                            <div id="lifetime-donated" class="stat-box-value">0 wei</div>
                         </div>
-                        <div style="padding: 0.5rem; background: rgba(236, 72, 153, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Lifetime Won</div>
-                            <div id="lifetime-won" style="font-weight: bold;">0 wei</div>
+                        <div class="stat-box" style="--stat-color: #ec4899;">
+                            <div class="stat-box-label">Lifetime Won</div>
+                            <div id="lifetime-won" class="stat-box-value">0 wei</div>
                         </div>
-                        <div style="padding: 0.5rem; background: rgba(251, 191, 36, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Rounds Won</div>
-                            <div id="rounds-won" style="font-weight: bold;">0</div>
+                        <div class="stat-box" style="--stat-color: #fbbf24;">
+                            <div class="stat-box-label">Rounds Won</div>
+                            <div id="rounds-won" class="stat-box-value">0</div>
                         </div>
-                        <div style="padding: 0.5rem; background: rgba(251, 191, 36, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Rounds Played</div>
-                            <div id="rounds-participated" style="font-weight: bold;">0</div>
+                        <div class="stat-box" style="--stat-color: #fbbf24;">
+                            <div class="stat-box-label">Rounds Played</div>
+                            <div id="rounds-participated" class="stat-box-value">0</div>
                         </div>
                     </div>
                 </details>
 
                 <!-- Winners History - Collapsible -->
                 <details class="contest-info-panel">
-                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span style="font-size: 0.85rem;">▶</span>
-                        <span style="font-weight: 600;">🏆 Recent Winners</span>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>🏆 Recent Winners</span>
                     </summary>
                     <div id="winners-history" style="max-height: 250px; overflow-y: auto; margin-top: 0.75rem;">
                         <div style="text-align: center; padding: 1.5rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.85rem;">
@@ -151,25 +151,46 @@ export class PissingContest extends Game {
 
                 <!-- Global Stats - Collapsible -->
                 <details class="contest-info-panel">
-                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span style="font-size: 0.85rem;">▶</span>
-                        <span style="font-weight: 600;">🌍 Global Stats</span>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>🌍 Global Stats</span>
                     </summary>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.75rem;">
-                        <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Total Rounds</div>
-                            <div id="total-rounds" style="font-weight: bold;">0</div>
+                    <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.8rem; --stat-color: #10b981;">
+                        <div class="stat-box">
+                            <div class="stat-box-label">Total Rounds</div>
+                            <div id="total-rounds" class="stat-box-value">0</div>
                         </div>
-                        <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Total Donated</div>
-                            <div id="total-donated" style="font-weight: bold;">0 wei</div>
+                        <div class="stat-box">
+                            <div class="stat-box-label">Total Donated</div>
+                            <div id="total-donated" class="stat-box-value">0 wei</div>
                         </div>
                     </div>
-                    <div style="padding: 0.75rem; background: rgba(16, 185, 129, 0.1); border-radius: 6px; margin-top: 0.5rem; font-size: 0.8rem;">
-                        <div style="opacity: 0.7; margin-bottom: 0.25rem;">All-Time Record</div>
-                        <div id="highest-donation" style="font-weight: bold; margin-bottom: 0.25rem;">0 wei</div>
+                    <div class="stat-box" style="margin-top: 0.5rem; font-size: 0.8rem; --stat-color: #10b981;">
+                        <div class="stat-box-label">All-Time Record</div>
+                        <div id="highest-donation" class="stat-box-value" style="margin-bottom: 0.25rem;">0 wei</div>
                         <div style="font-size: 0.75rem; opacity: 0.8;">
                             By: <span id="highest-donor">-</span>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- How to Win -->
+                <details class="contest-info-panel" open>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>📖 How to Win</span>
+                    </summary>
+                    <div style="margin-top: 1rem;">
+                        <div class="strategy-callout" style="margin-bottom: 1rem;">
+                            <strong>🎯 Goal:</strong> Send the highest donation in the round to win the entire prize pool.
+                        </div>
+                        
+                        <div style="padding: 1rem; background: color-mix(in srgb, var(--panel-color) 5%, transparent); border-radius: 8px; font-size: 0.85rem;">
+                            <strong style="display: block; margin-bottom: 0.5rem;">Rules:</strong>
+                            • Each round accepts up to 10 donations<br>
+                            • Highest donor becomes the leader<br>
+                            • After 10 donations, round ends and leader wins 100%<br>
+                            • New round starts immediately
                         </div>
                     </div>
                 </details>
@@ -244,7 +265,7 @@ export class PissingContest extends Game {
                     const btn = document.getElementById('donate-button');
                     if (btn) {
                         btn.disabled = isLoading;
-                        btn.textContent = isLoading ? '⏳ Donating...' : '💰 Donate & Compete';
+                        btn.textContent = isLoading ? '⏳ Donating...' : '💰 Donate';
                     }
                 }
             );
@@ -285,7 +306,7 @@ export class PissingContest extends Game {
                 if (leaderAddress === '0x0000000000000000000000000000000000000000') {
                     leaderEl.textContent = 'No donations yet';
                 } else {
-                    const leaderDisplay = await AddressBadge.createWithAddress(leaderAddress, this.web3Provider, {
+                    const leaderDisplay = await this.components.AddressBadge.createWithAddress(leaderAddress, this.web3Provider, {
                         size: 32,
                         formatAddress: true,
                         addressStyle: 'font-size: 1.25rem; font-weight: bold;'
@@ -341,7 +362,7 @@ export class PissingContest extends Game {
                 if (championAddress === '0x0000000000000000000000000000000000000000') {
                     championEl.textContent = 'No donations yet';
                 } else {
-                    const championDisplay = await AddressBadge.createWithAddress(championAddress, this.web3Provider, {
+                    const championDisplay = await this.components.AddressBadge.createWithAddress(championAddress, this.web3Provider, {
                         size: 24,
                         formatAddress: true
                     });
@@ -440,7 +461,7 @@ export class PissingContest extends Game {
                 
                 // Add badge + address
                 const winnerAddress = String(detail.winner);
-                const addressDisplay = await AddressBadge.createWithAddress(winnerAddress, this.web3Provider, {
+                const addressDisplay = await this.components.AddressBadge.createWithAddress(winnerAddress, this.web3Provider, {
                     size: 16,
                     formatAddress: true,
                     addressStyle: 'font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);'
@@ -454,7 +475,7 @@ export class PissingContest extends Game {
                         ${this.dom.formatWei(detail.prize)}
                     </div>
                     <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
-                        ${detail.donationCount} plays
+                        ${detail.donationCount} donations
                     </div>
                 `;
                 
@@ -519,7 +540,7 @@ export class PissingContest extends Game {
             // Add badges to each donation (async)
             const donationsWithBadges = await Promise.all(
                 topDonations.map(async (d) => {
-                    const badge = await AddressBadge.create(d.address, this.web3Provider, { size: 24 });
+                    const badge = await this.components.AddressBadge.create(d.address, this.web3Provider, { size: 24 });
                     return {
                         ...d,
                         badge,
@@ -542,6 +563,17 @@ export class PissingContest extends Game {
             const owner = config[0];
             const adminPanel = document.getElementById('admin-panel');
             
+            // config returns: (owner, max_donations_per_round, minimum_donation, paused)
+            const maxDonations = config[1];
+            const minDonation = config[2];
+            const paused = config[3];
+            
+            // Update minimum for all users
+            this.dom.updateInfo('min-donation', this.dom.formatWei(minDonation));
+            if (this.donationInput && minDonation) {
+                this.donationInput.setMinimum(minDonation.toString());
+            }
+            
             if (!adminPanel) return;
             
             // Show admin panel if current user is owner
@@ -549,14 +581,7 @@ export class PissingContest extends Game {
                 this.web3Provider.currentAddress.toLowerCase() === owner.toLowerCase()) {
                 adminPanel.style.display = 'block';
                 
-                // Update config display
-                const paused = config[4];
-                const feeBp = config[1];
-                const maxDonations = config[2];
-                const minDonation = config[3];
-                
                 this.dom.updateInfo('contract-paused', paused ? 'Yes ⚠️' : 'No ✅');
-                this.dom.updateInfo('config-fee', `${(feeBp / 100).toFixed(2)}%`);
                 this.dom.updateInfo('config-min', this.dom.formatWei(minDonation));
                 this.dom.updateInfo('config-max', maxDonations.toString());
                 
@@ -595,7 +620,7 @@ export class PissingContest extends Game {
             );
             
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: '✅ Pause status toggled',
+                message: 'Pause status toggled',
                 type: 'success'
             });
             
@@ -619,7 +644,7 @@ export class PissingContest extends Game {
             );
             
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: '✅ Round ended early',
+                message: 'Round ended early',
                 type: 'success'
             });
             
@@ -640,7 +665,7 @@ export class PissingContest extends Game {
                 const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
                 if (isYou && isLargest) {
                     this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: '🏆 You are now leading!',
+                        message: 'You are now leading',
                         type: 'success'
                     });
                 }
@@ -655,7 +680,7 @@ export class PissingContest extends Game {
                 if (isYou) {
                     this.events.bus.emit(this.events.EVENTS.CONFETTI);
                     this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `🎉 YOU WON ${this.dom.formatWei(prize)}!`,
+                        message: `You won ${this.dom.formatWei(prize)}!`,
                         type: 'success'
                     });
                 } else {
@@ -677,7 +702,7 @@ export class PissingContest extends Game {
 
         this.contract.on('RoundStarted', async (roundNumber) => {
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: `🚀 Round #${roundNumber} started!`,
+                message: `Round ${roundNumber} started`,
                 type: 'info'
             });
             await this.refreshState();

@@ -65,17 +65,6 @@ export class DiceThreeD {
                     ${this.createFace(6, 'die-face-6')}
                 </div>
             </div>
-            
-            <!-- Number Select Buttons -->
-            <div class="dice-number-select">
-                <div class="dice-number-grid">
-                    ${[1,2,3,4,5,6].map(n => `
-                        <button class="dice-number-btn" data-number="${n}" title="Select ${n}">
-                            ${n}
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
         `;
     }
     
@@ -107,26 +96,7 @@ export class DiceThreeD {
     }
     
     attachEventListeners() {
-        // Number select buttons
-        const numberButtons = this.sceneElement.parentElement.querySelectorAll('.dice-number-btn');
-        numberButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const number = parseInt(e.currentTarget.dataset.number);
-                this.selectFace(number);
-            });
-        });
-        
-        // Keyboard accessibility
-        document.addEventListener('keydown', this.handleKeyDown.bind(this));
-        this.sceneElement.setAttribute('tabindex', '0');
-    }
-    
-    handleKeyDown(e) {
-        // Allow direct number selection via keyboard
-        const num = parseInt(e.key);
-        if (num >= 1 && num <= 6) {
-            this.selectFace(num);
-        }
+        // No interactive event listeners needed - die is display only
     }
     
     updateRotation() {
@@ -194,14 +164,7 @@ export class DiceThreeD {
     }
     
     destroy() {
-        // Cleanup event listeners
-        this.sceneElement?.removeEventListener('mousedown', this.handleMouseDown);
-        document.removeEventListener('mousemove', this.handleMouseMove);
-        document.removeEventListener('mouseup', this.handleMouseUp);
-        this.sceneElement?.removeEventListener('touchstart', this.handleTouchStart);
-        document.removeEventListener('touchmove', this.handleTouchMove);
-        document.removeEventListener('touchend', this.handleTouchEnd);
-        this.sceneElement?.removeEventListener('keydown', this.handleKeyDown);
+        // No event listeners to clean up
     }
 }
 

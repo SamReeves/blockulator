@@ -9,10 +9,9 @@ import { EulerianFuture } from '../../domain/futures/eulerian-future.js';
 import { DOMHelpers } from '../dom/dom-helpers.js';
 
 export class MarketTable {
-    constructor(factory, web3Provider, futureAbi) {
+    constructor(factory, web3Provider) {
         this.factory = factory;
         this.web3Provider = web3Provider;
-        this.futureAbi = futureAbi;
         this.futures = [];
         this.filter = 'all'; // all, listed, my-futures, uniform, gaussian, decay, growth
         this.sortBy = 'recent'; // recent, expiry, value, expected
@@ -44,16 +43,9 @@ export class MarketTable {
                             this.factory.getExpectedValue(address).catch(() => ethers.BigNumber.from(0))
                         ]);
 
-                        // Get future contract balance and time remaining
-                        const future = new EulerianFuture(
-                            this.web3Provider,
-                            address,
-                            this.futureAbi
-                        );
-                        await future.init();
-                        
-                        const balance = factoryInfo.balance; // Get from factory info
-                        const timeRemaining = await future.timeRemaining().catch(() => 0);
+                        // Compute time remaining from factory data
+                        const currentTimestamp = Math.floor(Date.now() / 1000);
+                        const timeRemaining = Math.max(0, factoryInfo.expiryTime - currentTimestamp);
 
                         return {
                             address,
@@ -67,7 +59,7 @@ export class MarketTable {
                             askPrice: listing.askPrice,
                             listTime: listing.listTime,
                             expectedValue,
-                            balance,
+                            balance: factoryInfo.balance,
                             timeRemaining
                         };
                     } catch (error) {
@@ -86,7 +78,6 @@ export class MarketTable {
             // Sort futures
             this.sortFutures();
 
-            console.log(`📋 Loaded ${this.futures.length} futures`);
         } catch (error) {
             console.error('Failed to load futures:', error);
             eventBus.emit(EVENTS.TOAST, {
@@ -430,7 +421,7 @@ export class MarketTable {
 
         const priceEth = parseFloat(ethers.utils.formatEther(priceWei)).toFixed(6);
         
-        if (!confirm(`Buy this future for ${priceEth} ETH?\n\n1% marketplace fee applies.`)) {
+        if (!confirm(`Buy this future for ${priceEth} ETH?`)) {
             return;
         }
 

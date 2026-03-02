@@ -30,22 +30,22 @@ export class MessageBoard extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-            <div class="game-sections">
+            <div class="game-sections" style="--panel-color: #3b82f6; --btn-color: #3b82f6;">
                 <!-- Main Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.1) 100%);">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #3b82f6; margin: 0;">
+                <div class="contest-info-panel game-panel">
+                    <div class="flex-between" style="margin-bottom: 0.75rem;">
+                        <h3 class="game-panel-header">
                             <span>💬</span>
                             <span>Message Board</span>
                         </h3>
-                        <div style="font-size: 0.75rem; color: #3b82f6;">
+                        <div style="font-size: 0.75rem;">
                             <span id="msg-count-badge">0</span> posts
                         </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 1.5rem; align-items: start;">
                         <!-- Left: Post Form -->
-                        <div style="min-width: 0;">
+                        <div class="min-w-0">
                             <textarea 
                                 id="msg-content"
                                 placeholder="Write something permanent..."
@@ -59,39 +59,49 @@ export class MessageBoard extends Game {
                             
                             <div id="msg-fee-input" style="margin-bottom: 0.75rem;"></div>
                             
-                            <button id="post-btn" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
+                            <button id="post-btn" class="btn-action">
                                 💬 Post
                             </button>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.7rem;">
-                                <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 4px;">
-                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Min Fee</div>
-                                    <div id="min-fee" style="font-weight: bold; font-size: 0.75rem;">0 wei</div>
+                            <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.7rem;">
+                                <div class="stat-box" style="--stat-color: #10b981;">
+                                    <div class="stat-box-label">Min Fee</div>
+                                    <div id="min-fee" class="stat-box-value" style="font-size: 0.75rem;">0 wei</div>
                                 </div>
-                                <div style="padding: 0.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 4px;">
-                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Can Post</div>
-                                    <div id="wait-time" style="font-weight: bold; font-size: 0.75rem;">Now</div>
+                                <div class="stat-box" style="--stat-color: #8b5cf6;">
+                                    <div class="stat-box-label">Can Post</div>
+                                    <div id="wait-time" class="stat-box-value" style="font-size: 0.75rem;">Now</div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Right: Message Feed -->
-                        <div style="min-width: 0;">
+                        <div class="min-w-0">
                             <div id="message-feed-container"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Owner Panel (only visible to owner) -->
-                <div id="owner-panel" class="contest-info-panel" style="border: 2px solid #ef4444; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%); display: none;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="color: #ef4444; margin: 0; font-size: 0.9rem;">⚙️ Owner</h3>
-                        <span id="contract-balance" style="font-weight: bold; font-size: 0.85rem;">0 wei</span>
+                <!-- How to Post -->
+                <details class="contest-info-panel" open>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>📖 How to Post</span>
+                    </summary>
+                    <div style="margin-top: 1rem;">
+                        <div class="strategy-callout" style="margin-bottom: 1rem;">
+                            <strong>💬 Post messages permanently on-chain.</strong> Your message is stored forever in the blockchain.
+                        </div>
+                        
+                        <div style="padding: 1rem; background: color-mix(in srgb, var(--panel-color) 5%, transparent); border-radius: 8px; font-size: 0.85rem;">
+                            <strong style="display: block; margin-bottom: 0.5rem;">Rules:</strong>
+                            • Maximum 280 characters per message<br>
+                            • Minimum fee set by contract (shown above)<br>
+                            • Rate limit prevents spam (cooldown between posts)<br>
+                            • Messages are permanent and uncensored
+                        </div>
                     </div>
-                    <button id="withdraw-btn" class="btn-secondary" style="width: 100%; padding: 0.6rem; font-size: 0.85rem; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; margin-top: 0.5rem;">
-                        💰 Withdraw
-                    </button>
-                </div>
+                </details>
             </div>
         `;
         
@@ -124,9 +134,9 @@ export class MessageBoard extends Game {
         // Initialize ValueInput component
         this.feeInput = new this.components.ValueInput('msg-fee-input', {
             label: 'Fee',
-            hint: 'Fee to post your message',
+            hint: 'Minimum fee set by contract',
             defaultUnit: 'gwei',
-            minWei: '0',
+            minWei: '0', // Will be updated from contract
             required: true
         });
         this.feeInput.render();
@@ -146,7 +156,7 @@ export class MessageBoard extends Game {
             return;
         }
         
-        if (!fee || fee <= 0) {
+        if (!fee || fee.lte(0)) {
             this.events.bus.emit(this.events.EVENTS.TOAST, {
                 message: 'Please enter a fee',
                 type: 'warning'
@@ -166,7 +176,7 @@ export class MessageBoard extends Game {
                     const btn = document.getElementById('post-btn');
                     if (btn) {
                         btn.disabled = isLoading;
-                        btn.textContent = isLoading ? '⏳ Posting...' : '🎮 Play';
+                        btn.textContent = isLoading ? '⏳ Posting...' : '💬 Post';
                     }
                 }
             );
@@ -193,44 +203,33 @@ export class MessageBoard extends Game {
                 this.contract.rate_limit_seconds()
             ]);
             
-            this.dom.updateInfo('msg-count', count.toString());
-            this.dom.updateInfo('total', this.dom.formatWei(total));
-            
             // Update message count badge
             const badge = document.getElementById('msg-count-badge');
             if (badge) badge.textContent = count.toString();
             
             const minFeeWei = minFee.toString();
-            this.dom.updateInfo('min-fee', minFeeWei + ' wei');
+            this.dom.updateInfo('min-fee', this.dom.formatWei(minFee));
             
-            const feeInput = document.getElementById('msg-fee');
-            if (feeInput) {
-                feeInput.placeholder = `Minimum: ${minFeeWei}`;
+            // Update ValueInput minimum
+            if (this.feeInput && minFee) {
+                this.feeInput.setMinimum(minFeeWei);
             }
-            
-            this.dom.updateInfo('rate-limit', rateLimit.toString() + 's');
             
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 const [lastPost, waitTime] = await Promise.all([
                     this.contract.last_post_time(this.web3Provider.currentAddress),
                     this.contract.get_time_until_next_post(this.web3Provider.currentAddress)
                 ]);
-                
-                this.dom.updateInfo('last-post', this.dom.formatTimestamp(lastPost.toNumber()));
-                
+
                 const wait = waitTime.toNumber();
                 this.dom.updateInfo('wait-time', 
                     wait === 0 ? 'Now ✅' : `${wait}s ⏳`
                 );
             } else {
-                this.dom.updateInfo('last-post', '👀 Read-only');
                 this.dom.updateInfo('wait-time', 'Connect wallet');
             }
             
             await this.loadMessages(count.toNumber());
-            
-            // Check owner status and update owner panel
-            await this.checkOwnerAccess();
             
         } catch (error) {
             console.error('Failed to load state:', error);
@@ -238,56 +237,6 @@ export class MessageBoard extends Game {
                 message: 'Failed to load message board state',
                 type: 'error'
             });
-        }
-    }
-    
-    async checkOwnerAccess() {
-        try {
-            const owner = await this.contract.owner();
-            const ownerPanel = document.getElementById('owner-panel');
-            
-            if (!ownerPanel) return;
-            
-            // Show owner panel if current user is owner
-            if (this.web3Provider?.currentAddress && 
-                this.web3Provider.currentAddress.toLowerCase() === owner.toLowerCase()) {
-                ownerPanel.style.display = 'block';
-                
-                // Get contract balance
-                const balance = await this.web3Provider.provider.getBalance(this.contract.address);
-                this.dom.updateInfo('contract-balance', this.dom.formatWei(balance));
-                
-                // Setup withdraw button listener
-                const withdrawBtn = document.getElementById('withdraw-btn');
-                if (withdrawBtn) {
-                    withdrawBtn.replaceWith(withdrawBtn.cloneNode(true));
-                    document.getElementById('withdraw-btn').addEventListener('click', () => this.withdraw());
-                }
-            } else {
-                ownerPanel.style.display = 'none';
-            }
-        } catch (error) {
-            console.error('Failed to check owner access:', error);
-        }
-    }
-    
-    async withdraw() {
-        if (!this.requiresWallet('withdraw fees')) return;
-        
-        try {
-            await TransactionHandler.execute(
-                this.contract.withdraw(),
-                { game: 'message-board', action: 'withdraw' }
-            );
-            
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: '✅ Fees withdrawn successfully',
-                type: 'success'
-            });
-            
-            await this.refreshState();
-        } catch (error) {
-            console.error('Withdraw failed:', error);
         }
     }
 
@@ -338,7 +287,7 @@ export class MessageBoard extends Game {
             if (this.web3Provider.isConnected() && 
                 poster.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                 this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: '✅ Message posted successfully!',
+                    message: 'Message posted successfully',
                     type: 'success'
                 });
             }

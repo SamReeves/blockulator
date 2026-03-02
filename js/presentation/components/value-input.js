@@ -290,6 +290,27 @@ export class ValueInput {
     }
 
     /**
+     * Set minimum value in wei
+     */
+    setMinimum(minWei) {
+        this.options.minWei = minWei;
+        
+        const container = document.getElementById(this.containerId);
+        if (container) {
+            const input = container.querySelector('.value-input');
+            if (input) {
+                input.min = this.getMinForUnit();
+            }
+            
+            // Update min display if it exists
+            const minValueEl = container.querySelector('.min-value');
+            if (minValueEl && this.options.minWei && this.options.minWei !== '0') {
+                minValueEl.textContent = `${this.getMinForUnit()} ${this.units[this.currentUnit].label}`;
+            }
+        }
+    }
+
+    /**
      * Reset the input
      */
     reset() {

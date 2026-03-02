@@ -28,48 +28,48 @@ export class TimeToMakeTheDonuts extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-            <div class="game-sections">
+            <div class="game-sections" style="--panel-color: #ec4899; --hero-color: #f59e0b; --btn-color: #ec4899;">
                 <!-- Main Consolidated Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #ec4899; background: linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(219, 39, 119, 0.1) 100%);">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #ec4899; margin: 0;">
+                <div class="contest-info-panel game-panel">
+                    <div class="flex-between" style="margin-bottom: 0.75rem;">
+                        <h3 class="game-panel-header">
                             <span>🍩</span>
                             <span>Make the Donuts</span>
                         </h3>
-                        <div style="font-size: 0.85rem; color: #ec4899; font-weight: 500;">Be FIRST at midnight UTC!</div>
+                        <div style="font-size: 0.85rem; font-weight: 500;">First donor after midnight UTC wins</div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                    <div class="game-panel-grid">
                         <!-- Left: Countdown Wheel -->
-                        <div style="min-width: 0;">
+                        <div class="min-w-0">
                             <div id="countdown-wheel-container"></div>
                         </div>
                         
                         <!-- Right: Status + Play -->
-                        <div style="min-width: 0;">
-                            <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
-                                <div style="font-size: 0.7rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">🏆 First Donor Today</div>
-                                <div id="first-donor-today" style="font-size: 0.85rem; font-weight: bold; word-break: break-all; margin-bottom: 0.75rem; min-height: 1.5rem;">
+                        <div class="min-w-0">
+                            <div class="hero-card" style="margin-bottom: 1rem;">
+                                <div class="hero-card-label">🏆 First Donor Today</div>
+                                <div id="first-donor-today" class="hero-card-content" style="min-height: 1.5rem;">
                                     No one yet
                                 </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; font-size: 0.7rem;">
+                                <div class="hero-card-stats stat-grid-3">
                                     <div>
-                                        <div style="opacity: 0.8;">Prize Pool</div>
-                                        <div id="pot-value" style="font-weight: bold; font-size: 0.8rem;">0 wei</div>
+                                        <div>Prize Pool</div>
+                                        <div id="pot-value" class="value">0 wei</div>
                                     </div>
                                     <div>
-                                        <div style="opacity: 0.8;">Winner Gets</div>
-                                        <div id="winner-prize" style="font-weight: bold; font-size: 0.8rem;">0 wei</div>
+                                        <div>Winner Gets</div>
+                                        <div id="winner-prize" class="value">0 wei</div>
                                     </div>
                                     <div>
-                                        <div style="opacity: 0.8;">Day</div>
-                                        <div id="current-day" style="font-weight: bold; font-size: 0.8rem;">0</div>
+                                        <div>Day</div>
+                                        <div id="current-day" class="value">0</div>
                                     </div>
                                 </div>
                             </div>
                             
                             <div id="donation-amount-input" style="margin-bottom: 0.75rem;"></div>
-                            <button id="donate-btn" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); box-shadow: 0 4px 12px rgba(236, 72, 153, 0.3);">
+                            <button id="donate-btn" class="btn-action">
                                 🎮 Donate & Race to Win
                             </button>
                         </div>
@@ -78,50 +78,44 @@ export class TimeToMakeTheDonuts extends Game {
 
                 <!-- Game Rules - Collapsible -->
                 <details class="contest-info-panel">
-                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span style="font-size: 0.85rem;">▶</span>
-                        <span style="font-weight: 600;">📖 How To Win</span>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>📖 How To Win</span>
                     </summary>
                     <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.85rem;">
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(236, 72, 153, 0.05); border-radius: 6px; border-left: 3px solid #ec4899;">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: #ec4899; min-width: 1.75rem;">1</div>
-                            <div>
-                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Wait For Midnight UTC</strong>
-                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Each day starts at 00:00 UTC - watch the countdown closely</span>
+                        <div class="step-card" style="--step-color: #ec4899;">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <strong>Wait For Midnight UTC</strong>
+                                <span>Each day starts at 00:00 UTC - watch the countdown closely</span>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(245, 158, 11, 0.05); border-radius: 6px; border-left: 3px solid #f59e0b;">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: #f59e0b; min-width: 1.75rem;">2</div>
-                            <div>
-                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Be First To Donate</strong>
-                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Race to submit your donation as soon as the day changes</span>
+                        <div class="step-card" style="--step-color: #f59e0b;">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <strong>Be First To Donate</strong>
+                                <span>Race to submit your donation as soon as the day changes</span>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 6px; border-left: 3px solid #10b981;">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: #10b981; min-width: 1.75rem;">3</div>
-                            <div>
-                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Claim 99% of Prize Pool</strong>
-                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">First donor wins 99% of yesterday's pot automatically!</span>
+                        <div class="step-card" style="--step-color: #10b981;">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <strong>Win the Prize Pool</strong>
+                                <span>First donor wins 100% of yesterday's pot automatically!</span>
                             </div>
                         </div>
                     </div>
                 </details>
 
-                <!-- Daily Stats - Collapsible -->
+                <!-- Stats - Collapsible -->
                 <details class="contest-info-panel">
-                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span style="font-size: 0.85rem;">▶</span>
-                        <span style="font-weight: 600;">📊 Daily Stats</span>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>📊 Stats</span>
                     </summary>
-                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 0.75rem;">
-                        <div style="padding: 0.5rem; background: rgba(236, 72, 153, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Total Days</div>
-                            <div id="total-days" style="font-weight: bold; font-size: 0.9rem;">1</div>
-                        </div>
-                        <div style="padding: 0.5rem; background: rgba(245, 158, 11, 0.1); border-radius: 6px; font-size: 0.8rem;">
-                            <div style="opacity: 0.7; margin-bottom: 0.25rem;">Contract Balance</div>
-                            <div id="contract-balance" style="font-weight: bold; font-size: 0.9rem;">0 wei</div>
-                        </div>
+                    <div class="stat-box" style="margin-top: 0.75rem; font-size: 0.8rem; --stat-color: #ec4899;">
+                        <div class="stat-box-label">Total Days</div>
+                        <div id="total-days" class="stat-box-value" style="font-size: 0.9rem;">1</div>
                     </div>
                 </details>
             </div>
@@ -179,7 +173,7 @@ export class TimeToMakeTheDonuts extends Game {
             );
             
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: '🍩 Donation sent! Check if you won!',
+                message: 'Donation sent. Check if you won.',
                 type: 'success'
             });
             
@@ -209,20 +203,10 @@ export class TimeToMakeTheDonuts extends Game {
                 this.contract.get_potential_prize()
             ]);
             
-            console.log('🍩 Donuts Game State:', {
-                currentDay: currentDay.toString(),
-                totalDays: totalDays.toString(),
-                potValue: potValue.toString(),
-                potValueEth: ethers.utils.formatEther(potValue),
-                firstDonorToday: firstDonorToday,
-                potentialPrize: potentialPrize[0].toString()
-            });
-            
             this.dom.updateInfo('current-day', currentDay.toString());
             this.dom.updateInfo('total-days', totalDays.toString());
             this.dom.updateInfo('pot-value', this.dom.formatWei(potValue));
             this.dom.updateInfo('winner-prize', this.dom.formatWei(potentialPrize[0]));
-            this.dom.updateInfo('contract-balance', this.dom.formatWei(potValue));
             
             const donorEl = document.getElementById('first-donor-today');
             if (donorEl) {
@@ -255,17 +239,22 @@ export class TimeToMakeTheDonuts extends Game {
         if (!this.contract) return;
         
         this.contract.on('DonationReceived', (dayNumber, donor, amount, newPot, isFirstDonor) => {
+            if (!this.web3Provider?.currentAddress) {
+                this.refreshState();
+                return;
+            }
+            
             const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isFirstDonor) {
                 if (isYou) {
                     this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `🍩 You donated ${this.dom.formatWei(amount)} and were FIRST TODAY!`,
+                        message: `You were first today! You donated ${this.dom.formatWei(amount)}`,
                         type: 'success'
                     });
                 } else {
                     this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `⚡ ${this.dom.formatAddress(donor)} was first today!`,
+                        message: `${this.dom.formatAddress(donor)} was first today`,
                         type: 'info'
                     });
                 }
@@ -287,13 +276,18 @@ export class TimeToMakeTheDonuts extends Game {
         });
         
         this.contract.on('WinnerPaid', (dayNumber, winner, prize, fee) => {
+            if (!this.web3Provider?.currentAddress) {
+                this.refreshState();
+                return;
+            }
+            
             const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             
             if (isYou) {
                 this.events.bus.emit(this.events.EVENTS.WINNER_DETERMINED, { player: winner, prize });
                 this.events.bus.emit(this.events.EVENTS.CONFETTI);
                 this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `🎉 YOU WON ${this.dom.formatWei(prize)} by being first today!`,
+                    message: `You won ${this.dom.formatWei(prize)} by being first today!`,
                     type: 'success'
                 });
             } else {

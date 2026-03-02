@@ -33,7 +33,6 @@ export class Game extends InteractiveContract {
      */
     setupContractEvents() {
         // Override in subclass to listen to contract events
-        console.log('No contract events configured for this game');
     }
 
     /**

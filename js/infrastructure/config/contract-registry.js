@@ -68,7 +68,7 @@ export const CONTRACT_REGISTRY = {
         type: 'game',
         name: 'King of the Hill',
         emoji: '👑',
-        description: 'Dethrone king, stakes grow',
+        description: 'Dethrone the king; stakes grow with each challenge',
         addresses: {
             sepolia: '0x0DEEBef3228B5d0cD4158Dc367A5C4b31B6414A6',
             mainnet: '0x0000000000000000000000000000000000000000'
@@ -81,7 +81,7 @@ export const CONTRACT_REGISTRY = {
         type: 'game',
         name: 'Last Call',
         emoji: '⏰',
-        description: 'Last donor wins after timer',
+        description: 'Last donor before the timer expires wins',
         addresses: {
             sepolia: '0xE0e1E3778d75E757fd4718FdF44bD4e0F5E73baa',
             mainnet: '0x0000000000000000000000000000000000000000'
@@ -94,7 +94,7 @@ export const CONTRACT_REGISTRY = {
         type: 'game',
         name: 'Time to Make the Donuts',
         emoji: '🍩',
-        description: 'First donor daily at midnight',
+        description: 'First donor each day after midnight UTC wins',
         addresses: {
             sepolia: '0xD222eCe3C1D844B23384F56d62E59F556e925C85',
             mainnet: '0x0000000000000000000000000000000000000000'
@@ -107,7 +107,7 @@ export const CONTRACT_REGISTRY = {
         type: 'game',
         name: 'Dice Gods',
         emoji: '🎲',
-        description: 'Pick the least popular number',
+        description: 'Last digit of your donation is your guess (1-6)',
         addresses: {
             sepolia: '0x61d97822209D3B375c7B214597f1077F4879fD84',
             mainnet: '0x0000000000000000000000000000000000000000'

@@ -32,7 +32,6 @@ class FuturesApp {
     }
 
     async init() {
-        console.log('📈 Initializing Futures Marketplace app...');
 
         try {
             // Check for existing wallet connection FIRST
@@ -61,7 +60,6 @@ class FuturesApp {
      * Assumes shared components (wallet, toast, confetti) are already initialized
      */
     async initViewOnly() {
-        console.log('📈 Initializing Futures Marketplace view...');
 
         try {
             // Load ABIs
@@ -89,7 +87,6 @@ class FuturesApp {
             // Render contract info section
             this.renderContractInfo();
 
-            console.log('✅ Futures Marketplace view initialized');
 
         } catch (error) {
             console.error('Failed to initialize futures view:', error);
@@ -128,7 +125,7 @@ class FuturesApp {
                 </div>
             `;
             
-                    const contractInfo = ContractInfoRenderer.createContractInfo(
+            const contractInfo = ContractInfoRenderer.createContractInfo(
                 metadata.contractAddress,
                 metadata.sourceFile,
                 metadata.abiFile
@@ -143,7 +140,6 @@ class FuturesApp {
      * Refresh data when returning to view
      */
     async refresh() {
-        console.log('🔄 Refreshing futures...');
         await this.renderCurrentView();
     }
 
@@ -163,7 +159,6 @@ class FuturesApp {
             }
             this.futureAbi = await futureResponse.json();
 
-            console.log('✅ ABIs loaded');
         } catch (error) {
             console.error('Failed to load ABIs:', error);
             throw error;
@@ -173,14 +168,10 @@ class FuturesApp {
     async loadFactory() {
         const FACTORY_ADDRESS = CONTRACT_ADDRESSES.FUTURE_FACTORY || '0x0000000000000000000000000000000000000000';
 
-        console.log('📍 Loading factory with address:', FACTORY_ADDRESS);
-        console.log('📍 Wallet Network ChainId:', this.web3Provider.chainId);
-        console.log('📍 Connected:', this.web3Provider.isConnected());
-        console.log('📍 Expected Network: Sepolia (11155111)');
 
         if (!FACTORY_ADDRESS || FACTORY_ADDRESS === '0x0000000000000000000000000000000000000000') {
             eventBus.emit(EVENTS.TOAST, {
-                message: '⚠️ Future Factory not yet deployed. Check back soon!',
+                message: 'Future Factory not deployed on this network',
                 type: 'warning'
             });
             throw new Error('Future Factory address not configured');
@@ -203,15 +194,13 @@ class FuturesApp {
         );
 
         await this.factory.init();
-        console.log('✅ Factory contract initialized at:', FACTORY_ADDRESS);
     }
 
     async initializeComponents() {
         // Initialize Market Table (Level 1)
         this.marketTable = new MarketTable(
             this.factory,
-            this.web3Provider,
-            this.futureAbi
+            this.web3Provider
         );
 
         const marketTableContainer = document.getElementById('market-table-container');
@@ -223,24 +212,20 @@ class FuturesApp {
         this.createForm = new CreateFutureForm(this.factory, this.web3Provider);
         this.createForm.init();
 
-        console.log('✅ Components initialized');
     }
 
     setupEventListeners() {
         // Wallet changes
         eventBus.on(EVENTS.WALLET_CONNECTED, async () => {
-            console.log('Wallet connected, refreshing...');
             await this.onWalletChanged();
         });
 
         eventBus.on(EVENTS.WALLET_DISCONNECTED, async () => {
-            console.log('Wallet disconnected, refreshing...');
             await this.onWalletChanged();
         });
 
         // Future created
         eventBus.on('FUTURE_CREATED', async () => {
-            console.log('Future created, refreshing...');
             
             // Hide create form
             const formContainer = document.getElementById('create-future-form-container');
@@ -256,19 +241,16 @@ class FuturesApp {
 
         // Future selected
         eventBus.on('FUTURE_SELECTED', async (future) => {
-            console.log('Future selected:', future);
             this.viewRouter.navigateToDiscussion(future); // Reuse discussion navigation
         });
             
         // Navigate to market
         eventBus.on('NAVIGATE_TO_MARKET', () => {
-            console.log('Navigating to market...');
             this.viewRouter.navigateToBoard(); // Reuse board navigation
         });
 
         // Navigate to board (alias for market)
         eventBus.on('NAVIGATE_TO_BOARD', () => {
-            console.log('Navigating to market...');
             this.viewRouter.navigateToBoard();
         });
             
@@ -352,7 +334,6 @@ class FuturesApp {
         // Listen to factory contract events
         this.factory.subscribeToEvents({
             FutureCreated: async (event) => {
-                console.log('New future created:', event);
                 
                 eventBus.emit(EVENTS.TOAST, {
                     message: `📈 New future created!`,
@@ -364,7 +345,6 @@ class FuturesApp {
             },
 
             FutureListed: async (event) => {
-                console.log('Future listed:', event);
 
             eventBus.emit(EVENTS.TOAST, {
                     message: `📋 Future listed for sale`,
@@ -376,7 +356,6 @@ class FuturesApp {
             },
 
             FutureSold: async (event) => {
-                console.log('Future sold:', event);
                 
                 const price = ethers.utils.formatEther(event.price);
                 eventBus.emit(EVENTS.TOAST, {
@@ -389,7 +368,6 @@ class FuturesApp {
             },
 
             FutureDelisted: async (event) => {
-                console.log('Future delisted:', event);
             
             eventBus.emit(EVENTS.TOAST, {
                     message: '📤 Future removed from marketplace',
@@ -401,7 +379,6 @@ class FuturesApp {
             },
 
             FutureReplaced: async (event) => {
-                console.log('Future replaced:', event);
 
             eventBus.emit(EVENTS.TOAST, {
                     message: '🔄 Future replaced',
@@ -418,7 +395,6 @@ class FuturesApp {
      * Route change handler
      */
     async onRouteChange(data) {
-        console.log('Route changed:', data);
         await this.renderCurrentView();
     }
 
@@ -461,8 +437,7 @@ class FuturesApp {
             this.currentFutureView = new FutureDetailView(
                 future,
                 this.factory,
-                this.web3Provider,
-                this.futureAbi
+                this.web3Provider
             );
 
             this.currentFutureView.setContainer(container);

@@ -5632,3 +5632,323 @@ details[open] .panel-arrow {
     }
 }
 
+/* ==================================================================
+   GAME REFACTOR: REUSABLE COMPONENTS
+   ================================================================== */
+
+/* Layout Utilities */
+.game-panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.stat-grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+
+.stat-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+}
+
+.flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.flex-center-gap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
+/* Game Panel Components */
+.game-panel {
+    border: 2px solid var(--panel-color, var(--md-sys-color-primary));
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--panel-color, var(--md-sys-color-primary)) 10%, transparent) 0%,
+        color-mix(in srgb, var(--panel-color, var(--md-sys-color-primary)) 5%, transparent) 100%
+    );
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.game-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--panel-color, var(--md-sys-color-primary));
+    margin: 0;
+}
+
+/* Stat Box Components */
+.stat-box {
+    padding: 0.5rem;
+    background: color-mix(in srgb, var(--stat-color, var(--panel-color, var(--md-sys-color-primary))) 10%, transparent);
+    border-radius: 6px;
+    font-size: 0.75rem;
+}
+
+.stat-box-label {
+    opacity: 0.7;
+    margin-bottom: 0.25rem;
+    font-size: 0.65rem;
+}
+
+.stat-box-value {
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+/* Hero Card (Current Leader/Winner Display) */
+.hero-card {
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    background: linear-gradient(
+        135deg,
+        var(--hero-color, var(--panel-color, var(--md-sys-color-primary))) 0%,
+        color-mix(in srgb, var(--hero-color, var(--panel-color, var(--md-sys-color-primary))) 90%, black) 100%
+    );
+}
+
+.hero-card-label {
+    font-size: 0.7rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hero-card-content {
+    font-size: 0.9rem;
+    font-weight: bold;
+    word-break: break-all;
+    margin-bottom: 0.75rem;
+}
+
+.hero-card-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 0.5rem;
+    font-size: 0.75rem;
+}
+
+.hero-card-stats > div {
+    opacity: 0.8;
+}
+
+.hero-card-stats .value {
+    font-weight: bold;
+}
+
+/* Collapsible Sections */
+.collapsible-summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 600;
+}
+
+.collapsible-summary::marker,
+.collapsible-summary::-webkit-details-marker {
+    display: none;
+}
+
+.collapsible-arrow {
+    font-size: 0.85rem;
+    transition: transform 0.2s ease;
+}
+
+details[open] .collapsible-arrow {
+    transform: rotate(90deg);
+}
+
+/* Step Cards (How It Works) */
+.step-card {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 6px;
+    border-left: 3px solid var(--step-color, var(--panel-color, var(--md-sys-color-primary)));
+    background: color-mix(in srgb, var(--step-color, var(--panel-color, var(--md-sys-color-primary))) 5%, transparent);
+}
+
+.step-number {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--step-color, var(--panel-color, var(--md-sys-color-primary)));
+    min-width: 1.75rem;
+}
+
+.step-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.step-content span {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.8rem;
+}
+
+/* Strategy Callout */
+.strategy-callout {
+    padding: 0.75rem;
+    background: color-mix(in srgb, var(--panel-color, var(--md-sys-color-primary)) 10%, transparent);
+    border-radius: 8px;
+    border-left: 3px solid var(--panel-color, var(--md-sys-color-primary));
+    font-size: 0.85rem;
+    margin-top: 1rem;
+}
+
+.strategy-callout strong {
+    color: var(--panel-color, var(--md-sys-color-primary));
+}
+
+/* Action Buttons */
+.btn-action {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    background: linear-gradient(
+        135deg,
+        var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 0%,
+        color-mix(in srgb, var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 90%, black) 100%
+    );
+    border: none;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 30%, transparent);
+    transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 40%, transparent);
+}
+
+.btn-action:active {
+    transform: translateY(0);
+}
+
+.btn-action-secondary {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    background: linear-gradient(
+        135deg,
+        var(--btn-color, var(--md-sys-color-secondary)) 0%,
+        color-mix(in srgb, var(--btn-color, var(--md-sys-color-secondary)) 90%, black) 100%
+    );
+    border: none;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-color, var(--md-sys-color-secondary)) 30%, transparent);
+    transition: all 0.2s ease;
+    margin-top: 0.75rem;
+}
+
+.btn-action-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--btn-color, var(--md-sys-color-secondary)) 40%, transparent);
+}
+
+.btn-action-secondary:active {
+    transform: translateY(0);
+}
+
+/* Chart Error State */
+.chart-error {
+    color: var(--md-sys-color-error);
+    padding: 1rem;
+    text-align: center;
+}
+
+/* Admin Panel Utilities */
+.admin-panel {
+    border: 2px solid #ef4444;
+    background: linear-gradient(
+        135deg,
+        rgba(239, 68, 68, 0.1) 0%,
+        rgba(220, 38, 38, 0.1) 100%
+    );
+}
+
+.admin-panel-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #ef4444;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Countdown Container */
+.countdown-container {
+    position: relative;
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.countdown-overlay {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 70px;
+}
+
+.countdown-time {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--countdown-color, #ec4899);
+    font-family: monospace;
+}
+
+.countdown-label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    margin-top: 0.25rem;
+}
+
+/* Responsive adjustments for game panels */
+@media (max-width: 768px) {
+    .game-panel-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stat-grid-3,
+    .stat-grid-4 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+

@@ -29,53 +29,74 @@ export class KingOfTheHill extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-            <div class="game-sections">
+            <div class="game-sections" style="--panel-color: #8b5cf6; --btn-color: #764ba2;">
                 <!-- Main Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #764ba2; background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #764ba2; margin: 0;">
+                <div class="contest-info-panel game-panel">
+                    <div class="flex-between" style="margin-bottom: 0.75rem;">
+                        <h3 class="game-panel-header">
                             <span>👑</span>
                             <span>King of the Hill</span>
                         </h3>
-                        <div style="font-size: 0.75rem; color: #764ba2;">
+                        <div style="font-size: 0.75rem;">
                             <span id="total-dethrone-badge">0</span> battles
                         </div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                    <div class="game-panel-grid">
                         <!-- Left: Controls -->
-                        <div style="min-width: 0;">
-                            <div style="background: rgba(118, 75, 162, 0.15); padding: 0.75rem; border-radius: 6px; margin-bottom: 0.75rem; border-left: 3px solid #764ba2;">
-                                <div style="font-size: 0.7rem; opacity: 0.8; margin-bottom: 0.3rem;">Min Payment</div>
-                                <div id="min-payment" style="font-size: 0.95rem; font-weight: bold; color: #764ba2;">
+                        <div class="min-w-0">
+                            <div class="stat-box" style="margin-bottom: 0.75rem;">
+                                <div class="stat-box-label">Min Payment</div>
+                                <div id="min-payment" class="stat-box-value" style="font-size: 0.95rem;">
                                     0 wei
                                 </div>
                             </div>
                             
                             <div id="throne-payment-input" style="margin-bottom: 0.75rem;"></div>
                             
-                            <button id="claim-btn" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 4px 12px rgba(118, 75, 162, 0.3);">
+                            <button id="claim-btn" class="btn-action">
                                 ⚔️ Dethrone King
                             </button>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-top: 0.75rem; font-size: 0.75rem;">
-                                <div style="padding: 0.5rem; background: rgba(16, 185, 129, 0.1); border-radius: 4px;">
-                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Crowns</div>
-                                    <div id="your-crowns" style="font-weight: bold; font-size: 0.8rem;">—</div>
+                            <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.75rem;">
+                                <div class="stat-box" style="--stat-color: #10b981;">
+                                    <div class="stat-box-label">Crowns</div>
+                                    <div id="your-crowns" class="stat-box-value">—</div>
                                 </div>
-                                <div style="padding: 0.5rem; background: rgba(245, 158, 11, 0.1); border-radius: 4px;">
-                                    <div style="opacity: 0.7; margin-bottom: 0.2rem;">Total Reign</div>
-                                    <div id="your-reign" style="font-weight: bold; font-size: 0.8rem;">—</div>
+                                <div class="stat-box" style="--stat-color: #f59e0b;">
+                                    <div class="stat-box-label">Total Reign</div>
+                                    <div id="your-reign" class="stat-box-value">—</div>
                                 </div>
                             </div>
                         </div>
                         
                         <!-- Right: King Ladder -->
-                        <div style="min-width: 0;">
+                        <div class="min-w-0">
                             <div id="king-ladder-container"></div>
                         </div>
                     </div>
                 </div>
+
+                <!-- How to Win -->
+                <details class="contest-info-panel" open>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>📖 How to Win</span>
+                    </summary>
+                    <div style="margin-top: 1rem;">
+                        <div class="strategy-callout" style="margin-bottom: 1rem;">
+                            <strong>👑 Goal:</strong> Pay more than the current king to claim the throne. Last king standing wins the entire prize.
+                        </div>
+                        
+                        <div style="padding: 1rem; background: color-mix(in srgb, var(--panel-color) 5%, transparent); border-radius: 8px; font-size: 0.85rem;">
+                            <strong style="display: block; margin-bottom: 0.5rem;">Rules:</strong>
+                            • Minimum payment grows with each dethronement<br>
+                            • Must pay at least 1% more than current prize<br>
+                            • Previous king loses their payment (no refunds)<br>
+                            • Winner takes all when game ends
+                        </div>
+                    </div>
+                </details>
             </div>
         `;
         
@@ -145,7 +166,7 @@ export class KingOfTheHill extends Game {
             );
             
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: '👑 You are now KING!',
+                message: 'You are now king',
                 type: 'success'
             });
             
@@ -183,6 +204,11 @@ export class KingOfTheHill extends Game {
             const isYouKing = this.web3Provider.isConnected() && 
                              this.web3Provider.currentAddress &&
                              currentKing.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+            
+            // Update ValueInput minimum
+            if (this.paymentInput && minPayment) {
+                this.paymentInput.setMinimum(minPayment.toString());
+            }
             
             // Update king ladder
             if (this.kingLadder) {
@@ -245,18 +271,18 @@ export class KingOfTheHill extends Game {
             
             if (isYou) {
                 this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `👑 You won ${this.dom.formatWei(prizeWon)}!`,
+                    message: `You won ${this.dom.formatWei(prizeWon)} as king!`,
                     type: 'success'
                 });
                 this.events.bus.emit(this.events.EVENTS.CONFETTI);
             } else if (wasYou) {
                 this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: '⚔️ You were dethroned!',
+                    message: 'You were dethroned',
                     type: 'warning'
                 });
             } else {
                 this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `👑 New king: ${this.dom.formatAddress(newKing)}`,
+                    message: `New king: ${this.dom.formatAddress(newKing)}`,
                     type: 'info'
                 });
             }

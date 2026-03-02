@@ -8,14 +8,13 @@ import { EulerianFuture } from '../../domain/futures/eulerian-future.js';
 import { StatusCardRenderer } from '../components/status-card-renderer.js';
 import { DOMHelpers } from '../dom/dom-helpers.js';
 import { computeCdfValue } from './distribution-cdf.js';
+import { getExplorerUrl } from '../../infrastructure/config/network.js';
 
 export class FutureDetailView {
-    constructor(futureData, factory, web3Provider, futureAbi) {
+    constructor(futureData, factory, web3Provider) {
         this.futureData = futureData;
         this.factory = factory;
         this.web3Provider = web3Provider;
-        this.futureAbi = futureAbi;
-        this.future = null;
         this.containerElement = null;
         this.chart = null;
     }
@@ -34,34 +33,36 @@ export class FutureDetailView {
         this.containerElement.appendChild(StatusCardRenderer.createLoadingState('Loading future details...'));
 
         try {
-            console.log('📊 Starting future detail render for:', this.futureData.address);
             
-            // Initialize future contract
-            this.future = new EulerianFuture(
-                this.web3Provider,
-                this.futureData.address,
-                this.futureAbi
-            );
-            await this.future.init();
-
-            // Get fresh data
-            const [fullData, listing] = await Promise.all([
-                this.future.getFullData(),
+            // Get fresh data from factory
+            const [factoryInfo, expectedValue, listing] = await Promise.all([
+                this.factory.getFutureInfo(this.futureData.address),
+                this.factory.getExpectedValue(this.futureData.address).catch(() => ethers.BigNumber.from(0)),
                 this.factory.getListing(this.futureData.address)
             ]);
 
-            console.log('📊 Got full data:', fullData);
-            console.log('📊 Got listing:', listing);
 
-            this.futureData = { ...this.futureData, ...fullData, ...listing };
+            // Merge fresh factory data
+            this.futureData = { 
+                ...this.futureData, 
+                initialValue: factoryInfo.initialValue,
+                creationTime: factoryInfo.creationTime,
+                expiryTime: factoryInfo.expiryTime,
+                owner: factoryInfo.owner,
+                balance: factoryInfo.balance,
+                isExpired: factoryInfo.isExpired,
+                distributionType: factoryInfo.distributionType,
+                expectedValue,
+                isListed: listing.isListed,
+                askPrice: listing.askPrice,
+                listTime: listing.listTime
+            };
             
-            // Ensure lifetime is set (calculate from expiry - creation if not present)
-            if (!this.futureData.lifetime && this.futureData.expiryTime && this.futureData.creationTime) {
-                this.futureData.lifetime = this.futureData.expiryTime - this.futureData.creationTime;
-                console.log('📊 Calculated lifetime from timestamps:', this.futureData.lifetime);
-            }
+            // Calculate lifetime and time remaining from timestamps
+            this.futureData.lifetime = this.futureData.expiryTime - this.futureData.creationTime;
+            const currentTimestamp = Math.floor(Date.now() / 1000);
+            this.futureData.timeRemaining = Math.max(0, this.futureData.expiryTime - currentTimestamp);
             
-            console.log('📊 Merged futureData:', this.futureData);
 
             // Render view
             this.containerElement.innerHTML = this.renderHTML();
@@ -70,7 +71,6 @@ export class FutureDetailView {
             this.attachEventListeners();
 
             // Render chart
-            console.log('📊 About to render chart...');
             this.renderChart();
 
         } catch (error) {
@@ -95,7 +95,6 @@ export class FutureDetailView {
     }
 
     renderHTML() {
-        console.log('📊 renderHTML called with futureData:', this.futureData);
         
         const distName = EulerianFuture.getDistributionName(this.futureData.distributionType);
         const distEmoji = EulerianFuture.getDistributionEmoji(this.futureData.distributionType);
@@ -128,7 +127,6 @@ export class FutureDetailView {
         const elapsed = Math.max(0, lifetime - timeRemaining);
         const progress = lifetime > 0 ? Math.min(100, ((elapsed / lifetime) * 100)).toFixed(1) : '0.0';
         
-        console.log('Progress calculation:', {
             lifetime: lifetime,
             timeRemaining: timeRemaining,
             elapsed: elapsed,
@@ -237,11 +235,11 @@ export class FutureDetailView {
                     <div class="contract-info">
                         <div class="info-row">
                             <span class="label">Contract Address:</span>
-                            <span class="value">${this.futureData.address}</span>
+                            <span class="value"><a href="${getExplorerUrl(this.futureData.address)}" target="_blank" rel="noopener noreferrer">${this.futureData.address}</a></span>
                         </div>
                         <div class="info-row">
                             <span class="label">Owner:</span>
-                            <span class="value">${this.futureData.owner} ${isMyFuture ? '(You)' : ''}</span>
+                            <span class="value"><a href="${getExplorerUrl(this.futureData.owner)}" target="_blank" rel="noopener noreferrer">${this.futureData.owner}</a> ${isMyFuture ? '(You)' : ''}</span>
                         </div>
                         <div class="info-row">
                             <span class="label">Distribution Type:</span>
@@ -351,7 +349,7 @@ export class FutureDetailView {
     async handleBuy() {
         const priceEth = parseFloat(ethers.utils.formatEther(this.futureData.askPrice)).toFixed(6);
         
-        if (!confirm(`Buy this future for ${priceEth} ETH?\n\n1% marketplace fee applies.`)) {
+        if (!confirm(`Buy this future for ${priceEth} ETH?`)) {
             return;
         }
 
@@ -403,7 +401,6 @@ export class FutureDetailView {
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const timeRemaining = Math.max(0, expiryTimeNum - currentTimestamp);
         
-        console.log('Rendering chart with data:', {
             lifetime: lifetime,
             timeRemaining: timeRemaining,
             distributionType: this.futureData.distributionType,
@@ -414,13 +411,13 @@ export class FutureDetailView {
 
         if (!lifetime || lifetime <= 0) {
             console.error('Invalid lifetime for chart:', lifetime);
-            canvas.parentElement.innerHTML = '<p style="color: red;">Invalid lifetime data</p>';
+            canvas.parentElement.innerHTML = '<p class="chart-error">Invalid lifetime data</p>';
             return;
         }
 
         if (typeof Chart === 'undefined') {
             console.error('Chart.js not loaded!');
-            canvas.parentElement.innerHTML = '<p style="color: red;">Chart.js library not loaded</p>';
+            canvas.parentElement.innerHTML = '<p class="chart-error">Chart.js library not loaded</p>';
             return;
         }
 
@@ -444,7 +441,6 @@ export class FutureDetailView {
         const expiryTime = expiryTimeNum;
         
         // Debug: Log the actual values
-        console.log('🔍 Chart Debug:', {
             creationTime,
             expiryTime,
             lifetime,

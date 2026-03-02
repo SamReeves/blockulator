@@ -30,7 +30,7 @@ export class CreateFutureForm {
             this.valueInput = new ValueInput('initial-value-input', {
                 label: 'Initial Value',
                 minWei: ethers.utils.parseEther('0.0001').toString(),
-                hint: '1% creation fee will be deducted',
+                hint: 'Minimum 0.0001 ETH. No fees.',
                 defaultUnit: 'eth'
             });
             this.valueInput.render();
@@ -42,8 +42,10 @@ export class CreateFutureForm {
         // Setup distribution type change
         const distSelect = document.getElementById('distribution-type');
         if (distSelect) {
-            distSelect.addEventListener('change', () => this.updateDistributionDescription());
-            distSelect.addEventListener('change', () => this.updateChart());
+            distSelect.addEventListener('change', () => {
+                this.updateDistributionDescription();
+                this.updateChart();
+            });
         }
 
         // Setup lifetime slider
@@ -58,7 +60,6 @@ export class CreateFutureForm {
         this.updateLifetimeDisplay();
         this.updateChart();
 
-        console.log('✅ Create Future Form initialized');
     }
 
     updateDistributionDescription() {
@@ -264,7 +265,6 @@ export class CreateFutureForm {
             }
 
             // Create future
-            console.log('Creating future:', { lifetime, distributionType, valueWei });
             const result = await this.factory.createFuture(lifetime, distributionType, valueWei);
 
             eventBus.emit(EVENTS.TOAST, {
@@ -303,7 +303,7 @@ export class CreateFutureForm {
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.textContent = '🚀 Create Future';
+                submitBtn.textContent = 'Create Future';
             }
         }
     }

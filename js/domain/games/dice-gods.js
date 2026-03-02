@@ -33,44 +33,49 @@ export class DiceGods extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-            <div class="game-sections">
-                <!-- Consolidated Game Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #8b5cf6; margin: 0;">
-                            <span>🎲</span>
-                            <span>Dice Gods</span>
-                        </h3>
-                        <div style="font-size: 0.85rem; color: #8b5cf6; font-weight: 500;">Pick the LEAST popular number!</div>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start; position: relative;">
-                        <!-- Left: Die + Selection -->
-                        <div style="min-width: 0;">
-                            <div id="dice-3d-container" style="margin-bottom: 0;"></div>
-                            <div id="selected-number-display" style="text-align: center; margin-top: 0.5rem; padding: 0.5rem; background: rgba(139, 92, 246, 0.08); border-radius: 8px;">
-                                <div style="font-size: 1rem; color: #8b5cf6; font-weight: 600;">
-                                    <span id="selected-number-text">—</span>
-                                </div>
-                            </div>
+            <div class="game-sections" style="--panel-color: #8b5cf6; --btn-color: #10b981;">
+                <!-- Main Game Panel -->
+                <div class="contest-info-panel game-panel">
+                    <div class="game-panel-grid">
+                        <!-- Left: Die Animation -->
+                        <div class="min-w-0">
+                            <div id="dice-3d-container"></div>
                         </div>
                         
-                        <!-- Right: Amount + Play + Round Info -->
-                        <div style="position: relative; overflow: visible; min-width: 0;">
-                            <div style="margin-bottom: 1rem; position: relative; overflow: visible;">
-                                <div id="play-amount-input" style="position: relative; overflow: visible;"></div>
+                        <!-- Right: Play Controls -->
+                        <div class="min-w-0">
+                            <div class="strategy-callout" style="margin-bottom: 1rem;">
+                                <strong>How to play:</strong> The last digit of your donation (1-6) is your number. Pick the LEAST popular to win!
                             </div>
                             
-                            <button id="play-button" class="btn-play" disabled style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); opacity: 0.5; margin-bottom: 1rem;">
-                                🎲 Play Your Number
+                            <div id="play-amount-input" style="margin-bottom: 1rem;"></div>
+                            <button id="play-button" class="btn-action">
+                                Play
                             </button>
                             
-                            <div id="round-info-panel-compact"></div>
+                            <div class="stat-grid-4" style="margin-top: 1rem; font-size: 0.75rem;">
+                                <div class="stat-box">
+                                    <div class="stat-box-label">Round</div>
+                                    <div id="round-number" class="stat-box-value">-</div>
+                                </div>
+                                <div class="stat-box">
+                                    <div class="stat-box-label">Plays</div>
+                                    <div id="plays-count" class="stat-box-value">-</div>
+                                </div>
+                                <div class="stat-box" style="--stat-color: #10b981;">
+                                    <div class="stat-box-label">Pool</div>
+                                    <div id="prize-pool" class="stat-box-value">-</div>
+                                </div>
+                                <div class="stat-box" style="--stat-color: #f59e0b;">
+                                    <div class="stat-box-label">Min</div>
+                                    <div id="min-donation" class="stat-box-value">-</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Vote Distribution Panel -->
+                <!-- Current Round -->
                 <div id="vote-distribution-panel"></div>
             </div>
         `;
@@ -80,10 +85,10 @@ export class DiceGods extends Game {
         
         // Initialize ValueInput component
         this.donationInput = new this.components.ValueInput('play-amount-input', {
-            label: 'Bet Amount',
-            hint: 'Your bet for your chosen number',
+            label: 'Donation Amount',
+            hint: 'Last digit (1-6) is your number',
             defaultUnit: 'gwei',
-            minWei: '1',
+            minWei: '1', // Will be updated from contract
             required: true
         });
         this.donationInput.render();
@@ -94,122 +99,39 @@ export class DiceGods extends Game {
     }
 
     renderDice3D() {
-        // Initialize the 3D die component
+        // Initialize the 3D die component (visual only)
         this.dice3D = new DiceThreeD('dice-3d-container', {
-            onSelect: (number) => this.handleDiceSelect(number)
+            onSelect: () => {} // No action needed
         });
         this.dice3D.init();
     }
 
-    handleDiceSelect(number) {
-        this.selectedNumber = number;
-        this.updateSelectedNumberDisplay();
-        this.updatePlayButton();
-    }
-
-    updatePlayButton() {
-        const playButton = document.getElementById('play-button');
-        if (playButton) {
-            playButton.disabled = !this.selectedNumber;
-            playButton.style.opacity = this.selectedNumber ? '1' : '0.5';
-        }
-    }
-
-    updateSelectedNumberDisplay() {
-        const displayText = document.getElementById('selected-number-text');
-        if (!displayText) return;
-        
-        if (this.selectedNumber) {
-            const emoji = this.DICE_EMOJIS[this.selectedNumber - 1];
-            const color = this.DICE_COLORS[this.selectedNumber - 1];
-            displayText.innerHTML = `
-                <span style="font-size: 1.5rem; display: block;">${emoji}</span>
-                <span style="color: ${color}; font-weight: 700; font-size: 0.9rem;">Number ${this.selectedNumber}</span>
-            `;
-        } else {
-            displayText.textContent = '—';
-        }
-    }
-
     renderCompactRoundPanel() {
-        const container = document.getElementById('round-info-panel-compact');
-        if (!container) return;
-        
-        container.innerHTML = `
-            <div style="background: rgba(139, 92, 246, 0.08); border-radius: 8px; padding: 0.75rem; font-size: 0.85rem;">
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem; row-gap: 0.3rem;">
-                    <div style="color: #8b5cf6; font-weight: 600;">Round:</div>
-                    <div id="round-number">-</div>
-                    
-                    <div style="color: #8b5cf6; font-weight: 600;">Plays:</div>
-                    <div id="plays-count">-</div>
-                    
-                    <div style="color: #10b981; font-weight: 600;">Pool:</div>
-                    <div id="prize-pool" style="color: #10b981;">-</div>
-                </div>
-            </div>
-        `;
+        // Stats are now rendered inline in the main template
     }
 
     renderVoteDistribution() {
-        const panel = document.createElement('div');
-        panel.className = 'vote-distribution-panel';
+        const container = document.getElementById('vote-distribution-panel');
+        if (!container) return;
         
-        panel.innerHTML = `
-            <details style="cursor: pointer;">
-                <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none; font-weight: bold; font-size: 1rem; padding: 0.75rem; background: rgba(139, 92, 246, 0.1); border-radius: 8px; border: 2px solid rgba(139, 92, 246, 0.2);">
-                    <span style="transition: transform 0.2s;">▶</span>
-                    <span>📊 Vote Distribution & Plays</span>
+        container.innerHTML = `
+            <details class="contest-info-panel">
+                <summary class="collapsible-summary">
+                    <span class="collapsible-arrow">▶</span>
+                    <span>📊 Current Round - Number Votes</span>
                 </summary>
-                <div style="margin-top: 1rem; padding: 1rem; background: rgba(139, 92, 246, 0.05); border-radius: 8px;">
+                <div style="margin-top: 1rem;">
                     <div class="distribution-bars" id="distribution-bars" style="margin-bottom: 1rem;">
-                        <div class="loading">No plays yet...</div>
-                    </div>
-                    <div style="font-size: 0.85rem; color: #8b5cf6; margin-bottom: 1rem; padding: 0.5rem; background: rgba(139, 92, 246, 0.1); border-radius: 6px;">
-                        💡 Number with FEWEST votes wins! Earlier + bigger donations = more payout.
-                    </div>
-                    <div id="current-plays-list" style="max-height: 300px; overflow-y: auto;">
-                        <div style="text-align: center; padding: 1rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.85rem;">
-                            Loading plays...
+                        <div style="text-align: center; padding: 1rem; color: var(--md-sys-color-on-surface-variant);">
+                            No plays yet...
                         </div>
                     </div>
+                    <div id="current-plays-list" style="max-height: 300px; overflow-y: auto;"></div>
                 </div>
             </details>
         `;
-        
-        // Add rotation for arrow
-        panel.querySelector('details').addEventListener('toggle', (e) => {
-            const arrow = e.target.querySelector('summary span');
-            arrow.style.transform = e.target.open ? 'rotate(90deg)' : 'rotate(0deg)';
-        });
-        
-        return panel;
     }
 
-    renderHowItWorks() {
-        const panel = document.createElement('div');
-        panel.className = 'contest-info-panel';
-        
-        panel.innerHTML = `
-            <h3>📖 How It Works</h3>
-            <div class="how-it-works">
-                <ol>
-                    <li><strong>Choose Your Number:</strong> Pick a number from 1 to 6 with your donation</li>
-                    <li><strong>10 Plays per Round:</strong> After every 10 plays, the round ends</li>
-                    <li><strong>Least Popular Wins:</strong> The number(s) with the FEWEST votes win</li>
-                    <li><strong>Weighted Distribution:</strong> Earlier plays get more weight</li>
-                    <li><strong>Formula:</strong> Your share = (amount × position_weight) / total_weight</li>
-                </ol>
-                <div class="example-box">
-                    <h4>🎯 Example</h4>
-                    <p>If you play early with a big donation on a rare number, you win big!</p>
-                    <p>Position 1 (earliest) = 10x weight, Position 10 (latest) = 1x weight</p>
-                </div>
-            </div>
-        `;
-        
-        return panel;
-    }
 
     setupListeners() {
         const playButton = document.getElementById('play-button');
@@ -222,39 +144,42 @@ export class DiceGods extends Game {
     async play() {
         if (!this.requiresWallet('play')) return;
         
-        if (!this.selectedNumber) {
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Please select a number first',
-                type: 'warning'
-            });
-            return;
-        }
-        
         const weiAmount = this.donationInput.getWeiValue();
         
         if (!weiAmount || weiAmount.eq(0)) {
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Please enter a valid bet amount',
+                message: 'Please enter a donation amount',
                 type: 'warning'
             });
             return;
         }
         
+        // Extract last digit of the wei amount as the number (1-6)
+        const weiString = weiAmount.toString();
+        const lastDigit = parseInt(weiString[weiString.length - 1]);
+        let selectedNumber = lastDigit === 0 ? 6 : (lastDigit > 6 ? lastDigit % 6 || 6 : lastDigit);
+        
+        // Show the die face for this number
+        if (this.dice3D) {
+            this.dice3D.selectFace(selectedNumber);
+        }
+        
         try {
             await TransactionHandler.execute(
-                this.contract.play(this.selectedNumber, { value: weiAmount }),
+                this.contract.play(selectedNumber, { value: weiAmount }),
                 { 
                     game: 'dice-gods', 
-                    number: this.selectedNumber,
+                    number: selectedNumber,
                     wei: weiAmount.toString() 
                 }
             );
             
-            this.donationInput.reset();
-            this.selectedNumber = null;
-            this.updateSelectedNumberDisplay();
-            this.updatePlayButton();
+            this.events.bus.emit(this.events.EVENTS.TOAST, {
+                message: `Played number ${selectedNumber}`,
+                type: 'success'
+            });
             
+            this.donationInput.reset();
             await this.refreshState();
             
         } catch (error) {
@@ -266,7 +191,11 @@ export class DiceGods extends Game {
         if (!this.contract) return;
 
         try {
-            const roundInfo = await this.contract.get_current_round_info();
+            const [roundInfo, minDonation] = await Promise.all([
+                this.contract.get_current_round_info(),
+                this.contract.minimum_donation()
+            ]);
+            
             const roundNumber = roundInfo[0];
             const playCount = typeof roundInfo[1] === 'number' ? roundInfo[1] : roundInfo[1].toNumber();
             const totalPot = roundInfo[2];
@@ -274,35 +203,18 @@ export class DiceGods extends Game {
             this.dom.updateInfo('round-number', `#${roundNumber.toString()}`);
             this.dom.updateInfo('plays-count', `${playCount} / 10`);
             this.dom.updateInfo('prize-pool', this.dom.formatWei(totalPot));
-
-            const numberCounts = await this.contract.get_number_counts();
+            this.dom.updateInfo('min-donation', this.dom.formatWei(minDonation));
             
-            for (let i = 0; i < 6; i++) {
-                const count = typeof numberCounts[i] === 'number' ? numberCounts[i] : numberCounts[i].toNumber();
-                const voteElement = document.getElementById(`dice-votes-${i+1}`);
-                if (voteElement) {
-                    voteElement.textContent = `${count} ${count === 1 ? 'vote' : 'votes'}`;
-                }
+            // Update the ValueInput minimum
+            if (this.donationInput && minDonation) {
+                this.donationInput.setMinimum(minDonation.toString());
             }
 
+            const numberCounts = await this.contract.get_number_counts();
             this.updateDistributionBars(numberCounts);
             
             const currentPlays = await this.contract.get_plays();
             this.updateCurrentPlaysList(currentPlays);
-
-            if (this.web3Provider?.currentAddress) {
-                const userPlay = currentPlays.find(play => 
-                    play.player.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()
-                );
-
-                if (userPlay) {
-                    this.dom.updateInfo('your-donation', this.dom.formatWei(userPlay.amount));
-                    this.dom.updateInfo('your-number', `🎲 ${userPlay.number}`);
-                } else {
-                    this.dom.updateInfo('your-donation', 'Not playing');
-                    this.dom.updateInfo('your-number', '-');
-                }
-            }
 
         } catch (error) {
             console.error('Failed to refresh state:', error);
@@ -349,8 +261,8 @@ export class DiceGods extends Game {
         
         if (!plays || plays.length === 0) {
             listContainer.innerHTML = `
-                <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
-                    No plays yet in this round
+                <div style="text-align: center; padding: 1.5rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">
+                    No plays yet
                 </div>
             `;
             return;
@@ -400,7 +312,7 @@ export class DiceGods extends Game {
             const isYou = player.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
             if (isYou) {
                 this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `🎲 Your play recorded: Number ${number}`,
+                    message: `Your play recorded: Number ${number}`,
                     type: 'success'
                 });
             } else {
@@ -417,7 +329,7 @@ export class DiceGods extends Game {
             if (isYou) {
                 this.events.bus.emit(this.events.EVENTS.CONFETTI);
                 this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `🎉 YOU WON ${this.dom.formatWei(amount)} with number ${number}!`,
+                    message: `You won ${this.dom.formatWei(amount)} with number ${number}!`,
                     type: 'success'
                 });
             }
@@ -435,7 +347,7 @@ export class DiceGods extends Game {
 
         this.contract.on('RoundStarted', async (roundNumber) => {
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: `🚀 Round #${roundNumber} started!`,
+                message: `Round ${roundNumber} started`,
                 type: 'info'
             });
             await this.refreshState();

@@ -32,48 +32,48 @@ export class PayItBackward extends Game {
         
         const contentInner = document.createElement('div');
         contentInner.innerHTML = `
-            <div class="game-sections">
+            <div class="game-sections" style="--panel-color: #8b5cf6; --hero-color: #8b5cf6; --btn-color: #8b5cf6;">
                 <!-- Main Consolidated Panel -->
-                <div class="contest-info-panel" style="border: 2px solid #8b5cf6; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
-                        <h3 style="display: flex; align-items: center; gap: 0.5rem; color: #8b5cf6; margin: 0;">
+                <div class="contest-info-panel game-panel">
+                    <div class="flex-between" style="margin-bottom: 0.75rem;">
+                        <h3 class="game-panel-header">
                             <span>⏪</span>
                             <span>Pay It Backward</span>
                         </h3>
-                        <div style="font-size: 0.85rem; color: #8b5cf6; font-weight: 500;">Donate → Pay Previous → Wait</div>
+                        <div style="font-size: 0.85rem; font-weight: 500;">Donate → Pay Previous → Wait</div>
                     </div>
                     
-                    <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: start;">
+                    <div class="game-panel-grid">
                         <!-- Left: Chain Visualization -->
-                        <div style="min-width: 0;">
+                        <div class="min-w-0">
                             <div id="address-flow-container"></div>
                         </div>
                         
                         <!-- Right: Status + Play -->
-                        <div style="min-width: 0;">
-                            <div style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 0.75rem; border-radius: 8px; margin-bottom: 1rem;">
-                                <div style="font-size: 0.7rem; opacity: 0.9; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px;">🎯 Last Donor</div>
-                                <div id="last-donor" style="font-size: 0.85rem; font-weight: bold; word-break: break-all; margin-bottom: 0.75rem; min-height: 1.5rem; font-family: monospace;">
+                        <div class="min-w-0">
+                            <div class="hero-card" style="margin-bottom: 1rem;">
+                                <div class="hero-card-label">🎯 Last Donor</div>
+                                <div id="last-donor" class="hero-card-content" style="min-height: 1.5rem; font-family: monospace;">
                                     None
                                 </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.7rem;">
+                                <div class="hero-card-stats stat-grid">
                                     <div>
-                                        <div style="opacity: 0.8;">Next Gets</div>
-                                        <div id="next-recipient" style="font-weight: bold; font-size: 0.75rem;">—</div>
+                                        <div>Next Gets</div>
+                                        <div id="next-recipient" class="value" style="font-size: 0.75rem;">—</div>
                                     </div>
                                     <div>
-                                        <div style="opacity: 0.8;">Your Status</div>
-                                        <div id="your-status" style="font-weight: bold; font-size: 0.8rem;">—</div>
+                                        <div>Your Status</div>
+                                        <div id="your-status" class="value">—</div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div id="state-message" style="text-align: center; padding: 0.75rem; background: rgba(139, 92, 246, 0.15); border-radius: 6px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1rem; border-left: 3px solid #8b5cf6;">
-                                💡 Loading...
+                            <div id="state-message" class="strategy-callout" style="text-align: center; font-weight: 600; margin-bottom: 1rem;">
+                                💡 Loading state...
                             </div>
                             
                             <div id="donate-amount-input" style="margin-bottom: 0.75rem;"></div>
-                            <button id="donate-button" class="btn-play" style="width: 100%; padding: 0.75rem; font-size: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+                            <button id="donate-button" class="btn-action">
                                 ⏪ Donate & Pay Previous
                             </button>
                         </div>
@@ -82,30 +82,30 @@ export class PayItBackward extends Game {
 
                 <!-- How It Works - Collapsible -->
                 <details class="contest-info-panel">
-                    <summary style="list-style: none; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; user-select: none;">
-                        <span style="font-size: 0.85rem;">▶</span>
-                        <span style="font-weight: 600;">🔄 How Pay It Backward Works</span>
+                    <summary class="collapsible-summary">
+                        <span class="collapsible-arrow">▶</span>
+                        <span>🔄 How Pay It Backward Works</span>
                     </summary>
                     <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.85rem;">
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(139, 92, 246, 0.05); border-radius: 6px; border-left: 3px solid #8b5cf6;">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: #8b5cf6; min-width: 1.75rem;">1</div>
-                            <div>
-                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">First Donor</strong>
-                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Pays owner (bootstrap), becomes last donor</span>
+                        <div class="step-card" style="--step-color: #8b5cf6;">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <strong>First Donor</strong>
+                                <span>Pays owner (bootstrap), becomes last donor</span>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(236, 72, 153, 0.05); border-radius: 6px; border-left: 3px solid #ec4899;">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: #ec4899; min-width: 1.75rem;">2</div>
-                            <div>
-                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Second Donor</strong>
-                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Pays first donor IMMEDIATELY, becomes new last donor</span>
+                        <div class="step-card" style="--step-color: #ec4899;">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <strong>Second Donor</strong>
+                                <span>Pays first donor IMMEDIATELY, becomes new last donor</span>
                             </div>
                         </div>
-                        <div style="display: flex; gap: 0.75rem; padding: 0.75rem; background: rgba(16, 185, 129, 0.05); border-radius: 6px; border-left: 3px solid #10b981;">
-                            <div style="font-size: 1.25rem; font-weight: bold; color: #10b981; min-width: 1.75rem;">∞</div>
-                            <div>
-                                <strong style="display: block; margin-bottom: 0.25rem; font-size: 0.9rem;">Chain Continues</strong>
-                                <span style="color: var(--md-sys-color-on-surface-variant); font-size: 0.8rem;">Each donor pays previous instantly, becomes new last donor</span>
+                        <div class="step-card" style="--step-color: #10b981;">
+                            <div class="step-number">∞</div>
+                            <div class="step-content">
+                                <strong>Chain Continues</strong>
+                                <span>Each donor pays previous instantly, becomes new last donor</span>
                             </div>
                         </div>
                     </div>
@@ -147,9 +147,9 @@ export class PayItBackward extends Game {
         
         const weiAmount = this.donationInput.getWeiValue();
         
-        if (!weiAmount || weiAmount.eq(0)) {
+        if (!weiAmount || weiAmount.lte(0)) {
             this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Please enter a valid wei amount',
+                message: 'Please enter a donation amount',
                 type: 'warning'
             });
             return;
@@ -248,13 +248,6 @@ export class PayItBackward extends Game {
         if (!this.contract) return;
 
         this.contract.on('Donation', async (donor, amount, recipient, isFirst, event) => {
-            console.log('Donation event:', { 
-                donor, 
-                amount: amount.toString(), 
-                recipient, 
-                isFirst 
-            });
-            
             // Add to flow visualization
             if (this.addressFlow) {
                 this.addressFlow.addAddress(donor, this.dom.formatWei(amount), 'donated');
@@ -262,15 +255,17 @@ export class PayItBackward extends Game {
             
             await this.refreshState();
             
+            if (!this.web3Provider?.currentAddress) return;
+            
             if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
                 if (donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                     this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `🎉 You paid ${this.dom.formatWei(amount)} to ${this.dom.formatAddress(recipient)}!`,
+                        message: `You paid ${this.dom.formatWei(amount)} to ${this.dom.formatAddress(recipient)}`,
                         type: 'success'
                     });
                 } else if (recipient.toLowerCase() === this.web3Provider.currentAddress.toLowerCase()) {
                     this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `💰 You received ${this.dom.formatWei(amount)} from ${this.dom.formatAddress(donor)}!`,
+                        message: `You received ${this.dom.formatWei(amount)} from ${this.dom.formatAddress(donor)}`,
                         type: 'success'
                     });
                 }
