@@ -1,0 +1,52 @@
+/// @title One Iteration Exp Test
+/// @notice Test exactly one iteration of the product rule
+/// @dev Level 2: Verify digit extraction, table lookup, and scaled multiply work together
+
+#include "fp_constants.huff"
+#include "tables/exp_table.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr
+    
+    dup1 __FUNC_SIG(calculate) eq calculate_jump jumpi
+    0x00 0x00 revert
+    
+    calculate_jump:
+        pop
+        // Load x_fixed18
+        0x04 calldataload
+        
+        // Convert to scaled36: x = x_fixed18 * 10^18
+        [FIXED18_SCALE] mul       // [x_scaled36]
+        
+        // y = SCALE (1.0)
+        [SCALE] 0x00 mstore       // []
+        
+        // Stack: [x]
+        // i = 0 (fixed for one iteration)
+        0x00                      // [i=0, x]
+        
+        // Extract digit: d = x / SCALE
+        dup2                      // [x, i, x]
+        [SCALE] swap1 div         // [d, i, x]
+        
+        // Lookup TABLE[i][d] - FIXED: dup1 dup3 instead of dup2 dup2
+        dup1 dup3                 // [i, d, d, i, x]
+        EXP_TABLE_LOOKUP()        // [factor, d, i, x]
+        
+        // y = (y * factor) / SCALE
+        0x00 mload                // [y, factor, d, i, x]
+        swap1 mul                 // [y*factor, d, i, x]
+        [SCALE] swap1 div         // [y_new, d, i, x]
+        0x00 mstore               // [d, i, x]
+        
+        // Load result and convert back to fixed18
+        pop pop pop               // []
+        0x00 mload                // [y]
+        [FIXED18_SCALE] swap1 div // [result_fixed18]
+        
+        0x00 mstore
+        0x20 0x00 return
+}
+
+#define function calculate(uint256) pure returns (uint256)

@@ -1,0 +1,474 @@
+/// @title Floating Point Arithmetic Primitives
+/// @notice Base-10 floating point operations for high-precision calculations
+/// @dev Format: [1 bit sign | 15 bits exponent (biased by 16384) | 240 bits mantissa]
+/// Mantissa normalized to [1e23, 1e24) -- 24 significant digits
+
+#include "fp_constants.huff"
+
+/// @notice Unpack a floating-point number into components
+/// @dev takes(1) returns(3)
+/// Stack input: [packed_fp]
+/// Stack output: [sign, exponent, mantissa]
+#define macro FP_UNPACK() = takes(1) returns(3) {
+    // Input: packed FP on stack
+    dup1                      // [packed, packed]
+    0xff shr                  // [packed >> 255, packed]  (extract sign bit)
+    
+    swap1 dup1                // [packed, sign, packed]
+    0xf0 shr                  // [packed >> 240, sign, packed]
+    [EXP_MASK] and            // [biased_exp, sign, packed]
+    [EXP_BIAS] sub            // [exp, sign, packed]
+    
+    swap1 swap2               // [packed, exp, sign]
+    [MANTISSA_MASK] and       // [mantissa, exp, sign]
+    
+    swap2 swap1               // [sign, exp, mantissa]
+}
+
+/// @notice Pack floating-point components into a single uint256
+/// @dev takes(3) returns(1)
+/// Stack input: [sign, exponent, mantissa]
+/// Stack output: [packed_fp]
+#define macro FP_PACK() = takes(3) returns(1) {
+    // Input: [sign, exp, mantissa]
+    swap1                     // [exp, sign, mantissa]
+    [EXP_BIAS] add            // [biased_exp, sign, mantissa]
+    0xf0 shl                  // [biased_exp << 240, sign, mantissa]
+    
+    swap1                     // [sign, biased_exp << 240, mantissa]
+    0xff shl                  // [sign << 255, biased_exp << 240, mantissa]
+    
+    or or                     // [packed_fp]
+}
+
+/// @notice Normalize mantissa to be in range [1e37, 1e38)
+/// @dev takes(2) returns(2)
+/// Stack input: [exponent, mantissa]
+/// Stack output: [normalized_exp, normalized_mantissa]
+#define macro FP_NORMALIZE() = takes(2) returns(2) {
+    // Input: [exp, mantissa]
+    
+    // Check if mantissa is zero (special case)
+    dup2 iszero               // [mantissa == 0, exp, mantissa]
+    normalize_done jumpi      // if zero, skip normalization
+    
+    // Normalize down: while mantissa >= 1e38
+    normalize_down:
+        dup2                  // [mantissa, exp, mantissa]
+        [MAX_MANTISSA]        // [MAX, mantissa, exp, mantissa]
+        lt                    // [mantissa < MAX, exp, mantissa]
+        normalize_up jumpi    // if mantissa < MAX, go to up normalization
+        
+        // mantissa >= MAX, divide by 10 and increment exp
+        swap1                 // [mantissa, exp]
+        [TEN_UINT] div        // [mantissa / 10, exp]
+        swap1                 // [exp, mantissa / 10]
+        0x01 add              // [exp + 1, mantissa / 10]
+        swap1                 // [mantissa / 10, exp + 1]
+        normalize_down jump   // loop
+    
+    // Normalize up: while mantissa < 1e37 and mantissa != 0
+    normalize_up:
+        dup2                  // [mantissa, exp, mantissa]
+        [MIN_MANTISSA]        // [MIN, mantissa, exp, mantissa]
+        lt                    // [mantissa < MIN, exp, mantissa]
+        iszero                // [mantissa >= MIN, exp, mantissa]
+        normalize_done jumpi  // if mantissa >= MIN, done
+        
+        // Check if mantissa is zero before multiplying
+        dup2 iszero           // [mantissa == 0, exp, mantissa]
+        normalize_done jumpi
+        
+        // mantissa < MIN, multiply by 10 and decrement exp
+        swap1                 // [mantissa, exp]
+        [TEN_UINT] mul        // [mantissa * 10, exp]
+        swap1                 // [exp, mantissa * 10]
+        0x01 sub              // [exp - 1, mantissa * 10]
+        swap1                 // [mantissa * 10, exp - 1]
+        normalize_up jump     // loop
+    
+    normalize_done:
+        // [exp, mantissa]
+}
+
+/// @notice Check if a floating-point number is zero
+/// @dev takes(1) returns(1)
+/// Stack input: [packed_fp]
+/// Stack output: [is_zero (1 if zero, 0 otherwise)]
+#define macro FP_IS_ZERO() = takes(1) returns(1) {
+    // A number is zero if mantissa is zero
+    [MANTISSA_MASK] and       // extract mantissa
+    iszero                    // check if zero
+}
+
+/// @notice Multiply two floating-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [fp_a, fp_b]
+/// Stack output: [fp_result]
+#define macro FP_MUL() = takes(2) returns(1) {
+    // Unpack both operands
+    FP_UNPACK()               // [sign_a, exp_a, mant_a, fp_b]
+    swap3                     // [fp_b, exp_a, mant_a, sign_a]
+    FP_UNPACK()               // [sign_b, exp_b, mant_b, exp_a, mant_a, sign_a]
+    
+    // Result sign = sign_a XOR sign_b
+    swap5                     // [sign_a, exp_b, mant_b, exp_a, mant_a, sign_b]
+    xor                       // [result_sign, mant_b, exp_a, mant_a, exp_b]
+    
+    // Result exponent = exp_a + exp_b + 23
+    // (compensate for dividing mantissa product by 1e23)
+    swap2 swap4               // [exp_b, mant_b, exp_a, mant_a, result_sign]
+    add                       // [exp_a + exp_b, mant_b, mant_a, result_sign]
+    0x17 add                  // [exp_a + exp_b + 23, mant_b, mant_a, result_sign]
+    
+    // Result mantissa = (mant_a * mant_b) / 1e23
+    swap1 swap2               // [mant_a, mant_b, result_exp, result_sign]
+    mul                       // [mant_a * mant_b, result_exp, result_sign]
+    [FP_MANTISSA_SCALE]       // [1e37, product, result_exp, result_sign]
+    div                       // [product / 1e37, result_exp, result_sign]
+    
+    // Normalize
+    swap1                     // [result_exp, mantissa, result_sign]
+    FP_NORMALIZE()            // [norm_exp, norm_mant, result_sign]
+    
+    // Pack and return
+    swap2                     // [result_sign, norm_mant, norm_exp]
+    swap1                     // [result_sign, norm_exp, norm_mant]
+    FP_PACK()                 // [packed_result]
+}
+
+/// @notice Divide two floating-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [fp_a, fp_b]
+/// Stack output: [fp_result]
+#define macro FP_DIV() = takes(2) returns(1) {
+    // Unpack both operands
+    FP_UNPACK()               // [sign_a, exp_a, mant_a, fp_b]
+    swap3                     // [fp_b, exp_a, mant_a, sign_a]
+    FP_UNPACK()               // [sign_b, exp_b, mant_b, exp_a, mant_a, sign_a]
+    
+    // Result sign = sign_a XOR sign_b
+    swap5                     // [sign_a, exp_b, mant_b, exp_a, mant_a, sign_b]
+    xor                       // [result_sign, mant_b, exp_a, mant_a, exp_b]
+    
+    // Result exponent = exp_a - exp_b - 23
+    // (compensate for multiplying mantissa by 1e23)
+    swap2 swap3 swap4         // [exp_a, exp_b, mant_b, mant_a, result_sign]
+    sub                       // [exp_a - exp_b, mant_b, mant_a, result_sign]
+    0x17 sub                  // [exp_a - exp_b - 23, mant_b, mant_a, result_sign]
+    
+    // Result mantissa = (mant_a * 1e23) / mant_b
+    swap2                     // [mant_a, mant_b, result_exp, result_sign]
+    [FP_MANTISSA_SCALE]       // [1e37, mant_a, mant_b, result_exp, result_sign]
+    mul                       // [mant_a * 1e37, mant_b, result_exp, result_sign]
+    swap1                     // [mant_b, mant_a * 1e37, result_exp, result_sign]
+    div                       // [quotient, result_exp, result_sign]
+    
+    // Normalize
+    swap1                     // [result_exp, mantissa, result_sign]
+    FP_NORMALIZE()            // [norm_exp, norm_mant, result_sign]
+    
+    // Pack and return
+    swap2                     // [result_sign, norm_mant, norm_exp]
+    swap1                     // [result_sign, norm_exp, norm_mant]
+    FP_PACK()                 // [packed_result]
+}
+
+/// @notice Add two floating-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [fp_a, fp_b]
+/// Stack output: [fp_result]
+/// Uses memory slots 0x00-0xc0 for intermediate storage
+#define macro FP_ADD() = takes(2) returns(1) {
+    // Unpack fp_a and store in memory
+    FP_UNPACK()               // [sign_a, exp_a, mant_a, fp_b]
+    0x40 mstore               // [sign_a, exp_a, fp_b] (mant_a at 0x40)
+    0x20 mstore               // [sign_a, fp_b] (exp_a at 0x20)
+    0x00 mstore               // [fp_b] (sign_a at 0x00)
+    
+    // Unpack fp_b and store in memory
+    FP_UNPACK()               // [sign_b, exp_b, mant_b]
+    0xa0 mstore               // [sign_b, exp_b] (mant_b at 0xa0)
+    0x80 mstore               // [sign_b] (exp_b at 0x80)
+    0x60 mstore               // [] (sign_b at 0x60)
+    
+    // Load and compare exponents
+    0x20 mload                // [exp_a]
+    0x80 mload                // [exp_b, exp_a]
+    dup2 dup2                 // [exp_a, exp_b, exp_b, exp_a]
+    sgt                       // [exp_a > exp_b (signed), exp_b, exp_a]
+    add_a_larger jumpi
+    
+    // exp_b >= exp_a: shift mant_a, use exp_b as result
+    add_b_larger:
+        // Calculate shift = exp_b - exp_a
+        swap1 sub             // [exp_b - exp_a]
+        0x40 mload            // [mant_a, shift]
+        
+        // Shift mant_a right by dividing by 10**shift
+        // Stack: [mant_a, shift]
+        add_shift_loop_b:
+            dup2 iszero       // [shift == 0, mant_a, shift]
+            add_shift_done_b jumpi
+            [TEN_UINT] div    // [mant_a / 10, shift]
+            swap1 0x01 sub    // [shift - 1, mant_a / 10]
+            swap1             // [mant_a / 10, shift - 1]
+            add_shift_loop_b jump
+        
+        add_shift_done_b:
+            swap1 pop         // [mant_a_shifted]
+            0x40 mstore       // [] (store shifted mant_a)
+            0x80 mload        // [exp_b] (use exp_b as result exp)
+            add_do_operation jump
+    
+    add_a_larger:
+        // exp_a > exp_b: shift mant_b, use exp_a as result
+        sub                   // [exp_a - exp_b]
+        0xa0 mload            // [mant_b, shift]
+        
+        // Shift mant_b right by dividing by 10**shift
+        // Stack: [mant_b, shift]
+        add_shift_loop_a:
+            dup2 iszero       // [shift == 0, mant_b, shift]
+            add_shift_done_a jumpi
+            [TEN_UINT] div    // [mant_b / 10, shift]
+            swap1 0x01 sub    // [shift - 1, mant_b / 10]
+            swap1             // [mant_b / 10, shift - 1]
+            add_shift_loop_a jump
+        
+        add_shift_done_a:
+            swap1 pop         // [mant_b_shifted]
+            0xa0 mstore       // [] (store shifted mant_b)
+            0x20 mload        // [exp_a] (use exp_a as result exp)
+    
+    add_do_operation:
+        // Stack: [result_exp]
+        // Memory: aligned mantissas at 0x40 and 0xa0, signs at 0x00 and 0x60
+        
+        // Compare signs
+        0x00 mload            // [sign_a, result_exp]
+        0x60 mload            // [sign_b, sign_a, result_exp]
+        dup2 dup2             // [sign_a, sign_b, sign_b, sign_a, result_exp]
+        eq                    // [signs_equal, sign_b, sign_a, result_exp]
+        add_same_sign jumpi
+        
+        // Different signs: subtract mantissas
+        add_diff_sign:
+            pop               // [sign_a, result_exp]
+            0x40 mload        // [mant_a, sign_a, result_exp]
+            0xa0 mload        // [mant_b, mant_a, sign_a, result_exp]
+            dup2 dup2         // [mant_a, mant_b, mant_b, mant_a, sign_a, result_exp]
+            gt                // [mant_a > mant_b, mant_b, mant_a, sign_a, result_exp]
+            add_a_mant_larger jumpi
+            
+            // mant_b >= mant_a: result = mant_b - mant_a, sign_b
+            sub               // [mant_b - mant_a, sign_a, result_exp]
+            swap2             // [result_exp, sign_a, result_mant]
+            swap1 pop         // [result_exp, result_mant]
+            0x60 mload        // [sign_b, result_exp, result_mant]
+            swap2             // [result_mant, result_exp, sign_b]
+            swap1             // [result_exp, result_mant, sign_b]
+            add_finalize jump
+            
+        add_a_mant_larger:
+            // mant_a > mant_b: result = mant_a - mant_b, sign_a
+            swap1 sub         // [mant_a - mant_b, sign_a, result_exp]
+            swap2 swap1       // [result_exp, result_mant, sign_a]
+            add_finalize jump
+        
+        add_same_sign:
+            // Same signs: add mantissas, keep sign
+            pop               // [sign, result_exp]
+            0x40 mload        // [mant_a, sign, result_exp]
+            0xa0 mload        // [mant_b, mant_a, sign, result_exp]
+            add               // [result_mant, sign, result_exp]
+            swap2 swap1       // [result_exp, result_mant, sign]
+    
+    add_finalize:
+        // [result_exp, result_mant, result_sign]
+        FP_NORMALIZE()        // [norm_exp, norm_mant, result_sign]
+        swap2 swap1           // [result_sign, norm_exp, norm_mant]
+        FP_PACK()             // [packed_result]
+}
+
+/// @notice Subtract two floating-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [fp_a, fp_b]
+/// Stack output: [fp_result = fp_a - fp_b]
+#define macro FP_SUB() = takes(2) returns(1) {
+    // Flip sign of fp_b and add
+    // fp_b XOR (1 << 255) flips the sign bit
+    0x8000000000000000000000000000000000000000000000000000000000000000
+    xor                       // [fp_b_negated, fp_a]
+    swap1                     // [fp_a, fp_b_negated]
+    FP_ADD()                  // [result]
+}
+
+/// @notice Extract the integer digit (0-9) from a floating-point number
+/// @dev takes(1) returns(1)
+/// Stack input: [fp_value]
+/// Stack output: [digit] (uint in range 0-9)
+/// Used for digit extraction in product-rule algorithms
+#define macro FP_FLOOR_DIGIT() = takes(1) returns(1) {
+    FP_UNPACK()               // [sign, exp, mantissa]
+    
+    // If exp < -19, value < 1, so digit is 0
+    dup2                      // [exp, sign, exp, mantissa]
+    0x00 0x17 sub             // [-23, exp, sign, exp, mantissa]
+    slt                       // [exp < -23, sign, exp, mantissa]
+    floor_zero jumpi
+    
+    // exp >= -23: calculate digit = mantissa / 10**(-exp)
+    // Correct formula: floor(mantissa * 10**exp) = mantissa // 10**(-exp)
+    pop                       // [exp, mantissa]
+    0x00 swap1 sub            // [-exp (negate), mantissa]
+    
+    // Divide mantissa by 10**(-exp)
+    swap1                     // [mantissa, -exp]
+    
+    floor_div_loop:
+        dup2 iszero           // [shift == 0, mantissa, shift]
+        floor_div_done jumpi
+        
+        [TEN_UINT] div        // [mantissa / 10, shift]
+        swap1 0x01 sub        // [shift - 1, mantissa / 10]
+        swap1
+        floor_div_loop jump
+    
+    floor_div_done:
+        swap1 pop             // [digit]
+        
+        // Cap at 9 (should not happen for valid input)
+        dup1 0x09 gt          // [digit > 9, digit]
+        floor_cap jumpi
+        floor_done jump
+    
+    floor_cap:
+        pop 0x09              // [9]
+    
+    floor_done:
+        // [digit]
+        jump_over_floor_zero jump
+    
+    floor_zero:
+        pop pop pop           // []
+        0x00                  // [0]
+    
+    jump_over_floor_zero:
+}
+
+/// @notice Convert unsigned integer to floating-point
+/// @dev takes(1) returns(1)
+/// Stack input: [uint_value]
+/// Stack output: [fp_value]
+#define macro FP_FROM_UINT() = takes(1) returns(1) {
+    // Pack as: sign=0, exp=0, mantissa=value
+    // Then normalize
+    dup1 iszero               // [value == 0, value]
+    from_uint_zero jumpi
+    
+    0x00                      // [exp=0, value]
+    FP_NORMALIZE()            // [norm_exp, norm_mant]
+    0x00                      // [sign=0, norm_exp, norm_mant]
+    swap1                     // [sign, norm_exp, norm_mant]
+    FP_PACK()                 // [packed]
+    from_uint_done jump
+    
+    from_uint_zero:
+        pop                   // []
+        [FP_ZERO]             // [FP_ZERO]
+    
+    from_uint_done:
+}
+
+/// @notice Convert 18-decimal fixed-point to floating-point
+/// @dev takes(1) returns(1)
+/// Stack input: [fixed18_value]
+/// Stack output: [fp_value]
+#define macro FP_FROM_FIXED18() = takes(1) returns(1) {
+    // fixed18 = value * 1e18
+    // We want FP with mantissa representing the same value
+    // Start with mantissa = fixed18, exponent = -18
+    // Then normalize
+    
+    dup1 iszero               // [value == 0, value]
+    from_fixed_zero jumpi
+    
+    // Push -18 in two's complement (0 - 18)
+    0x00 0x12 sub             // [exp=-18 (two's complement), value]
+    FP_NORMALIZE()            // [norm_exp, norm_mant]
+    0x00                      // [sign=0, norm_exp, norm_mant]
+    swap1                     // [sign, norm_exp, norm_mant]
+    FP_PACK()                 // [packed]
+    from_fixed_done jump
+    
+    from_fixed_zero:
+        pop
+        [FP_ZERO]
+    
+    from_fixed_done:
+}
+
+/// @notice Convert floating-point to 18-decimal fixed-point
+/// @dev takes(1) returns(1)
+/// Stack input: [fp_value]
+/// Stack output: [fixed18_value]
+#define macro FP_TO_FIXED18() = takes(1) returns(1) {
+    // Unpack FP
+    FP_UNPACK()               // [sign, exp, mantissa]
+    
+    // For now, handle only positive values (sign=0)
+    // TODO: Handle negative values if needed
+    
+    // We need to convert mantissa * 10**exp to fixed18 (value * 1e18)
+    // So: result = mantissa * 10**(exp + 18)
+    
+    swap1                     // [exp, sign, mantissa]
+    0x12 add                  // [exp + 18, sign, mantissa]
+    
+    // Now we need to multiply mantissa by 10**(exp+18)
+    // If exp+18 is positive, multiply; if negative, divide
+    
+    dup1                      // [exp+18, exp+18, sign, mantissa]
+    0x00 slt                  // [(exp+18) < 0, exp+18, sign, mantissa]
+    to_fixed_negative jumpi
+    
+    // exp+18 >= 0: multiply
+    to_fixed_positive:
+        swap2 swap1           // [exp+18, mantissa, sign]
+        
+        mul_by_10_loop:
+            dup1 iszero       // [shift == 0, shift, mantissa, sign]
+            mul_done jumpi
+            
+            swap1             // [mantissa, shift, sign]
+            [TEN_UINT] mul    // [mantissa * 10, shift, sign]
+            swap1             // [shift, mantissa * 10, sign]
+            0x01 sub          // [shift - 1, mantissa * 10, sign]
+            mul_by_10_loop jump
+        
+        mul_done:
+            pop swap1 pop     // [result]
+            to_fixed_done jump
+    
+    to_fixed_negative:
+        // exp+18 < 0: divide
+        // Need to negate the exponent for division count
+        0x00 swap1 sub        // [-(exp+18), sign, mantissa]
+        swap2 swap1           // [-(exp+18), mantissa, sign]
+        
+        div_by_10_loop:
+            dup1 iszero       // [shift == 0, shift, mantissa, sign]
+            div_done jumpi
+            
+            swap1             // [mantissa, shift, sign]
+            [TEN_UINT] div    // [mantissa / 10, shift, sign]
+            swap1             // [shift, mantissa / 10, sign]
+            0x01 sub          // [shift - 1, mantissa / 10, sign]
+            div_by_10_loop jump
+        
+        div_done:
+            pop swap1 pop     // [result]
+    
+    to_fixed_done:
+}

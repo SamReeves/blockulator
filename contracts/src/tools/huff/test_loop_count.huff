@@ -1,0 +1,39 @@
+/// Test loop iteration count
+
+#include "fp_constants.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr
+    
+    dup1 0xb9d92de8 eq calculate_jump jumpi
+    0x00 0x00 revert
+    
+    calculate_jump:
+        pop
+        0x04 calldataload
+        [FIXED18_SCALE] mul
+        
+        // Counter in memory
+        0x00 0x20 mstore
+        
+        0x00  // [i=0, x]
+        
+        loop:
+            // Increment counter
+            0x20 mload 0x01 add 0x20 mstore
+            
+            // Dummy operation
+            dup2 [SCALE] swap1 div pop
+            
+            // i++
+            0x01 add
+            dup1 0x13 swap1 lt loop jumpi
+        
+        // Return counter
+        pop pop
+        0x20 mload
+        0x00 mstore
+        0x20 0x00 return
+}
+
+#define function calculate(uint256) pure returns (uint256)

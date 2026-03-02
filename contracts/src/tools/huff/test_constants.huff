@@ -1,0 +1,34 @@
+/// Test constants
+
+#include "fp_constants.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr
+    
+    dup1 0xb9d92de8 eq scale_jump jumpi
+    dup1 0x97122b5a eq fixed18_jump jumpi
+    dup1 0x1a03d3d7 eq ten_jump jumpi
+    0x00 0x00 revert
+    
+    scale_jump:
+        pop
+        [SCALE]
+        0x00 mstore
+        0x20 0x00 return
+    
+    fixed18_jump:
+        pop
+        [FIXED18_SCALE]
+        0x00 mstore
+        0x20 0x00 return
+    
+    ten_jump:
+        pop
+        [TEN]
+        0x00 mstore
+        0x20 0x00 return
+}
+
+#define function calculate(uint256) pure returns (uint256)
+#define function get_fixed18() pure returns (uint256)
+#define function get_ten() pure returns (uint256)

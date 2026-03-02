@@ -1,0 +1,26 @@
+/// Test table lookup directly with (i, d) parameters
+
+#include "tables/exp_table.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr
+    
+    dup1 __FUNC_SIG(lookup) eq lookup_jump jumpi
+    0x00 0x00 revert
+    
+    lookup_jump:
+        pop
+        // Get i and d from calldata
+        0x04 calldataload  // [i]
+        0x24 calldataload  // [d, i]
+        swap1              // [i, d]
+        
+        // Call the table lookup macro
+        EXP_TABLE_LOOKUP()
+        
+        // Return the result
+        0x00 mstore
+        0x20 0x00 return
+}
+
+#define function lookup(uint256,uint256) pure returns (uint256)

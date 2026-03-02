@@ -1,0 +1,31 @@
+/// Test single normalize iteration
+#include "fp_constants.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    // Input: exp at 0x04, mantissa at 0x24
+    0x04 calldataload         // [exp]
+    0x24 calldataload         // [mantissa, exp]
+    swap1                     // [exp, mantissa]
+    
+    // Check: mantissa < MIN_MANTISSA?
+    dup2                      // [mantissa, exp, mantissa]
+    [MIN_MANTISSA]            // [MIN, mantissa, exp, mantissa]
+    lt                        // [mantissa < MIN, exp, mantissa]
+    
+    // Store check result
+    0x40 mstore               // [exp, mantissa]
+    
+    // If true, do one multiply iteration
+    swap1                     // [mantissa, exp]
+    [TEN_UINT] mul            // [mantissa * 10, exp]
+    swap1                     // [exp, mantissa * 10]
+    0x01 sub                  // [exp - 1, mantissa * 10]
+    swap1                     // [mantissa * 10, exp - 1]
+    
+    // Store results
+    0x20 mstore               // [exp - 1]
+    0x00 mstore               // []
+    
+    // Return: [check_result, exp-1, mantissa*10]
+    0x60 0x00 return
+}

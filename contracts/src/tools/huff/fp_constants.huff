@@ -1,0 +1,14 @@
+/// @title Scaled Integer Constants
+/// @notice Constants for scaled-integer arithmetic with SCALE = 10^36
+/// @dev All values are represented as (value * 10^36) stored as uint256
+///      36 digits of internal precision provides 18-digit output with 18 guard digits
+///      No sign/exponent packing, no normalization loops
+
+// SCALE: 10^36 (the scaling factor for all internal arithmetic)
+#define constant SCALE = 0xC097CE7BC90715B34B9F1000000000
+
+// FIXED18_SCALE: 10^18 (for converting to/from 18-decimal fixed-point)
+#define constant FIXED18_SCALE = 0xDE0B6B3A7640000
+
+// TEN: 10 (for shifting x left after digit extraction)
+#define constant TEN = 0x0A

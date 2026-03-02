@@ -1,0 +1,47 @@
+/// Normalize with logging (max 10 iters to avoid infinite loop)
+#include "fp_constants.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x04 calldataload         // [exp]
+    0x24 calldataload         // [mantissa, exp]
+    swap1                     // [exp, mantissa]
+    
+    // Counter at 0x80
+    0x00 0x80 mstore
+    
+    dup2 iszero               // [mantissa == 0, exp, mantissa]
+    done jumpi
+    
+    check_up:
+        // Check counter (safety: max 10 iterations)
+        0x80 mload
+        0x0a gt               // [counter > 10]
+        done jumpi
+        
+        // Increment counter
+        0x80 mload 0x01 add 0x80 mstore
+        
+        dup2                  // [mantissa, exp, mantissa]
+        [MIN_MANTISSA]        // [MIN, mantissa, exp, mantissa]
+        lt                    // [mantissa < MIN, exp, mantissa]
+        iszero                // [mantissa >= MIN, exp, mantissa]
+        done jumpi
+        
+        dup2 iszero           // [mantissa == 0, exp, mantissa]
+        done jumpi
+        
+        // multiply by 10
+        swap1                 // [mantissa, exp]
+        [TEN_UINT] mul        // [mantissa * 10, exp]
+        swap1                 // [exp, mantissa * 10]
+        0x01 sub              // [exp - 1, mantissa * 10]
+        swap1                 // [mantissa * 10, exp - 1]
+        check_up jump
+    
+    done:
+        // Return: [iterations, exp, mantissa]
+        0x40 mstore           // [exp]
+        0x20 mstore           // []
+        0x80 mload 0x00 mstore
+        0x60 0x00 return
+}

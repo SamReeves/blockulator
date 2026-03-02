@@ -1,0 +1,53 @@
+/// Standalone normalize test - no includes except constants
+#include "fp_constants.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    // Load inputs: exponent at 0x04, mantissa at 0x24
+    0x04 calldataload         // [exp]
+    0x24 calldataload         // [mantissa, exp]
+    swap1                     // [exp, mantissa]
+    
+    // Normalize: should produce [norm_exp, norm_mantissa]
+    // Inline the normalize logic here to avoid macro complications
+    
+    dup2 iszero               // [mantissa == 0, exp, mantissa]
+    done jumpi
+    
+    check_down:
+        dup2                  // [mantissa, exp, mantissa]
+        [MAX_MANTISSA]        // [MAX, mantissa, exp, mantissa]
+        lt                    // [mantissa < MAX, exp, mantissa]
+        check_up jumpi
+        
+        // mantissa >= MAX, divide by 10
+        swap1                 // [mantissa, exp]
+        [TEN_UINT] div        // [mantissa / 10, exp]
+        swap1                 // [exp, mantissa / 10]
+        0x01 add              // [exp + 1, mantissa / 10]
+        swap1                 // [mantissa / 10, exp + 1]
+        check_down jump
+    
+    check_up:
+        dup2                  // [mantissa, exp, mantissa]
+        [MIN_MANTISSA]        // [MIN, mantissa, exp, mantissa]
+        lt                    // [mantissa < MIN, exp, mantissa]
+        iszero                // [mantissa >= MIN, exp, mantissa]
+        done jumpi
+        
+        dup2 iszero           // [mantissa == 0, exp, mantissa]
+        done jumpi
+        
+        // mantissa < MIN, multiply by 10
+        swap1                 // [mantissa, exp]
+        [TEN_UINT] mul        // [mantissa * 10, exp]
+        swap1                 // [exp, mantissa * 10]
+        0x01 sub              // [exp - 1, mantissa * 10]
+        swap1                 // [mantissa * 10, exp - 1]
+        check_up jump
+    
+    done:
+        // [exp, mantissa]
+        0x20 mstore           // [exp]
+        0x00 mstore           // []
+        0x40 0x00 return
+}
