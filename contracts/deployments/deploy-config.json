@@ -1,7 +1,7 @@
 {
-  "contractName": "CONTENT_FACTORY_V4_OPTIMIZED",
-  "contractFile": "content_factory_v4_optimized.vy",
-  "abiPath": "contracts/build/abis/content-factory-v4-optimized.json",
-  "bytecodePath": "contracts/build/bytecode/content-factory-v4-optimized.json",
-  "timestamp": "2025-11-28T00:05:08Z"
+  "contractName": "FP128_ARITHMETIC",
+  "contractFile": "test_fp128_addsub.huff",
+  "abiPath": "contracts/build/abis/fp128-arithmetic.json",
+  "bytecodePath": "contracts/build/bytecode/test_fp128_addsub.json",
+  "timestamp": "2026-03-02T19:48:00Z"
 }

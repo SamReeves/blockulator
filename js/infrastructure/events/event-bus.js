@@ -98,7 +98,6 @@ export const EVENTS = {
     WINNER_DETERMINED: 'winner:determined',
     
     // Animation triggers
-    WHALE_APPEARS: 'animation:whale',
     CONFETTI: 'animation:confetti',
     SPLASH: 'animation:splash',
     

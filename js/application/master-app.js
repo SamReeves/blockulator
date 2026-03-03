@@ -19,17 +19,18 @@ export class MasterApp {
         // Sub-apps (lazy loaded)
         this.gamesApp = null;
         this.calculatorApp = null;
+        this.arithmeticApp = null;
         this.futuresApp = null;
         this.badgesModule = null;
         
-        console.log('🐋 MasterApp created');
+        console.log('MasterApp created');
     }
 
     /**
      * Initialize the entire application
      */
     async init() {
-        console.log('🐋 Initializing Blockulator SPA...');
+        console.log('Initializing Blockulator SPA...');
         
         try {
             // 1. Check for existing wallet connection
@@ -81,6 +82,7 @@ export class MasterApp {
         
         this.masterRouter.registerView('games', () => this.initGamesView());
         this.masterRouter.registerView('calculator', () => this.initCalculatorView());
+        this.masterRouter.registerView('arithmetic', () => this.initArithmeticView());
         this.masterRouter.registerView('futures', () => this.initFuturesView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
         this.masterRouter.registerView('about', () => this.initAboutView());
@@ -125,6 +127,22 @@ export class MasterApp {
         }
         
         console.log('✅ Calculator view initialized');
+    }
+
+    /**
+     * Initialize Arithmetic view (lazy loaded)
+     */
+    async initArithmeticView() {
+        console.log('🔢 Initializing Arithmetic view...');
+        
+        if (!this.arithmeticApp) {
+            // Import and create arithmetic app
+            const { ArithmeticApp } = await import('./arithmetic-app.js');
+            this.arithmeticApp = new ArithmeticApp(this.web3Provider, this.walletComponent, this.toastComponent);
+            await this.arithmeticApp.init();
+        }
+        
+        console.log('✅ Arithmetic view initialized');
     }
 
     /**

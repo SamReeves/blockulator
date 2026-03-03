@@ -505,6 +505,22 @@ export const CONTRACT_REGISTRY = {
         abi: 'contracts/build/abis/gcd.json'
     },
     
+    // ========== ARITHMETIC (HUFF) ==========
+    'fp128-arithmetic': {
+        type: 'arithmetic',
+        name: 'FP128 Arithmetic',
+        symbol: '+−×÷',
+        emoji: '0x',
+        category: 'huff',
+        description: 'Fixed-point 128.128 arithmetic in pure Huff assembly',
+        addresses: {
+            sepolia: '0xaad81fb27fa1c1ec5810724e7f5b4ccff260fe2e',
+            mainnet: '0x0000000000000000000000000000000000000000'
+        },
+        source: 'contracts/src/tools/huff/test_fp128_addsub.huff',
+        abi: 'contracts/build/abis/fp128-arithmetic.json'
+    },
+    
     // ========== FUTURES ==========
     'future-factory': {
         type: 'future',

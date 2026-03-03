@@ -1,0 +1,20 @@
+/// @title 128.128 Fixed-Point Constants
+/// @notice Constants for signed fixed-point arithmetic using two's complement
+/// @dev Format: 128 integer bits + 128 fractional bits in a single uint256
+///      Value represented = word / 2^128
+///      Sign handled via two's complement (bit 255 is sign bit)
+
+// FRAC_BITS: Number of fractional bits (128)
+#define constant FRAC_BITS = 0x80
+
+// HALF_FRAC_BITS: Half of fractional bits (64) - used for chunked division
+#define constant HALF_FRAC_BITS = 0x40
+
+// ONE_FP128: The value 1.0 in 128.128 format (1 << 128)
+#define constant ONE_FP128 = 0x100000000000000000000000000000000
+
+// FIXED18_SCALE: 10^18 (for converting to/from 18-decimal fixed-point)
+#define constant FIXED18_SCALE = 0xDE0B6B3A7640000
+
+// MASK128: Mask for lower 128 bits (2^128 - 1)
+#define constant MASK128 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF

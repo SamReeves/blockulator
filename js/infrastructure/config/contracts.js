@@ -58,7 +58,8 @@ const LEGACY_KEY_MAP = {
     'norm-cdf': 'NORM_CDF',
     'norm-pdf': 'NORM_PDF',
     'gaussian-tail': 'GAUSSIAN_TAIL',
-    'zscore': 'ZSCORE'
+    'zscore': 'ZSCORE',
+    'fp128-arithmetic': 'FP128_ARITHMETIC'
 };
 
 // Gaussian blueprint used as the "eulerian future" reference for backward compatibility

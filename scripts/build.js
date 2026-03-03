@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🏗️  Building Whale Games for deployment...');
+console.log('Building Blockulator for deployment...');
 
 // Helper function to copy directory recursively
 function copyDir(src, dest) {

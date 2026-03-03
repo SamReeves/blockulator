@@ -42,10 +42,13 @@ export class ContractInfoRenderer {
         
         // Add View Source button if source file is provided
         if (sourceFile) {
+            const sourceLabel = '📜 View Source';
+            const sourceTitle = 'View contract source code';
+            
             const viewSourceBtn = document.createElement('button');
             viewSourceBtn.className = 'contract-badge contract-badge-source';
-            viewSourceBtn.innerHTML = '🐍 View Vyper Source';
-            viewSourceBtn.title = 'View Vyper source code';
+            viewSourceBtn.innerHTML = sourceLabel;
+            viewSourceBtn.title = sourceTitle;
             viewSourceBtn.onclick = () => this.showSourceModal(sourceFile);
             infoContainer.appendChild(viewSourceBtn);
         }
@@ -93,6 +96,10 @@ export class ContractInfoRenderer {
             existingModal.remove();
         }
         
+        const isHuff = sourceFile.endsWith('.huff');
+        const langClass = isHuff ? 'language-asm' : 'language-python';
+        const titleEmoji = isHuff ? '0x' : '📜';
+        
         const modal = document.createElement('div');
         modal.id = 'source-modal';
         modal.className = 'modal-overlay';
@@ -100,14 +107,14 @@ export class ContractInfoRenderer {
         modal.innerHTML = `
             <div class="modal-content source-modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">📜 Contract Source Code</h3>
+                    <h3 class="modal-title">${titleEmoji} Contract Source Code</h3>
                     <button class="modal-close" id="close-modal">✕</button>
                 </div>
                 <div class="modal-file-info">
                     <span class="file-path">${sourceFile}</span>
                 </div>
                 <div class="modal-body">
-                    <pre class="source-code"><code class="language-python">${this.escapeHtml(code)}</code></pre>
+                    <pre class="source-code"><code class="${langClass}">${this.escapeHtml(code)}</code></pre>
                 </div>
                 <div class="modal-footer">
                     <button class="btn-secondary" id="copy-source">📋 Copy to Clipboard</button>

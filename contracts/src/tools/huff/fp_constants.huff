@@ -1,8 +1,13 @@
-/// @title Scaled Integer Constants
-/// @notice Constants for scaled-integer arithmetic with SCALE = 10^36
-/// @dev All values are represented as (value * 10^36) stored as uint256
-///      36 digits of internal precision provides 18-digit output with 18 guard digits
-///      No sign/exponent packing, no normalization loops
+/// @title FP and Scaled Integer Constants
+/// @notice Constants for both floating-point and scaled-integer arithmetic
+/// @dev Two number systems coexist:
+///      1. Scaled integers: value * 10^36 (used by exp.huff)
+///      2. Floating point: [1-bit sign | 15-bit biased exponent | 240-bit mantissa]
+///         Mantissa normalized to [10^37, 10^38), base-10 exponent
+
+// ============================================================================
+// Scaled-Integer Constants (for exp.huff and scaled multiply operations)
+// ============================================================================
 
 // SCALE: 10^36 (the scaling factor for all internal arithmetic)
 #define constant SCALE = 0xC097CE7BC90715B34B9F1000000000
@@ -10,5 +15,33 @@
 // FIXED18_SCALE: 10^18 (for converting to/from 18-decimal fixed-point)
 #define constant FIXED18_SCALE = 0xDE0B6B3A7640000
 
-// TEN: 10 (for shifting x left after digit extraction)
+// TEN: 10 (for shifting x left after digit extraction in exp loop)
 #define constant TEN = 0x0A
+
+// ============================================================================
+// Floating-Point Constants (for fp.huff arithmetic primitives)
+// ============================================================================
+
+// EXP_BIAS: 16384 (bias for 15-bit signed exponent storage)
+#define constant EXP_BIAS = 0x4000
+
+// EXP_MASK: 0x7FFF (15-bit mask for extracting biased exponent)
+#define constant EXP_MASK = 0x7FFF
+
+// MANTISSA_MASK: 240-bit mask for extracting mantissa from packed FP
+#define constant MANTISSA_MASK = 0x0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+
+// MIN_MANTISSA: 10^37 (lower bound for normalized mantissa)
+#define constant MIN_MANTISSA = 0x785EE10D5DA46D900F436A000000000
+
+// MAX_MANTISSA: 10^38 (upper exclusive bound for normalized mantissa)
+#define constant MAX_MANTISSA = 0x4B3B4CA85A86C47A098A224000000000
+
+// TEN_UINT: 10 (for FP normalization loops - multiply/divide by 10)
+#define constant TEN_UINT = 0x0A
+
+// FP_MANTISSA_SCALE: 10^37 (divisor for FP_MUL, multiplier for FP_DIV)
+#define constant FP_MANTISSA_SCALE = 0x785EE10D5DA46D900F436A000000000
+
+// FP_ZERO: 0 (packed representation of zero)
+#define constant FP_ZERO = 0x00

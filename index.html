@@ -22,6 +22,7 @@
             <nav class="header-nav">
                 <a href="#/games" class="nav-link" data-route="games">Games</a>
                 <a href="#/calculator" class="nav-link" data-route="calculator">Calculator</a>
+                <a href="#/arithmetic" class="nav-link" data-route="arithmetic">Arithmetic</a>
                 <a href="#/futures" class="nav-link" data-route="futures">Futures</a>
                 <a href="#/badges" class="nav-link" data-route="badges">Badges</a>
                 <a href="https://sepolia-faucet.pk910.de/" target="_blank" class="nav-link">Faucet</a>
@@ -74,6 +75,12 @@
                 </div>
             </div>
 
+            <!-- ARITHMETIC VIEW -->
+            <div id="arithmetic-view" class="view-container hidden" data-view="arithmetic">
+                <div id="arithmetic-content" class="content">
+                    <div id="arithmetic-container"></div>
+                </div>
+            </div>
 
             <!-- FUTURES VIEW -->
             <div id="futures-view" class="view-container hidden" data-view="futures">
@@ -341,9 +348,9 @@
                             <div class="about-card">
                                 <h3>🔢 Math Library</h3>
                                 <p>
-                                    30+ on-chain math contracts: trig, logarithms, exponentials, 
-                                    statistical distributions, combinatorics. Callable from other contracts 
-                                    or through the calculator interface.
+                                    30+ on-chain math contracts in Vyper: trig, logarithms, exponentials, 
+                                    statistical distributions, combinatorics. Plus a signed 128.128 
+                                    fixed-point arithmetic engine written in pure Huff assembly.
                                 </p>
                             </div>
 
@@ -382,7 +389,7 @@
                             <div class="stack-layer">
                                 <div class="stack-label">Contracts</div>
                                 <div class="stack-content">
-                                    <strong>Vyper 0.4</strong> on Ethereum Sepolia
+                                    <strong>Vyper 0.4</strong> + <strong>Huff</strong> on Ethereum Sepolia
                                 </div>
                             </div>
 
@@ -436,7 +443,7 @@
         
         const app = new MasterApp();
         app.init().then(() => {
-            console.log('🐋 Blockulator SPA ready!');
+            console.log('Blockulator SPA ready');
         }).catch(err => {
             console.error('Failed to initialize app:', err);
         });
