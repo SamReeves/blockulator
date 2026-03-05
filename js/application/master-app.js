@@ -7,6 +7,7 @@
 import { web3Provider } from '../infrastructure/blockchain/web3-provider.js';
 import { WalletConnectComponent, ToastComponent } from '../presentation/components/index.js';
 import { initConfetti } from '../presentation/effects/confetti-animation.js';
+import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
 import { MasterRouter } from './master-router.js';
 
 export class MasterApp {
