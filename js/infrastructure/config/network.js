@@ -90,7 +90,7 @@ export function switchNetwork(network) {
     localStorage.setItem('preferred_network', network);
     
     // Emit event - all components should listen and reinitialize
-    eventBus.emit('NETWORK_CHANGED', {
+    eventBus.emit(EVENTS.NETWORK_CHANGED, {
         network: CURRENT_NETWORK,
         config: NETWORKS[CURRENT_NETWORK]
     });

@@ -338,7 +338,7 @@ export class MarketTable {
                 const address = row.dataset.address;
                 const future = this.futures.find(f => f.address === address);
                 if (future) {
-                    eventBus.emit('FUTURE_SELECTED', future);
+                    eventBus.emit(EVENTS.FUTURE_SELECTED, future);
                 }
             });
         });

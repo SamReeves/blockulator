@@ -98,6 +98,68 @@ EOF
 ]
 EOF
             echo -e "${GREEN}✓ ABI generated${NC}"
+        elif [ "$contract_name" = "test_hex_arithmetic" ]; then
+            cat > "${ABI_DIR}/hex-arithmetic.json" << EOF
+[
+  {
+    "type": "function",
+    "name": "add",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "sub",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "mul",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "div",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "mulRaw",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "divRaw",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "fromFixed18",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "toFixed18",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  }
+]
+EOF
+            echo -e "${GREEN}✓ ABI generated${NC}"
         elif [ "$contract_name" = "test_fp128_addsub" ]; then
             cat > "${ABI_DIR}/fp128-arithmetic.json" << EOF
 [

@@ -11,6 +11,24 @@
    ============================================ */
 
 /* ============================================
+   TABLE OF CONTENTS
+   
+   1. CSS Variables (line ~16)
+   2. Reset & Base (line ~79)
+   3. App Layout (line ~100)
+   4. Header (line ~150)
+   5. Navigation (line ~270)
+   6. Buttons (line ~570)
+   7. Forms & Inputs (line ~750)
+   8. Game Interfaces (line ~1750)
+   9. Calculator Interfaces (line ~3100)
+   10. Futures/Market (line ~4050)
+   11. Modals & Overlays (line ~5400)
+   12. Utilities (line ~5600)
+   13. Mobile Responsive (line ~5750)
+   ============================================ */
+
+/* ============================================
    CSS VARIABLES - MD3 DESIGN TOKENS
    ============================================ */
 :root {
@@ -101,6 +119,43 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+}
+
+/* Global Error Banner */
+.app-error-banner {
+    background: var(--md-sys-color-error);
+    color: white;
+    padding: var(--md-sys-spacing-3) var(--md-sys-spacing-4);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.app-error-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: var(--md-sys-spacing-4);
+}
+
+.app-error-dismiss {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.25rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+
+.app-error-dismiss:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
 
 /* Header */
@@ -1786,6 +1841,7 @@ body {
 .contest-info-panel {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: visible !important;
 }
 
 .contest-info-panel:hover {
@@ -2041,12 +2097,6 @@ body {
     margin-top: var(--md-sys-spacing-6);
 }
 
-.stat-box {
-    background: rgba(255, 255, 255, 0.15);
-    padding: var(--md-sys-spacing-4);
-    border-radius: var(--md-sys-shape-corner-medium);
-    backdrop-filter: blur(10px);
-}
 
 .stat-label {
     font-size: 0.75rem;
@@ -4759,10 +4809,6 @@ details[open] .panel-arrow {
     font-weight: 500;
 }
 
-/* Fix for value input dropdown overflow in compact layouts */
-.contest-info-panel {
-    overflow: visible !important;
-}
 
 .value-input-container {
     position: relative;

@@ -47,7 +47,6 @@ console.log('📦 Copying JavaScript files...');
 copyDir('js', 'dist/js');
 
 console.log('🎨 Copying CSS files...');
-copyDir('styles', 'dist/styles');
 copyFileIfExists('styles.css', 'dist/styles.css');
 
 console.log('🖼️  Copying images...');

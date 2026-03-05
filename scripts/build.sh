@@ -3,7 +3,7 @@
 # Build script for DigitalOcean static site deployment
 # This copies all necessary static files to the dist directory
 
-echo "🏗️  Building Whale Games for deployment..."
+echo "🏗️  Building Blockulator for deployment..."
 
 # Clean and create dist directory
 rm -rf dist
@@ -19,12 +19,7 @@ cp -r js dist/
 
 # Copy CSS files
 echo "🎨 Copying CSS files..."
-cp -r styles dist/
 cp styles.css dist/ 2>/dev/null || true
-
-# Copy shared components
-echo "📦 Copying shared components..."
-cp -r shared dist/
 
 # Copy images and assets
 echo "🖼️  Copying images..."

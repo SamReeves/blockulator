@@ -1,65 +1,40 @@
 /**
- * Futures App Entry Point
- * Bootstraps the futures marketplace application with ViewRouter architecture
+ * Futures App
+ * Sub-app for the Futures view
+ * Manages futures marketplace with ViewRouter architecture
  */
 
-import { web3Provider } from './infrastructure/blockchain/web3-provider.js';
-import { eventBus, EVENTS } from './infrastructure/events/event-bus.js';
-import { getExplorerUrl } from './infrastructure/config/network.js';
-import { WalletConnectComponent, ToastComponent } from './presentation/components/index.js';
-import { initConfetti } from './presentation/effects/confetti-animation.js';
-import { FutureFactory } from './domain/futures/future-factory.js';
-import { ViewRouter, ViewState } from './presentation/router/view-router.js';
-import { MarketTable } from './presentation/tables/market-table.js';
-import { FutureDetailView } from './presentation/futures/future-detail-view.js';
-import { CreateFutureForm } from './presentation/futures/create-future-form.js';
-import { ContractInfoRenderer } from './presentation/renderers/contract-info-renderer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from './infrastructure/config/contracts.js';
-import { getContractsByType, getContractMetadata } from './infrastructure/config/contract-registry.js';
+import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
+import { getExplorerUrl } from '../infrastructure/config/network.js';
+import { FutureFactory } from '../domain/futures/future-factory.js';
+import { ViewRouter, ViewState } from '../presentation/router/view-router.js';
+import { MarketTable } from '../presentation/tables/market-table.js';
+import { FutureDetailView } from '../presentation/futures/future-detail-view.js';
+import { CreateFutureForm } from '../presentation/futures/create-future-form.js';
+import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js';
+import { getContractsByType, getContractMetadata } from '../infrastructure/config/contract-registry.js';
 
-class FuturesApp {
-    constructor() {
+export class FuturesApp {
+    constructor(web3Provider, walletComponent, toastComponent) {
         this.web3Provider = web3Provider;
+        this.walletComponent = walletComponent;
+        this.toastComponent = toastComponent;
         this.factory = null;
         this.viewRouter = null;
         this.marketTable = null;
         this.currentFutureView = null;
         this.createForm = null;
-        this.walletComponent = null;
-        this.toastComponent = null;
         this.factoryAbi = null;
         this.futureAbi = null;
+        this.initialized = false;
     }
 
     async init() {
-
-        try {
-            // Check for existing wallet connection FIRST
-            await this.web3Provider.checkConnection();
-
-            // Initialize wallet component
-            this.walletComponent = new WalletConnectComponent(this.web3Provider);
-            this.walletComponent.render();
-
-            // Initialize toast notifications
-            this.toastComponent = new ToastComponent();
-
-            // Initialize confetti
-            initConfetti();
-
-            // Initialize view-specific components
-            await this.initViewOnly();
-
-        } catch (error) {
-            console.error('Failed to initialize futures app:', error);
+        // Guard against double initialization
+        if (this.initialized) {
+            await this.refresh();
+            return;
         }
-    }
-
-    /**
-     * Initialize only view-specific components (for SPA integration)
-     * Assumes shared components (wallet, toast, confetti) are already initialized
-     */
-    async initViewOnly() {
 
         try {
             // Load ABIs
@@ -87,6 +62,7 @@ class FuturesApp {
             // Render contract info section
             this.renderContractInfo();
 
+            this.initialized = true;
 
         } catch (error) {
             console.error('Failed to initialize futures view:', error);
@@ -166,7 +142,8 @@ class FuturesApp {
     }
 
     async loadFactory() {
-        const FACTORY_ADDRESS = CONTRACT_ADDRESSES.FUTURE_FACTORY || '0x0000000000000000000000000000000000000000';
+        const factoryMetadata = getContractMetadata('future-factory');
+        const FACTORY_ADDRESS = factoryMetadata.contractAddress || '0x0000000000000000000000000000000000000000';
 
 
         if (!FACTORY_ADDRESS || FACTORY_ADDRESS === '0x0000000000000000000000000000000000000000') {
@@ -225,7 +202,7 @@ class FuturesApp {
         });
 
         // Future created
-        eventBus.on('FUTURE_CREATED', async () => {
+        eventBus.on(EVENTS.FUTURE_CREATED, async () => {
             
             // Hide create form
             const formContainer = document.getElementById('create-future-form-container');
@@ -240,17 +217,17 @@ class FuturesApp {
         });
 
         // Future selected
-        eventBus.on('FUTURE_SELECTED', async (future) => {
+        eventBus.on(EVENTS.FUTURE_SELECTED, async (future) => {
             this.viewRouter.navigateToDiscussion(future); // Reuse discussion navigation
         });
             
         // Navigate to market
-        eventBus.on('NAVIGATE_TO_MARKET', () => {
+        eventBus.on(EVENTS.NAVIGATE_TO_MARKET, () => {
             this.viewRouter.navigateToBoard(); // Reuse board navigation
         });
 
         // Navigate to board (alias for market)
-        eventBus.on('NAVIGATE_TO_BOARD', () => {
+        eventBus.on(EVENTS.NAVIGATE_TO_BOARD, () => {
             this.viewRouter.navigateToBoard();
         });
             
@@ -448,9 +425,14 @@ class FuturesApp {
             container.innerHTML = `
                 <div class="error-state">
                     <p>Failed to load future details</p>
-                    <button onclick="eventBus.emit('NAVIGATE_TO_MARKET')">← Back to Market</button>
+                    <button id="back-to-market-error">← Back to Market</button>
                 </div>
             `;
+            // Attach event handler properly instead of inline onclick
+            const backBtn = container.querySelector('#back-to-market-error');
+            if (backBtn) {
+                backBtn.addEventListener('click', () => eventBus.emit(EVENTS.NAVIGATE_TO_MARKET));
+            }
         }
     }
 
@@ -487,7 +469,7 @@ class FuturesApp {
 
         try {
             // Create EulerianFuture instance
-            const { EulerianFuture } = await import('./domain/futures/eulerian-future.js');
+            const { EulerianFuture } = await import('../domain/futures/eulerian-future.js');
             const future = new EulerianFuture(this.web3Provider, futureAddress, this.futureAbi);
             await future.init();
 
@@ -555,6 +537,3 @@ class FuturesApp {
         await this.refreshCurrentView();
     }
 }
-
-// Export the class for manual initialization
-export { FuturesApp };

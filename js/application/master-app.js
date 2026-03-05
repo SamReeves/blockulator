@@ -27,6 +27,24 @@ export class MasterApp {
     }
 
     /**
+     * SUB-APP CONTRACT
+     * 
+     * All sub-apps (games, calculator, arithmetic, futures, badges) follow a consistent pattern:
+     * 
+     * Constructor signature:
+     *   new SubApp(web3Provider, walletComponent, toastComponent)
+     * 
+     * Public methods:
+     *   async init()     - Initialize the sub-app (called once when view first loads)
+     *   async refresh()  - Optional: refresh data when returning to view
+     * 
+     * Sub-apps receive shared components (wallet, toast) instead of creating their own.
+     * Shared components (wallet, toast, confetti) are initialized once in MasterApp.
+     * 
+     * Note: BadgeManager uses a different API by design: init(container, web3Provider)
+     */
+
+    /**
      * Initialize the entire application
      */
     async init() {
@@ -51,6 +69,9 @@ export class MasterApp {
             console.log('✅ Blockulator SPA initialized successfully');
         } catch (error) {
             console.error('❌ Failed to initialize app:', error);
+            eventBus.emit(EVENTS.APP_ERROR, {
+                message: 'Failed to initialize application. Please refresh the page.'
+            });
             throw error;
         }
     }
@@ -71,7 +92,42 @@ export class MasterApp {
         // Confetti effects
         initConfetti();
         
+        // App-level error handling
+        this.initErrorHandling();
+        
         console.log('✅ Shared components initialized');
+    }
+
+    /**
+     * Initialize app-level error handling
+     * Subscribes to APP_ERROR events and manages the global error banner
+     */
+    initErrorHandling() {
+        const errorBanner = document.getElementById('app-error');
+        const errorMessage = document.getElementById('app-error-message');
+        const dismissBtn = document.getElementById('app-error-dismiss');
+        
+        if (!errorBanner || !errorMessage || !dismissBtn) {
+            console.warn('⚠️ App error banner elements not found');
+            return;
+        }
+        
+        // Show error banner
+        eventBus.on(EVENTS.APP_ERROR, ({ message }) => {
+            errorMessage.textContent = message;
+            errorBanner.classList.remove('hidden');
+        });
+        
+        // Clear error banner
+        eventBus.on(EVENTS.APP_ERROR_CLEAR, () => {
+            errorBanner.classList.add('hidden');
+            errorMessage.textContent = '';
+        });
+        
+        // Dismiss button
+        dismissBtn.addEventListener('click', () => {
+            eventBus.emit(EVENTS.APP_ERROR_CLEAR);
+        });
     }
 
     /**
@@ -155,12 +211,10 @@ export class MasterApp {
         await this.loadChartJs();
         
         if (!this.futuresApp) {
-            // Import and create futures app
-            const { FuturesApp } = await import('../futures-app.js');
-            this.futuresApp = new FuturesApp();
-            
-            // Don't re-initialize shared components, but do initialize view-specific things
-            await this.futuresApp.initViewOnly();
+            // Import and create futures app with shared dependencies
+            const { FuturesApp } = await import('./futures-app.js');
+            this.futuresApp = new FuturesApp(this.web3Provider, this.walletComponent, this.toastComponent);
+            await this.futuresApp.init();
         } else {
             // Refresh data if already loaded
             await this.futuresApp.refresh();

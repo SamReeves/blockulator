@@ -5,7 +5,7 @@
  */
 
 import { BadgeViewer } from './badge-viewer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { getContractMetadata } from '../../infrastructure/config/contract-registry.js';
 import { DOMHelpers } from '../dom/dom-helpers.js';
 
 export class AddressBadge {
@@ -28,17 +28,21 @@ export class AddressBadge {
         } = options;
 
         try {
+            // Get badge factory metadata
+            const factoryMetadata = getContractMetadata('badge-factory');
+            const factoryAddress = factoryMetadata.contractAddress;
+            
             // Check if badge system is deployed
-            if (!CONTRACT_ADDRESSES.BADGE_FACTORY || 
-                CONTRACT_ADDRESSES.BADGE_FACTORY === '0x0000000000000000000000000000000000000000') {
+            if (!factoryAddress || 
+                factoryAddress === '0x0000000000000000000000000000000000000000') {
                 return null;
             }
 
             // Load factory contract if not loaded
             if (!this.factoryContract) {
-                const factoryAbi = await fetch(`${CONTRACT_ABIS.BADGE_FACTORY}?v=${Date.now()}`).then(r => r.json());
+                const factoryAbi = await fetch(`${factoryMetadata.abiFile}?v=${Date.now()}`).then(r => r.json());
                 this.factoryContract = web3Provider.getContract(
-                    CONTRACT_ADDRESSES.BADGE_FACTORY,
+                    factoryAddress,
                     factoryAbi
                 );
             }
@@ -56,7 +60,8 @@ export class AddressBadge {
                 }
 
                 // Load badge contract and pixel data
-                const badgeAbi = await fetch(`${CONTRACT_ABIS.BADGE}?v=${Date.now()}`).then(r => r.json());
+                const badgeMetadata = getContractMetadata('badge-blueprint');
+                const badgeAbi = await fetch(`${badgeMetadata.abiFile}?v=${Date.now()}`).then(r => r.json());
                 const badgeContract = web3Provider.getContract(badgeAddress, badgeAbi);
                 const pixelData = await badgeContract.pixel_data();
                 const pixelBytes = new Uint8Array(ethers.utils.arrayify(pixelData));

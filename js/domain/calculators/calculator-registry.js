@@ -1,6 +1,13 @@
 /**
  * Calculator Registry
- * Single source of truth for all mathematical tools
+ * Domain layer - Calculator-specific UI and flow configuration
+ * 
+ * This registry contains calculator-only configuration: input schemas, result formatting,
+ * method names, hints, and display options for the calculator UI.
+ * 
+ * Calculator IDs (e.g., 'pi-calculator') must match contract keys in 
+ * js/infrastructure/config/contract-registry.js, which defines contract addresses,
+ * ABI paths, and source paths. Do not duplicate basic contract metadata here.
  */
 
 export const CALCULATOR_REGISTRY = [
@@ -1107,4 +1114,23 @@ export function getAllCategories() {
         categories[calc.category].push(calc);
     });
     return categories;
+}
+
+/**
+ * Validate calculator IDs against contract registry (optional dev-mode check)
+ * Ensures all calculator IDs exist in the contract registry
+ * @param {Object} CONTRACT_REGISTRY - Import from contract-registry.js to check
+ * @returns {Array<string>} Array of missing calculator IDs (empty if all valid)
+ */
+export function validateCalculatorIds(CONTRACT_REGISTRY) {
+    const missing = [];
+    CALCULATOR_REGISTRY.forEach(calc => {
+        if (!CONTRACT_REGISTRY[calc.id]) {
+            missing.push(calc.id);
+        }
+    });
+    if (missing.length > 0) {
+        console.warn('⚠️ Calculator IDs not found in contract registry:', missing);
+    }
+    return missing;
 }

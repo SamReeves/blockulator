@@ -7,7 +7,7 @@
  */
 
 import { eventBus, EVENTS } from '../events/event-bus.js';
-import { CONTRACT_ADDRESSES } from '../config/contracts.js';
+import { getContractMetadata } from '../config/contract-registry.js';
 
 export class ContractLoader {
     /**
@@ -19,20 +19,22 @@ export class ContractLoader {
     static async load(contractName, web3Provider) {
         // No longer requires wallet connection - works in read-only mode too!
         try {
+            // Get contract metadata from registry
+            const metadata = getContractMetadata(contractName);
+            
             // Fetch ABI (with cache busting to ensure latest version)
             const cacheBust = Date.now();
-            const response = await fetch(`/contracts/build/abis/${contractName}.json?v=${cacheBust}`);
+            const response = await fetch(`/${metadata.abiFile}?v=${cacheBust}`);
             if (!response.ok) {
                 throw new Error(`ABI file not found: ${contractName}.json`);
             }
             const abi = await response.json();
             
             // Get contract address
-            const addressKey = this.toAddressKey(contractName);
-            const address = CONTRACT_ADDRESSES[addressKey];
+            const address = metadata.contractAddress;
             
             if (!address) {
-                throw new Error(`No address configured for ${contractName} (key: ${addressKey})`);
+                throw new Error(`No address configured for ${contractName}`);
             }
 
             // Create contract instance (read-only or with signer)
@@ -55,15 +57,6 @@ export class ContractLoader {
             eventBus.emit(EVENTS.TOAST, { message, type: 'error' });
             return null;
         }
-    }
-
-    /**
-     * Convert kebab-case to SCREAMING_SNAKE_CASE for address lookup
-     * @param {string} kebabCase - e.g., 'pissing-contest'
-     * @returns {string} e.g., 'PISSING_CONTEST'
-     */
-    static toAddressKey(kebabCase) {
-        return kebabCase.toUpperCase().replace(/-/g, '_');
     }
 }
 

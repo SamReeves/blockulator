@@ -1,7 +1,13 @@
 /**
  * Unified Contract Registry
  * Infrastructure layer - Single source of truth for all contract metadata
- * Consolidates addresses, source files, ABIs, and display metadata
+ * 
+ * This registry defines WHAT contracts exist and WHERE they live on-chain.
+ * Contains: addresses, ABI paths, source paths, and minimal display metadata
+ * (name, emoji, description) for all contract types (games, calculators, futures, identity).
+ * 
+ * For calculator-specific UI configuration (input schemas, result formatting, method names),
+ * see js/domain/calculators/calculator-registry.js, which references IDs from this file.
  */
 
 import { getCurrentNetwork } from './network.js';

@@ -9,7 +9,7 @@ import { TransactionHandler } from '../../infrastructure/blockchain/transaction-
 import { DOMHelpers } from '../../presentation/dom/dom-helpers.js';
 import { ContractInfoRenderer } from '../../presentation/renderers/contract-info-renderer.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
-import { CONTRACT_ADDRESSES, CONTRACT_SOURCES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { getContractMetadata } from '../../infrastructure/config/contract-registry.js';
 import { getExplorerUrl } from '../../infrastructure/config/network.js';
 import { PixelEditor } from '../../presentation/components/pixel-editor.js';
 import { BadgeViewer } from '../../presentation/components/badge-viewer.js';
@@ -110,14 +110,15 @@ export class BadgeManager extends InteractiveContract {
                 <p class="contract-card-description">Creates and manages badge instances</p>
             </div>
         `;
+        const factoryMetadata = getContractMetadata('badge-factory');
         const factoryInfo = ContractInfoRenderer.createContractInfo(
-            CONTRACT_ADDRESSES.BADGE_FACTORY,
-            CONTRACT_SOURCES.BADGE_FACTORY,
-            CONTRACT_ABIS.BADGE_FACTORY
+            factoryMetadata.contractAddress,
+            factoryMetadata.sourceFile,
+            factoryMetadata.abiFile
         );
         factoryCard.appendChild(factoryInfo);
         contractsSection.appendChild(factoryCard);
-        
+
         // Badge Blueprint contract
         const blueprintCard = document.createElement('div');
         blueprintCard.className = 'contract-info-card';
@@ -127,10 +128,11 @@ export class BadgeManager extends InteractiveContract {
                 <p class="contract-card-description">Template contract for individual badges</p>
             </div>
         `;
+        const blueprintMetadata = getContractMetadata('badge-blueprint');
         const blueprintInfo = ContractInfoRenderer.createContractInfo(
-            CONTRACT_ADDRESSES.BADGE_BLUEPRINT,
-            CONTRACT_SOURCES.BADGE_BLUEPRINT,
-            CONTRACT_ABIS.BADGE
+            blueprintMetadata.contractAddress,
+            blueprintMetadata.sourceFile,
+            blueprintMetadata.abiFile
         );
         blueprintCard.appendChild(blueprintInfo);
         contractsSection.appendChild(blueprintCard);
@@ -165,8 +167,10 @@ export class BadgeManager extends InteractiveContract {
         const hasBadgeState = document.getElementById('has-badge-state');
 
         // Check if badge contracts are deployed
-        if (!CONTRACT_ADDRESSES.BADGE_FACTORY || 
-            CONTRACT_ADDRESSES.BADGE_FACTORY === '0x0000000000000000000000000000000000000000') {
+        const factoryMetadata = getContractMetadata('badge-factory');
+        const factoryAddress = factoryMetadata.contractAddress;
+        if (!factoryAddress ||
+            factoryAddress === '0x0000000000000000000000000000000000000000') {
             if (loading) loading.classList.add('hidden');
             if (content) {
                 content.classList.remove('hidden');
@@ -251,7 +255,8 @@ export class BadgeManager extends InteractiveContract {
     async loadBadgeContract() {
         try {
             // Load badge ABI (with cache busting)
-            const response = await fetch(`${CONTRACT_ABIS.BADGE}?v=${Date.now()}`);
+            const badgeMetadata = getContractMetadata('badge-blueprint');
+            const response = await fetch(`${badgeMetadata.abiFile}?v=${Date.now()}`);
             const abi = await response.json();
             
             // Create contract instance

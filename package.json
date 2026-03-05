@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "build": "mkdir -p dist && cp index.html styles.css blockulator.png blockulator_favicon.png dist/ && cp -r js dist/js && cp -r contracts dist/contracts"
+    "build": "mkdir -p dist && cp index.html styles.css blockulator.png blockulator_favicon.png dist/ && cp -r js dist/js && cp -r contracts dist/contracts",
+    "test": "node tests/test-module-imports.js && node tests/test-all-contracts.js",
+    "test:server": "cd tests && ./test-server.sh"
   },
   "dependencies": {
     "ethers": "^5.8.0"

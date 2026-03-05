@@ -85,7 +85,7 @@ export class FutureDetailView {
             backBtn.id = 'back-to-market-btn';
             backBtn.textContent = '← Back to Market';
             backBtn.addEventListener('click', () => {
-                eventBus.emit('NAVIGATE_TO_MARKET');
+                eventBus.emit(EVENTS.NAVIGATE_TO_MARKET);
             });
             
             errorContainer.appendChild(backBtn);
@@ -265,7 +265,7 @@ export class FutureDetailView {
         const backBtn = this.containerElement.querySelector('#back-to-market-btn');
         if (backBtn) {
             backBtn.addEventListener('click', () => {
-                eventBus.emit('NAVIGATE_TO_MARKET');
+                eventBus.emit(EVENTS.NAVIGATE_TO_MARKET);
             });
         }
 
@@ -363,7 +363,7 @@ export class FutureDetailView {
             });
             
             setTimeout(() => {
-                eventBus.emit('NAVIGATE_TO_MARKET');
+                eventBus.emit(EVENTS.NAVIGATE_TO_MARKET);
             }, 1500);
         } catch (error) {
             console.error('Failed to buy future:', error);

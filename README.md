@@ -23,6 +23,13 @@ A mobile-first web application for blockchain-based games and on-chain scientifi
 - **Event-driven** - Loose coupling between game logic and animations
 - **Modular** - Each game/tool is an independent module
 
+### Routing
+- **Hash-based SPA routing** - Client-side navigation using URL hash fragments
+- **Deep links** - Direct links to any page or sub-page work out of the box
+  - Main views: `https://site.com/#/games`, `https://site.com/#/calculator`, `https://site.com/#/futures`
+  - Sub-routes: `https://site.com/#/games/pissing-contest`
+- **No server configuration required** - All routes handled client-side with JavaScript
+
 ### Project Structure
 
 ```

@@ -1,8 +1,11 @@
 /**
  * Master Router
- * Handles top-level navigation between major views (games, tools, discussions, futures)
- * Manages URL state and browser history without page reloads
+ * Handles top-level navigation between major views (games, calculator, arithmetic, futures, badges)
+ * Uses hash-based routing (#/games, #/calculator, etc.) for SPA navigation without page reloads
  * Supports sub-routes: #/games/pissing-contest
+ * 
+ * Deep links: https://site.com/#/games or https://site.com/#/games/pissing-contest
+ * No server configuration required (pure client-side routing)
  */
 
 export class MasterRouter {
@@ -60,7 +63,7 @@ export class MasterRouter {
      * Parse current URL to determine route
      */
     parseRoute() {
-        // Support both hash-based (#/games) and path-based (/games) routing
+        // Hash-based routing: URLs like https://site.com/#/games or https://site.com/#/games/pissing-contest
         let path = window.location.hash.slice(1); // Remove #
         
         if (!path || path === '/') {

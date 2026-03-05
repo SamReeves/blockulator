@@ -239,10 +239,10 @@ export class PriceSuggester {
                 e.stopPropagation();
                 const price = btn.dataset.price;
                 const premium = btn.dataset.premium;
-                
+
                 // Emit event with selected price
-                eventBus.emit('PRICE_SELECTED', { 
-                    price, 
+                eventBus.emit(EVENTS.PRICE_SELECTED, {
+                    price,
                     priceWei: price,
                     priceEth: ethers.utils.formatEther(price),
                     premium,
@@ -309,8 +309,8 @@ export class PriceSuggester {
                     const useCustomBtn = customResult.querySelector('.btn-use-custom');
                     if (useCustomBtn) {
                         useCustomBtn.addEventListener('click', () => {
-                            eventBus.emit('PRICE_SELECTED', { 
-                                price: customPrice, 
+                            eventBus.emit(EVENTS.PRICE_SELECTED, {
+                                price: customPrice,
                                 priceWei: customPrice,
                                 priceEth,
                                 premium,

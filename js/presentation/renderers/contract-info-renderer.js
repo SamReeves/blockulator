@@ -90,79 +90,21 @@ export class ContractInfoRenderer {
      * Create and show source code modal
      */
     static createSourceModal(code, sourceFile) {
-        // Remove existing modal if any
-        const existingModal = document.getElementById('source-modal');
-        if (existingModal) {
-            existingModal.remove();
-        }
-        
         const isHuff = sourceFile.endsWith('.huff');
         const langClass = isHuff ? 'language-asm' : 'language-python';
         const titleEmoji = isHuff ? '0x' : '📜';
         
-        const modal = document.createElement('div');
-        modal.id = 'source-modal';
-        modal.className = 'modal-overlay';
-        
-        modal.innerHTML = `
-            <div class="modal-content source-modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title">${titleEmoji} Contract Source Code</h3>
-                    <button class="modal-close" id="close-modal">✕</button>
-                </div>
-                <div class="modal-file-info">
-                    <span class="file-path">${sourceFile}</span>
-                </div>
-                <div class="modal-body">
-                    <pre class="source-code"><code class="${langClass}">${this.escapeHtml(code)}</code></pre>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-secondary" id="copy-source">📋 Copy to Clipboard</button>
-                    <button class="btn-primary" id="close-modal-footer">Close</button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Add event listeners
-        const closeButtons = modal.querySelectorAll('#close-modal, #close-modal-footer');
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => modal.remove());
+        this.createModal({
+            modalId: 'source-modal',
+            title: `${titleEmoji} Contract Source Code`,
+            filePath: sourceFile,
+            code: code,
+            langClass: langClass,
+            copyBtnId: 'copy-source',
+            closeBtnId: 'close-modal',
+            closeFooterBtnId: 'close-modal-footer',
+            copySuccessMessage: 'Source code copied to clipboard!'
         });
-        
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
-        });
-        
-        // Copy button
-        const copyBtn = modal.querySelector('#copy-source');
-        copyBtn.addEventListener('click', async () => {
-            try {
-                await navigator.clipboard.writeText(code);
-                eventBus.emit(EVENTS.TOAST, {
-                    message: 'Source code copied to clipboard!',
-                    type: 'success'
-                });
-            } catch (error) {
-                console.error('Copy failed:', error);
-                eventBus.emit(EVENTS.TOAST, {
-                    message: 'Failed to copy to clipboard',
-                    type: 'error'
-                });
-            }
-        });
-        
-        // Escape key to close
-        const escHandler = (e) => {
-            if (e.key === 'Escape') {
-                modal.remove();
-                document.removeEventListener('keydown', escHandler);
-            }
-        };
-        document.addEventListener('keydown', escHandler);
     }
     
     /**
@@ -190,31 +132,48 @@ export class ContractInfoRenderer {
      * Create and show ABI modal
      */
     static createAbiModal(abiJson, abiFile) {
+        this.createModal({
+            modalId: 'abi-modal',
+            title: '📋 Contract ABI',
+            filePath: abiFile,
+            code: abiJson,
+            langClass: 'language-json',
+            copyBtnId: 'copy-abi',
+            closeBtnId: 'close-abi-modal',
+            closeFooterBtnId: 'close-abi-modal-footer',
+            copySuccessMessage: 'ABI copied to clipboard!'
+        });
+    }
+    
+    /**
+     * Generic modal creator for source code and ABI display
+     */
+    static createModal({ modalId, title, filePath, code, langClass, copyBtnId, closeBtnId, closeFooterBtnId, copySuccessMessage }) {
         // Remove existing modal if any
-        const existingModal = document.getElementById('abi-modal');
+        const existingModal = document.getElementById(modalId);
         if (existingModal) {
             existingModal.remove();
         }
         
         const modal = document.createElement('div');
-        modal.id = 'abi-modal';
+        modal.id = modalId;
         modal.className = 'modal-overlay';
         
         modal.innerHTML = `
             <div class="modal-content source-modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">📋 Contract ABI</h3>
-                    <button class="modal-close" id="close-abi-modal">✕</button>
+                    <h3 class="modal-title">${title}</h3>
+                    <button class="modal-close" id="${closeBtnId}">✕</button>
                 </div>
                 <div class="modal-file-info">
-                    <span class="file-path">${abiFile}</span>
+                    <span class="file-path">${filePath}</span>
                 </div>
                 <div class="modal-body">
-                    <pre class="source-code"><code class="language-json">${this.escapeHtml(abiJson)}</code></pre>
+                    <pre class="source-code"><code class="${langClass}">${this.escapeHtml(code)}</code></pre>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn-secondary" id="copy-abi">📋 Copy to Clipboard</button>
-                    <button class="btn-primary" id="close-abi-modal-footer">Close</button>
+                    <button class="btn-secondary" id="${copyBtnId}">📋 Copy to Clipboard</button>
+                    <button class="btn-primary" id="${closeFooterBtnId}">Close</button>
                 </div>
             </div>
         `;
@@ -222,7 +181,7 @@ export class ContractInfoRenderer {
         document.body.appendChild(modal);
         
         // Add event listeners
-        const closeButtons = modal.querySelectorAll('#close-abi-modal, #close-abi-modal-footer');
+        const closeButtons = modal.querySelectorAll(`#${closeBtnId}, #${closeFooterBtnId}`);
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => modal.remove());
         });
@@ -234,12 +193,12 @@ export class ContractInfoRenderer {
         });
         
         // Copy button
-        const copyBtn = modal.querySelector('#copy-abi');
+        const copyBtn = modal.querySelector(`#${copyBtnId}`);
         copyBtn.addEventListener('click', async () => {
             try {
-                await navigator.clipboard.writeText(abiJson);
+                await navigator.clipboard.writeText(code);
                 eventBus.emit(EVENTS.TOAST, {
-                    message: 'ABI copied to clipboard!',
+                    message: copySuccessMessage,
                     type: 'success'
                 });
             } catch (error) {

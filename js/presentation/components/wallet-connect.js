@@ -5,7 +5,7 @@
 
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { BadgeViewer } from './badge-viewer.js';
-import { CONTRACT_ADDRESSES, CONTRACT_ABIS } from '../../infrastructure/config/contracts.js';
+import { getContractMetadata } from '../../infrastructure/config/contract-registry.js';
 
 export class WalletConnectComponent {
     constructor(web3Provider) {
@@ -104,19 +104,23 @@ export class WalletConnectComponent {
      */
     async loadBadge(address) {
         try {
+            // Get badge factory metadata
+            const factoryMetadata = getContractMetadata('badge-factory');
+            const factoryAddress = factoryMetadata.contractAddress;
+            
             // Check if badge factory is deployed
-            if (!CONTRACT_ADDRESSES.BADGE_FACTORY || 
-                CONTRACT_ADDRESSES.BADGE_FACTORY === '0x0000000000000000000000000000000000000000' ||
-                CONTRACT_ADDRESSES.BADGE_FACTORY === '0x0') {
+            if (!factoryAddress ||
+                factoryAddress === '0x0000000000000000000000000000000000000000' ||
+                factoryAddress === '0x0') {
                 console.log('Badge system not deployed yet, skipping badge load');
                 return; // Badge system not deployed yet
             }
 
             // Load badge factory contract if not loaded
             if (!this.badgeFactoryContract) {
-                const factoryAbi = await fetch(`${CONTRACT_ABIS.BADGE_FACTORY}?v=${Date.now()}`).then(r => r.json());
+                const factoryAbi = await fetch(`${factoryMetadata.abiFile}?v=${Date.now()}`).then(r => r.json());
                 this.badgeFactoryContract = this.web3Provider.getContract(
-                    CONTRACT_ADDRESSES.BADGE_FACTORY,
+                    factoryAddress,
                     factoryAbi
                 );
             }
@@ -147,7 +151,8 @@ export class WalletConnectComponent {
 
             if (hasBadge) {
                 // Load badge contract
-                const badgeAbi = await fetch(`${CONTRACT_ABIS.BADGE}?v=${Date.now()}`).then(r => r.json());
+                const badgeMetadata = getContractMetadata('badge-blueprint');
+                const badgeAbi = await fetch(`${badgeMetadata.abiFile}?v=${Date.now()}`).then(r => r.json());
                 const badgeContract = this.web3Provider.getContract(
                     badgeAddress,
                     badgeAbi

@@ -5,7 +5,7 @@
  */
 
 import { web3Provider } from '../infrastructure/blockchain/web3-provider.js';
-import { CONTRACT_ADDRESSES } from '../infrastructure/config/contracts.js';
+import { getContractMetadata } from '../infrastructure/config/contract-registry.js';
 import { AddressBadge } from '../presentation/components/address-badge.js';
 import { DOMHelpers } from '../presentation/dom/dom-helpers.js';
 
@@ -85,24 +85,17 @@ export class GameStatusService {
      * @private
      */
     async fetchGameStatus(gameName) {
-        const contractKey = gameName.toUpperCase().replace(/-/g, '_');
-        const address = CONTRACT_ADDRESSES[contractKey];
-
-        if (!address) {
-            throw new Error(`Contract address not found for ${gameName}`);
-        }
-
         try {
-            // Dynamically import ABI path
-            const abiModule = await import('../infrastructure/config/contracts.js');
-            const abiPath = abiModule.CONTRACT_ABIS[contractKey];
-            
-            if (!abiPath) {
-                throw new Error(`ABI path not found for ${gameName}`);
+            // Get contract metadata from registry
+            const metadata = getContractMetadata(gameName);
+            const address = metadata.contractAddress;
+
+            if (!address) {
+                throw new Error(`Contract address not found for ${gameName}`);
             }
 
             // Fetch the actual ABI JSON file
-            const abiResponse = await fetch(`/${abiPath}`);
+            const abiResponse = await fetch(`/${metadata.abiFile}`);
             if (!abiResponse.ok) {
                 throw new Error(`Failed to fetch ABI: ${abiResponse.status}`);
             }

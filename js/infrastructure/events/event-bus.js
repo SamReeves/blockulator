@@ -81,6 +81,7 @@ class EventBus {
 export const eventBus = new EventBus();
 
 // Common events
+// All app-level events are defined here for discoverability and typo-safety
 export const EVENTS = {
     // Network events
     NETWORK_CHANGED: 'network:changed',
@@ -97,12 +98,23 @@ export const EVENTS = {
     PLAY_FAILED: 'play:failed',
     WINNER_DETERMINED: 'winner:determined',
     
+    // Futures events
+    FUTURE_SELECTED: 'futures:selected',
+    FUTURE_CREATED: 'futures:created',
+    NAVIGATE_TO_MARKET: 'futures:navigateToMarket',
+    NAVIGATE_TO_BOARD: 'futures:navigateToBoard',
+    
+    // Price suggester events
+    PRICE_SELECTED: 'price:selected',
+    
     // Animation triggers
     CONFETTI: 'animation:confetti',
     SPLASH: 'animation:splash',
     
     // UI events
     TOAST: 'ui:toast',
-    LOADING: 'ui:loading'
+    LOADING: 'ui:loading',
+    APP_ERROR: 'ui:appError',
+    APP_ERROR_CLEAR: 'ui:appErrorClear'
 };
 

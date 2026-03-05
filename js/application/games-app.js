@@ -42,19 +42,17 @@ export class GamesApp {
     /**
      * Register all game modules from MODULE_MANIFEST
      */
-    async registerGames() {
+    registerGames() {
         console.log('🎮 Registering games from manifest...');
         
         // Get all game modules from manifest
         const gameModules = Object.entries(MODULE_MANIFEST)
             .filter(([_, config]) => config.category === 'game');
         
-        // Dynamically import and register each game
+        // Register each game (ModuleRegistry loads them dynamically when needed)
         for (const [moduleName, config] of gameModules) {
             try {
-                const module = await import(config.path);
-                const GameClass = module[config.export];
-                this.moduleRegistry.register(moduleName, GameClass, 'game');
+                this.moduleRegistry.register(moduleName, 'game');
             } catch (error) {
                 console.error(`Failed to register game ${moduleName}:`, error);
             }

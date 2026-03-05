@@ -101,7 +101,7 @@ export class ArithmeticApp {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Internal:</span>
-                            <span class="info-value">uint256 / 2^128</span>
+                            <span class="info-value">int256 / 2^128 (signed)</span>
                         </div>
                     </div>
                 </div>

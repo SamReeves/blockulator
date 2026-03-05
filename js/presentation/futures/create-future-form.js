@@ -273,7 +273,7 @@ export class CreateFutureForm {
             });
 
             // Emit event for refresh
-            eventBus.emit('FUTURE_CREATED', { 
+            eventBus.emit(EVENTS.FUTURE_CREATED, {
                 address: result.futureAddress,
                 distributionType,
                 lifetime

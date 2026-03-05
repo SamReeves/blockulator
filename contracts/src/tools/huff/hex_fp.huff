@@ -1,0 +1,400 @@
+/// @title Hex Fixed-Point Arithmetic Library (IBM S/360 inspired)
+/// @notice Hexadecimal floating-point operations using base-16 exponent
+/// @dev Format: 1-bit sign + 8-bit base-16 exponent + 128-bit 64.64 mantissa
+///      Inspired by IBM System/360 hexadecimal floating-point architecture
+
+#include "hex_fp_constants.huff"
+
+// ============================================================================
+// HELPER MACROS
+// ============================================================================
+
+/// @notice Extract sign, exponent, and mantissa from packed hex float
+/// @dev takes(1) returns(3)
+/// Stack input: [packed]
+/// Stack output: [mantissa, exponent, sign]
+#define macro HEX_UNPACK() = takes(1) returns(3) {
+    // Input: [packed]
+    dup1                        // [packed, packed]
+    [SIGN_BIT] shr             // [sign, packed]
+    swap1                       // [packed, sign]
+    
+    dup1                        // [packed, packed, sign]
+    [EXP_SHIFT] shr            // [exp_field, packed, sign]
+    [EXP_MASK] and             // [exponent, packed, sign]
+    swap1                       // [packed, exponent, sign]
+    
+    [MANTISSA_MASK] and        // [mantissa, exponent, sign]
+}
+
+/// @notice Pack sign, exponent, and mantissa into hex float word
+/// @dev takes(3) returns(1)
+/// Stack input: [mantissa, exponent, sign]
+/// Stack output: [packed]
+#define macro HEX_PACK() = takes(3) returns(1) {
+    // Input: [mantissa, exponent, sign]
+    //  bits [255]     : sign
+    //  bits [254:247] : exponent  
+    //  bits [119:0]   : mantissa
+    
+    // Start with mantissa (limit to 128 bits)
+    [MANTISSA_MASK] and        // [mantissa & mask, exponent, sign]
+    
+    // Add exponent field
+    swap1                       // [exponent, mantissa, sign]
+    [EXP_MASK] and             // [exponent & 0xFF, mantissa, sign]
+    [EXP_SHIFT] shl            // [exp_field << 247, mantissa, sign]
+    or                          // [mantissa|exp, sign]
+    
+    // Add sign bit
+    swap1                       // [sign, mantissa|exp]
+    [SIGN_BIT] shl             // [sign << 255, mantissa|exp]
+    or                          // [packed]
+}
+
+/// @notice Normalize mantissa to have leading nibble in range 1..F
+/// @dev takes(2) returns(2)
+/// Stack input: [mantissa, exponent]
+/// Stack output: [normalized_mantissa, adjusted_exponent]
+#define macro HEX_NORMALIZE() = takes(2) returns(2) {
+    // Input: [mantissa, exponent]
+    
+    // Check if mantissa is zero
+    dup1 iszero normalize_zero jumpi
+    
+    // Iteratively normalize (max ~32 iterations for 128 bits)
+    normalize_loop:
+        // Check if mantissa >= 2^64 (needs shift right)
+        dup1 [MAX_MANTISSA_64_64] lt normalize_check_left jumpi
+        
+        // Mantissa >= 2^64, shift right by 4 bits (one nibble)
+        [NIBBLE_SHIFT] shr         // [mantissa >> 4, exponent]
+        swap1 0x01 add swap1       // [mantissa >> 4, exponent + 1]
+        normalize_loop jump
+    
+    normalize_check_left:
+        // Check if mantissa < 2^60 (needs shift left)
+        dup1 [MIN_MANTISSA_64_64] lt normalize_shift_left jumpi
+        
+        // Mantissa is normalized
+        normalize_done jump
+    
+    normalize_shift_left:
+        // Mantissa < 2^60, shift left by 4 bits
+        [NIBBLE_SHIFT] shl         // [mantissa << 4, exponent]
+        swap1 0x01 sub swap1       // [mantissa << 4, exponent - 1]
+        normalize_loop jump
+    
+    normalize_zero:
+        // Mantissa is zero, return zero with exponent 0
+        pop 0x00                    // [0, exponent]
+        swap1 pop [EXP_BIAS]       // [0, EXP_BIAS]
+    
+    normalize_done:
+}
+
+// ============================================================================
+// CONVERSION MACROS
+// ============================================================================
+
+/// @notice Convert signed fixed18 to hex float format (simplified)
+/// @dev takes(1) returns(1)
+/// Stack input: [fixed18_value] (signed int256 representing value * 1e18)
+/// Stack output: [hex_float] (packed format)
+#define macro HEX_FROM_FIXED18() = takes(1) returns(1) {
+    // Input: [fixed18]
+    
+    // Handle zero early
+    dup1 iszero hex_from_zero jumpi
+    
+    // Determine sign and get absolute value
+    dup1 0x00 slt              // [is_negative, fixed18]
+    swap1                       // [fixed18, is_negative]
+    dup2 hex_from_is_neg jumpi     // if is_negative, jump
+    
+    // Positive path
+    // Stack: [fixed18, 0]
+    [ONE_64_64] mul            // [fixed18 * 2^64, 0]
+    [FIXED18_SCALE] div        // [mantissa, 0]
+    
+    // Pack inline: need [mantissa, exponent, sign]
+    [MANTISSA_MASK] and        // [mantissa & mask, 0]
+    [EXP_BIAS] [EXP_MASK] and  // [exp & 0xFF, mantissa, 0]
+    [EXP_SHIFT] shl            // [exp << 247, mantissa, 0]
+    or                          // [mantissa|exp, 0]
+    swap1 [SIGN_BIT] shl       // [sign << 255, mantissa|exp]
+    or                          // [packed]
+    hex_from_done jump
+    
+    hex_from_is_neg:
+    // Negative: negate and set sign=1
+    // Stack: [fixed18, 1]
+    swap1 0x00 swap1 sub       // [-fixed18, 1] = [abs, 1]
+    swap1                       // [1, abs]
+    swap1                       // [abs, 1]
+    [ONE_64_64] mul            // [abs * 2^64, 1]
+    [FIXED18_SCALE] div        // [mantissa, 1]
+    
+    // Pack inline: need [mantissa, exponent, sign]
+    [MANTISSA_MASK] and        // [mantissa & mask, 1]
+    [EXP_BIAS] [EXP_MASK] and  // [exp & 0xFF, mantissa, 1]
+    [EXP_SHIFT] shl            // [exp << 247, mantissa, 1]
+    or                          // [mantissa|exp, 1]
+    swap1 [SIGN_BIT] shl       // [sign << 255, mantissa|exp]
+    or                          // [packed]
+    hex_from_done jump
+    
+    hex_from_zero:
+    0x00
+    
+    hex_from_done:
+}
+
+/// @notice Convert hex float format to signed fixed18 (simplified)
+/// @dev takes(1) returns(1)
+/// Stack input: [hex_float] (packed format)
+/// Stack output: [fixed18_value] (signed int256 representing value * 1e18)
+/// Note: Simplified version - assumes exponent = bias
+#define macro HEX_TO_FIXED18() = takes(1) returns(1) {
+    // Input: [packed]
+    
+    // Handle zero
+    dup1 iszero hex_to_zero jumpi
+    
+    // Unpack
+    HEX_UNPACK()               // [mantissa, exponent, sign]
+    
+    // Check for zero mantissa
+    dup1 iszero hex_to_zero_unpacked jumpi
+    
+    // Stack: [mantissa, exponent, sign]
+    // Simplified: ignore exponent, just convert mantissa from 64.64 to fixed18
+    swap1 pop                   // [mantissa, sign]
+    
+    // Convert from 64.64 to fixed18: (mantissa * 10^18) / 2^64
+    [FIXED18_SCALE] mul        // [mantissa * 10^18, sign]
+    [FRAC_BITS] shr            // [result, sign]
+    
+    // Apply sign
+    swap1 iszero hex_to_done jumpi
+    0x00 swap1 sub             // [-result]
+    hex_to_done jump
+    
+    hex_to_zero_unpacked:
+    pop pop 0x00
+    hex_to_done jump
+    
+    hex_to_zero:
+    0x00
+    
+    hex_to_done:
+}
+
+// ============================================================================
+// ARITHMETIC MACROS
+// ============================================================================
+
+/// @notice Add two hex float numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [b, a]
+/// Stack output: [a + b]
+#define macro HEX_ADD() = takes(2) returns(1) {
+    // Input: [b, a]
+    
+    // Unpack both operands
+    HEX_UNPACK()               // [mantissa_b, exp_b, sign_b, a]
+    swap3                       // [a, exp_b, sign_b, mantissa_b]
+    HEX_UNPACK()               // [mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Stack: [mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    // Align exponents: shift smaller mantissa right
+    
+    // Compare exponents
+    dup2 dup5                   // [exp_b, exp_a, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    gt add_b_larger jumpi
+    
+    // exp_a >= exp_b: shift mantissa_b right
+    dup2 dup5 sub              // [exp_diff, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    [NIBBLE_SHIFT] mul         // [shift_amount, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Shift mantissa_b right
+    swap6                       // [mantissa_b, exp_a, sign_a, exp_b, sign_b, mantissa_a, shift_amount]
+    dup7 shr                    // [mantissa_b >> shift, exp_a, sign_a, exp_b, sign_b, mantissa_a, shift_amount]
+    swap6 pop                   // [mantissa_b_shifted, exp_a, sign_a, exp_b, sign_b, mantissa_a]
+    swap5 swap4 swap3          // [mantissa_a, exp_a, sign_a, mantissa_b_shifted, sign_b, exp_b]
+    pop                         // [mantissa_a, exp_a, sign_a, mantissa_b_shifted, sign_b]
+    swap4                       // [sign_b, exp_a, sign_a, mantissa_b_shifted, mantissa_a]
+    swap2                       // [sign_a, exp_a, sign_b, mantissa_b_shifted, mantissa_a]
+    add_aligned jump
+    
+    add_b_larger:
+    // exp_b > exp_a: shift mantissa_a right and use exp_b
+    dup4 dup3 sub              // [exp_diff, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    [NIBBLE_SHIFT] mul         // [shift_amount, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    swap1 swap2 pop            // [mantissa_a, shift_amount, sign_a, exp_b, sign_b, mantissa_b]
+    dup2 shr                    // [mantissa_a_shifted, shift_amount, sign_a, exp_b, sign_b, mantissa_b]
+    swap1 pop                   // [mantissa_a_shifted, sign_a, exp_b, sign_b, mantissa_b]
+    swap4                       // [mantissa_b, sign_a, exp_b, sign_b, mantissa_a_shifted]
+    swap3                       // [sign_b, sign_a, exp_b, mantissa_b, mantissa_a_shifted]
+    swap1                       // [sign_a, sign_b, exp_b, mantissa_b, mantissa_a_shifted]
+    swap2                       // [exp_b, sign_b, sign_a, mantissa_b, mantissa_a_shifted]
+    swap1                       // [sign_b, exp_b, sign_a, mantissa_b, mantissa_a_shifted]
+    swap2                       // [sign_a, exp_b, sign_b, mantissa_b, mantissa_a_shifted]
+    
+    add_aligned:
+    // Stack: [sign_a, exp, sign_b, mantissa_a_aligned, mantissa_b_aligned]
+    // Need to handle signed addition
+    
+    // For simplicity: convert to signed mantissas, add, then extract sign
+    swap2                       // [sign_b, exp, sign_a, mantissa_a_aligned, mantissa_b_aligned]
+    dup1 iszero add_b_positive jumpi
+    swap4                       // [mantissa_b_aligned, exp, sign_a, mantissa_a_aligned, sign_b]
+    0x00 swap1 sub             // [-mantissa_b, exp, sign_a, mantissa_a_aligned, sign_b]
+    swap4 pop                   // [-mantissa_b, exp, sign_a, mantissa_a_aligned]
+    add_b_done jump
+    
+    add_b_positive:
+    pop                         // [exp, sign_a, mantissa_a_aligned, mantissa_b_aligned]
+    swap3                       // [mantissa_b_aligned, sign_a, mantissa_a_aligned, exp]
+    
+    add_b_done:
+    // Stack: [signed_mantissa_b, exp, sign_a, mantissa_a_aligned] or similar
+    swap2                       // [sign_a, exp, signed_mantissa_b, mantissa_a_aligned]
+    dup1 iszero add_a_positive jumpi
+    swap3                       // [mantissa_a_aligned, exp, signed_mantissa_b, sign_a]
+    0x00 swap1 sub             // [-mantissa_a, exp, signed_mantissa_b, sign_a]
+    swap3 pop                   // [-mantissa_a, exp, signed_mantissa_b]
+    add_a_done jump
+    
+    add_a_positive:
+    pop                         // [exp, signed_mantissa_b, mantissa_a_aligned]
+    swap2                       // [mantissa_a_aligned, signed_mantissa_b, exp]
+    
+    add_a_done:
+    // Add mantissas
+    add                         // [result_mantissa_signed, exp]
+    
+    // Extract sign from result
+    dup1 0x00 slt              // [is_negative, result_mantissa, exp]
+    swap1                       // [result_mantissa, is_negative, exp]
+    dup1 0x00 slt add_negate jumpi
+    
+    // Positive result
+    0x00                        // [sign=0, result_mantissa, is_negative, exp]
+    swap2 pop                   // [sign=0, result_mantissa, exp]
+    add_final jump
+    
+    add_negate:
+    0x00 swap1 sub             // [abs_mantissa, is_negative, exp]
+    0x01                        // [sign=1, abs_mantissa, is_negative, exp]
+    swap2 pop                   // [sign=1, abs_mantissa, exp]
+    
+    add_final:
+    // Stack: [sign, mantissa, exp]
+    swap1                       // [mantissa, sign, exp]
+    swap2                       // [exp, sign, mantissa]
+    swap1                       // [sign, exp, mantissa]
+    swap2                       // [mantissa, exp, sign]
+    
+    // Normalize and pack
+    HEX_NORMALIZE()            // [mantissa, exp, sign]
+    HEX_PACK()                 // [result]
+}
+
+/// @notice Subtract two hex float numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [b, a]
+/// Stack output: [a - b]
+#define macro HEX_SUB() = takes(2) returns(1) {
+    // Negate b and add: a - b = a + (-b)
+    // Unpack b, flip sign, repack, then add
+    HEX_UNPACK()               // [mantissa_b, exp_b, sign_b, a]
+    swap2                       // [sign_b, exp_b, mantissa_b, a]
+    iszero                      // [!sign_b, exp_b, mantissa_b, a]
+    swap2                       // [mantissa_b, exp_b, !sign_b, a]
+    HEX_PACK()                 // [-b, a]
+    swap1                       // [a, -b]
+    HEX_ADD()                  // [a + (-b)]
+}
+
+/// @notice Multiply two hex float numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [b, a]
+/// Stack output: [a * b]
+#define macro HEX_MUL() = takes(2) returns(1) {
+    // Input: [b, a]
+    
+    // Unpack both
+    HEX_UNPACK()               // [mantissa_b, exp_b, sign_b, a]
+    swap3                       // [a, exp_b, sign_b, mantissa_b]
+    HEX_UNPACK()               // [mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Stack: [mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Multiply mantissas (64.64 * 64.64 = 128.128, take middle 128 bits)
+    // Result = (mantissa_a * mantissa_b) >> 64
+    dup1 dup7                   // [mantissa_b, mantissa_a, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    mul                         // [product_low, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    [FRAC_BITS] shr            // [product >> 64, mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Clean stack: remove original mantissas
+    swap1 pop swap5 pop        // [result_mantissa, exp_a, sign_a, exp_b, sign_b]
+    
+    // Add exponents and subtract bias (exp_a + exp_b - bias)
+    swap1 swap3                 // [exp_b, sign_a, exp_a, result_mantissa, sign_b]
+    add                         // [exp_a + exp_b, sign_a, result_mantissa, sign_b]
+    [EXP_BIAS] sub             // [exp_result, sign_a, result_mantissa, sign_b]
+    
+    // XOR signs
+    swap1 swap3                 // [sign_b, result_mantissa, sign_a, exp_result]
+    xor                         // [sign_result, result_mantissa, exp_result]
+    
+    // Reorder for normalize
+    swap1 swap2                 // [result_mantissa, exp_result, sign_result]
+    
+    // Normalize and pack
+    HEX_NORMALIZE()            // [mantissa, exp, sign]
+    HEX_PACK()                 // [result]
+}
+
+/// @notice Divide two hex float numbers
+/// @dev takes(2) returns(1)
+/// Stack input: [b, a]
+/// Stack output: [a / b]
+#define macro HEX_DIV() = takes(2) returns(1) {
+    // Input: [b, a]
+    
+    // Unpack both
+    HEX_UNPACK()               // [mantissa_b, exp_b, sign_b, a]
+    swap3                       // [a, exp_b, sign_b, mantissa_b]
+    HEX_UNPACK()               // [mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Stack: [mantissa_a, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Divide mantissas: (mantissa_a << 64) / mantissa_b
+    [FRAC_BITS] shl            // [mantissa_a << 64, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    dup1 dup7 swap1 sdiv       // [quotient, mantissa_a << 64, exp_a, sign_a, exp_b, sign_b, mantissa_b]
+    
+    // Clean stack
+    swap1 pop swap5 pop        // [result_mantissa, exp_a, sign_a, exp_b, sign_b]
+    
+    // Subtract exponents and add bias (exp_a - exp_b + bias)
+    swap1 swap3                 // [exp_b, sign_a, exp_a, result_mantissa, sign_b]
+    swap2                       // [exp_a, sign_a, exp_b, result_mantissa, sign_b]
+    swap2                       // [exp_b, sign_a, exp_a, result_mantissa, sign_b]
+    dup3 swap1 sub             // [exp_a - exp_b, sign_a, exp_a, result_mantissa, sign_b]
+    swap2 pop                   // [exp_a - exp_b, sign_a, result_mantissa, sign_b]
+    [EXP_BIAS] add             // [exp_result, sign_a, result_mantissa, sign_b]
+    
+    // XOR signs
+    swap1 swap3                 // [sign_b, result_mantissa, sign_a, exp_result]
+    xor                         // [sign_result, result_mantissa, exp_result]
+    
+    // Reorder for normalize
+    swap1 swap2                 // [result_mantissa, exp_result, sign_result]
+    
+    // Normalize and pack
+    HEX_NORMALIZE()            // [mantissa, exp, sign]
+    HEX_PACK()                 // [result]
+}
