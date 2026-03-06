@@ -1,6 +1,6 @@
 /**
- * Arithmetic App - FP128 Huff Calculator
- * Two-operand calculator (A op B) using the Huff-based fixed-point arithmetic
+ * Arithmetic App - FixedPoint128 Calculator
+ * Two-operand calculator (A op B) using the Huff-based 128.128 fixed-point arithmetic
  */
 
 import { ContractLoader } from '../infrastructure/blockchain/contract-loader.js';
@@ -35,7 +35,7 @@ export class ArithmeticApp {
             <div class="ti-calc-shell">
                 <!-- Header -->
                 <div class="arithmetic-header">
-                    <h2 class="arithmetic-title">FP128 Arithmetic</h2>
+                    <h2 class="arithmetic-title">FixedPoint128</h2>
                     <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point</p>
                 </div>
 
@@ -414,9 +414,9 @@ export class ArithmeticApp {
     }
 
     async loadContract() {
-        this.contract = await ContractLoader.load('fp128-arithmetic', this.web3Provider);
+        this.contract = await ContractLoader.load('fixedpoint128', this.web3Provider);
         if (!this.contract) {
-            console.error('Failed to load fp128-arithmetic contract');
+            console.error('Failed to load FixedPoint128 contract');
         }
     }
 
@@ -424,7 +424,7 @@ export class ArithmeticApp {
         const container = document.getElementById('arithmetic-contract-info');
         if (!container) return;
 
-        const metadata = getContractMetadata('fp128-arithmetic');
+        const metadata = getContractMetadata('fixedpoint128');
         if (!metadata) return;
 
         const contractCard = document.createElement('div');

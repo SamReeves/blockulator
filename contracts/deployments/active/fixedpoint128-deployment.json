@@ -1,0 +1,10 @@
+{
+  "network": "sepolia",
+  "contractName": "FixedPoint128",
+  "address": "0x1A4073C46bC9bC01994c2Fa7dd9DaD76092DBAA2",
+  "deployer": "0x4AA72012f9bE862442D38Aca966b9E3680D816c0",
+  "deployedAt": "2026-03-06T01:52:02.808Z",
+  "txHash": "0x79765e7cc659531ff53846253fb944cd2a487cb8f451e637ee8d0ab114a04c2d",
+  "bytecodeSize": 666,
+  "gasUsed": "194668"
+}

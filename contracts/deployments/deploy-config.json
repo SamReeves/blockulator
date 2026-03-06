@@ -1,7 +1,7 @@
 {
   "contractName": "FP128_ARITHMETIC",
-  "contractFile": "test_fp128_addsub.huff",
-  "abiPath": "contracts/build/abis/fp128-arithmetic.json",
-  "bytecodePath": "contracts/build/bytecode/test_fp128_addsub.json",
+  "contractFile": "test_fixedpoint128.huff",
+  "abiPath": "contracts/build/abis/fixedpoint128.json",
+  "bytecodePath": "contracts/build/bytecode/test_fixedpoint128.json",
   "timestamp": "2026-03-02T19:48:00Z"
 }

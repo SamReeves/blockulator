@@ -1,0 +1,153 @@
+/// @title IEEE 754 binary256 Arithmetic Test Contract
+/// @notice Test contract for IEEE 754 binary256 (octuple-precision) floating-point arithmetic
+/// @dev Exposes add, sub, mul, div, and conversion functions for testing
+
+#include "binary256.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    // Read function selector
+    0x00 calldataload 0xe0 shr
+    
+    dup1 __FUNC_SIG(add) eq add_jump jumpi
+    dup1 __FUNC_SIG(sub) eq sub_jump jumpi
+    dup1 __FUNC_SIG(mul) eq mul_jump jumpi
+    dup1 __FUNC_SIG(div) eq div_jump jumpi
+    dup1 __FUNC_SIG(mulRaw) eq mul_raw_jump jumpi
+    dup1 __FUNC_SIG(divRaw) eq div_raw_jump jumpi
+    dup1 __FUNC_SIG(fromFixed32) eq from_jump jumpi
+    dup1 __FUNC_SIG(toFixed32) eq to_jump jumpi
+    dup1 __FUNC_SIG(pack) eq pack_jump jumpi
+    dup1 __FUNC_SIG(unpack) eq unpack_jump jumpi
+    dup1 __FUNC_SIG(normalize) eq normalize_jump jumpi
+    
+    // No match, revert
+    0x00 0x00 revert
+    
+    add_jump:
+        pop
+        // Read two fixed32 args, convert, add, convert back
+        0x04 calldataload      // [a_fixed32]
+        FP_FROM_FIXED32()      // [a_fp]
+        0x24 calldataload      // [b_fixed32, a_fp]
+        FP_FROM_FIXED32()      // [b_fp, a_fp]
+        FP_ADD()               // [result_fp]
+        FP_TO_FIXED32()        // [result_fixed32]
+        0x00 mstore
+        0x20 0x00 return
+    
+    sub_jump:
+        pop
+        // Read two fixed32 args, convert, subtract, convert back
+        0x04 calldataload      // [a_fixed32]
+        FP_FROM_FIXED32()      // [a_fp]
+        0x24 calldataload      // [b_fixed32, a_fp]
+        FP_FROM_FIXED32()      // [b_fp, a_fp]
+        FP_SUB()               // [result_fp]
+        FP_TO_FIXED32()        // [result_fixed32]
+        0x00 mstore
+        0x20 0x00 return
+    
+    mul_jump:
+        pop
+        // Read two fixed32 args, convert, multiply, convert back
+        0x04 calldataload      // [a_fixed32]
+        FP_FROM_FIXED32()      // [a_fp]
+        0x24 calldataload      // [b_fixed32, a_fp]
+        FP_FROM_FIXED32()      // [b_fp, a_fp]
+        FP_MUL()               // [result_fp]
+        FP_TO_FIXED32()        // [result_fixed32]
+        0x00 mstore
+        0x20 0x00 return
+    
+    div_jump:
+        pop
+        // Read two fixed32 args, convert, divide, convert back
+        0x04 calldataload      // [a_fixed32]
+        FP_FROM_FIXED32()      // [a_fp]
+        0x24 calldataload      // [b_fixed32, a_fp]
+        FP_FROM_FIXED32()      // [b_fp, a_fp]
+        FP_DIV()               // [result_fp]
+        FP_TO_FIXED32()        // [result_fixed32]
+        0x00 mstore
+        0x20 0x00 return
+    
+    mul_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp]
+        0x24 calldataload      // [b_fp, a_fp]
+        FP_MUL()               // [result_fp]
+        0x00 mstore
+        0x20 0x00 return
+    
+    div_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp]
+        0x24 calldataload      // [b_fp, a_fp]
+        FP_DIV()               // [result_fp]
+        0x00 mstore
+        0x20 0x00 return
+    
+    from_jump:
+        pop
+        // Convert fixed32 to binary256 float (for debugging)
+        0x04 calldataload      // [fixed32]
+        FP_FROM_FIXED32()      // [fp]
+        0x00 mstore
+        0x20 0x00 return
+    
+    to_jump:
+        pop
+        // Convert binary256 float to fixed32 (for debugging)
+        0x04 calldataload      // [fp]
+        FP_TO_FIXED32()        // [fixed32]
+        0x00 mstore
+        0x20 0x00 return
+    
+    pack_jump:
+        pop
+        // Pack (significand, exponent, sign) into binary256 float
+        // Args: pack(uint256 significand, uint256 exponent, uint256 sign)
+        0x04 calldataload      // [sig]
+        0x24 calldataload      // [exp, sig]
+        0x44 calldataload      // [sign, exp, sig]
+        swap2                   // [sig, exp, sign]
+        FP_PACK()              // [packed]
+        0x00 mstore
+        0x20 0x00 return
+    
+    unpack_jump:
+        pop
+        // Unpack binary256 float into (significand, exponent, sign)
+        // Returns: bytes32[3] where [0]=sig, [1]=exp, [2]=sign
+        0x04 calldataload      // [packed]
+        FP_UNPACK()            // [sig, exp, sign]
+        // Store all three values in return data (mstore takes from top of stack)
+        0x00 mstore            // [exp, sign] (sig stored at offset 0x00)
+        0x20 mstore            // [sign] (exp stored at offset 0x20)
+        0x40 mstore            // [] (sign stored at offset 0x40)
+        0x60 0x00 return       // Return 96 bytes (3 x 32-byte words)
+    
+    normalize_jump:
+        pop
+        // Normalize (sig, exp) -> (norm_sig, norm_exp)
+        0x04 calldataload      // [sig]
+        0x24 calldataload      // [exp, sig]
+        swap1                   // [sig, exp]
+        FP_NORMALIZE()         // [norm_sig, norm_exp]
+        // Proven mstore pattern: [a, b] -> store b at 0x20, a at 0x00
+        swap1 0x20 mstore      // [norm_sig] (exp stored at 0x20)
+        0x00 mstore            // []         (sig stored at 0x00)
+        0x40 0x00 return
+}
+
+#define function add(uint256,uint256) pure returns (uint256)
+#define function sub(uint256,uint256) pure returns (uint256)
+#define function mul(uint256,uint256) pure returns (uint256)
+#define function div(uint256,uint256) pure returns (uint256)
+#define function mulRaw(uint256,uint256) pure returns (uint256)
+#define function divRaw(uint256,uint256) pure returns (uint256)
+#define function fromFixed32(uint256) pure returns (uint256)
+#define function toFixed32(uint256) pure returns (uint256)
+#define function pack(uint256,uint256,uint256) pure returns (uint256)
+#define function unpack(uint256) pure returns (uint256,uint256,uint256)
+#define function normalize(uint256,uint256) pure returns (uint256,uint256)

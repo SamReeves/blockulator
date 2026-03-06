@@ -1,0 +1,111 @@
+/// @title FixedPoint128 Test Contract
+/// @notice Test contract for signed 128.128 fixed-point arithmetic
+/// @dev Exposes add, sub, mul, div and conversion functions for testing
+
+#include "fixedpoint128.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    // Read function selector
+    0x00 calldataload 0xe0 shr
+    
+    dup1 __FUNC_SIG(add) eq add_jump jumpi
+    dup1 __FUNC_SIG(sub) eq sub_jump jumpi
+    dup1 __FUNC_SIG(mul) eq mul_jump jumpi
+    dup1 __FUNC_SIG(div) eq div_jump jumpi
+    dup1 __FUNC_SIG(mulRaw) eq mul_raw_jump jumpi
+    dup1 __FUNC_SIG(divRaw) eq div_raw_jump jumpi
+    dup1 __FUNC_SIG(fromFixed18) eq from_jump jumpi
+    dup1 __FUNC_SIG(toFixed18) eq to_jump jumpi
+    
+    // No match, revert
+    0x00 0x00 revert
+    
+    add_jump:
+        pop
+        // Read two fixed18 args, convert, add, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_ADD()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    sub_jump:
+        pop
+        // Read two fixed18 args, convert, subtract, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_SUB()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    mul_jump:
+        pop
+        // Read two fixed18 args, convert, multiply, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_MUL()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    div_jump:
+        pop
+        // Read two fixed18 args, convert, divide, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_DIV()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    mul_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_MUL()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    div_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_DIV()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    from_jump:
+        pop
+        // Convert fixed18 to fp128 (for debugging)
+        0x04 calldataload      // [fixed18]
+        FP128_FROM_FIXED18()   // [fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    to_jump:
+        pop
+        // Convert fp128 to fixed18 (for debugging)
+        0x04 calldataload      // [fp128]
+        FP128_TO_FIXED18()     // [fixed18]
+        0x00 mstore
+        0x20 0x00 return
+}
+
+#define function add(uint256,uint256) pure returns (uint256)
+#define function sub(uint256,uint256) pure returns (uint256)
+#define function mul(uint256,uint256) pure returns (uint256)
+#define function div(uint256,uint256) pure returns (uint256)
+#define function mulRaw(uint256,uint256) pure returns (uint256)
+#define function divRaw(uint256,uint256) pure returns (uint256)
+#define function fromFixed18(uint256) pure returns (uint256)
+#define function toFixed18(uint256) pure returns (uint256)

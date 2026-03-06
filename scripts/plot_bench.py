@@ -1,0 +1,465 @@
+#!/usr/bin/env python3
+"""Parse ArithBench output and generate precision vs gas plots.
+
+Usage:
+    python3 scripts/plot_bench.py          # runs forge automatically
+    forge test ... -vv | python3 scripts/plot_bench.py --stdin
+"""
+import subprocess
+import sys
+import math
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+LIBS = ["fp128", "bin256", "prb", "abdk", "solady"]
+# Colorblind-friendly palette
+COLORS = {"fp128": "#0173B2", "bin256": "#DE8F05", "prb": "#029E73", "abdk": "#CC78BC", "solady": "#CA9161"}
+LABELS = {"fp128": "FP128 (Huff 128.128)", "bin256": "Binary256 (Huff float)",
+          "prb": "PRBMath (SD59x18)", "abdk": "ABDK (64.64)", "solady": "Solady (WAD)"}
+MARKERS = {"fp128": "o", "bin256": "D", "prb": "s", "abdk": "^", "solady": "v"}
+
+
+def run_benchmark():
+    r = subprocess.run(
+        ["forge", "test", "--match-contract", "ArithBench", "-vv"],
+        capture_output=True, text=True, cwd="."
+    )
+    return r.stdout + r.stderr
+
+
+def parse(output):
+    """Parse BENCH| lines.
+    Format: BENCH|name|op|fp128_gas|fp128_err|bin256_gas|bin256_err|prb_gas|prb_err|abdk_gas|abdk_err|solady_gas|solady_err
+    """
+    cases = []
+    for line in output.split("\n"):
+        line = line.strip()
+        if not line.startswith("BENCH|") or line in ("BENCH_START", "BENCH_END"):
+            continue
+        parts = line.split("|")
+        if len(parts) != 13:
+            continue
+        _, name, op, *vals = parts
+        entry = {"name": name, "op": op}
+        lib_fields = [("fp128", 0, 1), ("bin256", 2, 3), ("prb", 4, 5), ("abdk", 6, 7), ("solady", 8, 9)]
+        for lib, gi, ei in lib_fields:
+            g, e = vals[gi], vals[ei]
+            if g == "NA":
+                entry[f"{lib}_gas"] = None
+                entry[f"{lib}_err"] = None
+            else:
+                entry[f"{lib}_gas"] = int(g)
+                entry[f"{lib}_err"] = int(e)
+        cases.append(entry)
+    return cases
+
+def parse_trans(output):
+    """Parse TRANS| lines.
+    Format: TRANS|name|func|prb_gas|prb_err|abdk_gas|abdk_err|solady_gas|solady_err
+    """
+    cases = []
+    for line in output.split("\n"):
+        line = line.strip()
+        if not line.startswith("TRANS|") or line in ("TRANS_START", "TRANS_END"):
+            continue
+        parts = line.split("|")
+        if len(parts) != 9:
+            continue
+        _, name, func, *vals = parts
+        entry = {"name": name, "func": func}
+        lib_fields = [("prb", 0, 1), ("abdk", 2, 3), ("solady", 4, 5)]
+        for lib, gi, ei in lib_fields:
+            g, e = vals[gi], vals[ei]
+            if g == "NA":
+                entry[f"{lib}_gas"] = None
+                entry[f"{lib}_err"] = None
+            else:
+                entry[f"{lib}_gas"] = int(g)
+                entry[f"{lib}_err"] = int(e)
+        cases.append(entry)
+    return cases
+
+
+def avg(lst):
+    return sum(lst) / len(lst) if lst else float('nan')
+
+def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/RESULTS.md"):
+    """Generate a comprehensive markdown summary of benchmark results."""
+    lines = []
+    lines.append("# Benchmark Results")
+    lines.append("")
+    lines.append("Comprehensive gas and precision benchmark comparing 5 fixed-point/floating-point arithmetic backends.")
+    lines.append("")
+    
+    # ── Arithmetic Summary ──
+    lines.append("## Arithmetic Operations")
+    lines.append("")
+    lines.append("**Test cases:** 52 (mul, div, add, sub)")
+    lines.append("")
+    
+    ops = ["mul", "div", "add", "sub"]
+    op_data = {op: {lib: {"gas": [], "err": []} for lib in LIBS} for op in ops}
+    
+    for c in cases:
+        op = c["op"]
+        for lib in LIBS:
+            g = c[f"{lib}_gas"]
+            e = c[f"{lib}_err"]
+            if g is not None:
+                op_data[op][lib]["gas"].append(g)
+                op_data[op][lib]["err"].append(e)
+    
+    lines.append("### Average Gas per Operation")
+    lines.append("")
+    lines.append("| Operation | FP128 | Binary256 | PRBMath | ABDK | Solady |")
+    lines.append("|-----------|-------|-----------|---------|------|--------|")
+    
+    for op in ops:
+        row = f"| {op.upper():<9} |"
+        for lib in LIBS:
+            g = avg(op_data[op][lib]["gas"])
+            row += f" {g:>5.0f} |" if not math.isnan(g) else " N/A |"
+        lines.append(row)
+    
+    lines.append("")
+    lines.append("### Average Error per Operation (wei)")
+    lines.append("")
+    lines.append("| Operation | FP128 | Binary256 | PRBMath | ABDK | Solady |")
+    lines.append("|-----------|-------|-----------|---------|------|--------|")
+    
+    for op in ops:
+        row = f"| {op.upper():<9} |"
+        for lib in LIBS:
+            e = avg(op_data[op][lib]["err"])
+            if not math.isnan(e):
+                if e < 1:
+                    row += f" {e:.2e} |"
+                else:
+                    row += f" {e:>5.1f} |"
+            else:
+                row += " N/A |"
+        lines.append(row)
+    
+    # ── Transcendental Summary ──
+    if trans_cases:
+        lines.append("")
+        lines.append("## Transcendental Functions")
+        lines.append("")
+        lines.append(f"**Test cases:** {len(trans_cases)} (exp, ln, sqrt)")
+        lines.append("")
+        lines.append("_Only PRBMath, ABDK, and Solady support transcendental functions._")
+        lines.append("")
+        
+        funcs = ["exp", "ln", "sqrt"]
+        trans_libs = ["prb", "abdk", "solady"]
+        func_data = {f: {lib: {"gas": [], "err": []} for lib in trans_libs} for f in funcs}
+        
+        for c in trans_cases:
+            func = c["func"]
+            for lib in trans_libs:
+                g = c[f"{lib}_gas"]
+                e = c[f"{lib}_err"]
+                if g is not None:
+                    func_data[func][lib]["gas"].append(g)
+                    func_data[func][lib]["err"].append(e)
+        
+        lines.append("### Average Gas per Function")
+        lines.append("")
+        lines.append("| Function | PRBMath | ABDK | Solady |")
+        lines.append("|----------|---------|------|--------|")
+        
+        for func in funcs:
+            row = f"| {func:<8} |"
+            for lib in trans_libs:
+                g = avg(func_data[func][lib]["gas"])
+                row += f" {g:>7.0f} |" if not math.isnan(g) else " N/A |"
+            lines.append(row)
+        
+        lines.append("")
+        lines.append("### Average Error per Function (wei)")
+        lines.append("")
+        lines.append("| Function | PRBMath | ABDK | Solady |")
+        lines.append("|----------|---------|------|--------|")
+        
+        for func in funcs:
+            row = f"| {func:<8} |"
+            for lib in trans_libs:
+                e = avg(func_data[func][lib]["err"])
+                if not math.isnan(e):
+                    if e < 1:
+                        row += f" {e:.2e} |"
+                    else:
+                        row += f" {e:>7.1f} |"
+                else:
+                    row += " N/A |"
+            lines.append(row)
+    
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append("**Note:** Error values are in wei (1e-18). All reference values computed at 100-digit precision using mpmath.")
+    lines.append("")
+    
+    # Write to file
+    with open(output_path, 'w') as f:
+        f.write('\n'.join(lines))
+    
+    return output_path
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "--stdin":
+        output = sys.stdin.read()
+    else:
+        print("Running forge benchmark...")
+        output = run_benchmark()
+
+    cases = parse(output)
+    trans_cases = parse_trans(output)
+    
+    if not cases and not trans_cases:
+        print("No BENCH or TRANS lines found.")
+        sys.exit(1)
+
+    print(f"Parsed {len(cases)} arithmetic cases, {len(trans_cases)} transcendental cases\n")
+
+    # ─── Table ─────────────────────────────────────────────────────────
+    hdr = f"{'Case':<25} {'Op':<4}"
+    for lib in LIBS:
+        hdr += f"  {lib:>8} {'err':>10}"
+    print(hdr)
+    print("-" * len(hdr))
+
+    for c in cases:
+        row = f"{c['name']:<25} {c['op']:<4}"
+        for lib in LIBS:
+            g = c[f"{lib}_gas"]
+            e = c[f"{lib}_err"]
+            if g is None:
+                row += f"  {'N/A':>8} {'N/A':>10}"
+            else:
+                row += f"  {g:>8} {e:>10}"
+        print(row)
+
+    # ─── Summary by operation ──────────────────────────────────────────
+    ops = ["mul", "div", "add", "sub"]
+    op_data = {op: {lib: {"gas": [], "err": []} for lib in LIBS} for op in ops}
+
+    for c in cases:
+        op = c["op"]
+        for lib in LIBS:
+            g = c[f"{lib}_gas"]
+            e = c[f"{lib}_err"]
+            if g is not None:
+                op_data[op][lib]["gas"].append(g)
+                op_data[op][lib]["err"].append(e)
+
+    print("\n" + "=" * 100)
+    print("SUMMARY BY OPERATION (averages)")
+    print("=" * 100)
+    hdr2 = f"{'Op':<6}"
+    for lib in LIBS:
+        hdr2 += f"  {lib+' gas':>12} {lib+' err':>12}"
+    print(hdr2)
+    print("-" * len(hdr2))
+
+    for op in ops:
+        row = f"{op:<6}"
+        for lib in LIBS:
+            d = op_data[op][lib]
+            g = avg(d["gas"])
+            e = avg(d["err"])
+            gs = f"{g:>12.0f}" if not math.isnan(g) else f"{'N/A':>12}"
+            es = f"{e:>12.1f}" if not math.isnan(e) else f"{'N/A':>12}"
+            row += f"  {gs} {es}"
+        print(row)
+
+    # ─── Plot 1: Gas by operation (grouped bar) ───────────────────────
+    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
+    ax = axes[0]
+    x_labels = [op for op in ops if op_data[op]["fp128"]["gas"]]
+    x = list(range(len(x_labels)))
+    n_libs = len(LIBS)
+    width = 0.8 / n_libs
+
+    for j, lib in enumerate(LIBS):
+        means = [avg(op_data[op][lib]["gas"]) if op_data[op][lib]["gas"] else 0 for op in x_labels]
+        offset = (j - n_libs / 2 + 0.5) * width
+        bars = ax.bar([xi + offset for xi in x], means, width,
+                      label=LABELS[lib], color=COLORS[lib], edgecolor='white')
+        for bar in bars:
+            h = bar.get_height()
+            if h > 0:
+                ax.annotate(f'{h:.0f}', xy=(bar.get_x() + bar.get_width()/2, h),
+                           xytext=(0, 3), textcoords="offset points",
+                           ha='center', va='bottom', fontsize=7)
+
+    ax.set_xlabel('Operation', fontsize=12)
+    ax.set_ylabel('Gas (avg)', fontsize=12)
+    ax.set_title('Gas Cost by Operation\n(Huff = external call; ABDK & Solady = inline)', fontsize=12, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels(x_labels, fontsize=11)
+    ax.legend(fontsize=9)
+    ax.grid(axis='y', alpha=0.3)
+
+    # ─── Plot 1b: Error by operation ──────────────────────────────────
+    ax = axes[1]
+    for j, lib in enumerate(LIBS):
+        means = [min(max(avg(op_data[op][lib]["err"]), 0.01), 1e18) if op_data[op][lib]["err"] else 0.01
+                 for op in x_labels]
+        offset = (j - n_libs / 2 + 0.5) * width
+        ax.bar([xi + offset for xi in x], means, width,
+               label=LABELS[lib], color=COLORS[lib], edgecolor='white')
+
+    ax.set_xlabel('Operation', fontsize=12)
+    ax.set_ylabel('Avg Error (wei, log scale)', fontsize=12)
+    ax.set_title('Precision by Operation (lower = better)\n1 wei = 1e-18', fontsize=12, fontweight='bold')
+    ax.set_xticks(x)
+    ax.set_xticklabels(x_labels, fontsize=11)
+    ax.set_yscale('log')
+    ax.legend(fontsize=9)
+    ax.grid(axis='y', alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig('docs/benchmarks/bench_gas_precision.png', dpi=150, bbox_inches='tight')
+    print(f"\nSaved: docs/benchmarks/bench_gas_precision.png")
+
+    # ─── Plot 2: Scatter — Gas vs Error ──────────────────────────────
+    fig, ax = plt.subplots(figsize=(13, 8))
+
+    for lib in LIBS:
+        pts = [(c[f"{lib}_gas"], min(max(c[f"{lib}_err"], 0.1), 1e18))
+               for c in cases if c[f"{lib}_gas"] is not None]
+        if pts:
+            ax.scatter([p[0] for p in pts], [p[1] for p in pts],
+                       s=70, alpha=0.7, label=LABELS[lib], color=COLORS[lib],
+                       marker=MARKERS[lib], edgecolors='black', linewidths=0.4)
+
+    ax.set_xlabel('Gas Cost', fontsize=12)
+    ax.set_ylabel('Error (wei, log scale)', fontsize=12)
+    ax.set_title(f'Gas vs Precision ({len(cases)} cases, 4 backends)\n1 wei = 1e-18', fontsize=13, fontweight='bold')
+    ax.set_yscale('log')
+    ax.legend(fontsize=10, loc='upper right')
+    ax.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.savefig('docs/benchmarks/bench_scatter.png', dpi=150, bbox_inches='tight')
+    print(f"Saved: docs/benchmarks/bench_scatter.png")
+
+    # ─── Plot 3: Per-case breakdown ──────────────────────────────────
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18, 16))
+    names = [c["name"] for c in cases]
+    y = list(range(len(names)))
+    n = len(LIBS)
+    bw = 0.8 / n
+
+    for j, lib in enumerate(LIBS):
+        offset = (j - n / 2 + 0.5) * bw
+        vals = [c[f"{lib}_gas"] if c[f"{lib}_gas"] else 0 for c in cases]
+        ax1.barh([yi + offset for yi in y], vals, bw,
+                 label=LABELS[lib], color=COLORS[lib])
+    ax1.set_yticks(y)
+    ax1.set_yticklabels(names, fontsize=7)
+    ax1.set_xlabel('Gas', fontsize=11)
+    ax1.set_title('Gas Cost Per Case', fontsize=12, fontweight='bold')
+    ax1.legend(fontsize=8, loc='lower right')
+    ax1.grid(axis='x', alpha=0.3)
+    ax1.invert_yaxis()
+
+    ERR_CAP = 1e18  # cap at 1 WAD for display
+    for j, lib in enumerate(LIBS):
+        offset = (j - n / 2 + 0.5) * bw
+        vals = [min(max(c[f"{lib}_err"], 0.1), ERR_CAP) if c[f"{lib}_gas"] else 0.1 for c in cases]
+        ax2.barh([yi + offset for yi in y], vals, bw,
+                 label=LABELS[lib], color=COLORS[lib])
+    ax2.set_yticks(y)
+    ax2.set_yticklabels(names, fontsize=7)
+    ax2.set_xlabel('Error (wei, log scale)', fontsize=11)
+    ax2.set_title('Precision Error Per Case (lower = better)', fontsize=12, fontweight='bold')
+    ax2.set_xscale('log')
+    ax2.legend(fontsize=8, loc='lower right')
+    ax2.grid(axis='x', alpha=0.3)
+    ax2.invert_yaxis()
+
+    plt.tight_layout()
+    plt.savefig('docs/benchmarks/bench_per_case.png', dpi=150, bbox_inches='tight')
+    print(f"Saved: docs/benchmarks/bench_per_case.png")
+
+    # ─── Transcendental Plots ───────────────────────────────────────────
+    if trans_cases:
+        trans_libs = ["prb", "abdk", "solady"]
+        trans_colors = {lib: COLORS[lib] for lib in trans_libs}
+        trans_labels = {lib: LABELS[lib] for lib in trans_libs}
+        
+        fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+        
+        # Group by function
+        funcs = ["exp", "ln", "sqrt"]
+        func_data = {f: {lib: {"gas": [], "err": []} for lib in trans_libs} for f in funcs}
+        
+        for c in trans_cases:
+            func = c["func"]
+            for lib in trans_libs:
+                g = c[f"{lib}_gas"]
+                e = c[f"{lib}_err"]
+                if g is not None:
+                    func_data[func][lib]["gas"].append(g)
+                    func_data[func][lib]["err"].append(e)
+        
+        # Plot 1: Gas by function
+        ax = axes[0]
+        x_labels = funcs
+        x = list(range(len(x_labels)))
+        n_libs = len(trans_libs)
+        width = 0.8 / n_libs
+        
+        for j, lib in enumerate(trans_libs):
+            means = [avg(func_data[f][lib]["gas"]) if func_data[f][lib]["gas"] else 0 for f in x_labels]
+            offset = (j - n_libs / 2 + 0.5) * width
+            bars = ax.bar([xi + offset for xi in x], means, width,
+                          label=trans_labels[lib], color=trans_colors[lib], edgecolor='white')
+            for bar in bars:
+                h = bar.get_height()
+                if h > 0:
+                    ax.annotate(f'{h:.0f}', xy=(bar.get_x() + bar.get_width()/2, h),
+                               xytext=(0, 3), textcoords="offset points",
+                               ha='center', va='bottom', fontsize=8)
+        
+        ax.set_xlabel('Function', fontsize=12)
+        ax.set_ylabel('Gas (avg)', fontsize=12)
+        ax.set_title('Gas Cost by Transcendental Function', fontsize=12, fontweight='bold')
+        ax.set_xticks(x)
+        ax.set_xticklabels(x_labels, fontsize=11)
+        ax.legend(fontsize=9)
+        ax.grid(axis='y', alpha=0.3)
+        
+        # Plot 2: Error by function
+        ax = axes[1]
+        for j, lib in enumerate(trans_libs):
+            means = [min(max(avg(func_data[f][lib]["err"]), 0.01), 1e18) if func_data[f][lib]["err"] else 0.01
+                     for f in x_labels]
+            offset = (j - n_libs / 2 + 0.5) * width
+            ax.bar([xi + offset for xi in x], means, width,
+                   label=trans_labels[lib], color=trans_colors[lib], edgecolor='white')
+        
+        ax.set_xlabel('Function', fontsize=12)
+        ax.set_ylabel('Avg Error (wei, log scale)', fontsize=12)
+        ax.set_title('Precision by Transcendental Function', fontsize=12, fontweight='bold')
+        ax.set_xticks(x)
+        ax.set_xticklabels(x_labels, fontsize=11)
+        ax.set_yscale('log')
+        ax.legend(fontsize=9)
+        ax.grid(axis='y', alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig('docs/benchmarks/bench_transcendental.png', dpi=150, bbox_inches='tight')
+        print(f"Saved: docs/benchmarks/bench_transcendental.png")
+
+    # ─── Generate Markdown Summary ──────────────────────────────────────
+    md_path = generate_markdown_summary(cases, trans_cases)
+    print(f"Saved: {md_path}")
+
+
+if __name__ == "__main__":
+    main()

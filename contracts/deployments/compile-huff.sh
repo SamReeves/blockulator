@@ -43,9 +43,10 @@ compile_huff_file() {
     
     echo -e "${YELLOW}Compiling ${contract_name}...${NC}"
     
-    # Compile to bytecode
-    if huffc "$huff_file" -b > "${BUILD_DIR}/${contract_name}.bin" 2>/dev/null; then
-        echo -e "${GREEN}✓ Bytecode generated${NC}"
+    # Compile to bytecode (both creation and runtime)
+    if huffc "$huff_file" -b > "${BUILD_DIR}/${contract_name}.bin" 2>/dev/null && \
+       huffc "$huff_file" -r > "${BUILD_DIR}/${contract_name}.runtime.bin" 2>/dev/null; then
+        echo -e "${GREEN}✓ Bytecode generated (creation + runtime)${NC}"
         
         # Copy to bytecode dir in JSON format (for consistency with Vyper contracts)
         echo "{\"bytecode\": \"0x$(cat ${BUILD_DIR}/${contract_name}.bin)\"}" > "${BYTECODE_DIR}/${contract_name}.json"
@@ -98,8 +99,8 @@ EOF
 ]
 EOF
             echo -e "${GREEN}✓ ABI generated${NC}"
-        elif [ "$contract_name" = "test_hex_arithmetic" ]; then
-            cat > "${ABI_DIR}/hex-arithmetic.json" << EOF
+        elif [ "$contract_name" = "test_binary256" ]; then
+            cat > "${ABI_DIR}/binary256.json" << EOF
 [
   {
     "type": "function",
@@ -160,8 +161,8 @@ EOF
 ]
 EOF
             echo -e "${GREEN}✓ ABI generated${NC}"
-        elif [ "$contract_name" = "test_fp128_addsub" ]; then
-            cat > "${ABI_DIR}/fp128-arithmetic.json" << EOF
+        elif [ "$contract_name" = "test_fixedpoint128" ]; then
+            cat > "${ABI_DIR}/fixedpoint128.json" << EOF
 [
   {
     "type": "function",
@@ -246,6 +247,15 @@ else
     # Only compile top-level contracts (not includes or tables)
     for huff_file in "$HUFF_DIR"/*.huff; do
         if [ -f "$huff_file" ]; then
+            # Skip constants files and library files (no MAIN macro)
+            basename_file=$(basename "$huff_file")
+            if [[ "$basename_file" == *"_constants.huff" ]] || \
+               [[ "$basename_file" == "binary256.huff" ]] || \
+               [[ "$basename_file" == "fixedpoint128.huff" ]] || \
+               [[ "$basename_file" == "fp128.huff" ]]; then
+                continue
+            fi
+            
             if compile_huff_file "$huff_file"; then
                 ((compiled++))
             else

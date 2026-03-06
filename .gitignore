@@ -30,6 +30,11 @@ dist/
 _static/
 contracts/build/bins/
 contracts/build/bytecode/
+contracts/build/huff/*.hex
+
+# Foundry build artifacts
+cache/
+out/
 
 # Keep ABIs - they're interface definitions for deployed contracts
 !contracts/build/abis/
@@ -37,6 +42,13 @@ contracts/build/bytecode/
 # Deployment artifacts
 contracts/deployments/deployment-*.json
 contracts/deployments/*.log
+
+# Foundry lock
+foundry.lock
+
+# Python bytecode
+__pycache__/
+*.pyc
 
 # Test outputs
 tests/*-local-*.json

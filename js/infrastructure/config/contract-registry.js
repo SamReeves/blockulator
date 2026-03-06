@@ -512,19 +512,19 @@ export const CONTRACT_REGISTRY = {
     },
     
     // ========== ARITHMETIC (HUFF) ==========
-    'fp128-arithmetic': {
+    'fixedpoint128': {
         type: 'arithmetic',
-        name: 'FP128 Arithmetic',
+        name: 'FixedPoint128',
         symbol: '+−×÷',
         emoji: '0x',
         category: 'huff',
-        description: 'Fixed-point 128.128 arithmetic in pure Huff assembly',
+        description: 'Signed 128.128 fixed-point arithmetic with IEEE 754-like special values',
         addresses: {
-            sepolia: '0xaad81fb27fa1c1ec5810724e7f5b4ccff260fe2e',
+            sepolia: '0x1A4073C46bC9bC01994c2Fa7dd9DaD76092DBAA2',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
-        source: 'contracts/src/tools/huff/test_fp128_addsub.huff',
-        abi: 'contracts/build/abis/fp128-arithmetic.json'
+        source: 'contracts/src/tools/huff/test_fixedpoint128.huff',
+        abi: 'contracts/build/abis/fixedpoint128.json'
     },
     
     // ========== FUTURES ==========

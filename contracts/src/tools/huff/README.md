@@ -19,9 +19,9 @@ Signed 128.128 fixed-point arithmetic: add, subtract, multiply, divide.
 ### Files
 
 ```
-fp128.huff              # Arithmetic library (ADD, SUB, MUL, DIV, conversions)
-fp128_constants.huff    # Constants (FRAC_BITS, ONE_FP128, MASK128, etc.)
-test_fp128_addsub.huff  # Deployable contract exposing all operations
+fixedpoint128.huff              # Arithmetic library (ADD, SUB, MUL, DIV, conversions)
+fixedpoint128_constants.huff    # Constants (FRAC_BITS, ONE_FP128, MASK128, etc.)
+test_fixedpoint128.huff         # Deployable contract exposing all operations
 ```
 
 ### Interface
@@ -56,10 +56,9 @@ IBM System/360-inspired hexadecimal floating-point arithmetic with base-16 expon
 ### Files
 
 ```
-hex_fp_constants.huff       # Format constants and bit masks
-hex_fp.huff                 # Core arithmetic operations
-test_hex_arithmetic.huff    # Test contract (in development)
-HEX_ARITHMETIC_STATUS.md    # Detailed status and design notes
+binary256_constants.huff       # Format constants and bit masks
+binary256.huff                 # Core arithmetic operations
+test_binary256.huff    # Test contract (in development)
 ```
 
 ### Design Highlights
@@ -68,7 +67,7 @@ Value representation: `sign × (mantissa_64_64 / 2^64) × 16^(exponent - 64)`
 
 Mantissa normalized so leading nibble is in [1..F], enabling bounded normalization (0-4 bit shift max).
 
-See [HEX_ARITHMETIC_STATUS.md](HEX_ARITHMETIC_STATUS.md) for full implementation details.
+See the binary256 source files for implementation details.
 
 ## Exponential Calculator
 
@@ -95,14 +94,14 @@ Decomposes the exponent digit-by-digit: `e^x = ∏ e^(dᵢ × 10^(-i))` for 19 i
 ## Building
 
 ```bash
-huffc --evm-version paris contracts/src/tools/huff/test_fp128_addsub.huff -r
+huffc --evm-version paris contracts/src/tools/huff/test_fixedpoint128.huff -r
 huffc --evm-version paris contracts/src/tools/huff/exp.huff -r
 ```
 
 ## Testing
 
 ```bash
-python3 tests/test_fp128_addsub.py    # 18 add/sub/conversion tests
-python3 tests/test_fp128_muldiv.py    # 16 mul/div tests
-python3 tests/test_fp128_fuzz.py      # 500+ randomized tests against Python Decimal
+python3 tests/test_fp128_addsub.py     # 18 add/sub/conversion tests
+python3 tests/test_fp128_muldiv.py     # 16 mul/div tests
+python3 tests/test_fp128_fuzz.py       # 500+ randomized tests against Python Decimal
 ```
