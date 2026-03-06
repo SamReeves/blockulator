@@ -179,6 +179,91 @@ def compute_ln_bkm_only(x_reduced_str):
     return abi_encode_uint256(to_fp128_int(result))
 
 
+def from_wad(wad_str):
+    """Convert WAD (18-decimal) string to mpf decimal value."""
+    wad_int = int(wad_str, 10)
+    if wad_int >= (1 << 255):
+        wad_int = wad_int - (1 << 256)
+    return mpf(wad_int) / mpf(10**18)
+
+
+def to_wad_int(value):
+    """Convert mpf decimal to WAD integer (signed int256)."""
+    scaled = int(value * mpf(10**18))
+    if scaled < 0:
+        scaled = (1 << 256) + scaled
+    return scaled
+
+
+def from_abdk(abdk_str):
+    """Convert ABDK 64.64 fixed-point string to mpf decimal value."""
+    abdk_int = int(abdk_str, 10)
+    if abdk_int >= (1 << 127):
+        abdk_int = abdk_int - (1 << 128)
+    return mpf(abdk_int) / mpf(2**64)
+
+
+def to_abdk_int(value):
+    """Convert mpf decimal to ABDK 64.64 integer (signed int128)."""
+    scaled = int(value * mpf(2**64))
+    if scaled < 0:
+        scaled = (1 << 128) + scaled
+    return scaled
+
+
+def from_vyper_decimal(decimal_str):
+    """Convert Vyper decimal (10-digit, 10^10 scale) string to mpf."""
+    decimal_int = int(decimal_str, 10)
+    if decimal_int >= (1 << 167):
+        decimal_int = decimal_int - (1 << 168)
+    return mpf(decimal_int) / mpf(10**10)
+
+
+def to_vyper_decimal_int(value):
+    """Convert mpf decimal to Vyper decimal integer (int168, scale 10^10)."""
+    scaled = int(value * mpf(10**10))
+    if scaled < 0:
+        scaled = (1 << 168) + scaled
+    return scaled
+
+
+def compute_multi_format(func_name, a_str, b_str=None):
+    """
+    Compute operation and return results in multiple formats.
+    Returns: (fp128, wad, abdk, vyper_decimal) as JSON array.
+    """
+    # Parse inputs as WAD by default
+    a = from_wad(a_str)
+    b = from_wad(b_str) if b_str else None
+    
+    # Compute result
+    if func_name == "mul":
+        result = a * b if b else mpf(0)
+    elif func_name == "div":
+        result = a / b if b and b != 0 else mpf(0)
+    elif func_name == "add":
+        result = a + b if b else a
+    elif func_name == "sub":
+        result = a - b if b else a
+    elif func_name == "exp":
+        result = mp_exp(a)
+    elif func_name == "ln":
+        result = log(a) if a > 0 else mpf(0)
+    elif func_name == "sqrt":
+        result = mp_sqrt(a) if a >= 0 else mpf(0)
+    else:
+        result = mpf(0)
+    
+    # Encode in all formats
+    fp128_val = to_fp128_int(result)
+    wad_val = to_wad_int(result)
+    abdk_val = to_abdk_int(result)
+    vyper_val = to_vyper_decimal_int(result)
+    
+    # Return as hex tuple (4 uint256 values)
+    return f"0x{fp128_val:064x}{wad_val:064x}{abdk_val:064x}{vyper_val:064x}"
+
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: fp128_oracle.py <function> <arg1_hex> [arg2_hex]", file=sys.stderr)
@@ -203,6 +288,11 @@ def main():
             result = compute_exp_bkm_only(sys.argv[2])
         elif func == "ln_bkm_only":
             result = compute_ln_bkm_only(sys.argv[2])
+        elif func.startswith("multi_"):
+            # Multi-format output: multi_mul, multi_div, etc.
+            op_name = func[6:]  # Strip "multi_" prefix
+            b_str = sys.argv[3] if len(sys.argv) > 3 else None
+            result = compute_multi_format(op_name, sys.argv[2], b_str)
         else:
             print(f"Unknown function: {func}", file=sys.stderr)
             sys.exit(1)

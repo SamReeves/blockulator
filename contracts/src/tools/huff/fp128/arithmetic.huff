@@ -43,16 +43,26 @@
 /// @dev takes(1) returns(1)
 /// Stack input: [fp128_value] (signed int256 representing value * 2^128)
 /// Stack output: [fixed18_value] (signed int256 representing value * 1e18)
-/// Formula: fixed18 = (fp128 * 1e18) / 2^128
-///          Use arithmetic right shift to preserve sign
-/// Gas: ~100 (optimized)
+/// Formula: fixed18 = (fp128_hi * 1e18) + ((fp128_lo * 1e18) >> 128)
+///          Split to avoid overflow: fp128 * 1e18 can exceed 256 bits
+/// Gas: ~120 (prevents overflow for all valid fp128 values)
 #define macro FP128_TO_FIXED18() = takes(1) returns(1) {
     // Input: [fp128]
-    // We need: (fp128 * 1e18) >> 128
-    // Use signed operations to preserve sign
+    // Split: fp128 = (fp128_hi << 128) + fp128_lo
+    // Result: (fp128_hi * 1e18) + ((fp128_lo * 1e18) >> 128)
     
-    [FIXED18_SCALE] mul   // [fp128 * 1e18]
-    0x80 sar              // [result] (PUSH1 + SAR = 6 gas)
+    dup1                      // [fp128, fp128]
+    0x80 sar                  // [fp128_hi, fp128]
+    [FIXED18_SCALE]           // [1e18, fp128_hi, fp128]
+    mul                       // [fp128_hi * 1e18, fp128]
+    
+    swap1                     // [fp128, fp128_hi * 1e18]
+    [MASK128] and             // [fp128_lo, fp128_hi * 1e18]
+    [FIXED18_SCALE]           // [1e18, fp128_lo, fp128_hi * 1e18]
+    mul                       // [fp128_lo * 1e18, fp128_hi * 1e18]
+    0x80 shr                  // [(fp128_lo * 1e18) >> 128, fp128_hi * 1e18]
+    
+    add                       // [result]
 }
 
 /// @notice Multiply two 128.128 fixed-point numbers (FAST VERSION - omits Term4)

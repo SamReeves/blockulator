@@ -202,19 +202,23 @@ export class BenchmarkApp {
         });
 
         // Arithmetic Precision Chart
+        const arithPrecisionData = this.getArithmeticPrecisionData(colors);
         const arithPrecisionCtx = document.getElementById('arithmetic-precision-chart').getContext('2d');
         this.charts.arithmeticPrecision = new Chart(arithPrecisionCtx, {
             type: 'bar',
-            data: this.getArithmeticPrecisionData(colors),
+            data: arithPrecisionData,
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                    title: { display: true, text: 'Precision by Operation (log scale)', font: { size: 14, weight: 'bold' } },
+                    title: { display: true, text: arithPrecisionData.useDigits ? 'Precision by Operation (Matching Digits)' : 'Precision by Operation (log scale)', font: { size: 14, weight: 'bold' } },
                     legend: { display: true, position: 'top' }
                 },
                 scales: {
-                    y: { type: 'logarithmic', title: { display: true, text: 'Error (wei)' } },
+                    y: { 
+                        type: arithPrecisionData.useDigits ? 'linear' : 'logarithmic', 
+                        title: { display: true, text: arithPrecisionData.useDigits ? 'Matching Decimal Digits' : 'Error (wei)' } 
+                    },
                     x: { title: { display: true, text: 'Operation' } }
                 }
             }
@@ -240,19 +244,23 @@ export class BenchmarkApp {
         });
 
         // Transcendental Precision Chart
+        const transPrecisionData = this.getTranscendentalPrecisionData(colors);
         const transPrecisionCtx = document.getElementById('transcendental-precision-chart').getContext('2d');
         this.charts.transcendentalPrecision = new Chart(transPrecisionCtx, {
             type: 'bar',
-            data: this.getTranscendentalPrecisionData(colors),
+            data: transPrecisionData,
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
                 plugins: {
-                    title: { display: true, text: 'Precision by Function (log scale)', font: { size: 14, weight: 'bold' } },
+                    title: { display: true, text: transPrecisionData.useDigits ? 'Precision by Function (Matching Digits)' : 'Precision by Function (log scale)', font: { size: 14, weight: 'bold' } },
                     legend: { display: true, position: 'top' }
                 },
                 scales: {
-                    y: { type: 'logarithmic', title: { display: true, text: 'Error (wei)' } },
+                    y: { 
+                        type: transPrecisionData.useDigits ? 'linear' : 'logarithmic', 
+                        title: { display: true, text: transPrecisionData.useDigits ? 'Matching Decimal Digits' : 'Error (wei)' } 
+                    },
                     x: { title: { display: true, text: 'Function' } }
                 }
             }
@@ -291,15 +299,25 @@ export class BenchmarkApp {
     getArithmeticPrecisionData(colors) {
         const ops = ['mul', 'div', 'add', 'sub'];
         const datasets = [];
+        
+        // Check if we have digits data (new format) or error data (old format)
+        const useDigits = this.benchmarkData.arithmetic.length > 0 && 
+                         this.benchmarkData.arithmetic[0].results[Object.keys(this.benchmarkData.arithmetic[0].results)[0]]?.digits !== undefined;
 
         for (const lib of Object.keys(this.enabledLibs)) {
             if (!this.enabledLibs[lib]) continue;
 
             const data = ops.map(op => {
                 const cases = this.benchmarkData.arithmetic.filter(c => c.op === op && c.results[lib]);
-                if (cases.length === 0) return 0.1;
-                const avg = cases.reduce((sum, c) => sum + c.results[lib].error, 0) / cases.length;
-                return Math.max(avg, 0.1); // Clamp to minimum for log scale
+                if (cases.length === 0) return useDigits ? 0 : 0.1;
+                
+                if (useDigits) {
+                    const avg = cases.reduce((sum, c) => sum + (c.results[lib].digits || 0), 0) / cases.length;
+                    return Math.max(avg, 0);
+                } else {
+                    const avg = cases.reduce((sum, c) => sum + c.results[lib].error, 0) / cases.length;
+                    return Math.max(avg, 0.1); // Clamp to minimum for log scale
+                }
             });
 
             datasets.push({
@@ -311,7 +329,7 @@ export class BenchmarkApp {
             });
         }
 
-        return { labels: ops.map(o => o.toUpperCase()), datasets };
+        return { labels: ops.map(o => o.toUpperCase()), datasets, useDigits };
     }
 
     getTranscendentalGasData(colors) {
@@ -345,15 +363,25 @@ export class BenchmarkApp {
         const funcs = ['exp', 'ln', 'sqrt'];
         const datasets = [];
         const transLibs = ['fp128', 'abdk', 'solady'];
+        
+        // Check if we have digits data
+        const useDigits = this.benchmarkData.transcendental.length > 0 &&
+                         this.benchmarkData.transcendental[0].results[Object.keys(this.benchmarkData.transcendental[0].results)[0]]?.digits !== undefined;
 
         for (const lib of transLibs) {
             if (!this.enabledLibs[lib]) continue;
 
             const data = funcs.map(func => {
                 const cases = this.benchmarkData.transcendental.filter(c => c.func === func && c.results[lib]);
-                if (cases.length === 0) return 0.1;
-                const avg = cases.reduce((sum, c) => sum + c.results[lib].error, 0) / cases.length;
-                return Math.max(avg, 0.1);
+                if (cases.length === 0) return useDigits ? 0 : 0.1;
+                
+                if (useDigits) {
+                    const avg = cases.reduce((sum, c) => sum + (c.results[lib].digits || 0), 0) / cases.length;
+                    return Math.max(avg, 0);
+                } else {
+                    const avg = cases.reduce((sum, c) => sum + c.results[lib].error, 0) / cases.length;
+                    return Math.max(avg, 0.1);
+                }
             });
 
             datasets.push({
@@ -365,7 +393,7 @@ export class BenchmarkApp {
             });
         }
 
-        return { labels: funcs.map(f => f.toUpperCase()), datasets };
+        return { labels: funcs.map(f => f.toUpperCase()), datasets, useDigits };
     }
 
     updateCharts() {
@@ -379,24 +407,54 @@ export class BenchmarkApp {
         this.charts.arithmeticGas.data = this.getArithmeticGasData(colors);
         this.charts.arithmeticGas.update();
 
-        this.charts.arithmeticPrecision.data = this.getArithmeticPrecisionData(colors);
+        const arithPrecisionData = this.getArithmeticPrecisionData(colors);
+        this.charts.arithmeticPrecision.data = arithPrecisionData;
+        
+        // Update chart config based on data type
+        if (arithPrecisionData.useDigits) {
+            this.charts.arithmeticPrecision.options.plugins.title.text = 'Precision by Operation (Matching Digits)';
+            this.charts.arithmeticPrecision.options.scales.y.type = 'linear';
+            this.charts.arithmeticPrecision.options.scales.y.title.text = 'Matching Decimal Digits';
+        } else {
+            this.charts.arithmeticPrecision.options.plugins.title.text = 'Precision by Operation (log scale)';
+            this.charts.arithmeticPrecision.options.scales.y.type = 'logarithmic';
+            this.charts.arithmeticPrecision.options.scales.y.title.text = 'Error (wei)';
+        }
         this.charts.arithmeticPrecision.update();
 
         this.charts.transcendentalGas.data = this.getTranscendentalGasData(colors);
         this.charts.transcendentalGas.update();
 
-        this.charts.transcendentalPrecision.data = this.getTranscendentalPrecisionData(colors);
+        const transPrecisionData = this.getTranscendentalPrecisionData(colors);
+        this.charts.transcendentalPrecision.data = transPrecisionData;
+        
+        // Update chart config based on data type
+        if (transPrecisionData.useDigits) {
+            this.charts.transcendentalPrecision.options.plugins.title.text = 'Precision by Function (Matching Digits)';
+            this.charts.transcendentalPrecision.options.scales.y.type = 'linear';
+            this.charts.transcendentalPrecision.options.scales.y.title.text = 'Matching Decimal Digits';
+        } else {
+            this.charts.transcendentalPrecision.options.plugins.title.text = 'Precision by Function (log scale)';
+            this.charts.transcendentalPrecision.options.scales.y.type = 'logarithmic';
+            this.charts.transcendentalPrecision.options.scales.y.title.text = 'Error (wei)';
+        }
         this.charts.transcendentalPrecision.update();
     }
 
     renderDetailTables() {
+        // Check if we have digits data
+        const useDigits = this.benchmarkData.arithmetic.length > 0 && 
+                         this.benchmarkData.arithmetic[0].results[Object.keys(this.benchmarkData.arithmetic[0].results)[0]]?.digits !== undefined;
+        
+        const precisionLabel = useDigits ? 'Digits' : 'Error';
+        
         // Arithmetic table
         const arithContainer = document.getElementById('arithmetic-detail');
         let arithHTML = '<table class="benchmark-detail-table"><thead><tr><th>Case</th><th>Op</th>';
         
         for (const lib of Object.keys(this.enabledLibs)) {
             if (this.enabledLibs[lib]) {
-                arithHTML += `<th>${this.benchmarkData.libraries[lib].name}<br><small>Gas / Error</small></th>`;
+                arithHTML += `<th>${this.benchmarkData.libraries[lib].name}<br><small>Gas / ${precisionLabel}</small></th>`;
             }
         }
         arithHTML += '</tr></thead><tbody>';
@@ -406,9 +464,11 @@ export class BenchmarkApp {
             for (const lib of Object.keys(this.enabledLibs)) {
                 if (this.enabledLibs[lib]) {
                     if (c.results[lib]) {
-                        const gasClass = this.getBestClass(c.results, lib, 'gas');
-                        const errClass = this.getBestClass(c.results, lib, 'error');
-                        arithHTML += `<td><span class="${gasClass}">${c.results[lib].gas}</span> / <span class="${errClass}">${this.formatError(c.results[lib].error)}</span></td>`;
+                        const gasClass = this.getBestClass(c.results, lib, 'gas', false);
+                        const precisionMetric = useDigits ? 'digits' : 'error';
+                        const precisionClass = this.getBestClass(c.results, lib, precisionMetric, useDigits);
+                        const precisionValue = useDigits ? this.formatDigits(c.results[lib].digits) : this.formatError(c.results[lib].error);
+                        arithHTML += `<td><span class="${gasClass}">${c.results[lib].gas}</span> / <span class="${precisionClass}">${precisionValue}</span></td>`;
                     } else {
                         arithHTML += '<td>N/A</td>';
                     }
@@ -420,13 +480,17 @@ export class BenchmarkApp {
         arithContainer.innerHTML = arithHTML;
 
         // Transcendental table
+        const transUseDigits = this.benchmarkData.transcendental.length > 0 &&
+                              this.benchmarkData.transcendental[0].results[Object.keys(this.benchmarkData.transcendental[0].results)[0]]?.digits !== undefined;
+        const transPrecisionLabel = transUseDigits ? 'Digits' : 'Error';
+        
         const transContainer = document.getElementById('transcendental-detail');
         let transHTML = '<table class="benchmark-detail-table"><thead><tr><th>Case</th><th>Func</th>';
         
         const transLibs = ['fp128', 'abdk', 'solady'];
         for (const lib of transLibs) {
             if (this.enabledLibs[lib]) {
-                transHTML += `<th>${this.benchmarkData.libraries[lib].name}<br><small>Gas / Error</small></th>`;
+                transHTML += `<th>${this.benchmarkData.libraries[lib].name}<br><small>Gas / ${transPrecisionLabel}</small></th>`;
             }
         }
         transHTML += '</tr></thead><tbody>';
@@ -436,9 +500,11 @@ export class BenchmarkApp {
             for (const lib of transLibs) {
                 if (this.enabledLibs[lib]) {
                     if (c.results[lib]) {
-                        const gasClass = this.getBestClass(c.results, lib, 'gas');
-                        const errClass = this.getBestClass(c.results, lib, 'error');
-                        transHTML += `<td><span class="${gasClass}">${c.results[lib].gas}</span> / <span class="${errClass}">${this.formatError(c.results[lib].error)}</span></td>`;
+                        const gasClass = this.getBestClass(c.results, lib, 'gas', false);
+                        const precisionMetric = transUseDigits ? 'digits' : 'error';
+                        const precisionClass = this.getBestClass(c.results, lib, precisionMetric, transUseDigits);
+                        const precisionValue = transUseDigits ? this.formatDigits(c.results[lib].digits) : this.formatError(c.results[lib].error);
+                        transHTML += `<td><span class="${gasClass}">${c.results[lib].gas}</span> / <span class="${precisionClass}">${precisionValue}</span></td>`;
                     } else {
                         transHTML += '<td>N/A</td>';
                     }
@@ -450,14 +516,14 @@ export class BenchmarkApp {
         transContainer.innerHTML = transHTML;
     }
 
-    getBestClass(results, lib, metric) {
+    getBestClass(results, lib, metric, higherIsBetter = false) {
         const values = Object.entries(results)
             .filter(([l, _]) => this.enabledLibs[l])
             .map(([_, r]) => r[metric]);
         
         if (values.length === 0) return '';
         
-        const bestValue = metric === 'gas' ? Math.min(...values) : Math.min(...values);
+        const bestValue = higherIsBetter ? Math.max(...values) : Math.min(...values);
         return results[lib][metric] === bestValue ? 'best-value' : '';
     }
 
@@ -467,6 +533,12 @@ export class BenchmarkApp {
         if (error < 1) return error.toFixed(2);
         if (error < 1000) return Math.round(error).toString();
         return error.toExponential(1);
+    }
+    
+    formatDigits(digits) {
+        if (digits === undefined || digits === null) return 'N/A';
+        if (digits >= 100) return '100+';
+        return digits.toFixed(1);
     }
 
     renderLibraryCards() {
@@ -493,31 +565,31 @@ export class BenchmarkApp {
                         <div class="stat-grid">
                             <div class="stat-item">
                                 <span class="stat-label">Avg Digits (Overall)</span>
-                                <span class="stat-value">${stats.overall.avgDigits}</span>
+                                <span class="stat-value">${this.formatDigits(stats.overall.avgDigits)}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Min Digits</span>
+                                <span class="stat-value">${stats.overall.minDigits !== undefined ? this.formatDigits(stats.overall.minDigits) : 'N/A'}</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Exact Match Rate</span>
+                                <span class="stat-value">${((stats.overall.zeroCount / stats.overall.total) * 100).toFixed(0)}%</span>
                             </div>
                             <div class="stat-item">
                                 <span class="stat-label">Avg Error (wei)</span>
                                 <span class="stat-value">${this.formatError(stats.overall.avgError)}</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Oracle Match Rate</span>
-                                <span class="stat-value">${((stats.overall.zeroCount / stats.overall.total) * 100).toFixed(0)}%</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Worst Error</span>
-                                <span class="stat-value">${this.formatError(stats.overall.maxError)}</span>
                             </div>
                         </div>
                         <details class="precision-breakdown">
                             <summary>By Operation Type</summary>
                             <div class="breakdown-content">
                                 <div class="breakdown-row">
-                                    <strong>Arithmetic:</strong> ${stats.arithmetic.avgDigits} avg digits, 
+                                    <strong>Arithmetic:</strong> ${this.formatDigits(stats.arithmetic.avgDigits)} avg digits, 
                                     ${stats.arithmetic.zeroCount}/${stats.arithmetic.total} exact matches
                                 </div>
                                 ${stats.transcendental.total > 0 ? `
                                 <div class="breakdown-row">
-                                    <strong>Transcendental:</strong> ${stats.transcendental.avgDigits} avg digits, 
+                                    <strong>Transcendental:</strong> ${this.formatDigits(stats.transcendental.avgDigits)} avg digits, 
                                     ${stats.transcendental.zeroCount}/${stats.transcendental.total} exact matches
                                 </div>
                                 ` : ''}
@@ -537,7 +609,7 @@ export class BenchmarkApp {
         const transLibs = ['fp128', 'abdk', 'solady'];
         const transStats = transLibs.includes(lib) 
             ? this.computeStatsForCases(this.benchmarkData.transcendental, lib)
-            : { avgError: 0, maxError: 0, avgDigits: 0, zeroCount: 0, total: 0 };
+            : { avgError: 0, maxError: 0, avgDigits: 0, minDigits: 0, zeroCount: 0, total: 0 };
         
         const allCases = [...this.benchmarkData.arithmetic];
         if (transLibs.includes(lib)) {
@@ -553,38 +625,65 @@ export class BenchmarkApp {
     }
 
     computeStatsForCases(cases, lib) {
-        let errors = [];
-        let digits = [];
-        let zeroCount = 0;
-        let maxError = 0;
-
-        for (const c of cases) {
-            if (!c.results[lib]) continue;
-
-            const err = c.results[lib].error;
-            const expected = Math.abs(parseInt(c.expected || '1000000000000000000'));
-
-            errors.push(err);
-            if (err > maxError) maxError = err;
-
-            if (err === 0) {
-                zeroCount++;
-            } else if (expected > 0 && err > 0) {
-                const matching = Math.floor(Math.log10(expected / err));
-                digits.push(Math.max(0, matching));
-            }
+        const results = cases.filter(c => c.results[lib]).map(c => c.results[lib]);
+        if (results.length === 0) {
+            return { avgError: 0, maxError: 0, avgDigits: 0, minDigits: 0, zeroCount: 0, total: 0 };
         }
 
-        const avgError = errors.length > 0 ? errors.reduce((a, b) => a + b, 0) / errors.length : 0;
-        const avgDigits = digits.length > 0 ? digits.reduce((a, b) => a + b, 0) / digits.length : 18;
+        // Check if we have digits data directly
+        const useDigits = results[0].digits !== undefined;
+        
+        if (useDigits) {
+            // New format: use digits directly
+            const digits = results.map(r => r.digits || 0);
+            const avgDigits = digits.reduce((a, b) => a + b, 0) / digits.length;
+            const minDigits = Math.min(...digits);
+            const zeroCount = digits.filter(d => d >= 100).length; // 100+ digits = exact match
+            
+            return {
+                avgError: 0,
+                maxError: 0,
+                avgDigits: Math.round(avgDigits * 10) / 10,
+                minDigits: Math.round(minDigits * 10) / 10,
+                zeroCount,
+                total: results.length
+            };
+        } else {
+            // Old format: compute from errors
+            let errors = [];
+            let digits = [];
+            let zeroCount = 0;
+            let maxError = 0;
 
-        return {
-            avgError: Math.round(avgError * 100) / 100,
-            maxError: maxError,
-            avgDigits: Math.round(avgDigits * 10) / 10,
-            zeroCount: zeroCount,
-            total: errors.length
-        };
+            for (const c of cases) {
+                if (!c.results[lib]) continue;
+
+                const err = c.results[lib].error;
+                const expected = Math.abs(parseInt(c.expected || '1000000000000000000'));
+
+                errors.push(err);
+                if (err > maxError) maxError = err;
+
+                if (err === 0) {
+                    zeroCount++;
+                } else if (expected > 0 && err > 0) {
+                    const matching = Math.floor(Math.log10(expected / err));
+                    digits.push(Math.max(0, matching));
+                }
+            }
+
+            const avgError = errors.length > 0 ? errors.reduce((a, b) => a + b, 0) / errors.length : 0;
+            const avgDigits = digits.length > 0 ? digits.reduce((a, b) => a + b, 0) / digits.length : 18;
+
+            return {
+                avgError: Math.round(avgError * 100) / 100,
+                maxError: maxError,
+                avgDigits: Math.round(avgDigits * 10) / 10,
+                minDigits: 0,
+                zeroCount: zeroCount,
+                total: errors.length
+            };
+        }
     }
 
     renderPrecisionTable() {

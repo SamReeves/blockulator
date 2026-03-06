@@ -8,54 +8,60 @@
       "range": "\u00b11.7e38",
       "stats": {
         "arithmetic": {
-          "avgError": 4.937221497955442e+37,
-          "maxError": 122810178722901203626769558964218888192,
-          "avgDigits": 0.0,
-          "zeroCount": 4,
-          "total": 52
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 34.8,
+          "minDigits": 28,
+          "zeroCount": 0,
+          "total": 10
         },
         "transcendental": {
-          "avgError": 3.7037881222549806e+25,
-          "maxError": 1000000000000000000000000000,
-          "avgDigits": 0.0,
-          "zeroCount": 1,
-          "total": 27
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 32.4,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 8
         },
         "overall": {
-          "avgError": 3.2498166821997843e+37,
-          "maxError": 122810178722901203626769558964218888192,
-          "avgDigits": 0.0,
-          "zeroCount": 5,
-          "total": 79
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 33.7,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 18
         }
       }
     },
     "vyper": {
       "name": "Vyper",
-      "format": "int256 18-decimal",
+      "format": "decimal (10-digit)",
       "lang": "Vyper 0.4",
-      "range": "\u00b15.8e58",
+      "range": "\u00b11.7e28",
       "stats": {
         "arithmetic": {
-          "avgError": 0.48,
-          "maxError": 3,
-          "avgDigits": 16.9,
-          "zeroCount": 36,
-          "total": 52
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 9.8,
+          "minDigits": 9,
+          "zeroCount": 0,
+          "total": 10
         },
         "transcendental": {
           "avgError": 0,
           "maxError": 0,
-          "avgDigits": 0,
+          "avgDigits": 9.6,
+          "minDigits": 9,
           "zeroCount": 0,
-          "total": 0
+          "total": 8
         },
         "overall": {
-          "avgError": 0.48,
-          "maxError": 3,
-          "avgDigits": 16.9,
-          "zeroCount": 36,
-          "total": 52
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 9.7,
+          "minDigits": 9,
+          "zeroCount": 0,
+          "total": 18
         }
       }
     },
@@ -66,25 +72,28 @@
       "range": "\u00b19.2e18",
       "stats": {
         "arithmetic": {
-          "avgError": 1.923094660321077e+31,
-          "maxError": 999999999994923055729694736384001,
-          "avgDigits": 13.8,
-          "zeroCount": 25,
-          "total": 52
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 18.9,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 10
         },
         "transcendental": {
-          "avgError": 27.37,
-          "maxError": 732,
-          "avgDigits": 18.0,
-          "zeroCount": 19,
-          "total": 27
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 18.9,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 8
         },
         "overall": {
-          "avgError": 1.2658344599581771e+31,
-          "maxError": 999999999994923055729694736384001,
-          "avgDigits": 14.8,
-          "zeroCount": 44,
-          "total": 79
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 18.9,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 18
         }
       }
     },
@@ -95,25 +104,28 @@
       "range": "\u00b15.8e58",
       "stats": {
         "arithmetic": {
-          "avgError": 0.48,
-          "maxError": 3,
-          "avgDigits": 16.9,
-          "zeroCount": 33,
-          "total": 48
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 18.0,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 10
         },
         "transcendental": {
-          "avgError": 1.11,
-          "maxError": 23,
-          "avgDigits": 18.1,
-          "zeroCount": 19,
-          "total": 27
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 18.0,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 8
         },
         "overall": {
-          "avgError": 0.71,
-          "maxError": 23,
-          "avgDigits": 17.3,
-          "zeroCount": 52,
-          "total": 75
+          "avgError": 0,
+          "maxError": 0,
+          "avgDigits": 18.0,
+          "minDigits": 18,
+          "zeroCount": 0,
+          "total": 18
         }
       }
     }
@@ -122,314 +134,115 @@
     {
       "name": "pi * e",
       "op": "mul",
-      "expected": "8539734222673567065",
+      "expected": "8539734222673567063",
       "results": {
         "fp128": {
-          "gas": 965,
-          "error": 122227170809771563694733872220323160743
+          "gas": 5505,
+          "digits": 38
         },
         "vyper": {
-          "gas": 5373,
-          "error": 2
+          "gas": 6114,
+          "digits": 10
         },
         "abdk": {
-          "gas": 236,
-          "error": 3
+          "gas": 216,
+          "digits": 19
         },
         "solady": {
-          "gas": 113,
-          "error": 2
+          "gas": 126,
+          "digits": 18
         }
       }
     },
     {
       "name": "sqrt2 * sqrt3",
       "op": "mul",
-      "expected": "2449489742783178098",
+      "expected": "2449489742783178096",
       "results": {
         "fp128": {
-          "gas": 967,
-          "error": 122227170809771563692072092960824629902
+          "gas": 1005,
+          "digits": 38
         },
         "vyper": {
-          "gas": 872,
-          "error": 2
+          "gas": 1615,
+          "digits": 9
         },
         "abdk": {
-          "gas": 236,
-          "error": 3
+          "gas": 216,
+          "digits": 18
         },
         "solady": {
-          "gas": 113,
-          "error": 2
+          "gas": 126,
+          "digits": 18
         }
       }
     },
     {
       "name": "phi * (1/phi)",
       "op": "mul",
-      "expected": "1000000000000000000",
+      "expected": "999999999999999999",
       "results": {
         "fp128": {
-          "gas": 967,
-          "error": 122227170809771563693521582703607808000
+          "gas": 1005,
+          "digits": 37
         },
         "vyper": {
-          "gas": 873,
-          "error": 1
+          "gas": 1617,
+          "digits": 9
         },
         "abdk": {
-          "gas": 236,
-          "error": 1
+          "gas": 216,
+          "digits": 19
         },
         "solady": {
-          "gas": 113,
-          "error": 1
+          "gas": 126,
+          "digits": 18
         }
       }
     },
     {
       "name": "1/3 * 3",
       "op": "mul",
-      "expected": "1000000000000000000",
+      "expected": "999999999999999999",
       "results": {
         "fp128": {
-          "gas": 968,
-          "error": 122227170809771563691521582703607808000
+          "gas": 1005,
+          "digits": 37
         },
         "vyper": {
-          "gas": 873,
-          "error": 1
+          "gas": 1617,
+          "digits": 10
         },
         "abdk": {
-          "gas": 236,
-          "error": 2
+          "gas": 216,
+          "digits": 19
         },
         "solady": {
-          "gas": 113,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "1/7 * 7",
-      "op": "mul",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 969,
-          "error": 122227170809771563693857614356126367744
-        },
-        "vyper": {
-          "gas": 874,
-          "error": 1
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 2
-        },
-        "solady": {
-          "gas": 113,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "1/13 * 13",
-      "op": "mul",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 970,
-          "error": 122227170809771563697361661834904207360
-        },
-        "vyper": {
-          "gas": 873,
-          "error": 1
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 2
-        },
-        "solady": {
-          "gas": 113,
-          "error": 1
+          "gas": 126,
+          "digits": 18
         }
       }
     },
     {
       "name": "e * e",
       "op": "mul",
-      "expected": "7389056098930650227",
+      "expected": "7389056098930650225",
       "results": {
         "fp128": {
-          "gas": 970,
-          "error": 122227170809771563695884550344066077581
+          "gas": 1005,
+          "digits": 38
         },
         "vyper": {
-          "gas": 874,
-          "error": 2
+          "gas": 1619,
+          "digits": 10
         },
         "abdk": {
-          "gas": 236,
-          "error": 2
+          "gas": 216,
+          "digits": 19
         },
         "solady": {
-          "gas": 113,
-          "error": 2
-        }
-      }
-    },
-    {
-      "name": "pi * pi",
-      "op": "mul",
-      "expected": "9869604401089358618",
-      "results": {
-        "fp128": {
-          "gas": 971,
-          "error": 122227170809771563693404002041907369190
-        },
-        "vyper": {
-          "gas": 874,
-          "error": 3
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 3
-        },
-        "solady": {
-          "gas": 113,
-          "error": 3
-        }
-      }
-    },
-    {
-      "name": "0.1 * 0.1",
-      "op": "mul",
-      "expected": "10000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 972,
-          "error": 122227170809771563690759558964218888192
-        },
-        "vyper": {
-          "gas": 875,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 1
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1e-9 * 1e9",
-      "op": "mul",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 973,
-          "error": 122227170810355571602899198900218888192
-        },
-        "vyper": {
-          "gas": 875,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 38464871
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "ln2 * (1/ln2)",
-      "op": "mul",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 974,
-          "error": 122227170809771563691937574790478168064
-        },
-        "vyper": {
-          "gas": 875,
-          "error": 1
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 1
-        },
-        "solady": {
-          "gas": 113,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "99.99 * 1.0001",
-      "op": "mul",
-      "expected": "99999999000000000000",
-      "results": {
-        "fp128": {
-          "gas": 975,
-          "error": 122227170809771563749754359190312521728
-        },
-        "vyper": {
-          "gas": 875,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 1
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(-2) * 3",
-      "op": "mul",
-      "expected": "-6000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 966,
-          "error": 122227170809771563693689598529867087872
-        },
-        "vyper": {
-          "gas": 876,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(-pi) * (-e)",
-      "op": "mul",
-      "expected": "8539734222673567065",
-      "results": {
-        "fp128": {
-          "gas": 957,
-          "error": 122227170809771563694733872220323160743
-        },
-        "vyper": {
-          "gas": 875,
-          "error": 2
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 3
+          "gas": 126,
+          "digits": 18
         }
       }
     },
@@ -439,20 +252,20 @@
       "expected": "1155727349790921717",
       "results": {
         "fp128": {
-          "gas": 1376,
-          "error": 1155742608812814861
+          "gas": 1105,
+          "digits": 28
         },
         "vyper": {
-          "gas": 933,
-          "error": 0
+          "gas": 1644,
+          "digits": 10
         },
         "abdk": {
-          "gas": 290,
-          "error": 0
+          "gas": 270,
+          "digits": 19
         },
         "solady": {
-          "gas": 145,
-          "error": 0
+          "gas": 155,
+          "digits": 18
         }
       }
     },
@@ -462,20 +275,20 @@
       "expected": "865255979432265087",
       "results": {
         "fp128": {
-          "gas": 1376,
-          "error": 865271238454158231
+          "gas": 1105,
+          "digits": 28
         },
         "vyper": {
-          "gas": 933,
-          "error": 0
+          "gas": 1646,
+          "digits": 10
         },
         "abdk": {
-          "gas": 290,
-          "error": 0
+          "gas": 270,
+          "digits": 19
         },
         "solady": {
-          "gas": 145,
-          "error": 0
+          "gas": 155,
+          "digits": 18
         }
       }
     },
@@ -485,223 +298,20 @@
       "expected": "333333333333333333",
       "results": {
         "fp128": {
-          "gas": 1377,
-          "error": 333348592355226477
+          "gas": 1105,
+          "digits": 28
         },
         "vyper": {
-          "gas": 934,
-          "error": 0
+          "gas": 1647,
+          "digits": 10
         },
         "abdk": {
-          "gas": 290,
-          "error": 0
+          "gas": 270,
+          "digits": 19
         },
         "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1 / 7",
-      "op": "div",
-      "expected": "142857142857142857",
-      "results": {
-        "fp128": {
-          "gas": 1378,
-          "error": 142872401879036001
-        },
-        "vyper": {
-          "gas": 934,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1 / 13",
-      "op": "div",
-      "expected": "76923076923076923",
-      "results": {
-        "fp128": {
-          "gas": 1378,
-          "error": 76938335944970067
-        },
-        "vyper": {
-          "gas": 934,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "22 / 7",
-      "op": "div",
-      "expected": "3142857142857142857",
-      "results": {
-        "fp128": {
-          "gas": 1379,
-          "error": 3142872401879036001
-        },
-        "vyper": {
-          "gas": 934,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt2 / sqrt3",
-      "op": "div",
-      "expected": "816496580927726032",
-      "results": {
-        "fp128": {
-          "gas": 1380,
-          "error": 816511839949619176
-        },
-        "vyper": {
-          "gas": 935,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "e^2 / e",
-      "op": "div",
-      "expected": "2718281828459045235",
-      "results": {
-        "fp128": {
-          "gas": 1381,
-          "error": 2718297087480938379
-        },
-        "vyper": {
-          "gas": 935,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "ln10 / ln2",
-      "op": "div",
-      "expected": "3321928094887362347",
-      "results": {
-        "fp128": {
-          "gas": 1381,
-          "error": 3321943353909255491
-        },
-        "vyper": {
-          "gas": 936,
-          "error": 2
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 2
-        },
-        "solady": {
-          "gas": 145,
-          "error": 2
-        }
-      }
-    },
-    {
-      "name": "phi / sqrt2",
-      "op": "div",
-      "expected": "1144122805635368595",
-      "results": {
-        "fp128": {
-          "gas": 1383,
-          "error": 1144138064657261739
-        },
-        "vyper": {
-          "gas": 935,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "100.001 / 100",
-      "op": "div",
-      "expected": "1000010000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1383,
-          "error": 1000025259021893144
-        },
-        "vyper": {
-          "gas": 936,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 1
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(-6) / 3",
-      "op": "div",
-      "expected": "-2000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1363,
-          "error": 2000015259021893143
-        },
-        "vyper": {
-          "gas": 936,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
+          "gas": 155,
+          "digits": 18
         }
       }
     },
@@ -711,154 +321,20 @@
       "expected": "5859874482048838473",
       "results": {
         "fp128": {
-          "gas": 874,
-          "error": 1308141344210441399
+          "gas": 199,
+          "digits": 38
         },
         "vyper": {
-          "gas": 869,
-          "error": 0
+          "gas": 1634,
+          "digits": 10
         },
         "abdk": {
-          "gas": 265,
-          "error": 1
+          "gas": 261,
+          "digits": 19
         },
         "solady": {
-          "gas": 148,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1 + 1e-15",
-      "op": "add",
-      "expected": "1000000000000000999",
-      "results": {
-        "fp128": {
-          "gas": 875,
-          "error": 1168015826259278873
-        },
-        "vyper": {
-          "gas": 869,
-          "error": 1
-        },
-        "abdk": {
-          "gas": 265,
-          "error": 0
-        },
-        "solady": {
-          "gas": 148,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "phi + (1/phi)",
-      "op": "add",
-      "expected": "2236067977499789696",
-      "results": {
-        "fp128": {
-          "gas": 875,
-          "error": 1931947848759490176
-        },
-        "vyper": {
-          "gas": 870,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 265,
-          "error": 1
-        },
-        "solady": {
-          "gas": 148,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(-3) + 5",
-      "op": "add",
-      "expected": "2000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 867,
-          "error": 0
-        },
-        "vyper": {
-          "gas": 870,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 265,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(1+1e-15) - 1",
-      "op": "sub",
-      "expected": "1000",
-      "results": {
-        "fp128": {
-          "gas": 875,
-          "error": 1000
-        },
-        "vyper": {
-          "gas": 895,
-          "error": 1
-        },
-        "abdk": {
-          "gas": 266,
-          "error": 2
-        },
-        "solady": {
-          "gas": 176,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "phi^2 - phi",
-      "op": "sub",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 875,
-          "error": 0
-        },
-        "vyper": {
-          "gas": 895,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 266,
-          "error": 0
-        },
-        "solady": {
-          "gas": 176,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt2^2 - 2",
-      "op": "sub",
-      "expected": "0",
-      "results": {
-        "fp128": {
-          "gas": 876,
-          "error": 0
-        },
-        "vyper": {
-          "gas": 895,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 266,
-          "error": 0
-        },
-        "solady": {
-          "gas": 176,
-          "error": 0
+          "gas": 125,
+          "digits": 18
         }
       }
     },
@@ -868,493 +344,45 @@
       "expected": "2000000000000000000",
       "results": {
         "fp128": {
-          "gas": 877,
-          "error": 0
+          "gas": 200,
+          "digits": 38
         },
         "vyper": {
-          "gas": 895,
-          "error": 0
+          "gas": 1635,
+          "digits": 10
         },
         "abdk": {
-          "gas": 266,
-          "error": 0
+          "gas": 232,
+          "digits": 19
         },
         "solady": {
-          "gas": 176,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(pi*e)/e",
-      "op": "div",
-      "expected": "3141592653589793238",
-      "results": {
-        "fp128": {
-          "gas": 1391,
-          "error": 3141607912611686382
-        },
-        "vyper": {
-          "gas": 939,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(e/pi)*pi",
-      "op": "mul",
-      "expected": "2718281828459045235",
-      "results": {
-        "fp128": {
-          "gas": 994,
-          "error": 122227170809771563693387308788278402701
-        },
-        "vyper": {
-          "gas": 882,
-          "error": 1
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 1
-        },
-        "solady": {
-          "gas": 113,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "sqrt(2)^2 via mul",
-      "op": "mul",
-      "expected": "2000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 995,
-          "error": 122227170809771563690937574790478168064
-        },
-        "vyper": {
-          "gas": 882,
-          "error": 3
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 3
-        },
-        "solady": {
-          "gas": 113,
-          "error": 3
-        }
-      }
-    },
-    {
-      "name": "1e-15 * 1e-15",
-      "op": "mul",
-      "expected": "0",
-      "results": {
-        "fp128": {
-          "gas": 995,
-          "error": 122227170809771563690769558964218888192
-        },
-        "vyper": {
-          "gas": 882,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 0
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1e-9 / 1e9",
-      "op": "div",
-      "expected": "0",
-      "results": {
-        "fp128": {
-          "gas": 1394,
-          "error": 15259021893144
-        },
-        "vyper": {
-          "gas": 940,
-          "error": 1
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "1e-12 + 1e-12",
-      "op": "add",
-      "expected": "2000000",
-      "results": {
-        "fp128": {
-          "gas": 885,
-          "error": 1168015826257279872
-        },
-        "vyper": {
-          "gas": 872,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 265,
-          "error": 1
-        },
-        "solady": {
-          "gas": 148,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1e-10 - 0.5e-10",
-      "op": "sub",
-      "expected": "50000000",
-      "results": {
-        "fp128": {
-          "gas": 883,
-          "error": 50000000
-        },
-        "vyper": {
-          "gas": 897,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 266,
-          "error": 0
-        },
-        "solady": {
-          "gas": 176,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1e15 * 1e2",
-      "op": "mul",
-      "expected": "100000000000000000000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 999,
-          "error": 122227754817684693389106350277182881792
-        },
-        "vyper": {
-          "gas": 883,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 0
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1e18 * 1e-3",
-      "op": "mul",
-      "expected": "1000000000000000000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1000,
-          "error": 122810178722901203626769558964218888192
-        },
-        "vyper": {
-          "gas": 883,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 33393426912553537
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1e20 / 1e10",
-      "op": "div",
-      "expected": "10000000000000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1398,
-          "error": 10000000000000015259021893144
-        },
-        "vyper": {
-          "gas": 941,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 9223372036854775808000000001
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "1e30 / 1e15",
-      "op": "div",
-      "expected": "1000000000000000000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1399,
-          "error": 1000000000000000000015258789066053
-        },
-        "vyper": {
-          "gas": 941,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 999999999994923055729694736384001
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(1+1e-15)^2 - 1",
-      "op": "sub",
-      "expected": "2000",
-      "results": {
-        "fp128": {
-          "gas": 888,
-          "error": 2000
-        },
-        "vyper": {
-          "gas": 898,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 266,
-          "error": 1
-        },
-        "solady": {
-          "gas": 176,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(a+b)*(a-b)",
-      "op": "mul",
-      "expected": "4000000000",
-      "results": {
-        "fp128": {
-          "gas": 1003,
-          "error": 122227170809771563691937574786478168064
-        },
-        "vyper": {
-          "gas": 885,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 1
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "a^2 - b^2 direct",
-      "op": "sub",
-      "expected": "4000000000",
-      "results": {
-        "fp128": {
-          "gas": 889,
-          "error": 4000000000
-        },
-        "vyper": {
-          "gas": 899,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 266,
-          "error": 1
-        },
-        "solady": {
-          "gas": 176,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(a*b)/(b*a)",
-      "op": "div",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1403,
-          "error": 1000015259021893144
-        },
-        "vyper": {
-          "gas": 942,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "((a/b)*b)/a",
-      "op": "div",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1404,
-          "error": 1000015259021893144
-        },
-        "vyper": {
-          "gas": 942,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "(1+2)*(3+4)",
-      "op": "mul",
-      "expected": "21000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1006,
-          "error": 122227170809771563696609638095515287552
-        },
-        "vyper": {
-          "gas": 886,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 236,
-          "error": 0
-        },
-        "solady": {
-          "gas": 113,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "10/(2+3)",
-      "op": "div",
-      "expected": "2000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 1405,
-          "error": 2000015259021893144
-        },
-        "vyper": {
-          "gas": 943,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 290,
-          "error": 0
-        },
-        "solady": {
-          "gas": 145,
-          "error": 0
+          "gas": 126,
+          "digits": 18
         }
       }
     }
   ],
   "transcendental": [
     {
-      "name": "exp(0)",
-      "func": "exp",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 4631,
-          "error": 0
-        },
-        "abdk": {
-          "gas": 2691,
-          "error": 0
-        },
-        "solady": {
-          "gas": 426,
-          "error": 0
-        }
-      }
-    },
-    {
       "name": "exp(1)",
       "func": "exp",
       "expected": "2718281828459045235",
       "results": {
         "fp128": {
-          "gas": 190,
-          "error": 2718281828459045235
+          "gas": 17174,
+          "digits": 36
+        },
+        "vyper": {
+          "gas": 7921,
+          "digits": 10
         },
         "abdk": {
-          "gas": 3787,
-          "error": 0
+          "gas": 3844,
+          "digits": 19
         },
         "solady": {
-          "gas": 426,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "exp(-1)",
-      "func": "exp",
-      "expected": "367879441171442321",
-      "results": {
-        "fp128": {
-          "gas": 157,
-          "error": 367879441171442322
-        },
-        "abdk": {
-          "gas": 3639,
-          "error": 0
-        },
-        "solady": {
-          "gas": 426,
-          "error": 0
+          "gas": 450,
+          "digits": 18
         }
       }
     },
@@ -1364,16 +392,20 @@
       "expected": "7389056098930650227",
       "results": {
         "fp128": {
-          "gas": 192,
-          "error": 7389056098930650227
+          "gas": 16950,
+          "digits": 37
+        },
+        "vyper": {
+          "gas": 3422,
+          "digits": 10
         },
         "abdk": {
-          "gas": 3770,
-          "error": 1
+          "gas": 3827,
+          "digits": 19
         },
         "solady": {
-          "gas": 426,
-          "error": 0
+          "gas": 450,
+          "digits": 18
         }
       }
     },
@@ -1383,149 +415,43 @@
       "expected": "1648721270700128146",
       "results": {
         "fp128": {
-          "gas": 192,
-          "error": 1648721270700128146
+          "gas": 16950,
+          "digits": 37
+        },
+        "vyper": {
+          "gas": 4957,
+          "digits": 10
         },
         "abdk": {
-          "gas": 3775,
-          "error": 0
+          "gas": 3832,
+          "digits": 19
         },
         "solady": {
-          "gas": 426,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "exp(-0.5)",
-      "func": "exp",
-      "expected": "606530659712633423",
-      "results": {
-        "fp128": {
-          "gas": 158,
-          "error": 606530659712633424
-        },
-        "abdk": {
-          "gas": 3651,
-          "error": 0
-        },
-        "solady": {
-          "gas": 426,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "exp(10)",
-      "func": "exp",
-      "expected": "22026465794806716516957",
-      "results": {
-        "fp128": {
-          "gas": 193,
-          "error": 22026465794806716516957
-        },
-        "abdk": {
-          "gas": 3878,
-          "error": 732
-        },
-        "solady": {
-          "gas": 426,
-          "error": 23
-        }
-      }
-    },
-    {
-      "name": "exp(-10)",
-      "func": "exp",
-      "expected": "45399929762484",
-      "results": {
-        "fp128": {
-          "gas": 160,
-          "error": 45399929762485
-        },
-        "abdk": {
-          "gas": 3548,
-          "error": 0
-        },
-        "solady": {
-          "gas": 426,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "exp(ln(2))",
-      "func": "exp",
-      "expected": "2000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 193,
-          "error": 2000000000000000000
-        },
-        "abdk": {
-          "gas": 4631,
-          "error": 1
-        },
-        "solady": {
-          "gas": 426,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "exp(3.5)",
-      "func": "exp",
-      "expected": "33115451958692313750",
-      "results": {
-        "fp128": {
-          "gas": 194,
-          "error": 33115451958692313750
-        },
-        "abdk": {
-          "gas": 3558,
-          "error": 0
-        },
-        "solady": {
-          "gas": 426,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "ln(1)",
-      "func": "ln",
-      "expected": "0",
-      "results": {
-        "fp128": {
-          "gas": 21373,
-          "error": 88253463394420122349
-        },
-        "abdk": {
-          "gas": 7019,
-          "error": 0
-        },
-        "solady": {
-          "gas": 171,
-          "error": 0
+          "gas": 450,
+          "digits": 18
         }
       }
     },
     {
       "name": "ln(e)",
       "func": "ln",
-      "expected": "1000000000000000000",
+      "expected": "999999999999999999",
       "results": {
         "fp128": {
-          "gas": 21373,
-          "error": 87253463394420122349
+          "gas": 14776,
+          "digits": 37
+        },
+        "vyper": {
+          "gas": 54851,
+          "digits": 9
         },
         "abdk": {
-          "gas": 7037,
-          "error": 1
+          "gas": 6999,
+          "digits": 18
         },
         "solady": {
-          "gas": 171,
-          "error": 1
+          "gas": 605,
+          "digits": 18
         }
       }
     },
@@ -1535,16 +461,20 @@
       "expected": "693147180559945309",
       "results": {
         "fp128": {
-          "gas": 21321,
-          "error": 87560316213860177040
+          "gas": 12072,
+          "digits": 38
+        },
+        "vyper": {
+          "gas": 104487,
+          "digits": 9
         },
         "abdk": {
-          "gas": 7037,
-          "error": 0
+          "gas": 6999,
+          "digits": 19
         },
         "solady": {
-          "gas": 171,
-          "error": 0
+          "gas": 605,
+          "digits": 18
         }
       }
     },
@@ -1554,92 +484,20 @@
       "expected": "2302585092994045684",
       "results": {
         "fp128": {
-          "gas": 21426,
-          "error": 85950878301426076665
+          "gas": 12240,
+          "digits": 38
+        },
+        "vyper": {
+          "gas": 104843,
+          "digits": 9
         },
         "abdk": {
-          "gas": 7067,
-          "error": 1
+          "gas": 7029,
+          "digits": 19
         },
         "solady": {
-          "gas": 171,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "ln(0.5)",
-      "func": "ln",
-      "expected": "-693147180559945309",
-      "results": {
-        "fp128": {
-          "gas": 21375,
-          "error": 88946610574980067658
-        },
-        "abdk": {
-          "gas": 7145,
-          "error": 1
-        },
-        "solady": {
-          "gas": 171,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "ln(100)",
-      "func": "ln",
-      "expected": "4605170185988091368",
-      "results": {
-        "fp128": {
-          "gas": 21426,
-          "error": 83648293208432030981
-        },
-        "abdk": {
-          "gas": 7079,
-          "error": 0
-        },
-        "solady": {
-          "gas": 171,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "ln(e^2)",
-      "func": "ln",
-      "expected": "2000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 21323,
-          "error": 86253463394420122349
-        },
-        "abdk": {
-          "gas": 7049,
-          "error": 1
-        },
-        "solady": {
-          "gas": 171,
-          "error": 1
-        }
-      }
-    },
-    {
-      "name": "ln(0.1)",
-      "func": "ln",
-      "expected": "-2302585092994045684",
-      "results": {
-        "fp128": {
-          "gas": 21376,
-          "error": 90556048487414168033
-        },
-        "abdk": {
-          "gas": 7097,
-          "error": 1
-        },
-        "solady": {
-          "gas": 171,
-          "error": 1
+          "gas": 605,
+          "digits": 18
         }
       }
     },
@@ -1649,130 +507,20 @@
       "expected": "1414213562373095048",
       "results": {
         "fp128": {
-          "gas": 2974,
-          "error": 1414213562373095048
+          "gas": 2414,
+          "digits": 18
+        },
+        "vyper": {
+          "gas": 11633,
+          "digits": 10
         },
         "abdk": {
-          "gas": 1016,
-          "error": 0
+          "gas": 1143,
+          "digits": 19
         },
         "solady": {
-          "gas": 393,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt(3)",
-      "func": "sqrt",
-      "expected": "1732050807568877293",
-      "results": {
-        "fp128": {
-          "gas": 2974,
-          "error": 1732050807568877293
-        },
-        "abdk": {
-          "gas": 1020,
-          "error": 0
-        },
-        "solady": {
-          "gas": 393,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt(0.5)",
-      "func": "sqrt",
-      "expected": "707106781186547524",
-      "results": {
-        "fp128": {
-          "gas": 2975,
-          "error": 707106781186547524
-        },
-        "abdk": {
-          "gas": 1151,
-          "error": 0
-        },
-        "solady": {
-          "gas": 393,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt(1)",
-      "func": "sqrt",
-      "expected": "1000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 2976,
-          "error": 1000000000000000000
-        },
-        "abdk": {
-          "gas": 1020,
-          "error": 0
-        },
-        "solady": {
-          "gas": 393,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt(4)",
-      "func": "sqrt",
-      "expected": "2000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 2975,
-          "error": 2000000000000000000
-        },
-        "abdk": {
-          "gas": 1038,
-          "error": 0
-        },
-        "solady": {
-          "gas": 393,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt(100)",
-      "func": "sqrt",
-      "expected": "10000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 2976,
-          "error": 10000000000000000000
-        },
-        "abdk": {
-          "gas": 1068,
-          "error": 0
-        },
-        "solady": {
-          "gas": 393,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt(1e18)",
-      "func": "sqrt",
-      "expected": "1000000000000000000000000000",
-      "results": {
-        "fp128": {
-          "gas": 2977,
-          "error": 1000000000000000000000000000
-        },
-        "abdk": {
-          "gas": 1128,
-          "error": 0
-        },
-        "solady": {
-          "gas": 393,
-          "error": 0
+          "gas": 469,
+          "digits": 18
         }
       }
     },
@@ -1782,35 +530,20 @@
       "expected": "1772453850905516027",
       "results": {
         "fp128": {
-          "gas": 2977,
-          "error": 1772453850905516027
+          "gas": 2414,
+          "digits": 18
+        },
+        "vyper": {
+          "gas": 7135,
+          "digits": 10
         },
         "abdk": {
-          "gas": 1020,
-          "error": 0
+          "gas": 1147,
+          "digits": 19
         },
         "solady": {
-          "gas": 393,
-          "error": 0
-        }
-      }
-    },
-    {
-      "name": "sqrt(e)",
-      "func": "sqrt",
-      "expected": "1648721270700128146",
-      "results": {
-        "fp128": {
-          "gas": 2977,
-          "error": 1648721270700128146
-        },
-        "abdk": {
-          "gas": 1020,
-          "error": 0
-        },
-        "solady": {
-          "gas": 393,
-          "error": 0
+          "gas": 469,
+          "digits": 18
         }
       }
     }
