@@ -53,115 +53,7 @@ compile_huff_file() {
         
         # Generate minimal ABI (Huff doesn't auto-generate ABI, so we create a basic one)
         # This should be customized based on the contract's interface
-        if [ "$contract_name" = "exp" ]; then
-            cat > "${ABI_DIR}/${contract_name}.json" << EOF
-[
-  {
-    "type": "function",
-    "name": "calculate",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "get_constant",
-    "inputs": [],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  }
-]
-EOF
-            echo -e "${GREEN}✓ ABI generated${NC}"
-        elif [ "$contract_name" = "test_table_lookup" ]; then
-            cat > "${ABI_DIR}/${contract_name}.json" << EOF
-[
-  {
-    "type": "function",
-    "name": "lookup",
-    "inputs": [{"name": "i", "type": "uint256"}, {"name": "d", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  }
-]
-EOF
-            echo -e "${GREEN}✓ ABI generated${NC}"
-        elif [[ "$contract_name" =~ ^test_(one|two)_iter_exp$ ]] || [ "$contract_name" = "test_basic_math" ]; then
-            cat > "${ABI_DIR}/${contract_name}.json" << EOF
-[
-  {
-    "type": "function",
-    "name": "calculate",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  }
-]
-EOF
-            echo -e "${GREEN}✓ ABI generated${NC}"
-        elif [ "$contract_name" = "test_binary256" ]; then
-            cat > "${ABI_DIR}/binary256.json" << EOF
-[
-  {
-    "type": "function",
-    "name": "add",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "sub",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "mul",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "div",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "mulRaw",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "divRaw",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "fromFixed18",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "toFixed18",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  }
-]
-EOF
-            echo -e "${GREEN}✓ ABI generated${NC}"
-        elif [ "$contract_name" = "test_fixedpoint128" ]; then
+        if [ "$contract_name" = "test_fp128" ]; then
             cat > "${ABI_DIR}/fixedpoint128.json" << EOF
 [
   {
@@ -238,21 +130,18 @@ if [ -n "$1" ]; then
     # Compile specific file
     compile_huff_file "$1"
 else
-    # Compile all Huff contracts in the huff directory
+    # Compile all Huff contracts in the huff directory tree
     echo -e "${GREEN}Compiling all Huff contracts...${NC}\n"
     
     compiled=0
     failed=0
     
-    # Only compile top-level contracts (not includes or tables)
-    for huff_file in "$HUFF_DIR"/*.huff; do
+    # Only compile test contracts (files starting with test_) in subdirectories
+    for huff_file in "$HUFF_DIR"/*/*.huff; do
         if [ -f "$huff_file" ]; then
-            # Skip constants files and library files (no MAIN macro)
+            # Skip library files (only compile test_ files)
             basename_file=$(basename "$huff_file")
-            if [[ "$basename_file" == *"_constants.huff" ]] || \
-               [[ "$basename_file" == "binary256.huff" ]] || \
-               [[ "$basename_file" == "fixedpoint128.huff" ]] || \
-               [[ "$basename_file" == "fp128.huff" ]]; then
+            if [[ "$basename_file" != test_* ]]; then
                 continue
             fi
             

@@ -40,9 +40,15 @@ export class CalculatorApp {
     }
 
     renderHTML() {
-        const container = document.getElementById('tool-container');
+        const container = document.getElementById('vyper-container');
         container.innerHTML = `
             <div class="ti-calc-shell">
+                <!-- Header -->
+                <div class="vyper-header">
+                    <h2 class="vyper-title">Vyper Math</h2>
+                    <p class="vyper-subtitle">30+ on-chain scientific functions in Vyper 0.4</p>
+                </div>
+
                 <!-- LCD Screen -->
                 <div class="ti-lcd">
                     <div class="ti-lcd-inner">
@@ -75,6 +81,24 @@ export class CalculatorApp {
                     margin: 0 auto;
                     padding: 1.5rem 1rem;
                     font-family: 'Courier New', 'Consolas', monospace;
+                }
+
+                .vyper-header {
+                    text-align: center;
+                    margin-bottom: 1rem;
+                }
+
+                .vyper-title {
+                    color: #00ff88;
+                    font-size: 1.5rem;
+                    margin-bottom: 0.25rem;
+                    font-weight: 700;
+                }
+
+                .vyper-subtitle {
+                    color: #4a7a4a;
+                    font-size: 0.875rem;
+                    letter-spacing: 0.5px;
                 }
 
                 /* ── LCD Display ── */

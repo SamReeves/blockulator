@@ -14,6 +14,7 @@ export class ArithmeticApp {
         this.toastComponent = toastComponent;
         this.contract = null;
         this.selectedOp = 'add';
+        this.isTranscendental = false;
 
         console.log('ArithmeticApp created');
     }
@@ -30,13 +31,13 @@ export class ArithmeticApp {
     }
 
     renderHTML() {
-        const container = document.getElementById('arithmetic-container');
+        const container = document.getElementById('fp128-container');
         container.innerHTML = `
             <div class="ti-calc-shell">
                 <!-- Header -->
                 <div class="arithmetic-header">
-                    <h2 class="arithmetic-title">FixedPoint128</h2>
-                    <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point</p>
+                    <h2 class="arithmetic-title">FP128</h2>
+                    <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point • exp, ln, sqrt</p>
                 </div>
 
                 <!-- LCD Screen -->
@@ -50,10 +51,10 @@ export class ArithmeticApp {
                 <!-- Input Area -->
                 <div class="ti-input-area">
                     <div class="arithmetic-input-row">
-                        <span class="arithmetic-label">A:</span>
+                        <span class="arithmetic-label" id="label-a">A:</span>
                         <input type="text" id="input-a" class="ti-input" placeholder="0" autocomplete="off" inputmode="decimal">
                     </div>
-                    <div class="arithmetic-input-row">
+                    <div class="arithmetic-input-row" id="input-b-row">
                         <span class="arithmetic-label">B:</span>
                         <input type="text" id="input-b" class="ti-input" placeholder="0" autocomplete="off" inputmode="decimal">
                     </div>
@@ -71,6 +72,11 @@ export class ArithmeticApp {
                         <button class="ti-key" data-op="sub" data-cat="arithmetic" title="Subtraction">−</button>
                         <button class="ti-key" data-op="mul" data-cat="arithmetic" title="Multiplication">×</button>
                         <button class="ti-key" data-op="div" data-cat="arithmetic" title="Division">÷</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="exp" data-cat="transcendental" title="Exponential">exp</button>
+                        <button class="ti-key" data-op="ln" data-cat="transcendental" title="Natural Logarithm">ln</button>
+                        <button class="ti-key" data-op="sqrt" data-cat="transcendental" title="Square Root">√</button>
                     </div>
                     <button id="arith-calculate" class="ti-calculate-btn">CALCULATE</button>
                 </div>
@@ -97,7 +103,7 @@ export class ArithmeticApp {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Operations:</span>
-                            <span class="info-value">ADD, SUB, MUL, DIV</span>
+                            <span class="info-value">ADD, SUB, MUL, DIV, EXP, LN, SQRT</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Internal:</span>
@@ -305,6 +311,22 @@ export class ArithmeticApp {
                     border-color: #6dd5c4;
                 }
 
+                .ti-key[data-cat="transcendental"] {
+                    background: #1a2030;
+                    border-color: #354560;
+                    color: #6db4d5;
+                    font-size: 0.875rem;
+                }
+
+                .ti-key[data-cat="transcendental"]:hover {
+                    background: #253550;
+                    border-color: #6db4d5;
+                }
+
+                .arithmetic-input-row.hidden {
+                    display: none;
+                }
+
                 .ti-key.selected {
                     box-shadow: 0 0 0 2px #00ff88;
                 }
@@ -461,6 +483,19 @@ export class ArithmeticApp {
                 document.querySelectorAll('.ti-key[data-op]').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 this.selectedOp = btn.dataset.op;
+                this.isTranscendental = btn.dataset.cat === 'transcendental';
+                
+                // Show/hide B input based on operation type
+                const inputBRow = document.getElementById('input-b-row');
+                const labelA = document.getElementById('label-a');
+                if (this.isTranscendental) {
+                    inputBRow.classList.add('hidden');
+                    labelA.textContent = 'x:';
+                } else {
+                    inputBRow.classList.remove('hidden');
+                    labelA.textContent = 'A:';
+                }
+                
                 this.updateExpression();
             });
         });
@@ -499,11 +534,17 @@ export class ArithmeticApp {
 
     updateExpression() {
         const a = document.getElementById('input-a').value.trim() || '0';
-        const b = document.getElementById('input-b').value.trim() || '0';
-        const opSymbols = { add: '+', sub: '−', mul: '×', div: '÷' };
-        const symbol = opSymbols[this.selectedOp] || '+';
         
-        document.getElementById('arith-expr').textContent = `${a} ${symbol} ${b}`;
+        if (this.isTranscendental) {
+            const opNames = { exp: 'exp', ln: 'ln', sqrt: '√' };
+            const name = opNames[this.selectedOp] || 'f';
+            document.getElementById('arith-expr').textContent = `${name}(${a})`;
+        } else {
+            const b = document.getElementById('input-b').value.trim() || '0';
+            const opSymbols = { add: '+', sub: '−', mul: '×', div: '÷' };
+            const symbol = opSymbols[this.selectedOp] || '+';
+            document.getElementById('arith-expr').textContent = `${a} ${symbol} ${b}`;
+        }
     }
 
     async calculate() {
@@ -512,10 +553,9 @@ export class ArithmeticApp {
         const resultEl = document.getElementById('arith-result');
         
         const aValue = inputA.value.trim();
-        const bValue = inputB.value.trim();
 
-        if (!aValue || !bValue) {
-            this.showStatus('Please enter both values', 'error');
+        if (!aValue) {
+            this.showStatus('Please enter a value', 'error');
             return;
         }
 
@@ -526,54 +566,111 @@ export class ArithmeticApp {
 
         try {
             const a = parseFloat(aValue);
-            const b = parseFloat(bValue);
 
-            if (isNaN(a) || isNaN(b)) {
+            if (isNaN(a)) {
                 this.showStatus('Invalid number format', 'error');
                 return;
             }
 
-            this.showStatus('Calculating on-chain...', 'loading');
-            resultEl.textContent = '...';
+            // For transcendental functions, we only need one input
+            if (this.isTranscendental) {
+                this.showStatus('Calculating on-chain...', 'loading');
+                resultEl.textContent = '...';
 
-            // Convert to fixed18 (scale by 1e18)
-            const scaledA = BigInt(Math.floor(a * 1e18));
-            const scaledB = BigInt(Math.floor(b * 1e18));
+                const scaledA = BigInt(Math.floor(a * 1e18));
 
-            // Call the appropriate contract method
-            let result;
-            switch (this.selectedOp) {
-                case 'add':
-                    result = await this.contract.add(scaledA, scaledB);
-                    break;
-                case 'sub':
-                    result = await this.contract.sub(scaledA, scaledB);
-                    break;
-                case 'mul':
-                    result = await this.contract.mul(scaledA, scaledB);
-                    break;
-                case 'div':
-                    if (b === 0) {
-                        this.showStatus('Division by zero', 'error');
-                        resultEl.textContent = 'Error';
+                let result;
+                switch (this.selectedOp) {
+                    case 'exp':
+                        result = await this.contract.exp(scaledA);
+                        break;
+                    case 'ln':
+                        if (a <= 0) {
+                            this.showStatus('ln requires positive input', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.ln(scaledA);
+                        break;
+                    case 'sqrt':
+                        if (a < 0) {
+                            this.showStatus('sqrt requires non-negative input', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.sqrt(scaledA);
+                        break;
+                    default:
+                        this.showStatus('Unknown operation', 'error');
                         return;
-                    }
-                    result = await this.contract.div(scaledA, scaledB);
-                    break;
-                default:
-                    this.showStatus('Unknown operation', 'error');
+                }
+
+                // Convert result back from fixed18
+                const resultBigInt = BigInt(result.toString());
+                const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
+                const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
+                const resultNumber = Number(absValue) / 1e18;
+                const displayResult = (isNegative ? -resultNumber : resultNumber).toFixed(18);
+
+                resultEl.textContent = displayResult;
+                this.showStatus('Calculated successfully', 'success');
+
+            } else {
+                // Arithmetic operations need both A and B
+                const bValue = inputB.value.trim();
+                if (!bValue) {
+                    this.showStatus('Please enter both values', 'error');
                     return;
+                }
+
+                const b = parseFloat(bValue);
+                if (isNaN(b)) {
+                    this.showStatus('Invalid number format', 'error');
+                    return;
+                }
+
+                this.showStatus('Calculating on-chain...', 'loading');
+                resultEl.textContent = '...';
+
+                // Convert to fixed18 (scale by 1e18)
+                const scaledA = BigInt(Math.floor(a * 1e18));
+                const scaledB = BigInt(Math.floor(b * 1e18));
+
+                // Call the appropriate contract method
+                let result;
+                switch (this.selectedOp) {
+                    case 'add':
+                        result = await this.contract.add(scaledA, scaledB);
+                        break;
+                    case 'sub':
+                        result = await this.contract.sub(scaledA, scaledB);
+                        break;
+                    case 'mul':
+                        result = await this.contract.mul(scaledA, scaledB);
+                        break;
+                    case 'div':
+                        if (b === 0) {
+                            this.showStatus('Division by zero', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.div(scaledA, scaledB);
+                        break;
+                    default:
+                        this.showStatus('Unknown operation', 'error');
+                        return;
+                }
+
+                // Convert result back from fixed18
+                const resultBigInt = BigInt(result.toString());
+                const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
+                const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
+                const resultNumber = Number(absValue) / 1e18;
+                const displayResult = (isNegative ? -resultNumber : resultNumber).toFixed(18);
+
+                resultEl.textContent = displayResult;
+                this.showStatus('Calculated successfully', 'success');
             }
-
-            // Convert result back from fixed18
-            const resultBigInt = BigInt(result.toString());
-            const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
-            const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
-            const resultNumber = Number(absValue) / 1e18;
-            const displayResult = (isNegative ? -resultNumber : resultNumber).toFixed(18);
-
-            resultEl.textContent = displayResult;
-            this.showStatus('Calculated successfully', 'success');
 
         } catch (error) {
             console.error('Calculation error:', error);

@@ -1,0 +1,252 @@
+/// @title FixedPoint128 Test Contract
+/// @notice Test contract for signed 128.128 fixed-point arithmetic
+/// @dev Exposes add, sub, mul, div, exp, ln, sqrt and conversion functions for testing
+
+#include "transcendental.huff"
+
+#define macro MAIN() = takes(0) returns(0) {
+    // Read function selector
+    0x00 calldataload 0xe0 shr
+    
+    dup1 __FUNC_SIG(add) eq add_jump jumpi
+    dup1 __FUNC_SIG(sub) eq sub_jump jumpi
+    dup1 __FUNC_SIG(mul) eq mul_jump jumpi
+    dup1 __FUNC_SIG(div) eq div_jump jumpi
+    dup1 __FUNC_SIG(mulRaw) eq mul_raw_jump jumpi
+    dup1 __FUNC_SIG(divRaw) eq div_raw_jump jumpi
+    dup1 __FUNC_SIG(fromFixed18) eq from_jump jumpi
+    dup1 __FUNC_SIG(toFixed18) eq to_jump jumpi
+    dup1 __FUNC_SIG(exp) eq exp_jump jumpi
+    dup1 __FUNC_SIG(ln) eq ln_jump jumpi
+    dup1 __FUNC_SIG(sqrt) eq sqrt_jump jumpi
+    dup1 __FUNC_SIG(expRaw) eq exp_raw_jump jumpi
+    dup1 __FUNC_SIG(lnRaw) eq ln_raw_jump jumpi
+    dup1 0x11117d8e eq ln_bkm_only_jump jumpi
+    dup1 0xde730773 eq ln_range_reduce_jump jumpi
+    dup1 __FUNC_SIG(expRangeReduce) eq exp_range_reduce_jump jumpi
+    dup1 __FUNC_SIG(expBkmOnly) eq exp_bkm_only_jump jumpi
+    dup1 __FUNC_SIG(expScale) eq exp_scale_jump jumpi
+    dup1 __FUNC_SIG(expOverflowCheck) eq exp_overflow_check_jump jumpi
+    dup1 __FUNC_SIG(testConstant) eq test_constant_jump jumpi
+    
+    // No match, revert
+    0x00 0x00 revert
+    
+    add_jump:
+        pop
+        // Read two fixed18 args, convert, add, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_ADD()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    sub_jump:
+        pop
+        // Read two fixed18 args, convert, subtract, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_SUB()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    mul_jump:
+        pop
+        // Read two fixed18 args, convert, multiply, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_MUL()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    div_jump:
+        pop
+        // Read two fixed18 args, convert, divide, convert back
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_DIV()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    mul_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_MUL()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    div_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_DIV()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    from_jump:
+        pop
+        // Convert fixed18 to fp128 (for debugging)
+        0x04 calldataload      // [fixed18]
+        FP128_FROM_FIXED18()   // [fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    to_jump:
+        pop
+        // Convert fp128 to fixed18 (for debugging)
+        0x04 calldataload      // [fp128]
+        FP128_TO_FIXED18()     // [fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    exp_jump:
+        pop
+        // Compute exp(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_EXP()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    ln_jump:
+        pop
+        // Compute ln(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_LN()             // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    sqrt_jump:
+        pop
+        // Compute sqrt(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_SQRT()           // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    exp_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        dup1                   // Debug: duplicate input
+        0x40 mstore            // Store input at 0x40 for debugging
+        FP128_EXP()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    ln_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        FP128_LN()             // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    ln_bkm_only_jump:
+        pop
+        // Test LN BKM loop alone: input x_reduced (in [1,2)), output ln_result
+        0x04 calldataload      // [x_reduced]
+        LN_BKM_LOOP()          // [ln_result]
+        0x00 mstore
+        0x20 0x00 return
+    
+    ln_range_reduce_jump:
+        pop
+        // Test LN range reduction: input x_fp128, output (shift_k, x_reduced)
+        0x04 calldataload      // [x_fp128]
+        LN_RANGE_REDUCE()      // [shift_k, x_reduced]
+        // Return both: store shift_k at 0x00, x_reduced at 0x20
+        0x00 mstore            // [x_reduced] - stores shift_k at 0x00
+        0x20 mstore            // [] - stores x_reduced at 0x20
+        0x40 0x00 return
+    
+    exp_range_reduce_jump:
+        pop
+        // Test range reduction: input x_fp128, output (k_int, x_prime)
+        0x04 calldataload      // [x_fp128]
+        EXP_RANGE_REDUCE()     // [k_int, x']
+        
+        // Return both: store k_int at 0x00, x' at 0x20
+        0x00 mstore            // [x'] - stores k_int at 0x00
+        0x20 mstore            // [] - stores x' at 0x20
+        0x40 0x00 return
+    
+    exp_bkm_only_jump:
+        pop
+        // Test BKM loop alone: input rem_fp128, output acc
+        0x04 calldataload      // [rem]
+        EXP_BKM_LOOP()         // [acc]
+        0x00 mstore
+        0x20 0x00 return
+    
+    exp_overflow_check_jump:
+        pop
+        // Isolate overflow check: input x_fp128, output 1 if x > 88 else 0
+        0x04 calldataload      // [x]
+        [EXP_OVERFLOW_THRESHOLD]  // [THRESH, x]
+        dup2                   // [x, THRESH, x]
+        gt                     // [(x > THRESH), x]
+        swap1 pop              // [result] - drop x, keep comparison result
+        0x00 mstore
+        0x20 0x00 return
+    
+    exp_scale_jump:
+        pop
+        // Test scaling: input acc_fp128 at 0x04, k_int at 0x24
+        0x04 calldataload      // [acc]
+        0x24 calldataload      // [k_int, acc]
+        
+        dup1 0x00 swap1 slt exp_scale_test_neg jumpi
+        
+        shl                    // [result]
+        0x00 mstore
+        0x20 0x00 return
+        
+    exp_scale_test_neg:
+        0x00 sub               // [|k_int|, acc]
+        swap1 sar              // [result]
+        0x00 mstore
+        0x20 0x00 return
+    
+    test_constant_jump:
+        pop
+        // Just return a known constant to verify dispatch works
+        [ONE_FP128]            // [ONE_FP128]
+        0x00 mstore
+        0x20 0x00 return
+}
+
+#define function add(uint256,uint256) pure returns (uint256)
+#define function sub(uint256,uint256) pure returns (uint256)
+#define function mul(uint256,uint256) pure returns (uint256)
+#define function div(uint256,uint256) pure returns (uint256)
+#define function mulRaw(uint256,uint256) pure returns (uint256)
+#define function divRaw(uint256,uint256) pure returns (uint256)
+#define function fromFixed18(uint256) pure returns (uint256)
+#define function toFixed18(uint256) pure returns (uint256)
+#define function exp(uint256) pure returns (uint256)
+#define function ln(uint256) pure returns (uint256)
+#define function sqrt(uint256) pure returns (uint256)
+#define function expRaw(uint256) pure returns (uint256)
+#define function lnRaw(uint256) pure returns (uint256)
+#define function expRangeReduce(uint256) pure returns (uint256,uint256)
+#define function expBkmOnly(uint256) pure returns (uint256)
+#define function expScale(uint256,uint256) pure returns (uint256)
+#define function expOverflowCheck(uint256) pure returns (uint256)
+#define function testConstant() pure returns (uint256)

@@ -22,10 +22,8 @@ contract UnifiedBenchmark is Test {
     IArith solady;
     IArith vyper;
     IArithU fp128;
-    IArithU binary256;
 
     int256 constant F18 = 1e18;
-    int256 constant F18_TO_32 = 1e14;
 
     int256 constant A1 = 3_141592653589793238;
     int256 constant B1 = 2_718281828459045235;
@@ -36,8 +34,7 @@ contract UnifiedBenchmark is Test {
         abdk = IArith(deployCode("ABDKWrapper.sol:ABDKWrapper"));
         solady = IArith(deployCode("SoladyWrapper.sol:SoladyWrapper"));
         vyper = IArith(_deployBinaryBytecode("contracts/build/vyper/arith.bin"));
-        fp128 = IArithU(_deployHuffBytecode("contracts/build/huff/test_fixedpoint128.runtime.bin"));
-        binary256 = IArithU(_deployHuffBytecode("contracts/build/huff/test_binary256.runtime.bin"));
+        fp128 = IArithU(_deployHuffBytecode("contracts/build/huff/test_fp128.runtime.bin"));
     }
 
     function _deployBinaryBytecode(string memory path) internal returns (address addr) {
@@ -73,10 +70,6 @@ contract UnifiedBenchmark is Test {
         fp128.mul(uint256(A1), uint256(B1));
     }
 
-    function testGas_binary256_mul_single() public view {
-        binary256.mul(uint256(A1 * F18_TO_32), uint256(B1 * F18_TO_32));
-    }
-
     function testGas_ABDK_div_single() public view {
         abdk.div(A1, B1);
     }
@@ -93,10 +86,6 @@ contract UnifiedBenchmark is Test {
         fp128.div(uint256(A1), uint256(B1));
     }
 
-    function testGas_binary256_div_single() public view {
-        binary256.div(uint256(A1 * F18_TO_32), uint256(B1 * F18_TO_32));
-    }
-
     function testGas_ABDK_add_single() public view {
         abdk.add(A1, B1);
     }
@@ -111,10 +100,6 @@ contract UnifiedBenchmark is Test {
 
     function testGas_fp128_add_single() public view {
         fp128.add(uint256(A1), uint256(B1));
-    }
-
-    function testGas_binary256_add_single() public view {
-        binary256.add(uint256(A1 * F18_TO_32), uint256(B1 * F18_TO_32));
     }
 
     // --- Correctness checks ---

@@ -5998,3 +5998,470 @@ details[open] .collapsible-arrow {
     }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════ */
+/* BENCHMARK PAGE STYLES                                                    */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+.benchmark-shell {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: 'Courier New', 'Consolas', monospace;
+}
+
+.benchmark-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.benchmark-title {
+    color: #00ff88;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.benchmark-subtitle {
+    color: #888;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+}
+
+/* Library Toggles */
+.library-toggles {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.lib-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #888;
+}
+
+.lib-toggle:hover {
+    border-color: #666;
+}
+
+.lib-toggle.active {
+    border-color: #00ff88;
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.toggle-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    opacity: 0.5;
+}
+
+.lib-toggle.active .toggle-color {
+    opacity: 1;
+}
+
+.toggle-label {
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+/* Loading State */
+.benchmark-loading {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #888;
+    font-size: 1.125rem;
+}
+
+/* Charts */
+.benchmark-charts {
+    margin-top: 2rem;
+}
+
+.chart-section {
+    margin-bottom: 4rem;
+}
+
+.chart-section h3 {
+    color: #00ff88;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.chart-container {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    min-height: 400px;
+}
+
+.chart-container canvas {
+    max-height: 400px;
+}
+
+/* Detail Tables */
+.detail-section {
+    margin-top: 3rem;
+}
+
+.detail-section h3 {
+    color: #00ff88;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.table-tabs {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.table-tab {
+    padding: 0.75rem 1.5rem;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    color: #888;
+}
+
+.table-tab:hover {
+    border-color: #666;
+}
+
+.table-tab.active {
+    border-color: #00ff88;
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.05);
+}
+
+.detail-table-container {
+    overflow-x: auto;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 0.5rem;
+    padding: 1rem;
+}
+
+.detail-table-container.hidden {
+    display: none;
+}
+
+.benchmark-detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.benchmark-detail-table thead th {
+    background: #0d0d0d;
+    color: #00ff88;
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 2px solid #333;
+    font-weight: 700;
+    position: sticky;
+    top: 0;
+}
+
+.benchmark-detail-table tbody td {
+    padding: 0.75rem;
+    border-bottom: 1px solid #2a2a2a;
+    color: #ccc;
+}
+
+.benchmark-detail-table tbody tr:hover {
+    background: rgba(0, 255, 136, 0.03);
+}
+
+.benchmark-detail-table tbody td:first-child {
+    color: #fff;
+    font-weight: 600;
+}
+
+.best-value {
+    color: #00ff88;
+    font-weight: 700;
+}
+
+/* Library Info Cards */
+.library-info-section {
+    margin-top: 3rem;
+}
+
+.library-info-section h3 {
+    color: #00ff88;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.library-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.library-card {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+}
+
+.library-card h4 {
+    color: #00ff88;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.library-card-details p {
+    margin: 0.5rem 0;
+    color: #ccc;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.library-card-details strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.library-card-stats {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #333;
+}
+
+.library-card-stats h5 {
+    color: #00ff88;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-label {
+    color: #888;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    color: #00ff88;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.precision-breakdown {
+    margin-top: 1rem;
+}
+
+.precision-breakdown summary {
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.875rem;
+    padding: 0.5rem;
+    background: #222;
+    border-radius: 0.25rem;
+    user-select: none;
+}
+
+.precision-breakdown summary:hover {
+    background: #2a2a2a;
+}
+
+.breakdown-content {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    background: #1a1a1a;
+    border-radius: 0.25rem;
+    border: 1px solid #333;
+}
+
+.breakdown-row {
+    color: #ccc;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.breakdown-row:last-child {
+    margin-bottom: 0;
+}
+
+.breakdown-row strong {
+    color: #fff;
+}
+
+/* Precision Comparison Table */
+.precision-comparison-section {
+    margin-top: 3rem;
+}
+
+.precision-comparison-section h3 {
+    color: #00ff88;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+}
+
+.precision-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1a1a1a;
+    border: 2px solid #333;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.precision-table thead {
+    background: #222;
+}
+
+.precision-table th {
+    color: #00ff88;
+    font-weight: 700;
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #333;
+}
+
+.precision-table th:first-child {
+    text-align: left;
+}
+
+.precision-table tbody tr {
+    border-bottom: 1px solid #333;
+}
+
+.precision-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.precision-table tbody tr:hover {
+    background: #222;
+}
+
+.precision-table td {
+    padding: 1rem;
+    text-align: center;
+    color: #ccc;
+    font-size: 1rem;
+}
+
+.precision-table td.func-name {
+    text-align: left;
+    color: #fff;
+    font-weight: 600;
+}
+
+.precision-table td.best-precision {
+    color: #00ff88;
+    font-weight: 700;
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.precision-table td.na {
+    color: #555;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .chart-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .benchmark-shell {
+        padding: 1rem 0.5rem;
+    }
+
+    .benchmark-title {
+        font-size: 1.5rem;
+    }
+
+    .library-toggles {
+        gap: 0.5rem;
+    }
+
+    .lib-toggle {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .chart-section h3 {
+        font-size: 1.25rem;
+    }
+
+    .chart-container {
+        padding: 1rem;
+        min-height: 300px;
+    }
+
+    .benchmark-detail-table {
+        font-size: 0.75rem;
+    }
+
+    .benchmark-detail-table thead th,
+    .benchmark-detail-table tbody td {
+        padding: 0.5rem;
+    }
+}
+

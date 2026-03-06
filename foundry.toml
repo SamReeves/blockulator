@@ -15,8 +15,12 @@ via_ir = true
 # Test settings
 verbosity = 3
 gas_reports = ["*"]
+ffi = true
 
-fs_permissions = [{ access = "read", path = "contracts/build" }]
+fs_permissions = [
+  { access = "read", path = "contracts/build" },
+  { access = "read", path = "scripts" }
+]
 
 [profile.default.fuzz]
 runs = 256

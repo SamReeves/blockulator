@@ -4,20 +4,23 @@
 Usage:
     python3 scripts/plot_bench.py          # runs forge automatically
     forge test ... -vv | python3 scripts/plot_bench.py --stdin
+    python3 scripts/plot_bench.py --json   # also generate JSON
 """
 import subprocess
 import sys
 import math
+import json
+from datetime import datetime
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-LIBS = ["fp128", "bin256", "prb", "abdk", "solady"]
+LIBS = ["fp128", "vyper", "abdk", "solady"]
 # Colorblind-friendly palette
-COLORS = {"fp128": "#0173B2", "bin256": "#DE8F05", "prb": "#029E73", "abdk": "#CC78BC", "solady": "#CA9161"}
-LABELS = {"fp128": "FP128 (Huff 128.128)", "bin256": "Binary256 (Huff float)",
-          "prb": "PRBMath (SD59x18)", "abdk": "ABDK (64.64)", "solady": "Solady (WAD)"}
-MARKERS = {"fp128": "o", "bin256": "D", "prb": "s", "abdk": "^", "solady": "v"}
+COLORS = {"fp128": "#2196F3", "vyper": "#4CAF50", "abdk": "#FF9800", "solady": "#9C27B0"}
+LABELS = {"fp128": "FP128 (Huff 128.128)", "vyper": "Vyper (int256 18-dec)",
+          "abdk": "ABDK (64.64)", "solady": "Solady (WAD)"}
+MARKERS = {"fp128": "o", "vyper": "s", "abdk": "^", "solady": "v"}
 
 
 def run_benchmark():
@@ -30,7 +33,7 @@ def run_benchmark():
 
 def parse(output):
     """Parse BENCH| lines.
-    Format: BENCH|name|op|fp128_gas|fp128_err|bin256_gas|bin256_err|prb_gas|prb_err|abdk_gas|abdk_err|solady_gas|solady_err
+    Format: BENCH|name|op|expected|fp128_gas|fp128_err|vyper_gas|vyper_err|abdk_gas|abdk_err|solady_gas|solady_err
     """
     cases = []
     for line in output.split("\n"):
@@ -38,11 +41,11 @@ def parse(output):
         if not line.startswith("BENCH|") or line in ("BENCH_START", "BENCH_END"):
             continue
         parts = line.split("|")
-        if len(parts) != 13:
+        if len(parts) != 12:
             continue
-        _, name, op, *vals = parts
-        entry = {"name": name, "op": op}
-        lib_fields = [("fp128", 0, 1), ("bin256", 2, 3), ("prb", 4, 5), ("abdk", 6, 7), ("solady", 8, 9)]
+        _, name, op, expected, *vals = parts
+        entry = {"name": name, "op": op, "expected": int(expected)}
+        lib_fields = [("fp128", 0, 1), ("vyper", 2, 3), ("abdk", 4, 5), ("solady", 6, 7)]
         for lib, gi, ei in lib_fields:
             g, e = vals[gi], vals[ei]
             if g == "NA":
@@ -56,7 +59,7 @@ def parse(output):
 
 def parse_trans(output):
     """Parse TRANS| lines.
-    Format: TRANS|name|func|prb_gas|prb_err|abdk_gas|abdk_err|solady_gas|solady_err
+    Format: TRANS|name|func|expected|fp128_gas|fp128_err|abdk_gas|abdk_err|solady_gas|solady_err
     """
     cases = []
     for line in output.split("\n"):
@@ -64,11 +67,11 @@ def parse_trans(output):
         if not line.startswith("TRANS|") or line in ("TRANS_START", "TRANS_END"):
             continue
         parts = line.split("|")
-        if len(parts) != 9:
+        if len(parts) != 10:
             continue
-        _, name, func, *vals = parts
-        entry = {"name": name, "func": func}
-        lib_fields = [("prb", 0, 1), ("abdk", 2, 3), ("solady", 4, 5)]
+        _, name, func, expected, *vals = parts
+        entry = {"name": name, "func": func, "expected": int(expected)}
+        lib_fields = [("fp128", 0, 1), ("abdk", 2, 3), ("solady", 4, 5)]
         for lib, gi, ei in lib_fields:
             g, e = vals[gi], vals[ei]
             if g == "NA":
@@ -89,7 +92,7 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
     lines = []
     lines.append("# Benchmark Results")
     lines.append("")
-    lines.append("Comprehensive gas and precision benchmark comparing 5 fixed-point/floating-point arithmetic backends.")
+    lines.append("Comprehensive gas and precision benchmark comparing 4 fixed-point arithmetic backends.")
     lines.append("")
     
     # ── Arithmetic Summary ──
@@ -112,8 +115,8 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
     
     lines.append("### Average Gas per Operation")
     lines.append("")
-    lines.append("| Operation | FP128 | Binary256 | PRBMath | ABDK | Solady |")
-    lines.append("|-----------|-------|-----------|---------|------|--------|")
+    lines.append("| Operation | FP128 | Vyper | ABDK | Solady |")
+    lines.append("|-----------|-------|-------|------|--------|")
     
     for op in ops:
         row = f"| {op.upper():<9} |"
@@ -125,8 +128,8 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
     lines.append("")
     lines.append("### Average Error per Operation (wei)")
     lines.append("")
-    lines.append("| Operation | FP128 | Binary256 | PRBMath | ABDK | Solady |")
-    lines.append("|-----------|-------|-----------|---------|------|--------|")
+    lines.append("| Operation | FP128 | Vyper | ABDK | Solady |")
+    lines.append("|-----------|-------|-------|------|--------|")
     
     for op in ops:
         row = f"| {op.upper():<9} |"
@@ -148,11 +151,11 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
         lines.append("")
         lines.append(f"**Test cases:** {len(trans_cases)} (exp, ln, sqrt)")
         lines.append("")
-        lines.append("_Only PRBMath, ABDK, and Solady support transcendental functions._")
+        lines.append("_Only FP128, ABDK, and Solady support transcendental functions._")
         lines.append("")
         
         funcs = ["exp", "ln", "sqrt"]
-        trans_libs = ["prb", "abdk", "solady"]
+        trans_libs = ["fp128", "abdk", "solady"]
         func_data = {f: {lib: {"gas": [], "err": []} for lib in trans_libs} for f in funcs}
         
         for c in trans_cases:
@@ -166,8 +169,8 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
         
         lines.append("### Average Gas per Function")
         lines.append("")
-        lines.append("| Function | PRBMath | ABDK | Solady |")
-        lines.append("|----------|---------|------|--------|")
+        lines.append("| Function | FP128 | ABDK | Solady |")
+        lines.append("|----------|-------|------|--------|")
         
         for func in funcs:
             row = f"| {func:<8} |"
@@ -179,8 +182,8 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
         lines.append("")
         lines.append("### Average Error per Function (wei)")
         lines.append("")
-        lines.append("| Function | PRBMath | ABDK | Solady |")
-        lines.append("|----------|---------|------|--------|")
+        lines.append("| Function | FP128 | ABDK | Solady |")
+        lines.append("|----------|-------|------|--------|")
         
         for func in funcs:
             row = f"| {func:<8} |"
@@ -388,7 +391,7 @@ def main():
 
     # ─── Transcendental Plots ───────────────────────────────────────────
     if trans_cases:
-        trans_libs = ["prb", "abdk", "solady"]
+        trans_libs = ["fp128", "abdk", "solady"]
         trans_colors = {lib: COLORS[lib] for lib in trans_libs}
         trans_labels = {lib: LABELS[lib] for lib in trans_libs}
         
@@ -459,6 +462,143 @@ def main():
     # ─── Generate Markdown Summary ──────────────────────────────────────
     md_path = generate_markdown_summary(cases, trans_cases)
     print(f"Saved: {md_path}")
+    
+    # ─── Generate JSON (if requested) ────────────────────────────────────
+    if "--json" in sys.argv:
+        json_data = generate_json(cases, trans_cases)
+        json_path = "docs/benchmarks/benchmark-data.json"
+        with open(json_path, 'w') as f:
+            json.dump(json_data, f, indent=2)
+        print(f"Saved: {json_path}")
+
+
+def generate_json(cases, trans_cases):
+    """Generate JSON data for the benchmark website."""
+    data = {
+        "generated": datetime.now().strftime("%Y-%m-%d"),
+        "libraries": {
+            "fp128": {
+                "name": "FP128",
+                "format": "128.128 fixed-point",
+                "lang": "Huff",
+                "range": "±1.7e38"
+            },
+            "vyper": {
+                "name": "Vyper",
+                "format": "int256 18-decimal",
+                "lang": "Vyper 0.4",
+                "range": "±5.8e58"
+            },
+            "abdk": {
+                "name": "ABDK",
+                "format": "64.64 fixed-point",
+                "lang": "Solidity",
+                "range": "±9.2e18"
+            },
+            "solady": {
+                "name": "Solady",
+                "format": "WAD 18-decimal",
+                "lang": "Solidity (asm)",
+                "range": "±5.8e58"
+            }
+        },
+        "arithmetic": [],
+        "transcendental": []
+    }
+    
+    # Convert cases to JSON format
+    for c in cases:
+        case_data = {
+            "name": c["name"],
+            "op": c["op"],
+            "expected": str(c["expected"]),
+            "results": {}
+        }
+        for lib in LIBS:
+            if c[f"{lib}_gas"] is not None:
+                case_data["results"][lib] = {
+                    "gas": c[f"{lib}_gas"],
+                    "error": c[f"{lib}_err"]
+                }
+        data["arithmetic"].append(case_data)
+    
+    # Convert transcendental cases
+    for c in trans_cases:
+        case_data = {
+            "name": c["name"],
+            "func": c["func"],
+            "expected": str(c["expected"]),
+            "results": {}
+        }
+        trans_libs = ["fp128", "abdk", "solady"]
+        for lib in trans_libs:
+            if c[f"{lib}_gas"] is not None:
+                case_data["results"][lib] = {
+                    "gas": c[f"{lib}_gas"],
+                    "error": c[f"{lib}_err"]
+                }
+        data["transcendental"].append(case_data)
+    
+    # Compute per-library stats
+    for lib in LIBS:
+        arith_stats = _compute_stats(cases, lib)
+        trans_libs = ["fp128", "abdk", "solady"]
+        if lib in trans_libs:
+            trans_stats = _compute_stats(trans_cases, lib)
+        else:
+            trans_stats = {"avgError": 0, "maxError": 0, "avgDigits": 0, "zeroCount": 0, "total": 0}
+        
+        # Overall stats
+        all_cases = [c for c in cases if c[f"{lib}_gas"] is not None]
+        all_trans = [c for c in trans_cases if c[f"{lib}_gas"] is not None] if lib in trans_libs else []
+        overall_stats = _compute_stats(all_cases + all_trans, lib)
+        
+        data["libraries"][lib]["stats"] = {
+            "arithmetic": arith_stats,
+            "transcendental": trans_stats,
+            "overall": overall_stats
+        }
+    
+    return data
+
+
+def _compute_stats(cases, lib):
+    """Compute stats for a library across a set of cases."""
+    import math
+    
+    errors = []
+    digits = []
+    zero_count = 0
+    max_error = 0
+    
+    for c in cases:
+        if c.get(f"{lib}_gas") is None:
+            continue
+        
+        err = c[f"{lib}_err"]
+        expected = abs(c["expected"])
+        
+        errors.append(err)
+        if err > max_error:
+            max_error = err
+        
+        if err == 0:
+            zero_count += 1
+        elif expected > 0 and err > 0:
+            # Compute matching digits: floor(log10(|expected| / error))
+            matching = math.floor(math.log10(expected / err))
+            digits.append(max(0, matching))  # Don't allow negative digits
+    
+    avg_error = sum(errors) / len(errors) if errors else 0
+    avg_digits = sum(digits) / len(digits) if digits else 18  # Default to 18 if all zeros
+    
+    return {
+        "avgError": round(avg_error, 2),
+        "maxError": max_error,
+        "avgDigits": round(avg_digits, 1),
+        "zeroCount": zero_count,
+        "total": len([c for c in cases if c.get(f"{lib}_gas") is not None])
+    }
 
 
 if __name__ == "__main__":

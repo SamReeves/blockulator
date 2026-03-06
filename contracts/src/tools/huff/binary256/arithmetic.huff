@@ -3,7 +3,7 @@
 /// @dev Format: 1-bit sign + 19-bit exponent + 236-bit significand
 ///      Following IEEE 754-2008 binary256 (octuple precision) specification
 
-#include "binary256_constants.huff"
+#include "constants.huff"
 
 // ============================================================================
 // HELPER MACROS

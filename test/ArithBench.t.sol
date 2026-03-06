@@ -4,20 +4,28 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 import {ABDKMath64x64} from "../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
 import {FixedPointMathLib} from "../lib/solady/src/utils/FixedPointMathLib.sol";
-import {SD59x18, wrap, unwrap} from "../lib/prb-math/src/SD59x18.sol";
 
 interface IHuffArith {
     function add(uint256, uint256) external view returns (uint256);
     function sub(uint256, uint256) external view returns (uint256);
     function mul(uint256, uint256) external view returns (uint256);
     function div(uint256, uint256) external view returns (uint256);
+    function exp(uint256) external view returns (uint256);
+    function ln(uint256) external view returns (uint256);
+    function sqrt(uint256) external view returns (uint256);
+}
+
+interface IVyperArith {
+    function mul(int256, int256) external pure returns (int256);
+    function div(int256, int256) external pure returns (int256);
+    function add(int256, int256) external pure returns (int256);
+    function sub(int256, int256) external pure returns (int256);
 }
 
 /// @title ArithBench
-/// @notice Gas + precision benchmark for five arithmetic backends:
+/// @notice Gas + precision benchmark for four arithmetic backends:
 ///   - fp128    (Huff 128.128 fixed-point, fixed18 I/O)
-///   - bin256   (Huff IEEE-754 binary256 float, fixed32 I/O)
-///   - PRBMath  (Solidity library, SD59x18 signed WAD)
+///   - vyper    (Vyper int256 18-decimal, fixed18 I/O)
 ///   - ABDK     (Solidity library, 64.64 fixed-point)
 ///   - Solady   (Solidity library, WAD 18-decimal)
 /// All errors measured in WAD units against 100-digit mpmath reference values.
@@ -30,8 +38,6 @@ contract ArithBench is Test {
     uint8 constant SUB = 3;
 
     int256 constant WAD_I = 1e18;
-    int256 constant F32   = 1e32;
-    int256 constant WAD_TO_F32 = 1e14; // multiply WAD by this to get fixed32
 
     struct Case {
         string name;
@@ -43,27 +49,30 @@ contract ArithBench is Test {
 
     Case[] cases;
     IHuffArith fp128;
-    IHuffArith bin256;
+    IVyperArith vyper;
+    uint256 _fp128Overhead;
 
     function setUp() public {
         // Deploy fp128 (128.128 fixed-point, fixed18 I/O)
         {
-            string memory hex1 = vm.readFile("contracts/build/huff/test_fixedpoint128.runtime.bin");
+            string memory hex1 = vm.readFile("contracts/build/huff/test_fp128.runtime.bin");
             bytes memory code1 = vm.parseBytes(string.concat("0x", hex1));
             address a1 = makeAddr("fp128");
             vm.etch(a1, code1);
             fp128 = IHuffArith(a1);
         }
 
-        // Deploy bin256 (IEEE-754 binary256 float, fixed32 I/O)
+        // Deploy Vyper (int256 18-decimal, fixed18 I/O)
         {
-            string memory hex2 = vm.readFile("contracts/build/huff/test_binary256.runtime.bin");
-            bytes memory code2 = vm.parseBytes(string.concat("0x", hex2));
-            address a2 = makeAddr("bin256");
+            bytes memory code2 = vm.readFileBinary("contracts/build/vyper/arith.bin");
+            address a2 = makeAddr("vyper");
             vm.etch(a2, code2);
-            bin256 = IHuffArith(a2);
+            vyper = IVyperArith(a2);
         }
 
+        // Measure call overhead for transcendental functions
+        _fp128Overhead = _measureCallOverhead(address(fp128));
+        
         _initCases();
         _initTransCases();
     }
@@ -137,8 +146,7 @@ contract ArithBench is Test {
         
         // Measure call overhead for Huff contracts (for reference)
         uint256 overhead_fp128 = _measureCallOverhead(address(fp128));
-        uint256 overhead_bin256 = _measureCallOverhead(address(bin256));
-        console.log(string.concat("OVERHEAD|fp128=", vm.toString(overhead_fp128), "|bin256=", vm.toString(overhead_bin256)));
+        console.log(string.concat("OVERHEAD|fp128=", vm.toString(overhead_fp128)));
         
         for (uint256 i = 0; i < cases.length; i++) {
             _benchOne(cases[i]);
@@ -156,10 +164,9 @@ contract ArithBench is Test {
     }
 
     function _benchOne(Case memory c) internal view {
-        // Run all five backends and collect [gas, err] pairs
+        // Run all four backends and collect [gas, err] pairs
         (uint256 fp128_gas, uint256 fp128_err)   = _runFp128(c);
-        (uint256 bin256_gas, uint256 bin256_err)  = _runBin256(c);
-        (uint256 prb_gas, uint256 prb_err)       = _runPrb(c);
+        (uint256 vyper_gas, uint256 vyper_err)   = _runVyper(c);
         (uint256 abdk_gas, uint256 abdk_err)     = _runAbdk(c);
 
         string memory opStr;
@@ -181,13 +188,13 @@ contract ArithBench is Test {
             }
         }
 
-        // BENCH|name|op|fp128_gas|fp128_err|bin256_gas|bin256_err|prb_gas|prb_err|abdk_gas|abdk_err|solady_gas|solady_err
+        // BENCH|name|op|expected|fp128_gas|fp128_err|vyper_gas|vyper_err|abdk_gas|abdk_err|solady_gas|solady_err
         console.log(
             string.concat(
                 "BENCH|", c.name, "|", opStr, "|",
+                vm.toString(c.expected), "|",
                 vm.toString(fp128_gas), "|", vm.toString(fp128_err), "|",
-                vm.toString(bin256_gas), "|", vm.toString(bin256_err), "|",
-                vm.toString(prb_gas), "|", vm.toString(prb_err), "|",
+                vm.toString(vyper_gas), "|", vm.toString(vyper_err), "|",
                 vm.toString(abdk_gas), "|", vm.toString(abdk_err), "|",
                 solady_str
             )
@@ -205,20 +212,15 @@ contract ArithBench is Test {
         err_ = _absErr(int256(raw), c.expected);
     }
 
-    function _runBin256(Case memory c) internal view returns (uint256 gas_, uint256 err_) {
-        int256 a32 = c.a * WAD_TO_F32;
-        int256 b32 = c.b * WAD_TO_F32;
-
+    function _runVyper(Case memory c) internal view returns (uint256 gas_, uint256 err_) {
         uint256 g0 = gasleft();
-        uint256 raw;
-        if (c.op == MUL)      raw = bin256.mul(uint256(a32), uint256(b32));
-        else if (c.op == DIV) raw = bin256.div(uint256(a32), uint256(b32));
-        else if (c.op == ADD) raw = bin256.add(uint256(a32), uint256(b32));
-        else                  raw = bin256.sub(uint256(a32), uint256(b32));
+        int256 raw;
+        if (c.op == MUL)      raw = vyper.mul(c.a, c.b);
+        else if (c.op == DIV) raw = vyper.div(c.a, c.b);
+        else if (c.op == ADD) raw = vyper.add(c.a, c.b);
+        else                  raw = vyper.sub(c.a, c.b);
         gas_ = g0 - gasleft();
-
-        int256 resultWad = int256(raw) / WAD_TO_F32;
-        err_ = _absErr(resultWad, c.expected);
+        err_ = _absErr(raw, c.expected);
     }
 
     function _runAbdk(Case memory c) internal view returns (uint256 gas_, uint256 err_) {
@@ -248,18 +250,6 @@ contract ArithBench is Test {
         err_ = _absErr(int256(sr), c.expected);
     }
 
-    function _runPrb(Case memory c) internal view returns (uint256 gas_, uint256 err_) {
-        SD59x18 a = wrap(c.a);
-        SD59x18 b = wrap(c.b);
-        SD59x18 r;
-        uint256 g0 = gasleft();
-        if (c.op == MUL)      r = a.mul(b);
-        else if (c.op == DIV) r = a.div(b);
-        else if (c.op == ADD) r = wrap(c.a + c.b);
-        else                  r = wrap(c.a - c.b);
-        gas_ = g0 - gasleft();
-        err_ = _absErr(unwrap(r), c.expected);
-    }
 
     // ═══════════════════════════════════════════════════════════════════════
     // TRANSCENDENTAL BENCHMARK
@@ -322,8 +312,8 @@ contract ArithBench is Test {
     }
 
     function _benchOneTrans(TransCase memory c) internal view {
-        // Run three backends that support transcendental functions
-        (uint256 prb_gas, uint256 prb_err) = _runPrbTrans(c);
+        // Run three backends (Vyper doesn't support transcendentals)
+        (uint256 fp128_gas, uint256 fp128_err) = _runFp128Trans(c);
         (uint256 abdk_gas, uint256 abdk_err) = _runAbdkTrans(c);
         (uint256 solady_gas, uint256 solady_err) = _runSoladyTrans(c);
 
@@ -332,27 +322,33 @@ contract ArithBench is Test {
         else if (c.func == LN)   funcStr = "ln";
         else                     funcStr = "sqrt";
 
-        // TRANS|name|func|prb_gas|prb_err|abdk_gas|abdk_err|solady_gas|solady_err
+        // TRANS|name|func|expected|fp128_gas|fp128_err|abdk_gas|abdk_err|solady_gas|solady_err
         console.log(
             string.concat(
                 "TRANS|", c.name, "|", funcStr, "|",
-                vm.toString(prb_gas), "|", vm.toString(prb_err), "|",
+                vm.toString(c.expected), "|",
+                vm.toString(fp128_gas), "|", vm.toString(fp128_err), "|",
                 vm.toString(abdk_gas), "|", vm.toString(abdk_err), "|",
                 vm.toString(solady_gas), "|", vm.toString(solady_err)
             )
         );
     }
 
-    function _runPrbTrans(TransCase memory c) internal view returns (uint256 gas_, uint256 err_) {
-        SD59x18 x = wrap(c.x);
-        SD59x18 r;
+    function _runFp128Trans(TransCase memory c) internal view returns (uint256 gas_, uint256 err_) {
+        // FP128 uses fixed18 I/O
+        uint256 r;
         uint256 g0 = gasleft();
-        if (c.func == EXP)       r = x.exp();
-        else if (c.func == LN)   r = x.ln();
-        else                     r = x.sqrt();
+        if (c.func == EXP)       r = fp128.exp(uint256(c.x));
+        else if (c.func == LN)   r = fp128.ln(uint256(c.x));
+        else                     r = fp128.sqrt(uint256(c.x));
         gas_ = g0 - gasleft();
-        err_ = _absErr(unwrap(r), c.expected);
+        
+        // Subtract call overhead for fair comparison
+        gas_ = gas_ > _fp128Overhead ? gas_ - _fp128Overhead : 0;
+        
+        err_ = _absErr(int256(r), c.expected);
     }
+
 
     function _runAbdkTrans(TransCase memory c) internal view returns (uint256 gas_, uint256 err_) {
         int128 x64 = _wadToAbdk(c.x);

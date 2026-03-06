@@ -1,8 +1,8 @@
 /// @title IEEE 754 binary256 Arithmetic Test Contract
 /// @notice Test contract for IEEE 754 binary256 (octuple-precision) floating-point arithmetic
-/// @dev Exposes add, sub, mul, div, and conversion functions for testing
+/// @dev Exposes add, sub, mul, div, exp, ln, sqrt, and conversion functions for testing
 
-#include "binary256.huff"
+#include "transcendental.huff"
 
 #define macro MAIN() = takes(0) returns(0) {
     // Read function selector
@@ -19,6 +19,9 @@
     dup1 __FUNC_SIG(pack) eq pack_jump jumpi
     dup1 __FUNC_SIG(unpack) eq unpack_jump jumpi
     dup1 __FUNC_SIG(normalize) eq normalize_jump jumpi
+    dup1 __FUNC_SIG(exp) eq exp_jump jumpi
+    dup1 __FUNC_SIG(ln) eq ln_jump jumpi
+    dup1 __FUNC_SIG(sqrt) eq sqrt_jump jumpi
     
     // No match, revert
     0x00 0x00 revert
@@ -138,6 +141,36 @@
         swap1 0x20 mstore      // [norm_sig] (exp stored at 0x20)
         0x00 mstore            // []         (sig stored at 0x00)
         0x40 0x00 return
+    
+    exp_jump:
+        pop
+        // Compute exp(x) with fixed32 I/O
+        0x04 calldataload      // [x_fixed32]
+        FP_FROM_FIXED32()      // [x_fp]
+        FP_EXP()               // [result_fp]
+        FP_TO_FIXED32()        // [result_fixed32]
+        0x00 mstore
+        0x20 0x00 return
+    
+    ln_jump:
+        pop
+        // Compute ln(x) with fixed32 I/O
+        0x04 calldataload      // [x_fixed32]
+        FP_FROM_FIXED32()      // [x_fp]
+        FP_LN()                // [result_fp]
+        FP_TO_FIXED32()        // [result_fixed32]
+        0x00 mstore
+        0x20 0x00 return
+    
+    sqrt_jump:
+        pop
+        // Compute sqrt(x) with fixed32 I/O
+        0x04 calldataload      // [x_fixed32]
+        FP_FROM_FIXED32()      // [x_fp]
+        FP_SQRT()              // [result_fp]
+        FP_TO_FIXED32()        // [result_fixed32]
+        0x00 mstore
+        0x20 0x00 return
 }
 
 #define function add(uint256,uint256) pure returns (uint256)
@@ -151,3 +184,6 @@
 #define function pack(uint256,uint256,uint256) pure returns (uint256)
 #define function unpack(uint256) pure returns (uint256,uint256,uint256)
 #define function normalize(uint256,uint256) pure returns (uint256,uint256)
+#define function exp(uint256) pure returns (uint256)
+#define function ln(uint256) pure returns (uint256)
+#define function sqrt(uint256) pure returns (uint256)

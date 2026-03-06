@@ -19,8 +19,9 @@ export class MasterApp {
         
         // Sub-apps (lazy loaded)
         this.gamesApp = null;
-        this.calculatorApp = null;
-        this.arithmeticApp = null;
+        this.vyperApp = null;
+        this.fp128App = null;
+        this.benchmarkApp = null;
         this.futuresApp = null;
         this.badgesModule = null;
         
@@ -138,8 +139,9 @@ export class MasterApp {
         console.log('📦 Registering views...');
         
         this.masterRouter.registerView('games', () => this.initGamesView());
-        this.masterRouter.registerView('calculator', () => this.initCalculatorView());
-        this.masterRouter.registerView('arithmetic', () => this.initArithmeticView());
+        this.masterRouter.registerView('vyper', () => this.initVyperView());
+        this.masterRouter.registerView('fp128', () => this.initFp128View());
+        this.masterRouter.registerView('benchmarks', () => this.initBenchmarksView());
         this.masterRouter.registerView('futures', () => this.initFuturesView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
         this.masterRouter.registerView('about', () => this.initAboutView());
@@ -171,35 +173,54 @@ export class MasterApp {
     }
 
     /**
-     * Initialize Calculator view (lazy loaded)
+     * Initialize Vyper view (lazy loaded)
      */
-    async initCalculatorView() {
-        console.log('🧮 Initializing Calculator view...');
+    async initVyperView() {
+        console.log('🧮 Initializing Vyper view...');
         
-        if (!this.calculatorApp) {
-            // Import and create calculator app
+        if (!this.vyperApp) {
+            // Import and create vyper app
             const { CalculatorApp } = await import('./calculator-app.js');
-            this.calculatorApp = new CalculatorApp(this.web3Provider, this.walletComponent, this.toastComponent);
-            await this.calculatorApp.init();
+            this.vyperApp = new CalculatorApp(this.web3Provider, this.walletComponent, this.toastComponent);
+            await this.vyperApp.init();
         }
         
-        console.log('✅ Calculator view initialized');
+        console.log('✅ Vyper view initialized');
     }
 
     /**
-     * Initialize Arithmetic view (lazy loaded)
+     * Initialize FP128 view (lazy loaded)
      */
-    async initArithmeticView() {
-        console.log('🔢 Initializing Arithmetic view...');
+    async initFp128View() {
+        console.log('🔢 Initializing FP128 view...');
         
-        if (!this.arithmeticApp) {
-            // Import and create arithmetic app
+        if (!this.fp128App) {
+            // Import and create fp128 app
             const { ArithmeticApp } = await import('./arithmetic-app.js');
-            this.arithmeticApp = new ArithmeticApp(this.web3Provider, this.walletComponent, this.toastComponent);
-            await this.arithmeticApp.init();
+            this.fp128App = new ArithmeticApp(this.web3Provider, this.walletComponent, this.toastComponent);
+            await this.fp128App.init();
         }
         
-        console.log('✅ Arithmetic view initialized');
+        console.log('✅ FP128 view initialized');
+    }
+
+    /**
+     * Initialize Benchmarks view (lazy loaded)
+     */
+    async initBenchmarksView() {
+        console.log('📊 Initializing Benchmarks view...');
+        
+        // Load Chart.js before initializing benchmarks (needed for charts)
+        await this.loadChartJs();
+        
+        if (!this.benchmarkApp) {
+            // Import and create benchmark app
+            const { BenchmarkApp } = await import('./benchmark-app.js');
+            this.benchmarkApp = new BenchmarkApp(this.web3Provider, this.walletComponent, this.toastComponent);
+            await this.benchmarkApp.init();
+        }
+        
+        console.log('✅ Benchmarks view initialized');
     }
 
     /**

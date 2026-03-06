@@ -1,107 +1,146 @@
 # Huff Contracts
 
-On-chain math implementations in pure Huff assembly.
+On-chain math implementations in pure Huff assembly, organized by number system.
 
-## Quick Links
+## Directory Structure
 
-- [FP128 Arithmetic](#fp128-arithmetic-calculator) - Production-ready 128.128 fixed-point
-- [Hex Arithmetic](#hex-arithmetic-experimental) - Experimental S/360-inspired hex float
-- [Exponential Calculator](#exponential-calculator) - High-precision e^x
+```
+huff/
+├── fp128/              # 128.128 fixed-point arithmetic
+│   ├── constants.huff         # Core constants (ONE_FP128, FRAC_BITS, etc.)
+│   ├── arithmetic.huff        # Add, sub, mul, div, conversions
+│   ├── tables.huff            # Lookup tables for exp/ln (generated)
+│   ├── transcendental.huff    # exp, ln, sqrt
+│   └── test_fp128.huff        # Deployable test contract
+├── binary256/          # IEEE 754 binary256 floating-point
+│   ├── constants.huff         # Format constants and bit masks
+│   ├── arithmetic.huff        # Core operations (pack, unpack, normalize, add, sub, mul, div)
+│   ├── transcendental.huff    # exp, ln, sqrt (placeholders)
+│   └── test_binary256.huff    # Deployable test contract
+└── README.md           # This file
+```
 
-## FP128 Arithmetic Calculator
+## FP128: 128.128 Fixed-Point Arithmetic
 
-Signed 128.128 fixed-point arithmetic: add, subtract, multiply, divide.
+Signed 128.128 fixed-point: 128 integer bits + 128 fractional bits, two's complement.
 
-- **Format**: One `uint256` word, 128 integer bits + 128 fractional bits, two's complement signed
 - **Precision**: ~38 decimal digits
 - **Range**: approximately ±1.7 × 10^38
+- **Format**: One `uint256` word
 
 ### Files
 
-```
-fixedpoint128.huff              # Arithmetic library (ADD, SUB, MUL, DIV, conversions)
-fixedpoint128_constants.huff    # Constants (FRAC_BITS, ONE_FP128, MASK128, etc.)
-test_fixedpoint128.huff         # Deployable contract exposing all operations
-```
+| File | Purpose |
+|------|---------|
+| `constants.huff` | Core constants (FRAC_BITS, ONE_FP128, MASK128, etc.) |
+| `arithmetic.huff` | Basic operations (add, sub, mul, div) and conversions (to/from fixed18) |
+| `tables.huff` | Bit-level lookup tables for exp/ln (135 entries each, ~8.6 KB total) |
+| `transcendental.huff` | exp, ln, sqrt using binary digit-by-digit table method |
+| `test_fp128.huff` | Deployable test contract exposing all operations |
 
 ### Interface
 
-All functions accept and return `fixed18` values (value × 10^18):
+All functions in `test_fp128.huff` accept and return `fixed18` values (value × 10^18):
 
 - `add(uint256, uint256) → uint256`
 - `sub(uint256, uint256) → uint256`
 - `mul(uint256, uint256) → uint256`
 - `div(uint256, uint256) → uint256`
+- `exp(uint256) → uint256`
+- `ln(uint256) → uint256`
+- `sqrt(uint256) → uint256`
 - `fromFixed18(uint256) → uint256` — convert to internal fp128 format
 - `toFixed18(uint256) → uint256` — convert from internal fp128 format
+- `expRaw(uint256) → uint256` — raw fp128 input/output
+- `lnRaw(uint256) → uint256` — raw fp128 input/output
+- `mulRaw(uint256, uint256) → uint256` — raw fp128 multiply
+- `divRaw(uint256, uint256) → uint256` — raw fp128 divide
 
-### How it works
+### How It Works
 
-Internally, inputs are converted from fixed18 to 128.128 format: `fp128 = (fixed18 × 2^128) / 10^18`. Addition and subtraction are single EVM opcodes. Multiplication uses 4-term schoolbook decomposition to avoid overflow. Division uses 64-bit chunked shift-and-divide. Results are converted back to fixed18 for output.
+Internally, inputs are converted from fixed18 to 128.128 format: `fp128 = (fixed18 × 2^128) / 10^18`.
 
-## Hex Arithmetic (Experimental)
+- **Add/Sub**: Single EVM opcodes (`ADD`, `SUB`)
+- **Mul**: 4-term schoolbook decomposition to avoid overflow
+- **Div**: 64-bit chunked shift-and-divide (~62-bit precision)
+- **Exp/Ln**: Binary digit-by-digit table method using precomputed `e^(2^(k-128))` values
+- **Sqrt**: Implemented as `exp(ln(x) / 2)` to reuse exp/ln logic
 
-**Status: In Development** - Core design complete, needs macro debugging
+Results are converted back to fixed18 for output.
 
-IBM System/360-inspired hexadecimal floating-point arithmetic with base-16 exponent.
+## Binary256: IEEE 754 Octuple Precision
 
-- **Format**: 1-bit sign + 8-bit base-16 exponent + 128-bit 64.64 mantissa (256 bits total)
-- **Precision**: 64.64 (~2^-64, same as standard 64.64 fixed-point)
-- **Range**: 16^127 (massive improvement over plain 64.64)
-- **Advantages**: 
-  - Nibble normalization (4-bit shifts) instead of bit-by-bit
-  - Same mul/div cost as 64.64, better than 128.128
-  - 4× exponent range per bit vs base-2
+IEEE 754 binary256 (octuple precision) floating-point arithmetic.
+
+- **Format**: 1-bit sign + 19-bit exponent + 236-bit significand (256 bits total)
+- **Precision**: ~71 decimal digits (236 bits)
+- **Range**: 2^(±262143) (vastly exceeds fixedpoint128)
 
 ### Files
 
-```
-binary256_constants.huff       # Format constants and bit masks
-binary256.huff                 # Core arithmetic operations
-test_binary256.huff    # Test contract (in development)
-```
+| File | Purpose |
+|------|---------|
+| `constants.huff` | Format constants (SIGN_BIT, EXP_*, SIGNIFICAND_*, special values) |
+| `arithmetic.huff` | Core operations (pack, unpack, normalize, add, sub, mul, div) |
+| `transcendental.huff` | exp, ln, sqrt (currently placeholders) |
+| `test_binary256.huff` | Deployable test contract |
 
 ### Design Highlights
 
-Value representation: `sign × (mantissa_64_64 / 2^64) × 16^(exponent - 64)`
+Value representation (normal): `(-1)^sign × 2^(exp - 262143) × 1.significand`
 
-Mantissa normalized so leading nibble is in [1..F], enabling bounded normalization (0-4 bit shift max).
+Significand normalized to [2^236, 2^237) with implicit leading 1. Binary CLZ (count leading zeros) enables O(log n) normalization.
 
-See the binary256 source files for implementation details.
+### Advantages
 
-## Exponential Calculator
-
-Computes `e^x` using a product-rule decomposition with precomputed lookup tables.
-
-### Files
-
-```
-exp.huff                # Main exp calculator
-fp_constants.huff       # Constants (SCALE, FIXED18_SCALE, TEN)
-tables/
-  exp_table.huff        # 19×10 lookup table (scaled integers)
-```
-
-### Interface
-
-- `calculate(uint256) → uint256` — compute e^x, input/output in fixed18
-- Valid input range: `[0, 10)`
-
-### Algorithm
-
-Decomposes the exponent digit-by-digit: `e^x = ∏ e^(dᵢ × 10^(-i))` for 19 iterations. Each factor is looked up from a 190-entry precomputed table. Internal arithmetic uses 36-decimal scaled integers for precision.
+- Native support for special values (±0, ±Inf, NaN)
+- Binary CLZ normalization (O(log n) vs O(n))
+- Exponent field enables efficient transcendentals
 
 ## Building
 
 ```bash
-huffc --evm-version paris contracts/src/tools/huff/test_fixedpoint128.huff -r
-huffc --evm-version paris contracts/src/tools/huff/exp.huff -r
+# Compile all Huff contracts
+./contracts/deployments/compile-huff.sh
+
+# Or compile individual contracts
+huffc --evm-version paris contracts/src/tools/huff/fp128/test_fp128.huff -r
+huffc --evm-version paris contracts/src/tools/huff/binary256/test_binary256.huff -r
 ```
+
+Output: `contracts/build/huff/*.bin` and `contracts/build/huff/*.runtime.bin`
 
 ## Testing
 
 ```bash
-python3 tests/test_fp128_addsub.py     # 18 add/sub/conversion tests
-python3 tests/test_fp128_muldiv.py     # 16 mul/div tests
-python3 tests/test_fp128_fuzz.py       # 500+ randomized tests against Python Decimal
+# Foundry tests
+forge test --match-contract FP128Test     # FP128 arithmetic + transcendentals
+forge test --match-contract HexFPTest     # Binary256 operations
+
+# Benchmarks
+forge test --match-contract ArithBench          # Gas + precision comparison
+forge test --match-contract UnifiedBenchmark    # Cross-library benchmarks
 ```
+
+## Table Generation
+
+FP128 lookup tables are generated using Python with `mpmath` for high precision:
+
+```bash
+# Generate exp/ln tables (135 entries each)
+python3 scripts/generate_fp128_tables.py > contracts/src/tools/huff/fp128/tables.huff
+
+# Generate transcendental constants
+python3 scripts/generate_fp128_coefficients.py >> contracts/src/tools/huff/fp128/constants.huff
+```
+
+## Performance
+
+FP128 is optimized for gas efficiency:
+- `add`: ~50 gas
+- `mul`: ~140 gas (full precision) or ~125 gas (fast, 1 ULP error for small fractional parts)
+- `exp`: ~21k gas
+- `ln`: ~41k gas
+- `sqrt`: ~63k gas (via exp/ln)
+
+Binary256 provides vastly greater range but at higher gas cost due to normalization overhead.

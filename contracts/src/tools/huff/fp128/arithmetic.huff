@@ -3,7 +3,7 @@
 /// @dev Format: 128 integer bits + 128 fractional bits
 ///      All operations preserve sign via two's complement
 
-#include "fixedpoint128_constants.huff"
+#include "constants.huff"
 
 /// @notice Add two 128.128 fixed-point numbers
 /// @dev takes(2) returns(1)
@@ -33,10 +33,10 @@
     // We need: (fixed18 * 2^128) / 1e18
     // For typical calculator use (values up to ~10^20), we're safe:
     // 10^20 * 2^128 ≈ 2^195, well within 256 bits.
-    
+
     0x80 shl              // [fixed18 << 128] (PUSH1 + SHL = 6 gas)
     [FIXED18_SCALE]       // [1e18, fixed18 << 128]
-    swap1 sdiv            // [result] (minimized stack ops)
+    swap1 sdiv            // [result] (SDIV pops dividend then divisor)
 }
 
 /// @notice Convert 128.128 format to signed fixed18
@@ -60,9 +60,11 @@
 /// Stack input: [b, a] (b on top)
 /// Stack output: [a * b]
 /// Formula: result = (a * b) / 2^128 (3-term approximation, omits Term4)
-///          Trades 1 ULP max precision for ~15 gas savings
 /// Gas: ~125-140 (15 gas less than FP128_MUL)
-/// Precision: 37+ decimal digits average (1 ULP max error)
+/// WARNING: Only accurate when at least one operand has a small fractional part.
+///          When both operands have large fractional parts and small integer parts
+///          (e.g. 0.88 * 1.21), the omitted (a_lo * b_lo) >> 128 term can be huge.
+///          Use FP128_MUL() for general-purpose multiplication.
 #define macro FP128_MUL_FAST() = takes(2) returns(1) {
     // Input: [b, a]
     // Split both: a = a_hi * 2^128 + a_lo, b = b_hi * 2^128 + b_lo
@@ -96,45 +98,47 @@
 /// Stack input: [b, a] (b on top)
 /// Stack output: [a * b]
 /// Formula: result = (a * b) / 2^128
-///          Inline extraction - compute each term directly from a and b
-/// Gas: ~140-160 (optimized: no pre-extraction, minimal cleanup)
+///          Optimized: push MASK128 once and reuse via dup
+/// Gas: ~110-130 (reduced PUSH32 operations)
 #define macro FP128_MUL() = takes(2) returns(1) {
     // Input: [b, a]
     // Split both: a = a_hi * 2^128 + a_lo, b = b_hi * 2^128 + b_lo
     // Result = a_hi * b_hi * 2^128 + a_hi * b_lo + a_lo * b_hi + (a_lo * b_lo) >> 128
-    // Inline extraction: compute each term directly without pre-extracting all parts
+    
+    // Push MASK128 once for reuse
+    [MASK128]             // [MASK, b, a]
     
     // Term1: (a_hi * b_hi) << 128
-    // Stack: [b, a]
-    dup2 0x80 sar         // [a_hi, b, a]
-    dup2 0x80 sar         // [b_hi, a_hi, b, a]
-    mul                   // [a_hi*b_hi, b, a]
-    0x80 shl              // [term1, b, a]
+    // Stack: [MASK, b, a]
+    dup3 0x80 sar         // [a_hi, MASK, b, a]
+    dup3 0x80 sar         // [b_hi, a_hi, MASK, b, a]
+    mul                   // [a_hi*b_hi, MASK, b, a]
+    0x80 shl              // [term1, MASK, b, a]
     
     // Term2: a_hi * b_lo
-    // Stack: [term1, b, a]
-    dup3 0x80 sar         // [a_hi, term1, b, a]
-    dup3 [MASK128] and    // [b_lo, a_hi, term1, b, a]
-    mul                   // [a_hi*b_lo, term1, b, a]
-    add                   // [sum12, b, a]
+    // Stack: [term1, MASK, b, a]
+    dup4 0x80 sar         // [a_hi, term1, MASK, b, a]
+    dup4 dup4 and         // [b_lo, a_hi, term1, MASK, b, a]
+    mul                   // [a_hi*b_lo, term1, MASK, b, a]
+    add                   // [sum12, MASK, b, a]
     
     // Term3: a_lo * b_hi
-    // Stack: [sum12, b, a]
-    dup3 [MASK128] and    // [a_lo, sum12, b, a]
-    dup3 0x80 sar         // [b_hi, a_lo, sum12, b, a]
-    mul                   // [a_lo*b_hi, sum12, b, a]
-    add                   // [sum123, b, a]
+    // Stack: [sum12, MASK, b, a]
+    dup4 dup3 and         // [a_lo, sum12, MASK, b, a]
+    dup4 0x80 sar         // [b_hi, a_lo, sum12, MASK, b, a]
+    mul                   // [a_lo*b_hi, sum12, MASK, b, a]
+    add                   // [sum123, MASK, b, a]
     
     // Term4: (a_lo * b_lo) >> 128
-    // Stack: [sum123, b, a]
-    dup3 [MASK128] and    // [a_lo, sum123, b, a]
-    dup3 [MASK128] and    // [b_lo, a_lo, sum123, b, a]
-    mul                   // [a_lo*b_lo, sum123, b, a]
-    0x80 shr              // [(a_lo*b_lo)>>128, sum123, b, a]
-    add                   // [result, b, a]
+    // Stack: [sum123, MASK, b, a]
+    dup4 dup3 and         // [a_lo, sum123, MASK, b, a]
+    dup4 dup4 and         // [b_lo, a_lo, sum123, MASK, b, a]
+    mul                   // [a_lo*b_lo, sum123, MASK, b, a]
+    0x80 shr              // [(a_lo*b_lo)>>128, sum123, MASK, b, a]
+    add                   // [result, MASK, b, a]
     
-    // Clean stack: only 2 items to remove
-    swap2 pop pop         // [result]
+    // Clean stack
+    swap3 pop pop pop     // [result]
 }
 
 /// @notice Divide two 128.128 fixed-point numbers
@@ -142,28 +146,56 @@
 /// Stack input: [b, a] (b on top)
 /// Stack output: [a / b]
 /// Formula: result = (a * 2^128) / b
-///          Use 64-bit chunked shift-and-divide (2 steps)
-/// Gas: ~400-450 (optimized with 0x40 constant)
-/// Precision: ~62 bits (acceptable trade-off for gas efficiency)
+///          Use 32-bit chunked shift-and-divide (4 steps for higher precision)
+/// Gas: ~200-250 (4 sdiv operations)
+/// Precision: ~96 bits (loses ~32 bits vs ~64 bits in 2-chunk method)
 #define macro FP128_DIV() = takes(2) returns(1) {
     // Input: [b, a]
     // We want: (a * 2^128) / b = (a << 128) / b
     // Problem: a << 128 overflows 256 bits
-    // Solution: Shift by 64 bits at a time, divide after each shift
-    //   Step 1: q1 = (a << 64) / b,  r1 = (a << 64) % b
-    //   Step 2: q2 = (r1 << 64) / b
-    //   Result: (q1 << 64) + q2
+    // Solution: Shift by 32 bits at a time, divide after each shift (4 steps)
+    //   Step 1: q1 = (a << 32) / b,  r1 = (a << 32) % b
+    //   Step 2: q2 = (r1 << 32) / b, r2 = (r1 << 32) % b
+    //   Step 3: q3 = (r2 << 32) / b, r3 = (r2 << 32) % b
+    //   Step 4: q4 = (r3 << 32) / b
+    //   Result: (q1 << 96) + (q2 << 64) + (q3 << 32) + q4
     //
-    // Note: This loses ~64 bits of precision because q2 is truncated.
-    // For full precision, would need Solady-style mulDiv (~800-1000 gas)
+    // This gives ~96 bits of precision (loses ~32 bits in the final chunk)
     
     swap1                      // [a, b]
-    0x40 shl                   // [a << 64, b]
-    dup1 dup3 swap1 sdiv       // [q1, a<<64, b]
-    swap2                      // [b, a<<64, q1]
+    
+    // Chunk 1: shift by 32, divide
+    0x20 shl                   // [a << 32, b]
+    dup1 dup3 swap1 sdiv       // [q1, a<<32, b]
+    swap2                      // [b, a<<32, q1]
     dup1 swap2 smod            // [r1, b, q1]
-    0x40 shl                   // [r1 << 64, b, q1]
-    swap1 sdiv                 // [q2, q1]
-    swap1 0x40 shl             // [q1 << 64, q2]
+    
+    // Chunk 2: shift r1 by 32, divide
+    0x20 shl                   // [r1 << 32, b, q1]
+    dup1 dup3 swap1 sdiv       // [q2, r1<<32, b, q1]
+    swap2                      // [b, r1<<32, q2, q1]
+    dup1 swap2 smod            // [r2, b, q2, q1]
+    
+    // Chunk 3: shift r2 by 32, divide
+    0x20 shl                   // [r2 << 32, b, q2, q1]
+    dup1 dup3 swap1 sdiv       // [q3, r2<<32, b, q2, q1]
+    swap2                      // [b, r2<<32, q3, q2, q1]
+    dup1 swap2 smod            // [r3, b, q3, q2, q1]
+    
+    // Chunk 4: shift r3 by 32, divide
+    0x20 shl                   // [r3 << 32, b, q3, q2, q1]
+    swap1 sdiv                 // [q4, q3, q2, q1]
+    
+    // Combine: (q1 << 96) + (q2 << 64) + (q3 << 32) + q4
+    // Stack: [q4, q3, q2, q1]
+    swap3                      // [q1, q3, q2, q4]
+    0x60 shl                   // [q1 << 96, q3, q2, q4]
+    swap1                      // [q3, q1<<96, q2, q4]
+    swap2                      // [q2, q1<<96, q3, q4]
+    0x40 shl                   // [q2 << 64, q1<<96, q3, q4]
+    add                        // [q1<<96 + q2<<64, q3, q4]
+    swap1                      // [q3, sum12, q4]
+    0x20 shl                   // [q3 << 32, sum12, q4]
+    add                        // [sum123, q4]
     add                        // [result]
 }

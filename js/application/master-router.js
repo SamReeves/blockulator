@@ -1,7 +1,7 @@
 /**
  * Master Router
- * Handles top-level navigation between major views (games, calculator, arithmetic, futures, badges)
- * Uses hash-based routing (#/games, #/calculator, etc.) for SPA navigation without page reloads
+ * Handles top-level navigation between major views (games, vyper, fp128, futures, badges)
+ * Uses hash-based routing (#/games, #/vyper, etc.) for SPA navigation without page reloads
  * Supports sub-routes: #/games/pissing-contest
  * 
  * Deep links: https://site.com/#/games or https://site.com/#/games/pissing-contest
@@ -67,7 +67,7 @@ export class MasterRouter {
         let path = window.location.hash.slice(1); // Remove #
         
         if (!path || path === '/') {
-            path = '/calculator'; // Default route
+            path = '/vyper'; // Default route
         }
         
         // Remove leading slash if present
@@ -76,7 +76,7 @@ export class MasterRouter {
         }
         
         const parts = path.split('/').filter(Boolean);
-        const view = parts[0] || 'calculator';
+        const view = parts[0] || 'vyper';
         const subRoute = parts.slice(1).join('/') || null;
         
         return { view, subRoute };
@@ -84,7 +84,7 @@ export class MasterRouter {
 
     /**
      * Navigate to a view with optional sub-route
-     * @param {string} viewName - Name of view to navigate to (games, tools, discussions, futures)
+     * @param {string} viewName - Name of view to navigate to (games, vyper, fp128, futures, badges, about)
      * @param {object} options - Navigation options
      */
     async navigateTo(viewName, options = {}) {

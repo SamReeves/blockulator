@@ -21,8 +21,9 @@
             </div>
             <nav class="header-nav">
                 <a href="#/games" class="nav-link" data-route="games">Games</a>
-                <a href="#/calculator" class="nav-link" data-route="calculator">Calculator</a>
-                <a href="#/arithmetic" class="nav-link" data-route="arithmetic">Arithmetic</a>
+                <a href="#/vyper" class="nav-link" data-route="vyper">Vyper</a>
+                <a href="#/fp128" class="nav-link" data-route="fp128">FP128</a>
+                <a href="#/benchmarks" class="nav-link" data-route="benchmarks">Benchmarks</a>
                 <a href="#/futures" class="nav-link" data-route="futures">Futures</a>
                 <a href="#/badges" class="nav-link" data-route="badges">Badges</a>
                 <a href="https://sepolia-faucet.pk910.de/" target="_blank" class="nav-link">Faucet</a>
@@ -76,17 +77,24 @@
                 </div>
             </div>
 
-            <!-- CALCULATOR VIEW -->
-            <div id="calculator-view" class="view-container hidden" data-view="calculator">
-                <div id="calculator-content" class="content">
-                    <div id="tool-container"></div>
+            <!-- VYPER VIEW -->
+            <div id="vyper-view" class="view-container hidden" data-view="vyper">
+                <div id="vyper-content" class="content">
+                    <div id="vyper-container"></div>
                 </div>
             </div>
 
-            <!-- ARITHMETIC VIEW -->
-            <div id="arithmetic-view" class="view-container hidden" data-view="arithmetic">
-                <div id="arithmetic-content" class="content">
-                    <div id="arithmetic-container"></div>
+            <!-- FP128 VIEW -->
+            <div id="fp128-view" class="view-container hidden" data-view="fp128">
+                <div id="fp128-content" class="content">
+                    <div id="fp128-container"></div>
+                </div>
+            </div>
+
+            <!-- BENCHMARKS VIEW -->
+            <div id="benchmarks-view" class="view-container hidden" data-view="benchmarks">
+                <div id="benchmarks-content" class="content">
+                    <div id="benchmarks-container"></div>
                 </div>
             </div>
 
@@ -354,11 +362,29 @@
                         
                         <div class="about-grid">
                             <div class="about-card">
-                                <h3>🔢 Math Library</h3>
+                                <h3>🔬 Vyper Math</h3>
                                 <p>
-                                    30+ on-chain math contracts in Vyper: trig, logarithms, exponentials, 
-                                    statistical distributions, combinatorics. Plus a signed 128.128 
-                                    fixed-point arithmetic engine written in pure Huff assembly.
+                                    30+ on-chain scientific functions in Vyper 0.4: trigonometric, 
+                                    logarithmic, exponential, statistical distributions, and combinatorics. 
+                                    A scientific calculator powered entirely by smart contracts.
+                                </p>
+                            </div>
+
+                            <div class="about-card">
+                                <h3>🔢 FP128</h3>
+                                <p>
+                                    Signed 128.128 fixed-point arithmetic engine written in pure Huff assembly. 
+                                    Basic operations (add, sub, mul, div) plus transcendental functions 
+                                    (exp, ln, sqrt) using BKM algorithm.
+                                </p>
+                            </div>
+
+                            <div class="about-card">
+                                <h3>📊 Benchmarks</h3>
+                                <p>
+                                    Gas cost and precision comparisons across on-chain math libraries: 
+                                    Vyper, FP128, ABDK, and Solady. Interactive charts showing performance 
+                                    across a range of operations and test cases.
                                 </p>
                             </div>
 
