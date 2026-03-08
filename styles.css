@@ -6002,466 +6002,411 @@ details[open] .collapsible-arrow {
 /* BENCHMARK PAGE STYLES                                                    */
 /* ═══════════════════════════════════════════════════════════════════════ */
 
-.benchmark-shell {
-    max-width: 1400px;
+.bench-shell {
+    max-width: 1100px;
     margin: 0 auto;
     padding: 2rem 1rem;
     font-family: 'Courier New', 'Consolas', monospace;
 }
 
-.benchmark-header {
+/* ── Header ──────────────────────────────────────────────────────────── */
+
+.bench-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
-.benchmark-title {
+.bench-title {
     color: #00ff88;
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
     font-weight: 700;
 }
 
-.benchmark-subtitle {
-    color: #888;
-    font-size: 1rem;
-    letter-spacing: 0.5px;
-}
-
-/* Library Toggles */
-.library-toggles {
+.bench-legend {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     justify-content: center;
-    margin-bottom: 2rem;
     flex-wrap: wrap;
+    margin-bottom: 0.75rem;
 }
 
-.lib-toggle {
+.bench-legend-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    background: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    color: #888;
+    color: #ccc;
+    font-size: 0.875rem;
 }
 
-.lib-toggle:hover {
-    border-color: #666;
-}
-
-.lib-toggle.active {
-    border-color: #00ff88;
-    color: #00ff88;
-    background: rgba(0, 255, 136, 0.05);
-}
-
-.toggle-color {
-    width: 16px;
-    height: 16px;
+.bench-legend-dot {
+    width: 12px;
+    height: 12px;
     border-radius: 3px;
-    opacity: 0.5;
+    flex-shrink: 0;
 }
 
-.lib-toggle.active .toggle-color {
-    opacity: 1;
-}
-
-.toggle-label {
-    font-size: 0.875rem;
-    letter-spacing: 0.5px;
-}
-
-/* Loading State */
-.benchmark-loading {
-    text-align: center;
-    padding: 4rem 2rem;
-    color: #888;
-    font-size: 1.125rem;
-}
-
-/* Charts */
-.benchmark-charts {
-    margin-top: 2rem;
-}
-
-.chart-section {
-    margin-bottom: 4rem;
-}
-
-.chart-section h3 {
-    color: #00ff88;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-weight: 700;
-}
-
-.chart-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin-bottom: 2rem;
-}
-
-.chart-container {
-    background: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    min-height: 400px;
-}
-
-.chart-container canvas {
-    max-height: 400px;
-}
-
-/* Detail Tables */
-.detail-section {
-    margin-top: 3rem;
-}
-
-.detail-section h3 {
-    color: #00ff88;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-weight: 700;
-}
-
-.table-tabs {
-    display: flex;
-    gap: 0.5rem;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-}
-
-.table-tab {
-    padding: 0.75rem 1.5rem;
-    background: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: 'Courier New', monospace;
-    font-weight: 600;
-    color: #888;
-}
-
-.table-tab:hover {
-    border-color: #666;
-}
-
-.table-tab.active {
-    border-color: #00ff88;
-    color: #00ff88;
-    background: rgba(0, 255, 136, 0.05);
-}
-
-.detail-table-container {
-    overflow-x: auto;
-    background: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 0.5rem;
-    padding: 1rem;
-}
-
-.detail-table-container.hidden {
-    display: none;
-}
-
-.benchmark-detail-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.875rem;
-}
-
-.benchmark-detail-table thead th {
-    background: #0d0d0d;
-    color: #00ff88;
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 2px solid #333;
-    font-weight: 700;
-    position: sticky;
-    top: 0;
-}
-
-.benchmark-detail-table tbody td {
-    padding: 0.75rem;
-    border-bottom: 1px solid #2a2a2a;
-    color: #ccc;
-}
-
-.benchmark-detail-table tbody tr:hover {
-    background: rgba(0, 255, 136, 0.03);
-}
-
-.benchmark-detail-table tbody td:first-child {
+.bench-legend-item strong {
     color: #fff;
-    font-weight: 600;
-}
-
-.best-value {
-    color: #00ff88;
     font-weight: 700;
 }
 
-/* Library Info Cards */
-.library-info-section {
-    margin-top: 3rem;
+.bench-legend-meta {
+    color: #666;
+    font-size: 0.75rem;
 }
 
-.library-info-section h3 {
-    color: #00ff88;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    font-weight: 700;
-}
-
-.library-info-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-}
-
-.library-card {
-    background: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-}
-
-.library-card h4 {
-    color: #00ff88;
-    font-size: 1.125rem;
-    margin-bottom: 1rem;
-    font-weight: 700;
-}
-
-.library-card-details p {
-    margin: 0.5rem 0;
-    color: #ccc;
-    font-size: 0.875rem;
+.bench-subtitle {
+    color: #666;
+    font-size: 0.8rem;
+    letter-spacing: 0.3px;
+    max-width: 600px;
+    margin: 0 auto;
     line-height: 1.5;
 }
 
-.library-card-details strong {
-    color: #fff;
-    font-weight: 600;
-}
+/* ── Loading ─────────────────────────────────────────────────────────── */
 
-.library-card-stats {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #333;
-}
-
-.library-card-stats h5 {
-    color: #00ff88;
-    font-size: 1rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
-}
-
-.stat-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.stat-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
-.stat-label {
+.bench-loading {
+    text-align: center;
+    padding: 4rem 2rem;
     color: #888;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 1rem;
 }
 
-.stat-value {
+/* ── Content ─────────────────────────────────────────────────────────── */
+
+.bench-content.hidden {
+    display: none;
+}
+
+/* ── Sections ────────────────────────────────────────────────────────── */
+
+.bench-section {
+    margin-bottom: 3rem;
+}
+
+.bench-section h3 {
     color: #00ff88;
     font-size: 1.25rem;
+    margin-bottom: 0.5rem;
     font-weight: 700;
 }
 
-.precision-breakdown {
-    margin-top: 1rem;
+.bench-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
 }
 
-.precision-breakdown summary {
-    color: #fff;
-    cursor: pointer;
-    font-size: 0.875rem;
-    padding: 0.5rem;
-    background: #222;
-    border-radius: 0.25rem;
-    user-select: none;
+.bench-section-note {
+    color: #666;
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
 }
 
-.precision-breakdown summary:hover {
-    background: #2a2a2a;
-}
+/* ── Mean/Median Toggle ──────────────────────────────────────────────── */
 
-.breakdown-content {
-    margin-top: 0.75rem;
-    padding: 0.75rem;
-    background: #1a1a1a;
-    border-radius: 0.25rem;
+.bench-stat-toggle {
+    display: flex;
+    gap: 0;
     border: 1px solid #333;
-}
-
-.breakdown-row {
-    color: #ccc;
-    font-size: 0.875rem;
-    line-height: 1.6;
-    margin-bottom: 0.5rem;
-}
-
-.breakdown-row:last-child {
-    margin-bottom: 0;
-}
-
-.breakdown-row strong {
-    color: #fff;
-}
-
-/* Precision Comparison Table */
-.precision-comparison-section {
-    margin-top: 3rem;
-}
-
-.precision-comparison-section h3 {
-    color: #00ff88;
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    text-align: center;
-    font-weight: 700;
-}
-
-.section-subtitle {
-    text-align: center;
-    color: #888;
-    font-size: 0.875rem;
-    margin-bottom: 1.5rem;
-}
-
-.precision-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #1a1a1a;
-    border: 2px solid #333;
-    border-radius: 0.5rem;
+    border-radius: 4px;
     overflow: hidden;
 }
 
-.precision-table thead {
+.bench-toggle {
+    padding: 0.4rem 1rem;
+    background: #1a1a1a;
+    border: none;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.15s;
+}
+
+.bench-toggle:not(:last-child) {
+    border-right: 1px solid #333;
+}
+
+.bench-toggle:hover {
+    color: #aaa;
     background: #222;
 }
 
-.precision-table th {
+.bench-toggle.active {
     color: #00ff88;
-    font-weight: 700;
-    padding: 1rem;
-    text-align: center;
+    background: rgba(0, 255, 136, 0.08);
+}
+
+/* ── Summary Table ───────────────────────────────────────────────────── */
+
+.bench-table-wrap {
+    overflow-x: auto;
+}
+
+.bench-summary {
+    width: 100%;
+    border-collapse: collapse;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    overflow: hidden;
     font-size: 0.875rem;
+}
+
+.bench-summary thead th {
+    background: #181818;
+    color: #888;
+    padding: 0.75rem 0.6rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.bench-summary thead th.col-func,
+.bench-summary thead th.col-n {
+    text-align: left;
+}
+
+.bench-lib-head {
+    border-bottom: 2px solid;
+    padding-bottom: 2px;
+}
+
+.bench-subhead th {
+    background: #151515;
+    color: #555;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.7rem;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid #333;
+    border-bottom: 1px solid #2a2a2a;
 }
 
-.precision-table th:first-child {
-    text-align: left;
+.bench-summary tbody tr {
+    border-bottom: 1px solid #1e1e1e;
+    transition: background 0.1s;
 }
 
-.precision-table tbody tr {
-    border-bottom: 1px solid #333;
+.bench-summary tbody tr:hover {
+    background: #1a1a1a;
 }
 
-.precision-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-.precision-table tbody tr:hover {
-    background: #222;
-}
-
-.precision-table td {
-    padding: 1rem;
+.bench-summary tbody td {
+    padding: 0.6rem;
+    color: #aaa;
     text-align: center;
-    color: #ccc;
-    font-size: 1rem;
 }
 
-.precision-table td.func-name {
+.bench-summary .col-func {
     text-align: left;
     color: #fff;
+    font-weight: 700;
+    padding-left: 1rem;
+}
+
+.bench-summary .col-n {
+    text-align: left;
+    color: #555;
+    font-size: 0.75rem;
+}
+
+.bench-summary .col-gas {
+    font-variant-numeric: tabular-nums;
+}
+
+.bench-summary .col-digits {
+    font-variant-numeric: tabular-nums;
+}
+
+.bench-summary .best {
+    color: #00ff88;
+    font-weight: 700;
+}
+
+.bench-summary .na {
+    color: #444;
+}
+
+/* ── Scatter Chart ───────────────────────────────────────────────────── */
+
+.bench-scatter-wrap {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 1.25rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.bench-scatter-wrap canvas {
+    max-height: 400px;
+}
+
+/* ── Distribution Panels ─────────────────────────────────────────────── */
+
+.bench-dist-panels {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.bench-dist-panel {
+    border: 1px solid #2a2a2a;
+    border-bottom: none;
+    background: #111;
+}
+
+.bench-dist-panel:first-child {
+    border-radius: 6px 6px 0 0;
+}
+
+.bench-dist-panel:last-child {
+    border-bottom: 1px solid #2a2a2a;
+    border-radius: 0 0 6px 6px;
+}
+
+.bench-dist-panel[open] {
+    background: #141414;
+}
+
+.bench-dist-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s;
+    list-style: none;
+}
+
+.bench-dist-summary::-webkit-details-marker {
+    display: none;
+}
+
+.bench-dist-summary::before {
+    content: '▸';
+    color: #555;
+    margin-right: 0.75rem;
+    transition: transform 0.15s;
+    font-size: 0.75rem;
+}
+
+.bench-dist-panel[open] > .bench-dist-summary::before {
+    transform: rotate(90deg);
+}
+
+.bench-dist-summary:hover {
+    background: #1a1a1a;
+}
+
+.bench-dist-func {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.bench-dist-n {
+    color: #555;
+    font-size: 0.75rem;
+}
+
+.bench-dist-body {
+    padding: 0 1rem 1rem;
+    overflow-x: auto;
+}
+
+.bench-dist-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.bench-dist-table thead th {
+    color: #888;
+    padding: 0.5rem 0.5rem;
+    text-align: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.bench-dist-table .bench-subhead th {
+    color: #555;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid #222;
+}
+
+.bench-dist-table tbody td {
+    padding: 0.4rem 0.5rem;
+    color: #999;
+    text-align: center;
+    border-bottom: 1px solid #1a1a1a;
+    font-variant-numeric: tabular-nums;
+}
+
+.bench-dist-table .col-func {
+    text-align: left;
+    color: #ccc;
     font-weight: 600;
 }
 
-.precision-table td.best-precision {
-    color: #00ff88;
-    font-weight: 700;
-    background: rgba(0, 255, 136, 0.1);
+.bench-dist-median-row td {
+    color: #ddd;
+    font-weight: 600;
+    background: rgba(0, 255, 136, 0.03);
 }
 
-.precision-table td.na {
-    color: #555;
-    font-style: italic;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .chart-row {
-        grid-template-columns: 1fr;
-    }
-}
+/* ── Responsive ──────────────────────────────────────────────────────── */
 
 @media (max-width: 768px) {
-    .benchmark-shell {
+    .bench-shell {
         padding: 1rem 0.5rem;
     }
 
-    .benchmark-title {
-        font-size: 1.5rem;
-    }
-
-    .library-toggles {
-        gap: 0.5rem;
-    }
-
-    .lib-toggle {
-        padding: 0.5rem 1rem;
-        font-size: 0.8rem;
-    }
-
-    .chart-section h3 {
+    .bench-title {
         font-size: 1.25rem;
     }
 
-    .chart-container {
-        padding: 1rem;
-        min-height: 300px;
+    .bench-legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
     }
 
-    .benchmark-detail-table {
+    .bench-legend-meta {
+        display: none;
+    }
+
+    .bench-section-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .bench-summary {
         font-size: 0.75rem;
     }
 
-    .benchmark-detail-table thead th,
-    .benchmark-detail-table tbody td {
-        padding: 0.5rem;
+    .bench-summary thead th,
+    .bench-summary tbody td {
+        padding: 0.4rem;
+    }
+
+    .bench-scatter-wrap {
+        padding: 0.75rem;
     }
 }
 

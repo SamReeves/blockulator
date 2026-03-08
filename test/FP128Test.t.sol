@@ -10,17 +10,17 @@ interface IFP128 {
     function div(uint256, uint256) external view returns (uint256);
     function mulRaw(uint256, uint256) external view returns (uint256);
     function divRaw(uint256, uint256) external view returns (uint256);
+    function divUnsignedRaw(uint256, uint256) external view returns (uint256);
     function fromFixed18(uint256) external view returns (uint256);
     function toFixed18(uint256) external view returns (uint256);
     function exp(uint256) external view returns (uint256);
     function ln(uint256) external view returns (uint256);
     function sqrt(uint256) external view returns (uint256);
     function expRaw(uint256) external view returns (uint256);
+    function exp2Raw(uint256) external view returns (uint256);
     function lnRaw(uint256) external view returns (uint256);
-    function lnBkmOnly(uint256) external view returns (uint256);
-    function lnRangeReduce(uint256) external view returns (uint256, uint256);
-    function expRangeReduce(uint256) external view returns (uint256, uint256);
-    function expBkmOnly(uint256) external view returns (uint256);
+    function log2Raw(uint256) external view returns (uint256);
+    function sqrtRaw(uint256) external view returns (uint256);
     function expScale(uint256, uint256) external view returns (uint256);
     function expOverflowCheck(uint256) external view returns (uint256);
     function testConstant() external view returns (uint256);
@@ -40,6 +40,40 @@ contract FP128Test is Test {
         fp128 = IFP128(addr);
     }
     
+    /// @dev Solidity reference: computes (a * 2^128) / b using Uniswap V3 FullMath
+    function _refDivUnsigned(uint256 a, uint256 b) internal pure returns (uint256 result) {
+        assembly {
+            // 512-bit product: prod1:prod0 = a * 2^128
+            let prod0 := shl(128, a)
+            let prod1 := shr(128, a)
+            
+            // Subtract remainder to make division exact
+            let remainder := mulmod(a, 0x100000000000000000000000000000000, b)
+            prod1 := sub(prod1, gt(remainder, prod0))
+            prod0 := sub(prod0, remainder)
+            
+            // Factor powers of two out of denominator
+            let twos := and(sub(0, b), b)
+            b := div(b, twos)
+            prod0 := div(prod0, twos)
+            
+            // Shift in bits from prod1 into prod0
+            let twos_flipped := add(div(sub(0, twos), twos), 1)
+            prod0 := or(prod0, mul(prod1, twos_flipped))
+            
+            // Modular inverse via Newton-Raphson
+            let inv := xor(mul(3, b), 2)
+            inv := mul(inv, sub(2, mul(b, inv)))
+            inv := mul(inv, sub(2, mul(b, inv)))
+            inv := mul(inv, sub(2, mul(b, inv)))
+            inv := mul(inv, sub(2, mul(b, inv)))
+            inv := mul(inv, sub(2, mul(b, inv)))
+            inv := mul(inv, sub(2, mul(b, inv)))
+            
+            result := mul(prod0, inv)
+        }
+    }
+
     function _oracle(string memory func, uint256 x) internal returns (uint256) {
         string[] memory cmd = new string[](4);
         cmd[0] = "python3";
@@ -61,16 +95,38 @@ contract FP128Test is Test {
         return abi.decode(out, (uint256));
     }
     
-    function _oracleExpRangeReduce(uint256 x) internal returns (uint256, uint256) {
-        string[] memory cmd = new string[](4);
-        cmd[0] = "python3";
-        cmd[1] = "scripts/fp128_oracle.py";
-        cmd[2] = "exp_range_reduce";
-        cmd[3] = vm.toString(x);
-        bytes memory out = vm.ffi(cmd);
-        return abi.decode(out, (uint256, uint256));
+    function _logStep3(bytes memory ret) internal pure {
+        uint256 v;
+        console.log("--- after twos ---");
+        assembly { v := mload(add(ret, 0xA0)) } console.log("twos             :", v);
+        assembly { v := mload(add(ret, 0xC0)) } console.log("prod0            :", v);
+        assembly { v := mload(add(ret, 0xE0)) } console.log("prod1            :", v);
+        assembly { v := mload(add(ret, 0x100)) } console.log("b                :", v);
+        console.log("--- after b/twos ---");
+        assembly { v := mload(add(ret, 0x120)) } console.log("b_new            :", v);
+        console.log("--- after prod0/twos ---");
+        assembly { v := mload(add(ret, 0x140)) } console.log("twos (unchanged) :", v);
+        assembly { v := mload(add(ret, 0x160)) } console.log("prod0_new        :", v);
+        assembly { v := mload(add(ret, 0x180)) } console.log("prod1            :", v);
+        console.log("--- fold ---");
+        assembly { v := mload(add(ret, 0x1A0)) } console.log("-twos            :", v);
+        assembly { v := mload(add(ret, 0x1C0)) } console.log("twos (denom)     :", v);
+        assembly { v := mload(add(ret, 0x1E0)) } console.log("(-twos)/twos     :", v);
+        assembly { v := mload(add(ret, 0x200)) } console.log("prod1*flipped    :", v);
+        assembly { v := mload(add(ret, 0x220)) } console.log("prod0_final (or) :", v);
     }
-    
+
+    function _logStep45(bytes memory ret) internal pure {
+        uint256 v;
+        console.log("--- step 4: modular inverse ---");
+        assembly { v := mload(add(ret, 0x240)) } console.log("initial inv      :", v);
+        assembly { v := mload(add(ret, 0x260)) } console.log("prod0 entering   :", v);
+        assembly { v := mload(add(ret, 0x280)) } console.log("b entering       :", v);
+        assembly { v := mload(add(ret, 0x2A0)) } console.log("final inv        :", v);
+        console.log("--- step 5: final ---");
+        assembly { v := mload(add(ret, 0x2C0)) } console.log("prod0 * inv      :", v);
+    }
+
     function _absDiff(uint256 a, uint256 b) internal pure returns (uint256) {
         return a > b ? a - b : b - a;
     }
@@ -267,7 +323,7 @@ contract FP128Test is Test {
     function test_div_1_div_3() public view {
         uint256 result = fp128.div(uint256(F18), uint256(3 * F18));
         int256 expected = F18 / 3;  // 0.333...
-        assertApproxEqAbs(int256(result), expected, uint256(F18 / 1000), "1 / 3 approx 0.333");
+        assertApproxEqAbs(int256(result), expected, uint256(1), "1 / 3 approx 0.333");
     }
     
     function test_div_negative_div_positive() public view {
@@ -312,7 +368,7 @@ contract FP128Test is Test {
         uint256 THREE_FP128 = 3 << 128;
         uint256 result = fp128.divRaw(SIX_FP128, THREE_FP128);
         uint256 TWO_FP128 = 2 << 128;
-        assertApproxEqAbs(int256(result), int256(TWO_FP128), 100, "6 / 3 = 2 (raw, full precision)");
+        assertApproxEqAbs(int256(result), int256(TWO_FP128), 1, "6 / 3 = 2 (raw, full precision)");
     }
 
     // ============================================================================
@@ -373,6 +429,61 @@ contract FP128Test is Test {
     function test_exp_negative_half() public {
         uint256 result = fp128.exp(uint256(int256(-0.5e18)));
         assertApproxEqAbs(result, 606530659712633423, 1e12, "exp(-0.5) should be ~0.60653");
+    }
+
+    function test_exp2_negative_one() public view {
+        uint256 NEG_ONE_FP128 = uint256(-int256(1 << 128));
+        uint256 result = fp128.exp2Raw(NEG_ONE_FP128);
+        console.log("exp2(-1) result:", result);
+        console.log("expected (0.5):", uint256(1) << 127);
+        assertApproxEqAbs(result, uint256(1) << 127, 1000, "exp2(-1) should be 0.5");
+    }
+
+    function test_exp2_bounds() public view {
+        // Test that -2 does NOT underflow (threshold is -128)
+        uint256 NEG_TWO_FP128 = uint256(-int256(2 << 128));
+        uint256 result = fp128.exp2Raw(NEG_TWO_FP128);
+        console.log("exp2(-2) result:", result);
+        console.log("expected (0.25):", uint256(1) << 126);
+        
+        // Test that -129 DOES underflow
+        uint256 NEG_129_FP128 = uint256(-int256(129 << 128));
+        uint256 result2 = fp128.exp2Raw(NEG_129_FP128);
+        console.log("exp2(-129) result:", result2);
+        console.log("expected (underflow):", uint256(0));
+        
+        // Test the exact value from multiplication
+        uint256 NEG_1_4427 = 0xfffffffffffffffffffffffffffffffe8eab89ad47d01e8882f0025f2dc582ef;
+        uint256 result3 = fp128.exp2Raw(NEG_1_4427);
+        console.log("exp2(-1.4427) result:", result3);
+        console.log("expected (~0.368):", (uint256(368) << 128) / 1000);
+    }
+
+    function test_expRaw_negative_one() public view {
+        uint256 NEG_ONE_FP128 = uint256(-int256(1 << 128));
+        uint256 result = fp128.expRaw(NEG_ONE_FP128);
+        console.log("expRaw(-1) result:", result);
+        uint256 expected = (uint256(367879441171442321) << 128) / 1e18;
+        console.log("expected:", expected);
+        assertApproxEqAbs(result, expected, 1 << 120, "expRaw(-1) should be ~0.368");
+    }
+
+    function test_mul_neg_one_times_inv_ln2() public view {
+        uint256 NEG_ONE_FP128 = uint256(-int256(1 << 128));
+        uint256 INV_LN2_FP128 = 0x0000000000000000000000000000000171547652b82fe1777d0ffda0d23a7d11;
+        uint256 result = fp128.mulRaw(NEG_ONE_FP128, INV_LN2_FP128);
+        console.log("(-1) * INV_LN2 result:", result);
+        int256 result_signed = int256(result);
+        console.logInt(result_signed);
+        
+        // Now call exp2Raw with this result
+        uint256 exp2_result = fp128.exp2Raw(result);
+        console.log("exp2(result) =", exp2_result);
+        
+        // Expected: -1.4427 in FP128
+        int256 expected_signed = -int256((uint256(14427) << 128) / 10000);
+        uint256 expected = uint256(expected_signed);
+        console.log("expected mul (-1.4427):", expected);
     }
 
     // ============================================================================
@@ -442,32 +553,32 @@ contract FP128Test is Test {
 
     function test_sqrt_four() public view {
         uint256 result = fp128.sqrt(4e18);
-        assertApproxEqAbs(result, 2e18, 100, "sqrt(4) should be 2.0");
+        assertApproxEqAbs(result, 2e18, 1, "sqrt(4) should be 2.0");
     }
 
     function test_sqrt_two() public view {
         uint256 result = fp128.sqrt(2e18);
-        assertApproxEqAbs(result, 1414213562373095048, 1000, "sqrt(2) should be ~1.41421");
+        assertApproxEqAbs(result, 1414213562373095048, 1, "sqrt(2) should be ~1.41421");
     }
 
     function test_sqrt_nine() public view {
         uint256 result = fp128.sqrt(9e18);
-        assertApproxEqAbs(result, 3e18, 100, "sqrt(9) should be 3.0");
+        assertApproxEqAbs(result, 3e18, 1, "sqrt(9) should be 3.0");
     }
 
     function test_sqrt_hundred() public view {
         uint256 result = fp128.sqrt(100e18);
-        assertApproxEqAbs(result, 10e18, 1e9, "sqrt(100) should be 10.0");
+        assertApproxEqAbs(result, 10e18, 200000000, "sqrt(100) should be 10.0");
     }
     
     function test_sqrt_quarter() public view {
         uint256 result = fp128.sqrt(0.25e18);
-        assertApproxEqAbs(result, 0.5e18, 1000, "sqrt(0.25) should be 0.5");
+        assertApproxEqAbs(result, 0.5e18, 1, "sqrt(0.25) should be 0.5");
     }
     
     function test_sqrt_tenth() public view {
         uint256 result = fp128.sqrt(0.1e18);
-        assertApproxEqAbs(result, 316227766016837933, 1000, "sqrt(0.1) should be ~0.31623");
+        assertApproxEqAbs(result, 316227766016837933, 1, "sqrt(0.1) should be ~0.31623");
     }
     
     function test_sqrt_half() public view {
@@ -479,7 +590,7 @@ contract FP128Test is Test {
         uint256 x = 3e18;
         uint256 sqrtX = fp128.sqrt(x);
         uint256 result = fp128.mul(sqrtX, sqrtX);
-        assertApproxEqAbs(result, x, 1e6, "sqrt(3)^2 should be ~3");
+        assertApproxEqAbs(result, x, 10, "sqrt(3)^2 should be ~3");
     }
 
     // ============================================================================
@@ -556,6 +667,91 @@ contract FP128Test is Test {
         assertLt(_absDiff(back, THREE), 4096, "exp(ln(3)) roundtrip within 4096 ULP");
     }
     
+    // ============================================================================
+    // DIV UNSIGNED: Solidity reference vs Huff implementation
+    // ============================================================================
+
+    function test_divUnsigned_ref_sanity() public pure {
+        uint256 ONE = uint256(1) << 128;
+        uint256 TWO = uint256(2) << 128;
+
+        // 2/2 = 1 exactly
+        assertEq(_refDivUnsigned(TWO, TWO), ONE, "ref: 2/2 = 1");
+        // 6/3 = 2
+        assertEq(_refDivUnsigned(uint256(6) << 128, uint256(3) << 128), TWO, "ref: 6/3 = 2");
+        // 1/2 = 0.5
+        uint256 HALF = ONE >> 1;
+        assertEq(_refDivUnsigned(ONE, TWO), HALF, "ref: 1/2 = 0.5");
+    }
+
+    function test_divUnsigned_huff_2_div_2() public view {
+        uint256 TWO = uint256(2) << 128;
+        uint256 ONE = uint256(1) << 128;
+        uint256 result = fp128.divUnsignedRaw(TWO, TWO);
+        uint256 ref = _refDivUnsigned(TWO, TWO);
+        assertEq(result, ref, "huff: 2/2 = 1");
+        assertEq(result, ONE, "huff: 2/2 = ONE");
+    }
+
+    function test_divUnsigned_huff_small() public view {
+        // Use small values where prod1 = 0 (a < 2^128)
+        uint256 a = 3;   // very small, prod1 = 0
+        uint256 b = 2;   // very small
+        uint256 result = fp128.divUnsignedRaw(a, b);
+        uint256 ref = _refDivUnsigned(a, b);
+        console.log("huff 3/2:", result);
+        console.log("ref  3/2:", ref);
+        assertEq(result, ref, "huff vs ref: small 3/2");
+    }
+
+    function test_divUnsigned_huff_6_div_3() public view {
+        uint256 SIX = uint256(6) << 128;
+        uint256 THREE = uint256(3) << 128;
+        uint256 TWO = uint256(2) << 128;
+        uint256 result = fp128.divUnsignedRaw(SIX, THREE);
+        assertEq(result, TWO, "huff: 6/3 = 2");
+    }
+
+    function test_divUnsigned_huff_1_div_2() public view {
+        uint256 ONE = uint256(1) << 128;
+        uint256 TWO = uint256(2) << 128;
+        uint256 HALF = ONE >> 1;
+        uint256 result = fp128.divUnsignedRaw(ONE, TWO);
+        assertEq(result, HALF, "huff: 1/2 = 0.5");
+    }
+
+    function test_divUnsigned_huff_1_div_3() public view {
+        uint256 ONE = uint256(1) << 128;
+        uint256 THREE = uint256(3) << 128;
+        uint256 huff_result = fp128.divUnsignedRaw(ONE, THREE);
+        uint256 ref_result = _refDivUnsigned(ONE, THREE);
+        assertEq(huff_result, ref_result, "huff vs ref: 1/3");
+    }
+
+    function test_divSigned_raw_positive() public view {
+        uint256 SIX = uint256(6) << 128;
+        uint256 THREE = uint256(3) << 128;
+        // Call divRaw which uses FP128_DIV (signed)
+        uint256 result = fp128.divRaw(SIX, THREE);
+        uint256 TWO = uint256(2) << 128;
+        assertEq(result, TWO, "divRaw: 6/3 = 2");
+    }
+
+    function test_divUnsigned_huff_vs_ref_sweep() public view {
+        uint256[] memory as_ = new uint256[](4);
+        uint256[] memory bs = new uint256[](4);
+        as_[0] = uint256(1) << 128;  bs[0] = uint256(3) << 128;
+        as_[1] = uint256(7) << 128;  bs[1] = uint256(11) << 128;
+        as_[2] = uint256(100) << 128; bs[2] = uint256(7) << 128;
+        as_[3] = uint256(1) << 64;   bs[3] = uint256(1) << 200;
+
+        for (uint256 i = 0; i < as_.length; i++) {
+            uint256 huff_r = fp128.divUnsignedRaw(as_[i], bs[i]);
+            uint256 ref_r = _refDivUnsigned(as_[i], bs[i]);
+            assertEq(huff_r, ref_r, "huff vs ref sweep");
+        }
+    }
+
     function test_precision_div() public view {
         uint256 ONE = uint256(1) << 128;
         uint256 THREE = uint256(3) << 128;
@@ -563,7 +759,7 @@ contract FP128Test is Test {
         uint256 expected = 0x00000000000000000000000000000000555555555555555555555555555555555;
         uint256 diff = result > expected ? result - expected : expected - result;
         uint256 relativeError = (diff << 128) / expected;
-        assertLt(relativeError, 1 << 66, "1/3 relative error should be < 2^-62");
+        assertLt(relativeError, 1 << 10, "1/3 relative error should be < 2^-118");
     }
     
     function test_precision_sqrt() public view {
@@ -577,93 +773,6 @@ contract FP128Test is Test {
     // STAGE-ISOLATION TESTS (Debug helpers)
     // ============================================================================
     
-    function test_exp_range_reduce_oracle() public {
-        uint256 ONE = 1 << 128;
-        (uint256 k_int, uint256 x_prime) = fp128.expRangeReduce(ONE);
-        (uint256 exp_k_int, uint256 exp_x_prime) = _oracleExpRangeReduce(ONE);
-        
-        assertEq(k_int, exp_k_int, "Range reduce: k_int matches oracle");
-        assertLt(_absDiff(x_prime, exp_x_prime), 256, "Range reduce: x_prime within 256 ULP");
-    }
-    
-    function test_exp_bkm_loop_oracle() public {
-        uint256 rem = 0x4ccccccccccccccccccccccccccccccc;
-        uint256 acc = fp128.expBkmOnly(rem);
-        uint256 expected = _oracle("exp_bkm_only", rem);
-        assertLt(_absDiff(acc, expected), 512, "BKM loop: within 512 ULP of oracle");
-    }
-
-    function test_ln_bkm_loop_oracle() public {
-        // Test LN BKM loop with x_reduced = 1.5 (in [1,2))
-        uint256 x_reduced = (uint256(3) << 128) / 2;  // 1.5 in FP128
-        // DEBUG: skip for now since lnBkmOnly is reverting
-        // uint256 result = fp128.lnBkmOnly(x_reduced);
-        // uint256 expected = _oracle("ln_bkm_only", x_reduced);
-        // assertLt(_absDiff(result, expected), 512, "LN BKM loop: within 512 ULP of oracle");
-    }
-    
-    function test_ln_reconstruction_debug() public view {
-        // Test reconstruction: shift_k=1, bkm_result=0 should give ln(2)
-        uint256 shift_k = 1;
-        uint256 bkm_result = 0;
-        
-        // Manual reconstruction in Solidity
-        uint256 shift_k_fp128 = shift_k << 128;
-        uint256 ln2_fp128 = uint256(235865763225513294137944142764154484399);
-        
-        // Multiply: (shift_k_fp128 * ln2_fp128) / 2^128
-        uint256 product = (shift_k_fp128 * ln2_fp128) >> 128;
-        
-        // Add: product + bkm_result
-        uint256 result = product + bkm_result;
-        
-        console.log("shift_k_fp128:", shift_k_fp128);
-        console.log("ln2_fp128:", ln2_fp128);
-        console.log("product:", product);
-        console.log("result:", result);
-        console.log("expected ln2:", ln2_fp128);
-        
-        assertEq(result, ln2_fp128, "Reconstruction should match ln2");
-    }
-    
-    function test_ln_range_reduce_manual() public pure {
-        // Manually compute range reduction for x=2.0
-        uint256 x = uint256(2) << 128;
-        uint256 shift_k = 0;
-        
-        while (x >= (uint256(2) << 128)) {  // while x >= 2.0
-            x = x >> 1;  // x /= 2
-            shift_k++;
-        }
-        
-        assertEq(shift_k, 1, "shift_k should be 1");
-        assertEq(x, uint256(1) << 128, "x_reduced should be 1.0");
-    }
-    
-    function test_ln_range_reduce_two() public view {
-        // Test range reduction for ln(2)
-        uint256 TWO_FP128 = uint256(2) << 128;
-        // (uint256 shift_k, uint256 x_reduced) = fp128.lnRangeReduce(TWO_FP128);
-        // assertEq(shift_k, 1, "shift_k should be 1 for ln(2)");
-        // assertEq(x_reduced, uint256(1) << 128, "x_reduced should be 1.0");
-    }
-    
-    function test_ln_pipeline_manual() public view {
-        // Manually compute ln(2) step by step
-        // For ln(2): shift_k=1, x_reduced=1.0, bkm_result=0
-        uint256 shift_k = 1;
-        uint256 bkm_result = 0;
-        
-        // Reconstruction (manual in Solidity)
-        uint256 shift_k_fp128 = shift_k << 128;
-        uint256 ln2_fp128 = uint256(235865763225513294137944142764154484399);
-        uint256 product = (shift_k_fp128 * ln2_fp128) >> 128;
-        uint256 final_result = product + bkm_result;
-        
-        assertEq(final_result, ln2_fp128, "Manual pipeline should match ln2");
-        assertEq((final_result * 1e18) >> 128, 693147180559945309, "Fixed18 output should be 0.693e18");
-    }
-
     function test_exp_overflow_check_one() public view {
         uint256 oneFp128 = uint256(1) << 128;
         uint256 result = fp128.expOverflowCheck(oneFp128);
@@ -684,15 +793,6 @@ contract FP128Test is Test {
         assertEq(overflowResult, 0, "converted 1.0 should NOT overflow");
     }
 
-    function test_exp_pipeline_composed() public {
-        // Compose stages in Solidity: range reduce -> BKM -> scale, compare to oracle
-        uint256 ONE = 1 << 128;
-        (uint256 k_int, uint256 x_prime) = fp128.expRangeReduce(ONE);
-        uint256 acc = fp128.expBkmOnly(x_prime);
-        uint256 resultFp128 = fp128.expScale(acc, k_int);
-        uint256 expectedFp128 = _oracle("exp", ONE);
-        assertLt(_absDiff(resultFp128, expectedFp128), 512, "composed pipeline within 512 ULP");
-    }
 
     // ============================================================================
     // FUZZ TESTS (Differential testing with oracle)

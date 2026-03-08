@@ -16,6 +16,7 @@ via_ir = true
 verbosity = 3
 gas_reports = ["*"]
 ffi = true
+gas_limit = "18446744073709551615"
 
 fs_permissions = [
   { access = "read", path = "contracts/build" },

@@ -8,25 +8,25 @@ Comprehensive gas and precision benchmark comparing 4 fixed-point arithmetic bac
 
 ### Average Gas per Operation
 
-| Operation | FP128 | Vyper | ABDK | Solady |
-|-----------|-------|-------|------|--------|
-| MUL       |  1905 |  2516 |   216 |   126 |
-| DIV       |  1105 |  1646 |   270 |   155 |
-| ADD       |   199 |  1634 |   261 |   125 |
-| SUB       |   200 |  1635 |   232 |   126 |
+| Operation | FP128 | ABDK | Solady |
+|-----------|-------|------|--------|
+| MUL       |  1786 |   214 |   113 |
+| DIV       |  1248 |   289 |   200 |
+| ADD       |   189 |   246 |   242 |
+| SUB       |   190 |   247 |   243 |
 
 ### Average Matching Digits per Operation
 
-| Operation | FP128 | Vyper | ABDK | Solady |
-|-----------|-------|-------|------|--------|
-| MUL       | 37.6 | 9.6 | 18.8 | 18.0 |
-| DIV       | 28.0 | 10.0 | 19.0 | 18.0 |
-| ADD       | 38.0 | 10.0 | 19.0 | 18.0 |
-| SUB       | 38.0 | 10.0 | 19.0 | 18.0 |
+| Operation | FP128 | ABDK | Solady |
+|-----------|-------|------|--------|
+| MUL       | 37.6 | 18.8 | 18.0 |
+| DIV       | 38.0 | 19.0 | 18.0 |
+| ADD       | 38.0 | 19.0 | 18.0 |
+| SUB       | 38.0 | 19.0 | 18.0 |
 
 ## Transcendental Functions
 
-**Test cases:** 8 (exp, ln, sqrt)
+**Test cases:** 15 (exp, ln, sqrt)
 
 _Only FP128, ABDK, and Solady support transcendental functions._
 
@@ -34,17 +34,21 @@ _Only FP128, ABDK, and Solady support transcendental functions._
 
 | Function | FP128 | ABDK | Solady |
 |----------|-------|------|--------|
-| exp      |   17025 |    5433 |    3834 |     450 |
-| ln       |   13029 |   88060 |    7009 |     605 |
-| sqrt     |    2414 |    9384 |    1145 |     469 |
+| exp      |    4149 |    3769 |     441 |
+| exp2     |    4044 |    2615 | N/A |
+| ln       |    3780 |    6850 |     584 |
+| log2     |    3661 |    6813 | N/A |
+| sqrt     |    3813 |    1058 |     460 |
 
 ### Average Matching Digits per Function
 
 | Function | FP128 | ABDK | Solady |
 |----------|-------|------|--------|
-| exp      | 36.7 | 10.0 | 19.0 | 18.0 |
-| ln       | 37.7 | 9.0 | 18.7 | 18.0 |
-| sqrt     | 18.0 | 10.0 | 19.0 | 18.0 |
+| exp      | 37.7 | 19.0 | 18.0 |
+| exp2     | 38.0 | 19.0 | N/A |
+| ln       | 37.3 | 18.7 | 18.0 |
+| log2     | 37.7 | 19.0 | N/A |
+| sqrt     | 38.0 | 19.0 | 18.0 |
 
 ---
 

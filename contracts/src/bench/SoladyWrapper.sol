@@ -57,4 +57,19 @@ contract SoladyWrapper {
     function sub(int256 a, int256 b) public pure returns (int256) {
         return a - b;
     }
+
+    /// @notice Exponential function (raw format)
+    function expRaw(int256 x) public pure returns (int256) {
+        return int256(FixedPointMathLib.expWad(x));
+    }
+
+    /// @notice Natural logarithm (raw format)
+    function lnRaw(int256 x) public pure returns (int256) {
+        return int256(FixedPointMathLib.lnWad(x));
+    }
+
+    /// @notice Square root (raw format)
+    function sqrtRaw(uint256 x) public pure returns (uint256) {
+        return FixedPointMathLib.sqrt(x);
+    }
 }

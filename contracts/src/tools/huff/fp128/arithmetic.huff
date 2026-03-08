@@ -2,8 +2,7 @@
 /// @notice Signed fixed-point operations using two's complement
 /// @dev Format: 128 integer bits + 128 fractional bits
 ///      All operations preserve sign via two's complement
-
-#include "constants.huff"
+/// @dev Requires: constants.huff must be included before this file
 
 /// @notice Add two 128.128 fixed-point numbers
 /// @dev takes(2) returns(1)
@@ -151,61 +150,121 @@
     swap3 pop pop pop     // [result]
 }
 
-/// @notice Divide two 128.128 fixed-point numbers
+/// @notice Divide two unsigned 128.128 fixed-point numbers (full precision)
+/// @dev takes(2) returns(1)
+/// Stack input: [b, a] (b on top, both must be positive/unsigned)
+/// Stack output: [a * 2^128 / b]
+/// Formula: result = (a * 2^128) / b using Remco Bloemen mulDiv algorithm
+/// Gas: ~450-550 (mulmod + modular inverse via Newton-Raphson)
+/// Precision: Full 128 fractional bits (exact for all inputs)
+#define macro FP128_DIV_UNSIGNED() = takes(2) returns(1) {
+    // Input: [b, a]
+    // We want to compute (a * 2^128) / b
+    // Using Remco Bloemen's mulDiv algorithm from Uniswap V3
+    
+    // Step 1: Compute 512-bit product [prod1:prod0] = a * 2^128
+    // For multiplier = 2^128, this simplifies to:
+    // prod0 = a << 128
+    // prod1 = a >> 128
+    dup2 0x80 shl              // [prod0, b, a]
+    dup3 0x80 shr              // [prod1, prod0, b, a]
+    
+    // Step 2: Make division exact by subtracting remainder
+    // remainder = mulmod(a, 2^128, b)
+    // mulmod pops [a, b, N] and pushes (a * b) % N
+    // We need [a, 2^128, b] on top so it computes (a * 2^128) % b
+    dup3 [ONE_FP128] dup6      // [a, 2^128, b, prod1, prod0, b, a]
+    mulmod                     // [remainder, prod1, prod0, b, a]
+    
+    // Subtract remainder from [prod1:prod0]
+    // Solidity: prod1 := sub(prod1, gt(remainder, prod0))
+    //           prod0 := sub(prod0, remainder)
+    dup3 dup2 gt               // [remainder>prod0, remainder, prod1, prod0, b, a]
+    dup3 sub                   // [prod1-borrow, remainder, prod1, prod0, b, a]
+    swap2 pop                  // [remainder, prod1_new, prod0, b, a]
+    dup3 sub                   // [prod0-remainder, prod1_new, prod0, b, a]
+    swap2 pop                  // [prod1_new, prod0_new, b, a]
+    swap1                      // [prod0, prod1, b, a]
+    
+    // Step 3: Factor powers of two out of denominator
+    // twos = -b & b (largest power of 2 dividing b)
+    dup3 dup1 0x00 sub and     // [twos, prod0, prod1, b, a]
+    
+    // Divide b by twos
+    dup1 dup5 div              // [b/twos, twos, prod0, prod1, b, a]
+    swap4 pop                  // [twos, prod0, prod1, b_new, a]
+    
+    // Divide prod0 by twos
+    dup1 dup3 div              // [prod0/twos, twos, prod0, prod1, b, a]
+    swap2 pop                  // [twos, prod0_new, prod1, b, a]
+    
+    // Shift in bits from prod1 into prod0
+    // Solidity: twos := add(div(sub(0, twos), twos), 1)
+    //           prod0 |= prod1 * twos  (where twos is now the new value)
+    // Stack: [twos, prod0, prod1, b, a]
+    dup1 0x00 sub              // [-twos, twos, prod0, prod1, b, a]
+    div                        // [(-twos)/twos, prod0, prod1, b, a]
+    0x01 add                   // [twos_flipped, prod0, prod1, b, a]
+    dup3 mul                   // [prod1*twos_flipped, prod0, prod1, b, a]
+    dup2 or                    // [prod0_final, prod0, prod1, b, a]
+    swap1 pop swap1 pop        // [prod0_final, b, a]
+    
+    // Step 4: Compute modular inverse of b mod 2^256
+    // inv = (3 * b) ^ 2
+    dup2 0x03 mul 0x02 xor     // [inv, prod0, b, a]
+    
+    // Newton-Raphson: inv *= 2 - b * inv (6 iterations for 256-bit precision)
+    dup3 dup2 mul 0x02 sub mul
+    dup3 dup2 mul 0x02 sub mul
+    dup3 dup2 mul 0x02 sub mul
+    dup3 dup2 mul 0x02 sub mul
+    dup3 dup2 mul 0x02 sub mul
+    dup3 dup2 mul 0x02 sub mul
+    
+    // Step 5: result = prod0 * inv
+    swap1 mul swap2 pop pop    // [result]
+}
+
+/// @notice Divide two signed 128.128 fixed-point numbers
 /// @dev takes(2) returns(1)
 /// Stack input: [b, a] (b on top)
 /// Stack output: [a / b]
-/// Formula: result = (a * 2^128) / b
-///          Use 32-bit chunked shift-and-divide (4 steps for higher precision)
-/// Gas: ~200-250 (4 sdiv operations)
-/// Precision: ~96 bits (loses ~32 bits vs ~64 bits in 2-chunk method)
+/// Formula: result = (a * 2^128) / b (signed)
+/// Gas: ~500-600 (sign handling + unsigned div)
+/// Precision: Full 128 fractional bits
 #define macro FP128_DIV() = takes(2) returns(1) {
     // Input: [b, a]
-    // We want: (a * 2^128) / b = (a << 128) / b
-    // Problem: a << 128 overflows 256 bits
-    // Solution: Shift by 32 bits at a time, divide after each shift (4 steps)
-    //   Step 1: q1 = (a << 32) / b,  r1 = (a << 32) % b
-    //   Step 2: q2 = (r1 << 32) / b, r2 = (r1 << 32) % b
-    //   Step 3: q3 = (r2 << 32) / b, r3 = (r2 << 32) % b
-    //   Step 4: q4 = (r3 << 32) / b
-    //   Result: (q1 << 96) + (q2 << 64) + (q3 << 32) + q4
-    //
-    // This gives ~96 bits of precision (loses ~32 bits in the final chunk)
+    // Strategy: compute sign, abs both, unsigned div, conditionally negate
     
-    swap1                      // [a, b]
+    // result_sign = (a sar 255) ^ (b sar 255)
+    // 0 = same sign (positive result), nonzero = different signs (negative result)
+    dup2 0xff sar              // [a_sign, b, a]
+    dup2 0xff sar              // [b_sign, a_sign, b, a]
+    xor                        // [result_sign, b, a]
     
-    // Chunk 1: shift by 32, divide
-    0x20 shl                   // [a << 32, b]
-    dup1 dup3 swap1 sdiv       // [q1, a<<32, b]
-    swap2                      // [b, a<<32, q1]
-    dup1 swap2 smod            // [r1, b, q1]
+    // abs(b): mask = b sar 255; abs = (b ^ mask) - mask
+    dup2                       // [b, result_sign, b, a]
+    dup1 0xff sar              // [mask, b, result_sign, b, a]
+    dup1 dup3 xor              // [b^mask, mask, b, result_sign, b, a]
+    sub                        // [abs_b, b, result_sign, b, a]
+    swap1 pop                  // [abs_b, result_sign, b, a]
     
-    // Chunk 2: shift r1 by 32, divide
-    0x20 shl                   // [r1 << 32, b, q1]
-    dup1 dup3 swap1 sdiv       // [q2, r1<<32, b, q1]
-    swap2                      // [b, r1<<32, q2, q1]
-    dup1 swap2 smod            // [r2, b, q2, q1]
+    // abs(a): mask = a sar 255; abs = (a ^ mask) - mask
+    dup4                       // [a, abs_b, result_sign, b, a]
+    dup1 0xff sar              // [mask, a, abs_b, result_sign, b, a]
+    dup1 dup3 xor              // [a^mask, mask, a, abs_b, result_sign, b, a]
+    sub                        // [abs_a, a, abs_b, result_sign, b, a]
+    swap1 pop                  // [abs_a, abs_b, result_sign, b, a]
     
-    // Chunk 3: shift r2 by 32, divide
-    0x20 shl                   // [r2 << 32, b, q2, q1]
-    dup1 dup3 swap1 sdiv       // [q3, r2<<32, b, q2, q1]
-    swap2                      // [b, r2<<32, q3, q2, q1]
-    dup1 swap2 smod            // [r3, b, q3, q2, q1]
+    // FP128_DIV_UNSIGNED expects [b, a] (b on top)
+    swap1                      // [abs_b, abs_a, result_sign, b, a]
+    FP128_DIV_UNSIGNED()       // [result, result_sign, b, a]
     
-    // Chunk 4: shift r3 by 32, divide
-    0x20 shl                   // [r3 << 32, b, q3, q2, q1]
-    swap1 sdiv                 // [q4, q3, q2, q1]
-    
-    // Combine: (q1 << 96) + (q2 << 64) + (q3 << 32) + q4
-    // Stack: [q4, q3, q2, q1]
-    swap3                      // [q1, q3, q2, q4]
-    0x60 shl                   // [q1 << 96, q3, q2, q4]
-    swap1                      // [q3, q1<<96, q2, q4]
-    swap2                      // [q2, q1<<96, q3, q4]
-    0x40 shl                   // [q2 << 64, q1<<96, q3, q4]
-    add                        // [q1<<96 + q2<<64, q3, q4]
-    swap1                      // [q3, sum12, q4]
-    0x20 shl                   // [q3 << 32, sum12, q4]
-    add                        // [sum123, q4]
-    add                        // [result]
+    // Apply sign: result = (result ^ sign_mask) - sign_mask
+    // This negates if sign_mask is all-ones, identity if zero
+    swap1                      // [result_sign, result, b, a]
+    dup1 dup3 xor              // [result^sign, result_sign, result, b, a]
+    sub                        // [(result^sign)-sign, result, b, a]
+    swap1 pop                  // [signed_result, b, a]
+    swap2 pop pop              // [signed_result]
 }

@@ -15,7 +15,7 @@ Functions:
   exp_bkm_only <rem_hex>      -- BKM loop simulation
 """
 
-from mpmath import mp, mpf, log, exp as mp_exp, sqrt as mp_sqrt
+from mpmath import mp, mpf, log, exp as mp_exp, sqrt as mp_sqrt, power
 import sys
 
 # Set 100-digit precision for ground truth
@@ -211,26 +211,10 @@ def to_abdk_int(value):
     return scaled
 
 
-def from_vyper_decimal(decimal_str):
-    """Convert Vyper decimal (10-digit, 10^10 scale) string to mpf."""
-    decimal_int = int(decimal_str, 10)
-    if decimal_int >= (1 << 167):
-        decimal_int = decimal_int - (1 << 168)
-    return mpf(decimal_int) / mpf(10**10)
-
-
-def to_vyper_decimal_int(value):
-    """Convert mpf decimal to Vyper decimal integer (int168, scale 10^10)."""
-    scaled = int(value * mpf(10**10))
-    if scaled < 0:
-        scaled = (1 << 168) + scaled
-    return scaled
-
-
 def compute_multi_format(func_name, a_str, b_str=None):
     """
     Compute operation and return results in multiple formats.
-    Returns: (fp128, wad, abdk, vyper_decimal) as JSON array.
+    Returns: (fp128, wad, abdk) as JSON array.
     """
     # Parse inputs as WAD by default
     a = from_wad(a_str)
@@ -247,8 +231,12 @@ def compute_multi_format(func_name, a_str, b_str=None):
         result = a - b if b else a
     elif func_name == "exp":
         result = mp_exp(a)
+    elif func_name == "exp2":
+        result = power(TWO, a)
     elif func_name == "ln":
         result = log(a) if a > 0 else mpf(0)
+    elif func_name == "log2":
+        result = log(a) / LN2 if a > 0 else mpf(0)
     elif func_name == "sqrt":
         result = mp_sqrt(a) if a >= 0 else mpf(0)
     else:
@@ -258,10 +246,9 @@ def compute_multi_format(func_name, a_str, b_str=None):
     fp128_val = to_fp128_int(result)
     wad_val = to_wad_int(result)
     abdk_val = to_abdk_int(result)
-    vyper_val = to_vyper_decimal_int(result)
     
-    # Return as hex tuple (4 uint256 values)
-    return f"0x{fp128_val:064x}{wad_val:064x}{abdk_val:064x}{vyper_val:064x}"
+    # Return as hex tuple (3 uint256 values)
+    return f"0x{fp128_val:064x}{wad_val:064x}{abdk_val:064x}"
 
 
 def main():

@@ -59,4 +59,19 @@ contract ABDKWrapper {
     function sub(int256 a, int256 b) public pure returns (int256) {
         return a - b;
     }
+
+    /// @notice Exponential function (raw ABDK format)
+    function expRaw(int128 x) public pure returns (int128) {
+        return ABDKMath64x64.exp(x);
+    }
+
+    /// @notice Natural logarithm (raw ABDK format)
+    function lnRaw(int128 x) public pure returns (int128) {
+        return ABDKMath64x64.ln(x);
+    }
+
+    /// @notice Square root (raw ABDK format)
+    function sqrtRaw(int128 x) public pure returns (int128) {
+        return ABDKMath64x64.sqrt(x);
+    }
 }

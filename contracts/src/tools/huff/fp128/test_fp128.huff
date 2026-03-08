@@ -2,7 +2,13 @@
 /// @notice Test contract for signed 128.128 fixed-point arithmetic
 /// @dev Exposes add, sub, mul, div, exp, ln, sqrt and conversion functions for testing
 
-#include "transcendental.huff"
+#include "constants.huff"
+#include "primitives.huff"
+#include "arithmetic.huff"
+#include "log2.huff"
+#include "exp.huff"
+#include "ln.huff"
+#include "sqrt.huff"
 
 #define macro MAIN() = takes(0) returns(0) {
     // Read function selector
@@ -19,15 +25,15 @@
     dup1 __FUNC_SIG(exp) eq exp_jump jumpi
     dup1 __FUNC_SIG(ln) eq ln_jump jumpi
     dup1 __FUNC_SIG(sqrt) eq sqrt_jump jumpi
+    dup1 __FUNC_SIG(sqrtRaw) eq sqrt_raw_jump jumpi
     dup1 __FUNC_SIG(expRaw) eq exp_raw_jump jumpi
+    dup1 __FUNC_SIG(exp2Raw) eq exp2_raw_jump jumpi
     dup1 __FUNC_SIG(lnRaw) eq ln_raw_jump jumpi
-    dup1 0x11117d8e eq ln_bkm_only_jump jumpi
-    dup1 0xde730773 eq ln_range_reduce_jump jumpi
-    dup1 __FUNC_SIG(expRangeReduce) eq exp_range_reduce_jump jumpi
-    dup1 __FUNC_SIG(expBkmOnly) eq exp_bkm_only_jump jumpi
+    dup1 __FUNC_SIG(log2Raw) eq log2_raw_jump jumpi
     dup1 __FUNC_SIG(expScale) eq exp_scale_jump jumpi
     dup1 __FUNC_SIG(expOverflowCheck) eq exp_overflow_check_jump jumpi
     dup1 __FUNC_SIG(testConstant) eq test_constant_jump jumpi
+    dup1 __FUNC_SIG(divUnsignedRaw) eq div_unsigned_raw_jump jumpi
     
     // No match, revert
     0x00 0x00 revert
@@ -142,6 +148,13 @@
         0x00 mstore
         0x20 0x00 return
     
+    sqrt_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        FP128_SQRT()           // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
     exp_raw_jump:
         pop
         0x04 calldataload      // [x_fp128]
@@ -158,40 +171,17 @@
         0x00 mstore
         0x20 0x00 return
     
-    ln_bkm_only_jump:
+    log2_raw_jump:
         pop
-        // Test LN BKM loop alone: input x_reduced (in [1,2)), output ln_result
-        0x04 calldataload      // [x_reduced]
-        LN_BKM_LOOP()          // [ln_result]
+        0x04 calldataload      // [x_fp128]
+        FP128_LOG2()           // [result_fp128]
         0x00 mstore
         0x20 0x00 return
     
-    ln_range_reduce_jump:
+    exp2_raw_jump:
         pop
-        // Test LN range reduction: input x_fp128, output (shift_k, x_reduced)
         0x04 calldataload      // [x_fp128]
-        LN_RANGE_REDUCE()      // [shift_k, x_reduced]
-        // Return both: store shift_k at 0x00, x_reduced at 0x20
-        0x00 mstore            // [x_reduced] - stores shift_k at 0x00
-        0x20 mstore            // [] - stores x_reduced at 0x20
-        0x40 0x00 return
-    
-    exp_range_reduce_jump:
-        pop
-        // Test range reduction: input x_fp128, output (k_int, x_prime)
-        0x04 calldataload      // [x_fp128]
-        EXP_RANGE_REDUCE()     // [k_int, x']
-        
-        // Return both: store k_int at 0x00, x' at 0x20
-        0x00 mstore            // [x'] - stores k_int at 0x00
-        0x20 mstore            // [] - stores x' at 0x20
-        0x40 0x00 return
-    
-    exp_bkm_only_jump:
-        pop
-        // Test BKM loop alone: input rem_fp128, output acc
-        0x04 calldataload      // [rem]
-        EXP_BKM_LOOP()         // [acc]
+        FP128_EXP2()           // [result_fp128]
         0x00 mstore
         0x20 0x00 return
     
@@ -230,6 +220,14 @@
         [ONE_FP128]            // [ONE_FP128]
         0x00 mstore
         0x20 0x00 return
+    
+    div_unsigned_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_DIV_UNSIGNED()   // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
 }
 
 #define function add(uint256,uint256) pure returns (uint256)
@@ -243,10 +241,12 @@
 #define function exp(uint256) pure returns (uint256)
 #define function ln(uint256) pure returns (uint256)
 #define function sqrt(uint256) pure returns (uint256)
+#define function sqrtRaw(uint256) pure returns (uint256)
 #define function expRaw(uint256) pure returns (uint256)
+#define function exp2Raw(uint256) pure returns (uint256)
 #define function lnRaw(uint256) pure returns (uint256)
-#define function expRangeReduce(uint256) pure returns (uint256,uint256)
-#define function expBkmOnly(uint256) pure returns (uint256)
+#define function log2Raw(uint256) pure returns (uint256)
 #define function expScale(uint256,uint256) pure returns (uint256)
 #define function expOverflowCheck(uint256) pure returns (uint256)
 #define function testConstant() pure returns (uint256)
+#define function divUnsignedRaw(uint256,uint256) pure returns (uint256)

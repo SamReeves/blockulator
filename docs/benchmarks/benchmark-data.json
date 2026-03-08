@@ -1,5 +1,5 @@
 {
-  "generated": "2026-03-06",
+  "generated": "2026-03-07",
   "libraries": {
     "fp128": {
       "name": "FP128",
@@ -10,58 +10,26 @@
         "arithmetic": {
           "avgError": 0,
           "maxError": 0,
-          "avgDigits": 34.8,
-          "minDigits": 28,
+          "avgDigits": 37.8,
+          "minDigits": 37,
           "zeroCount": 0,
           "total": 10
         },
         "transcendental": {
           "avgError": 0,
           "maxError": 0,
-          "avgDigits": 32.4,
-          "minDigits": 18,
+          "avgDigits": 37.7,
+          "minDigits": 37,
           "zeroCount": 0,
-          "total": 8
+          "total": 15
         },
         "overall": {
           "avgError": 0,
           "maxError": 0,
-          "avgDigits": 33.7,
-          "minDigits": 18,
+          "avgDigits": 37.8,
+          "minDigits": 37,
           "zeroCount": 0,
-          "total": 18
-        }
-      }
-    },
-    "vyper": {
-      "name": "Vyper",
-      "format": "decimal (10-digit)",
-      "lang": "Vyper 0.4",
-      "range": "\u00b11.7e28",
-      "stats": {
-        "arithmetic": {
-          "avgError": 0,
-          "maxError": 0,
-          "avgDigits": 9.8,
-          "minDigits": 9,
-          "zeroCount": 0,
-          "total": 10
-        },
-        "transcendental": {
-          "avgError": 0,
-          "maxError": 0,
-          "avgDigits": 9.6,
-          "minDigits": 9,
-          "zeroCount": 0,
-          "total": 8
-        },
-        "overall": {
-          "avgError": 0,
-          "maxError": 0,
-          "avgDigits": 9.7,
-          "minDigits": 9,
-          "zeroCount": 0,
-          "total": 18
+          "total": 25
         }
       }
     },
@@ -85,7 +53,7 @@
           "avgDigits": 18.9,
           "minDigits": 18,
           "zeroCount": 0,
-          "total": 8
+          "total": 15
         },
         "overall": {
           "avgError": 0,
@@ -93,7 +61,7 @@
           "avgDigits": 18.9,
           "minDigits": 18,
           "zeroCount": 0,
-          "total": 18
+          "total": 25
         }
       }
     },
@@ -117,7 +85,7 @@
           "avgDigits": 18.0,
           "minDigits": 18,
           "zeroCount": 0,
-          "total": 8
+          "total": 9
         },
         "overall": {
           "avgError": 0,
@@ -125,7 +93,7 @@
           "avgDigits": 18.0,
           "minDigits": 18,
           "zeroCount": 0,
-          "total": 18
+          "total": 19
         }
       }
     }
@@ -137,19 +105,15 @@
       "expected": "8539734222673567063",
       "results": {
         "fp128": {
-          "gas": 5505,
+          "gas": 5386,
           "digits": 38
         },
-        "vyper": {
-          "gas": 6114,
-          "digits": 10
-        },
         "abdk": {
-          "gas": 216,
+          "gas": 214,
           "digits": 19
         },
         "solady": {
-          "gas": 126,
+          "gas": 113,
           "digits": 18
         }
       }
@@ -160,19 +124,15 @@
       "expected": "2449489742783178096",
       "results": {
         "fp128": {
-          "gas": 1005,
+          "gas": 886,
           "digits": 38
         },
-        "vyper": {
-          "gas": 1615,
-          "digits": 9
-        },
         "abdk": {
-          "gas": 216,
+          "gas": 214,
           "digits": 18
         },
         "solady": {
-          "gas": 126,
+          "gas": 113,
           "digits": 18
         }
       }
@@ -183,19 +143,15 @@
       "expected": "999999999999999999",
       "results": {
         "fp128": {
-          "gas": 1005,
+          "gas": 886,
           "digits": 37
         },
-        "vyper": {
-          "gas": 1617,
-          "digits": 9
-        },
         "abdk": {
-          "gas": 216,
+          "gas": 214,
           "digits": 19
         },
         "solady": {
-          "gas": 126,
+          "gas": 113,
           "digits": 18
         }
       }
@@ -206,19 +162,15 @@
       "expected": "999999999999999999",
       "results": {
         "fp128": {
-          "gas": 1005,
+          "gas": 886,
           "digits": 37
         },
-        "vyper": {
-          "gas": 1617,
-          "digits": 10
-        },
         "abdk": {
-          "gas": 216,
+          "gas": 214,
           "digits": 19
         },
         "solady": {
-          "gas": 126,
+          "gas": 113,
           "digits": 18
         }
       }
@@ -229,19 +181,15 @@
       "expected": "7389056098930650225",
       "results": {
         "fp128": {
-          "gas": 1005,
+          "gas": 886,
           "digits": 38
         },
-        "vyper": {
-          "gas": 1619,
-          "digits": 10
-        },
         "abdk": {
-          "gas": 216,
+          "gas": 214,
           "digits": 19
         },
         "solady": {
-          "gas": 126,
+          "gas": 113,
           "digits": 18
         }
       }
@@ -252,19 +200,15 @@
       "expected": "1155727349790921717",
       "results": {
         "fp128": {
-          "gas": 1105,
-          "digits": 28
-        },
-        "vyper": {
-          "gas": 1644,
-          "digits": 10
+          "gas": 1248,
+          "digits": 38
         },
         "abdk": {
-          "gas": 270,
+          "gas": 289,
           "digits": 19
         },
         "solady": {
-          "gas": 155,
+          "gas": 200,
           "digits": 18
         }
       }
@@ -275,19 +219,15 @@
       "expected": "865255979432265087",
       "results": {
         "fp128": {
-          "gas": 1105,
-          "digits": 28
-        },
-        "vyper": {
-          "gas": 1646,
-          "digits": 10
+          "gas": 1248,
+          "digits": 38
         },
         "abdk": {
-          "gas": 270,
+          "gas": 289,
           "digits": 19
         },
         "solady": {
-          "gas": 155,
+          "gas": 200,
           "digits": 18
         }
       }
@@ -298,19 +238,15 @@
       "expected": "333333333333333333",
       "results": {
         "fp128": {
-          "gas": 1105,
-          "digits": 28
-        },
-        "vyper": {
-          "gas": 1647,
-          "digits": 10
+          "gas": 1248,
+          "digits": 38
         },
         "abdk": {
-          "gas": 270,
+          "gas": 289,
           "digits": 19
         },
         "solady": {
-          "gas": 155,
+          "gas": 200,
           "digits": 18
         }
       }
@@ -321,19 +257,15 @@
       "expected": "5859874482048838473",
       "results": {
         "fp128": {
-          "gas": 199,
+          "gas": 189,
           "digits": 38
         },
-        "vyper": {
-          "gas": 1634,
-          "digits": 10
-        },
         "abdk": {
-          "gas": 261,
+          "gas": 246,
           "digits": 19
         },
         "solady": {
-          "gas": 125,
+          "gas": 242,
           "digits": 18
         }
       }
@@ -344,19 +276,15 @@
       "expected": "2000000000000000000",
       "results": {
         "fp128": {
-          "gas": 200,
+          "gas": 190,
           "digits": 38
         },
-        "vyper": {
-          "gas": 1635,
-          "digits": 10
-        },
         "abdk": {
-          "gas": 232,
+          "gas": 247,
           "digits": 19
         },
         "solady": {
-          "gas": 126,
+          "gas": 243,
           "digits": 18
         }
       }
@@ -369,19 +297,15 @@
       "expected": "2718281828459045235",
       "results": {
         "fp128": {
-          "gas": 17174,
-          "digits": 36
-        },
-        "vyper": {
-          "gas": 7921,
-          "digits": 10
+          "gas": 4149,
+          "digits": 38
         },
         "abdk": {
-          "gas": 3844,
+          "gas": 3779,
           "digits": 19
         },
         "solady": {
-          "gas": 450,
+          "gas": 441,
           "digits": 18
         }
       }
@@ -392,19 +316,15 @@
       "expected": "7389056098930650227",
       "results": {
         "fp128": {
-          "gas": 16950,
+          "gas": 4149,
           "digits": 37
         },
-        "vyper": {
-          "gas": 3422,
-          "digits": 10
-        },
         "abdk": {
-          "gas": 3827,
+          "gas": 3762,
           "digits": 19
         },
         "solady": {
-          "gas": 450,
+          "gas": 441,
           "digits": 18
         }
       }
@@ -415,20 +335,61 @@
       "expected": "1648721270700128146",
       "results": {
         "fp128": {
-          "gas": 16950,
-          "digits": 37
-        },
-        "vyper": {
-          "gas": 4957,
-          "digits": 10
+          "gas": 4149,
+          "digits": 38
         },
         "abdk": {
-          "gas": 3832,
+          "gas": 3767,
           "digits": 19
         },
         "solady": {
-          "gas": 450,
+          "gas": 441,
           "digits": 18
+        }
+      }
+    },
+    {
+      "name": "exp2(1)",
+      "func": "exp2",
+      "expected": "2000000000000000000",
+      "results": {
+        "fp128": {
+          "gas": 4044,
+          "digits": 38
+        },
+        "abdk": {
+          "gas": 2602,
+          "digits": 19
+        }
+      }
+    },
+    {
+      "name": "exp2(0.5)",
+      "func": "exp2",
+      "expected": "1414213562373095048",
+      "results": {
+        "fp128": {
+          "gas": 4044,
+          "digits": 38
+        },
+        "abdk": {
+          "gas": 2622,
+          "digits": 19
+        }
+      }
+    },
+    {
+      "name": "exp2(3.5)",
+      "func": "exp2",
+      "expected": "11313708498984760390",
+      "results": {
+        "fp128": {
+          "gas": 4044,
+          "digits": 38
+        },
+        "abdk": {
+          "gas": 2622,
+          "digits": 19
         }
       }
     },
@@ -438,19 +399,15 @@
       "expected": "999999999999999999",
       "results": {
         "fp128": {
-          "gas": 14776,
+          "gas": 3914,
           "digits": 37
         },
-        "vyper": {
-          "gas": 54851,
-          "digits": 9
-        },
         "abdk": {
-          "gas": 6999,
+          "gas": 6840,
           "digits": 18
         },
         "solady": {
-          "gas": 605,
+          "gas": 584,
           "digits": 18
         }
       }
@@ -461,19 +418,15 @@
       "expected": "693147180559945309",
       "results": {
         "fp128": {
-          "gas": 12072,
+          "gas": 3494,
           "digits": 38
         },
-        "vyper": {
-          "gas": 104487,
-          "digits": 9
-        },
         "abdk": {
-          "gas": 6999,
+          "gas": 6840,
           "digits": 19
         },
         "solady": {
-          "gas": 605,
+          "gas": 584,
           "digits": 18
         }
       }
@@ -484,20 +437,61 @@
       "expected": "2302585092994045684",
       "results": {
         "fp128": {
-          "gas": 12240,
-          "digits": 38
-        },
-        "vyper": {
-          "gas": 104843,
-          "digits": 9
+          "gas": 3932,
+          "digits": 37
         },
         "abdk": {
-          "gas": 7029,
+          "gas": 6870,
           "digits": 19
         },
         "solady": {
-          "gas": 605,
+          "gas": 584,
           "digits": 18
+        }
+      }
+    },
+    {
+      "name": "log2(2)",
+      "func": "log2",
+      "expected": "1000000000000000000",
+      "results": {
+        "fp128": {
+          "gas": 3375,
+          "digits": 38
+        },
+        "abdk": {
+          "gas": 6803,
+          "digits": 19
+        }
+      }
+    },
+    {
+      "name": "log2(e)",
+      "func": "log2",
+      "expected": "1442695040888963407",
+      "results": {
+        "fp128": {
+          "gas": 3795,
+          "digits": 37
+        },
+        "abdk": {
+          "gas": 6803,
+          "digits": 19
+        }
+      }
+    },
+    {
+      "name": "log2(10)",
+      "func": "log2",
+      "expected": "3321928094887362347",
+      "results": {
+        "fp128": {
+          "gas": 3813,
+          "digits": 38
+        },
+        "abdk": {
+          "gas": 6833,
+          "digits": 19
         }
       }
     },
@@ -507,19 +501,15 @@
       "expected": "1414213562373095048",
       "results": {
         "fp128": {
-          "gas": 2414,
-          "digits": 18
-        },
-        "vyper": {
-          "gas": 11633,
-          "digits": 10
+          "gas": 3807,
+          "digits": 38
         },
         "abdk": {
-          "gas": 1143,
+          "gas": 1051,
           "digits": 19
         },
         "solady": {
-          "gas": 469,
+          "gas": 460,
           "digits": 18
         }
       }
@@ -530,19 +520,34 @@
       "expected": "1772453850905516027",
       "results": {
         "fp128": {
-          "gas": 2414,
-          "digits": 18
-        },
-        "vyper": {
-          "gas": 7135,
-          "digits": 10
+          "gas": 3807,
+          "digits": 38
         },
         "abdk": {
-          "gas": 1147,
+          "gas": 1055,
           "digits": 19
         },
         "solady": {
-          "gas": 469,
+          "gas": 460,
+          "digits": 18
+        }
+      }
+    },
+    {
+      "name": "sqrt(10)",
+      "func": "sqrt",
+      "expected": "3162277660168379331",
+      "results": {
+        "fp128": {
+          "gas": 3825,
+          "digits": 38
+        },
+        "abdk": {
+          "gas": 1069,
+          "digits": 19
+        },
+        "solady": {
+          "gas": 460,
           "digits": 18
         }
       }
