@@ -9,6 +9,7 @@
 #include "exp.huff"
 #include "ln.huff"
 #include "sqrt.huff"
+#include "pow.huff"
 
 #define macro MAIN() = takes(0) returns(0) {
     // Read function selector
@@ -34,6 +35,8 @@
     dup1 __FUNC_SIG(expOverflowCheck) eq exp_overflow_check_jump jumpi
     dup1 __FUNC_SIG(testConstant) eq test_constant_jump jumpi
     dup1 __FUNC_SIG(divUnsignedRaw) eq div_unsigned_raw_jump jumpi
+    dup1 __FUNC_SIG(pow) eq pow_jump jumpi
+    dup1 __FUNC_SIG(powRaw) eq pow_raw_jump jumpi
     
     // No match, revert
     0x00 0x00 revert
@@ -228,6 +231,26 @@
         FP128_DIV_UNSIGNED()   // [result_fp128]
         0x00 mstore
         0x20 0x00 return
+    
+    pow_jump:
+        pop
+        // Compute pow(x, y) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        0x24 calldataload      // [y_fixed18, x_fp128]
+        FP128_FROM_FIXED18()   // [y_fp128, x_fp128]
+        FP128_POW()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    pow_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        0x24 calldataload      // [y_fp128, x_fp128]
+        FP128_POW()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
 }
 
 #define function add(uint256,uint256) pure returns (uint256)
@@ -250,3 +273,5 @@
 #define function expOverflowCheck(uint256) pure returns (uint256)
 #define function testConstant() pure returns (uint256)
 #define function divUnsignedRaw(uint256,uint256) pure returns (uint256)
+#define function pow(uint256,uint256) pure returns (uint256)
+#define function powRaw(uint256,uint256) pure returns (uint256)

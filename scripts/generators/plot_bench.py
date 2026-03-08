@@ -84,7 +84,7 @@ def parse_native(output):
         _, name, op_or_func, expected, *vals = parts
         
         # Determine if this is transcendental or arithmetic
-        is_trans = op_or_func in ['exp', 'exp2', 'ln', 'log2', 'sqrt']
+        is_trans = op_or_func in ['exp', 'exp2', 'ln', 'log2', 'sqrt', 'pow']
         entry = {"name": name, "func" if is_trans else "op": op_or_func, "expected": int(expected)}
         
         lib_fields = [("fp128", 0, 1), ("abdk", 2, 3), ("solady", 4, 5)]
@@ -200,12 +200,12 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
         lines.append("")
         lines.append("## Transcendental Functions")
         lines.append("")
-        lines.append(f"**Test cases:** {len(trans_cases)} (exp, ln, sqrt)")
+        lines.append(f"**Test cases:** {len(trans_cases)} (exp, ln, sqrt, pow)")
         lines.append("")
         lines.append("_Only FP128, ABDK, and Solady support transcendental functions._")
         lines.append("")
         
-        funcs = ["exp", "exp2", "ln", "log2", "sqrt"]
+        funcs = ["exp", "exp2", "ln", "log2", "sqrt", "pow"]
         trans_libs = ["fp128", "abdk", "solady"]
         trans_metric_key = "digits" if (trans_cases and f"{trans_libs[0]}_digits" in trans_cases[0]) else "err"
         func_data = {f: {lib: {"gas": [], trans_metric_key: []} for lib in trans_libs} for f in funcs}
@@ -483,7 +483,7 @@ def main():
         fig, axes = plt.subplots(1, 2, figsize=(16, 7))
         
         # Group by function
-        funcs = ["exp", "exp2", "ln", "log2", "sqrt"]
+        funcs = ["exp", "exp2", "ln", "log2", "sqrt", "pow"]
         trans_metric_key = "digits" if (trans_cases and f"{trans_libs[0]}_digits" in trans_cases[0]) else "err"
         func_data = {f: {lib: {"gas": [], trans_metric_key: []} for lib in trans_libs} for f in funcs}
         

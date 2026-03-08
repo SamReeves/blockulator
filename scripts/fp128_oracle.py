@@ -11,6 +11,7 @@ Functions:
   sqrt <x_fp128_hex>          -- sqrt(x)
   mul <a_hex> <b_hex>         -- a * b
   div <a_hex> <b_hex>         -- a / b
+  pow <base_hex> <exp_hex>    -- base^exp
   exp_range_reduce <x_hex>    -- (k_int, x_prime) for exp range reduction
   exp_bkm_only <rem_hex>      -- BKM loop simulation
 """
@@ -90,6 +91,26 @@ def compute_sqrt(x_str):
     if x < 0:
         return abi_encode_uint256(0)
     result = mp_sqrt(x)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_pow(base_str, exp_str):
+    """Compute base^exp where both are FP128."""
+    base = from_fp128(base_str)
+    exp_val = from_fp128(exp_str)
+    
+    # Handle edge cases
+    if exp_val == 0:
+        # x^0 = 1 for all x (including 0^0 = 1 by convention)
+        return abi_encode_uint256(to_fp128_int(mpf(1)))
+    if base == 0:
+        # 0^y = 0 for y != 0
+        return abi_encode_uint256(0)
+    if base < 0:
+        # Negative base with fractional exponent is undefined in reals
+        return abi_encode_uint256(0)
+    
+    result = power(base, exp_val)
     return abi_encode_uint256(to_fp128_int(result))
 
 
@@ -239,6 +260,11 @@ def compute_multi_format(func_name, a_str, b_str=None):
         result = log(a) / LN2 if a > 0 else mpf(0)
     elif func_name == "sqrt":
         result = mp_sqrt(a) if a >= 0 else mpf(0)
+    elif func_name == "pow":
+        if b is None or a <= 0:
+            result = mpf(0)
+        else:
+            result = power(a, b)
     else:
         result = mpf(0)
     
@@ -269,6 +295,8 @@ def main():
             result = compute_mul(sys.argv[2], sys.argv[3])
         elif func == "div":
             result = compute_div(sys.argv[2], sys.argv[3])
+        elif func == "pow":
+            result = compute_pow(sys.argv[2], sys.argv[3])
         elif func == "exp_range_reduce":
             result = compute_exp_range_reduce(sys.argv[2])
         elif func == "exp_bkm_only":

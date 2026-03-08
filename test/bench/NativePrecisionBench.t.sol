@@ -13,6 +13,7 @@ interface IFP128 {
     function lnRaw(uint256) external view returns (uint256);
     function log2Raw(uint256) external view returns (uint256);
     function sqrtRaw(uint256) external view returns (uint256);
+    function powRaw(uint256, uint256) external view returns (uint256);
 }
 
 /// @title NativePrecisionBench
@@ -33,6 +34,7 @@ contract NativePrecisionBench is Test {
     uint8 constant LN = 6;
     uint8 constant LOG2 = 7;
     uint8 constant SQRT = 8;
+    uint8 constant POW = 9;
 
     int256 constant WAD_I = 1e18;
     uint256 constant ONE_FP128 = uint256(1) << 128;
@@ -125,6 +127,13 @@ contract NativePrecisionBench is Test {
         _t("sqrt(2)", SQRT, 2000000000000000000);
         _t("sqrt(pi)", SQRT, 3141592653589793238);
         _t("sqrt(10)", SQRT, 10000000000000000000);
+        
+        // Power cases (base, exponent)
+        _a("pow(2,3)", POW, 2000000000000000000, 3000000000000000000);
+        _a("pow(2,0.5)", POW, 2000000000000000000, 500000000000000000);
+        _a("pow(e,2)", POW, 2718281828459045235, 2000000000000000000);
+        _a("pow(8,1/3)", POW, 8000000000000000000, 333333333333333333);
+        _a("pow(10,0.5)", POW, 10000000000000000000, 500000000000000000);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -150,7 +159,8 @@ contract NativePrecisionBench is Test {
         if (c.op == MUL)      opStr = "mul";
         else if (c.op == DIV) opStr = "div";
         else if (c.op == ADD) opStr = "add";
-        else                  opStr = "sub";
+        else if (c.op == SUB) opStr = "sub";
+        else                  opStr = "pow";
 
         // Get true expected values from 100-digit oracle in all native formats
         (uint256 fp128_exp, uint256 wad_exp, uint256 abdk_exp) = _oracleMulti(opStr, c.a_wad, c.b_wad);
@@ -178,32 +188,53 @@ contract NativePrecisionBench is Test {
         else if (c.op == EXP2) opStr = "exp2";
         else if (c.op == LN)   opStr = "ln";
         else if (c.op == LOG2) opStr = "log2";
+        else if (c.op == POW)  opStr = "pow";
         else                   opStr = "sqrt";
 
         // Get true expected values from 100-digit oracle in all native formats
-        (uint256 fp128_exp, uint256 wad_exp, uint256 abdk_exp) = _oracleMulti1(opStr, c.a_wad);
-        
-        // Run all backends at native precision with oracle expected values
-        (uint256 fp128_gas, uint256 fp128_digits) = _runFp128Trans(c, fp128_exp);
-        (uint256 abdk_gas, uint256 abdk_digits) = _runAbdkTrans(c, abdk_exp);
+        if (c.op == POW) {
+            (uint256 fp128_exp, uint256 wad_exp, uint256 abdk_exp) = _oracleMulti(opStr, c.a_wad, c.b_wad);
+            
+            // Run all backends at native precision with oracle expected values
+            (uint256 fp128_gas, uint256 fp128_digits) = _runFp128Trans(c, fp128_exp);
+            (uint256 abdk_gas, uint256 abdk_digits) = _runAbdkTrans(c, abdk_exp);
+            (uint256 solady_gas, uint256 solady_digits) = _runSoladyTrans(c, wad_exp);
+            
+            // NATIVE_BENCH|name|func|expected_wad|fp128_gas|fp128_digits|abdk_gas|abdk_digits|solady_gas|solady_digits
+            console.log(
+                string.concat(
+                    "NATIVE_BENCH|", c.name, "|", opStr, "|",
+                    vm.toString(wad_exp), "|",
+                    vm.toString(fp128_gas), "|", vm.toString(fp128_digits), "|",
+                    vm.toString(abdk_gas), "|", vm.toString(abdk_digits), "|",
+                    vm.toString(solady_gas), "|", vm.toString(solady_digits)
+                )
+            );
+        } else {
+            (uint256 fp128_exp, uint256 wad_exp, uint256 abdk_exp) = _oracleMulti1(opStr, c.a_wad);
+            
+            // Run all backends at native precision with oracle expected values
+            (uint256 fp128_gas, uint256 fp128_digits) = _runFp128Trans(c, fp128_exp);
+            (uint256 abdk_gas, uint256 abdk_digits) = _runAbdkTrans(c, abdk_exp);
 
-        // Solady: no exp2/log2
-        string memory solady_str;
-        {
-            (uint256 sg, uint256 sd) = _runSoladyTrans(c, wad_exp);
-            solady_str = sg > 0 ? string.concat(vm.toString(sg), "|", vm.toString(sd)) : "NA|NA";
+            // Solady: no exp2/log2
+            string memory solady_str;
+            {
+                (uint256 sg, uint256 sd) = _runSoladyTrans(c, wad_exp);
+                solady_str = sg > 0 ? string.concat(vm.toString(sg), "|", vm.toString(sd)) : "NA|NA";
+            }
+
+            // NATIVE_BENCH|name|func|expected_wad|fp128_gas|fp128_digits|abdk_gas|abdk_digits|solady_gas|solady_digits
+            console.log(
+                string.concat(
+                    "NATIVE_BENCH|", c.name, "|", opStr, "|",
+                    vm.toString(wad_exp), "|",
+                    vm.toString(fp128_gas), "|", vm.toString(fp128_digits), "|",
+                    vm.toString(abdk_gas), "|", vm.toString(abdk_digits), "|",
+                    solady_str
+                )
+            );
         }
-
-        // NATIVE_BENCH|name|func|expected_wad|fp128_gas|fp128_digits|abdk_gas|abdk_digits|solady_gas|solady_digits
-        console.log(
-            string.concat(
-                "NATIVE_BENCH|", c.name, "|", opStr, "|",
-                vm.toString(wad_exp), "|",
-                vm.toString(fp128_gas), "|", vm.toString(fp128_digits), "|",
-                vm.toString(abdk_gas), "|", vm.toString(abdk_digits), "|",
-                solady_str
-            )
-        );
     }
 
     function _runFp128Native(Case memory c, uint256 exp_fp128) internal view returns (uint256 gas_, uint256 digits_) {
@@ -216,7 +247,8 @@ contract NativePrecisionBench is Test {
         if (c.op == MUL)      result_fp128 = fp128.mulRaw(a_fp128, b_fp128);
         else if (c.op == DIV) result_fp128 = fp128.divRaw(a_fp128, b_fp128);
         else if (c.op == ADD) result_fp128 = a_fp128 + b_fp128;
-        else                  result_fp128 = a_fp128 - b_fp128;
+        else if (c.op == SUB) result_fp128 = a_fp128 - b_fp128;
+        else                  result_fp128 = fp128.powRaw(a_fp128, b_fp128);
         gas_ = g0 - gasleft();
         
         // Compute matching digits (fp128 has ~38 digit precision ceiling)
@@ -233,7 +265,17 @@ contract NativePrecisionBench is Test {
         if (c.op == MUL)      r64 = ABDKMath64x64.mul(a64, b64);
         else if (c.op == DIV) r64 = ABDKMath64x64.div(a64, b64);
         else if (c.op == ADD) r64 = ABDKMath64x64.add(a64, b64);
-        else                  r64 = ABDKMath64x64.sub(a64, b64);
+        else if (c.op == SUB) r64 = ABDKMath64x64.sub(a64, b64);
+        else {
+            // POW: ABDK only supports integer exponents
+            if (c.b_wad >= 0 && c.b_wad % WAD_I == 0) {
+                uint256 exp_uint = uint256(c.b_wad / WAD_I);
+                r64 = ABDKMath64x64.pow(a64, exp_uint);
+            } else {
+                // Fractional or negative exponent - return 0
+                return (0, 0);
+            }
+        }
         gas_ = g0 - gasleft();
         
         // Compute matching digits in 64.64 space (ABDK has ~19 digit precision ceiling)
@@ -249,7 +291,8 @@ contract NativePrecisionBench is Test {
         if (c.op == MUL)      sr = FixedPointMathLib.mulWad(ua, ub);
         else if (c.op == DIV) sr = FixedPointMathLib.divWad(ua, ub);
         else if (c.op == ADD) sr = ua + ub;
-        else                  sr = ua - ub;
+        else if (c.op == SUB) sr = ua - ub;
+        else                  sr = uint256(FixedPointMathLib.powWad(int256(ua), int256(ub)));
         gas_ = g0 - gasleft();
         
         // Compute matching digits in WAD space (WAD has 18 digit precision ceiling)
@@ -266,6 +309,10 @@ contract NativePrecisionBench is Test {
         else if (c.op == EXP2)  result_fp128 = fp128.exp2Raw(a_fp128);
         else if (c.op == LN)    result_fp128 = fp128.lnRaw(a_fp128);
         else if (c.op == LOG2)  result_fp128 = fp128.log2Raw(a_fp128);
+        else if (c.op == POW) {
+            uint256 b_fp128 = _wadToFp128(c.b_wad);
+            result_fp128 = fp128.powRaw(a_fp128, b_fp128);
+        }
         else                    result_fp128 = fp128.sqrtRaw(a_fp128);
         gas_ = g0 - gasleft();
         digits_ = _matchingDigits(result_fp128, exp_fp128, 38);
@@ -281,6 +328,17 @@ contract NativePrecisionBench is Test {
         else if (c.op == EXP2)  r64 = ABDKMath64x64.exp_2(a64);
         else if (c.op == LN)    r64 = ABDKMath64x64.ln(a64);
         else if (c.op == LOG2)  r64 = ABDKMath64x64.log_2(a64);
+        else if (c.op == POW) {
+            // ABDK pow only supports integer exponents
+            if (c.b_wad >= 0 && c.b_wad % WAD_I == 0) {
+                uint256 exp_uint = uint256(c.b_wad / WAD_I);
+                int128 b64 = _wadToAbdk(c.b_wad);
+                r64 = ABDKMath64x64.pow(a64, exp_uint);
+            } else {
+                // Fractional or negative exponent - return 0
+                return (0, 0);
+            }
+        }
         else                    r64 = ABDKMath64x64.sqrt(a64);
         gas_ = g0 - gasleft();
         
@@ -299,6 +357,7 @@ contract NativePrecisionBench is Test {
         uint256 g0 = gasleft();
         if (c.op == EXP)       sr_signed = FixedPointMathLib.expWad(ia);
         else if (c.op == LN)   sr_signed = FixedPointMathLib.lnWad(ia);
+        else if (c.op == POW)  sr_signed = FixedPointMathLib.powWad(ia, c.b_wad);
         else                   sr_signed = int256(FixedPointMathLib.sqrtWad(uint256(ia)));
         gas_ = g0 - gasleft();
         

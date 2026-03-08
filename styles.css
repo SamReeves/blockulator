@@ -6251,122 +6251,46 @@ details[open] .collapsible-arrow {
     max-height: 400px;
 }
 
-/* ── Distribution Panels ─────────────────────────────────────────────── */
+/* ── Distribution Grid ────────────────────────────────────────────────── */
 
-.bench-dist-panels {
+.bench-dist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.bench-dist-card {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 0.5rem;
 }
 
-.bench-dist-panel {
-    border: 1px solid #2a2a2a;
-    border-bottom: none;
-    background: #111;
-}
-
-.bench-dist-panel:first-child {
-    border-radius: 6px 6px 0 0;
-}
-
-.bench-dist-panel:last-child {
-    border-bottom: 1px solid #2a2a2a;
-    border-radius: 0 0 6px 6px;
-}
-
-.bench-dist-panel[open] {
-    background: #141414;
-}
-
-.bench-dist-summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.1s;
-    list-style: none;
-}
-
-.bench-dist-summary::-webkit-details-marker {
-    display: none;
-}
-
-.bench-dist-summary::before {
-    content: '▸';
-    color: #555;
-    margin-right: 0.75rem;
-    transition: transform 0.15s;
-    font-size: 0.75rem;
-}
-
-.bench-dist-panel[open] > .bench-dist-summary::before {
-    transform: rotate(90deg);
-}
-
-.bench-dist-summary:hover {
-    background: #1a1a1a;
-}
-
-.bench-dist-func {
+.bench-dist-card-title {
     color: #fff;
     font-weight: 700;
     font-size: 0.875rem;
-}
-
-.bench-dist-n {
-    color: #555;
-    font-size: 0.75rem;
-}
-
-.bench-dist-body {
-    padding: 0 1rem 1rem;
-    overflow-x: auto;
-}
-
-.bench-dist-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.8rem;
-}
-
-.bench-dist-table thead th {
-    color: #888;
-    padding: 0.5rem 0.5rem;
     text-align: center;
+    letter-spacing: 0.05em;
+}
+
+.bench-dist-card canvas {
+    max-height: 140px;
+}
+
+.bench-dist-card-note {
+    color: #555;
     font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border-bottom: 1px solid #2a2a2a;
-}
-
-.bench-dist-table .bench-subhead th {
-    color: #555;
-    font-size: 0.65rem;
-    padding: 0.3rem 0.5rem;
-    border-bottom: 1px solid #222;
-}
-
-.bench-dist-table tbody td {
-    padding: 0.4rem 0.5rem;
-    color: #999;
     text-align: center;
-    border-bottom: 1px solid #1a1a1a;
-    font-variant-numeric: tabular-nums;
 }
 
-.bench-dist-table .col-func {
-    text-align: left;
-    color: #ccc;
-    font-weight: 600;
-}
-
-.bench-dist-median-row td {
-    color: #ddd;
-    font-weight: 600;
-    background: rgba(0, 255, 136, 0.03);
+@media (max-width: 768px) {
+    .bench-dist-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────── */

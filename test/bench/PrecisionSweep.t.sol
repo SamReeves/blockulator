@@ -103,6 +103,12 @@ contract PrecisionSweep is Test {
         console.log("SWEEP_END");
     }
     
+    function test_sweep_pow() public {
+        console.log("SWEEP_START");
+        _sweepPow();
+        console.log("SWEEP_END");
+    }
+    
     // ============================================================================
     // SWEEP IMPLEMENTATIONS
     // ============================================================================
@@ -257,6 +263,41 @@ contract PrecisionSweep is Test {
         _runSample("sqrt", 100 * WAD, 0);
     }
     
+    function _sweepPow() internal {
+        // Representative base values [0.1, 100]
+        int256[] memory bases = new int256[](8);
+        bases[0] = WAD / 10;        // 0.1
+        bases[1] = WAD / 2;         // 0.5
+        bases[2] = WAD;             // 1.0
+        bases[3] = 2 * WAD;         // 2.0
+        bases[4] = 2718281828459045235;  // e
+        bases[5] = 10 * WAD;        // 10
+        bases[6] = 50 * WAD;        // 50
+        bases[7] = 100 * WAD;       // 100
+        
+        // Representative exponent values [-3, 5] including fractional
+        int256[] memory exps = new int256[](13);
+        exps[0] = -3 * WAD;         // -3
+        exps[1] = -2 * WAD;         // -2
+        exps[2] = -WAD;             // -1
+        exps[3] = -WAD / 2;         // -0.5
+        exps[4] = 0;                // 0
+        exps[5] = WAD / 3;          // 1/3 (cube root)
+        exps[6] = WAD / 2;          // 0.5 (square root)
+        exps[7] = WAD;              // 1
+        exps[8] = 3 * WAD / 2;      // 1.5
+        exps[9] = 2 * WAD;          // 2
+        exps[10] = 3 * WAD;         // 3
+        exps[11] = 4 * WAD;         // 4
+        exps[12] = 5 * WAD;         // 5
+        
+        for (uint256 i = 0; i < bases.length; i++) {
+            for (uint256 j = 0; j < exps.length; j++) {
+                _runSample("pow", bases[i], exps[j]);
+            }
+        }
+    }
+    
     // ============================================================================
     // INPUT GENERATORS
     // ============================================================================
@@ -388,6 +429,8 @@ contract PrecisionSweep is Test {
             result_fp128 = fp128.log2Raw(a_fp128);
         } else if (funcHash == keccak256("sqrt")) {
             result_fp128 = fp128.sqrtRaw(a_fp128);
+        } else if (funcHash == keccak256("pow")) {
+            result_fp128 = fp128.powRaw(a_fp128, b_fp128);
         }
         
         gas_ = g0 - gasleft();
@@ -430,6 +473,19 @@ contract PrecisionSweep is Test {
             result64 = ABDKMath64x64.log_2(a64);
         } else if (funcHash == keccak256("sqrt")) {
             result64 = ABDKMath64x64.sqrt(a64);
+        } else if (funcHash == keccak256("pow")) {
+            // ABDK pow only supports integer exponents (uint256)
+            // For fractional exponents, skip (return 0)
+            if (b_wad >= 0 && b_wad % WAD == 0) {
+                uint256 exp_uint = uint256(b_wad / WAD);
+                result64 = ABDKMath64x64.pow(a64, exp_uint);
+            } else {
+                // Fractional or negative exponent - ABDK doesn't support
+                gas_ = 0;
+                digits_ = 0;
+                error_bits_ = 0;
+                return (gas_, digits_, error_bits_);
+            }
         }
         
         gas_ = g0 - gasleft();
@@ -468,6 +524,8 @@ contract PrecisionSweep is Test {
             result = 0;
         } else if (funcHash == keccak256("sqrt")) {
             result = FixedPointMathLib.sqrtWad(ua);
+        } else if (funcHash == keccak256("pow")) {
+            result = uint256(FixedPointMathLib.powWad(a_wad, b_wad));
         }
         
         gas_ = g0 - gasleft();

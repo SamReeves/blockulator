@@ -16,11 +16,13 @@ interface IFP128 {
     function exp(uint256) external view returns (uint256);
     function ln(uint256) external view returns (uint256);
     function sqrt(uint256) external view returns (uint256);
+    function pow(uint256, uint256) external view returns (uint256);
     function expRaw(uint256) external view returns (uint256);
     function exp2Raw(uint256) external view returns (uint256);
     function lnRaw(uint256) external view returns (uint256);
     function log2Raw(uint256) external view returns (uint256);
     function sqrtRaw(uint256) external view returns (uint256);
+    function powRaw(uint256, uint256) external view returns (uint256);
     function expScale(uint256, uint256) external view returns (uint256);
     function expOverflowCheck(uint256) external view returns (uint256);
     function testConstant() external view returns (uint256);
@@ -594,6 +596,74 @@ contract FP128Test is Test {
     }
 
     // ============================================================================
+    // POW TESTS (Fixed18 I/O)
+    // ============================================================================
+
+    function test_pow_2_to_3() public view {
+        uint256 result = fp128.pow(2e18, 3e18);
+        assertApproxEqAbs(result, 8e18, 1e12, "2^3 should be 8");
+    }
+
+    function test_pow_2_to_half() public view {
+        uint256 result = fp128.pow(2e18, 0.5e18);
+        assertApproxEqAbs(result, 1414213562373095048, 1e12, "2^0.5 should be sqrt(2) ~1.41421");
+    }
+
+    function test_pow_4_to_half() public view {
+        uint256 result = fp128.pow(4e18, 0.5e18);
+        assertApproxEqAbs(result, 2e18, 1e12, "4^0.5 should be 2");
+    }
+
+    function test_pow_e_to_1() public view {
+        uint256 result = fp128.pow(uint256(E), 1e18);
+        assertApproxEqAbs(result, uint256(E), 1e12, "e^1 should be e");
+    }
+
+    function test_pow_10_to_0() public view {
+        uint256 result = fp128.pow(10e18, 0);
+        assertApproxEqAbs(result, 1e18, 1, "10^0 should be 1");
+    }
+
+    function test_pow_0_to_5() public view {
+        uint256 result = fp128.pow(0, 5e18);
+        assertEq(result, 0, "0^5 should be 0");
+    }
+
+    function test_pow_1_to_anything() public view {
+        uint256 result = fp128.pow(1e18, 12345e18);
+        assertApproxEqAbs(result, 1e18, 1e12, "1^12345 should be 1");
+    }
+
+    function test_pow_8_to_third() public view {
+        uint256 result = fp128.pow(8e18, uint256(int256(F18) / 3));
+        assertApproxEqAbs(result, 2e18, 1e12, "8^(1/3) should be 2 (cube root)");
+    }
+
+    function test_pow_2_to_1point5() public view {
+        uint256 result = fp128.pow(2e18, 1.5e18);
+        assertApproxEqAbs(result, 2828427124746190097, 1e12, "2^1.5 should be ~2.828");
+    }
+
+    function test_pow_half_to_2() public view {
+        uint256 result = fp128.pow(0.5e18, 2e18);
+        assertApproxEqAbs(result, 0.25e18, 1e12, "0.5^2 should be 0.25");
+    }
+
+    function test_pow_cross_check_exp() public view {
+        // e^2 should equal exp(2)
+        uint256 pow_result = fp128.pow(uint256(E), 2e18);
+        uint256 exp_result = fp128.exp(2e18);
+        assertApproxEqAbs(pow_result, exp_result, 1e12, "e^2 should match exp(2)");
+    }
+
+    function test_pow_cross_check_sqrt() public view {
+        // x^0.5 should equal sqrt(x)
+        uint256 pow_result = fp128.pow(9e18, 0.5e18);
+        uint256 sqrt_result = fp128.sqrt(9e18);
+        assertApproxEqAbs(pow_result, sqrt_result, 1e12, "9^0.5 should match sqrt(9)");
+    }
+
+    // ============================================================================
     // ROUNDTRIP TESTS (Fixed18 I/O)
     // ============================================================================
 
@@ -665,6 +735,31 @@ contract FP128Test is Test {
         uint256 ln_val = fp128.lnRaw(THREE);
         uint256 back = fp128.expRaw(ln_val);
         assertLt(_absDiff(back, THREE), 4096, "exp(ln(3)) roundtrip within 4096 ULP");
+    }
+
+    function test_precision_pow_2_to_3() public {
+        uint256 TWO = 2 << 128;
+        uint256 THREE = 3 << 128;
+        uint256 result = fp128.powRaw(TWO, THREE);
+        uint256 expected = _oracle2("pow", TWO, THREE);
+        assertLt(_absDiff(result, expected), 512, "pow(2, 3) within 512 ULP");
+    }
+
+    function test_precision_pow_e_to_2() public {
+        uint256 ONE = 1 << 128;
+        uint256 TWO = 2 << 128;
+        uint256 e_fp128 = _oracle("exp", ONE);
+        uint256 result = fp128.powRaw(e_fp128, TWO);
+        uint256 expected = _oracle2("pow", e_fp128, TWO);
+        assertLt(_absDiff(result, expected), 1024, "pow(e, 2) within 1024 ULP");
+    }
+
+    function test_precision_pow_fractional() public {
+        uint256 EIGHT = 8 << 128;
+        uint256 THIRD = uint256(1 << 128) / 3;
+        uint256 result = fp128.powRaw(EIGHT, THIRD);
+        uint256 expected = _oracle2("pow", EIGHT, THIRD);
+        assertLt(_absDiff(result, expected), 1024, "pow(8, 1/3) within 1024 ULP");
     }
     
     // ============================================================================
@@ -815,6 +910,21 @@ contract FP128Test is Test {
         uint256 expected = _oracle("ln", x);
         assertLt(_absDiff(result, expected), 2048, "ln fuzz within 2048 ULP");
     }
+
+    function testFuzz_pow(uint256 base, uint256 exp_val) public {
+        // Bound base to positive values [0.01, 100]
+        base = bound(base, uint256(1 << 128) / 100, uint256(100) << 128);
+        // Bound exponent to reasonable range [0.01, 10] (positive only to avoid bound issues)
+        exp_val = bound(exp_val, uint256(1 << 128) / 100, uint256(10) << 128);
+        
+        uint256 result = fp128.powRaw(base, exp_val);
+        uint256 expected = _oracle2("pow", base, exp_val);
+        
+        // Scale tolerance by magnitude of result
+        uint256 magnitude = expected >> 128;
+        uint256 tolerance = magnitude > 1 ? magnitude * 256 : 2048;
+        assertLt(_absDiff(result, expected), tolerance, "pow fuzz within scaled tolerance");
+    }
     
     // ============================================================================
     // GAS BENCHMARKS
@@ -855,5 +965,9 @@ contract FP128Test is Test {
     function testGas_toFixed18() public view {
         uint256 fp128Val = fp128.fromFixed18(uint256(E));
         fp128.toFixed18(fp128Val);
+    }
+
+    function testGas_pow() public view {
+        fp128.pow(2e18, 3e18);
     }
 }

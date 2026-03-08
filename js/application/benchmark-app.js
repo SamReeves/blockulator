@@ -5,7 +5,7 @@
  */
 
 const LIBS = ['fp128', 'abdk', 'solady'];
-const FUNCTIONS = ['mul', 'div', 'add', 'sub', 'exp', 'exp2', 'ln', 'log2', 'sqrt'];
+const FUNCTIONS = ['mul', 'div', 'add', 'sub', 'exp', 'exp2', 'ln', 'log2', 'sqrt', 'pow'];
 
 const LIB_META = {
     fp128:  { name: 'FP128',  format: '128.128 fixed-point', lang: 'Huff',            color: '#2196F3' },
@@ -29,7 +29,7 @@ export class BenchmarkApp {
         await this.loadData();
         this.setupListeners();
         this.renderSummaryTable();
-        this.renderDistributionPanels();
+        this.renderDistributions();
         this.renderScatterChart();
     }
 
@@ -90,17 +90,17 @@ export class BenchmarkApp {
                     <!-- Scatter Chart -->
                     <section class="bench-section">
                         <h3>Gas vs Precision Tradeoff</h3>
-                        <p class="bench-section-note">Each dot is one function. Lower-right is better (less gas, more precision).</p>
+                        <p class="bench-section-note">Each dot is one function. Upper-left is better (less gas, more precision).</p>
                         <div class="bench-scatter-wrap">
                             <canvas id="bench-scatter-chart"></canvas>
                         </div>
                     </section>
 
-                    <!-- Distribution Panels -->
+                    <!-- Distribution Histograms -->
                     <section class="bench-section">
-                        <h3>Distribution Details</h3>
-                        <p class="bench-section-note">Click a function to see gas and precision spread across hundreds of test inputs.</p>
-                        <div id="bench-dist-panels" class="bench-dist-panels"></div>
+                        <h3>Precision Distributions</h3>
+                        <p class="bench-section-note">Median digits across hundreds of test inputs for each function.</p>
+                        <div id="bench-dist-grid" class="bench-dist-grid"></div>
                     </section>
                 </div>
             </div>
@@ -191,64 +191,103 @@ export class BenchmarkApp {
         document.getElementById('bench-summary-table').innerHTML = html;
     }
 
-    // ── Distribution Panels ───────────────────────────────────────────
+    // ── Distribution Histograms ───────────────────────────────────────
 
-    renderDistributionPanels() {
+    renderDistributions() {
         const stats = this.distData.stats;
         let html = '';
 
         for (const func of FUNCTIONS) {
             let sampleCount = 0;
+            const libData = [];
+            
             for (const lib of LIBS) {
                 const entry = stats[lib]?.[func];
-                if (entry) sampleCount = Math.max(sampleCount, entry.count || 0);
-            }
-
-            html += `
-            <details class="bench-dist-panel">
-                <summary class="bench-dist-summary">
-                    <span class="bench-dist-func">${func.toUpperCase()}</span>
-                    <span class="bench-dist-n">${sampleCount} cases</span>
-                </summary>
-                <div class="bench-dist-body">
-                    <table class="bench-dist-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                ${LIBS.map(lib =>
-                                    `<th colspan="2"><span style="color:${LIB_META[lib].color}">${LIB_META[lib].name}</span></th>`
-                                ).join('')}
-                            </tr>
-                            <tr class="bench-subhead">
-                                <th>Percentile</th>
-                                ${LIBS.map(() => '<th>Gas</th><th>Digits</th>').join('')}
-                            </tr>
-                        </thead>
-                        <tbody>`;
-
-            const percentiles = ['min', 'p5', 'p25', 'median', 'p75', 'p95', 'max'];
-            const pLabels = { min: 'Min', p5: 'P5', p25: 'P25', median: 'Median', p75: 'P75', p95: 'P95', max: 'Max' };
-
-            for (const p of percentiles) {
-                html += `<tr${p === 'median' ? ' class="bench-dist-median-row"' : ''}>
-                    <td class="col-func">${pLabels[p]}</td>`;
-
-                for (const lib of LIBS) {
-                    const entry = stats[lib]?.[func];
-                    const gasVal = entry?.gas?.[p];
-                    const digVal = entry?.digits?.[p];
-                    html += `<td class="col-gas">${gasVal != null ? Math.round(gasVal).toLocaleString() : '—'}</td>`;
-                    html += `<td class="col-digits">${digVal != null ? digVal.toFixed(1) : '—'}</td>`;
+                if (!entry) continue;
+                sampleCount = Math.max(sampleCount, entry.count || 0);
+                const median = entry.digits?.median;
+                if (median != null && median > 0) {
+                    libData.push({ lib, median });
                 }
-                html += '</tr>';
             }
 
-            html += `</tbody></table>
-                </div>
-            </details>`;
+            if (libData.length === 0) continue;
+
+            const canvasId = `bench-hist-${func}`;
+            html += `
+            <div class="bench-dist-card">
+                <div class="bench-dist-card-title">${func.toUpperCase()}</div>
+                <canvas id="${canvasId}"></canvas>
+                <div class="bench-dist-card-note">${sampleCount} cases</div>
+            </div>`;
         }
 
-        document.getElementById('bench-dist-panels').innerHTML = html;
+        document.getElementById('bench-dist-grid').innerHTML = html;
+
+        // Render charts after DOM is updated
+        for (const func of FUNCTIONS) {
+            const canvasId = `bench-hist-${func}`;
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) continue;
+
+            const libData = [];
+            for (const lib of LIBS) {
+                const entry = stats[lib]?.[func];
+                if (!entry) continue;
+                const median = entry.digits?.median;
+                if (median != null && median > 0) {
+                    libData.push({ lib, median });
+                }
+            }
+
+            if (libData.length === 0) continue;
+
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: libData.map(d => LIB_META[d.lib].name),
+                    datasets: [{
+                        data: libData.map(d => d.median),
+                        backgroundColor: libData.map(d => LIB_META[d.lib].color),
+                        borderColor: libData.map(d => LIB_META[d.lib].color),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    aspectRatio: 2,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(0,0,0,0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#ccc',
+                            borderColor: '#444',
+                            borderWidth: 1,
+                            padding: 8,
+                            displayColors: false,
+                            callbacks: {
+                                label: (ctx) => `${ctx.parsed.y.toFixed(1)} digits`
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 40,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#999', font: { size: 10 } },
+                            title: { display: false }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#ccc', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
     }
 
     // ── Scatter Chart ─────────────────────────────────────────────────
@@ -268,7 +307,8 @@ export class BenchmarkApp {
                 if (!entry) continue;
                 const gas = this.useMedian ? entry.gas?.median : entry.gas?.mean;
                 const digits = this.useMedian ? entry.digits?.median : entry.digits?.mean;
-                if (gas == null || digits == null) continue;
+                // Filter out functions not supported by library (median == 0 indicates no support)
+                if (gas == null || digits == null || entry.digits?.median <= 0) continue;
                 points.push({ x: gas, y: digits, func: func.toUpperCase() });
             }
             return {

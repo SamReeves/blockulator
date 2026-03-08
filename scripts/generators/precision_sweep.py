@@ -103,7 +103,7 @@ def print_summary_table(stats):
     print("PRECISION DISTRIBUTION SUMMARY")
     print("=" * 100)
     
-    functions = ["mul", "div", "add", "sub", "exp", "exp2", "ln", "log2", "sqrt"]
+    functions = ["mul", "div", "add", "sub", "exp", "exp2", "ln", "log2", "sqrt", "pow"]
     libraries = sorted(stats.keys())
     
     for func in functions:
@@ -135,7 +135,7 @@ def print_detailed_percentiles(stats):
     print("DETAILED PERCENTILE STATISTICS (Matching Digits)")
     print("=" * 100)
     
-    functions = ["mul", "div", "add", "sub", "exp", "exp2", "ln", "log2", "sqrt"]
+    functions = ["mul", "div", "add", "sub", "exp", "exp2", "ln", "log2", "sqrt", "pow"]
     libraries = sorted(stats.keys())
     
     for func in functions:
