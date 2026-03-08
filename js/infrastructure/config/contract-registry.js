@@ -518,9 +518,9 @@ export const CONTRACT_REGISTRY = {
         symbol: '+−×÷',
         emoji: '0x',
         category: 'huff',
-        description: 'Signed 128.128 fixed-point arithmetic with transcendental functions (exp, ln, sqrt)',
+        description: 'Signed 128.128 fixed-point arithmetic with transcendental functions (add, sub, mul, div, exp, exp2, ln, log2, sqrt, pow)',
         addresses: {
-            sepolia: '0x1A4073C46bC9bC01994c2Fa7dd9DaD76092DBAA2',
+            sepolia: 'PENDING_DEPLOYMENT',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/huff/fp128/test_fp128.huff',

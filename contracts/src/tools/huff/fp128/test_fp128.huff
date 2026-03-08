@@ -10,6 +10,8 @@
 #include "ln.huff"
 #include "sqrt.huff"
 #include "pow.huff"
+#include "utils.huff"
+#include "transcendental_utils.huff"
 
 #define macro MAIN() = takes(0) returns(0) {
     // Read function selector
@@ -24,7 +26,9 @@
     dup1 __FUNC_SIG(fromFixed18) eq from_jump jumpi
     dup1 __FUNC_SIG(toFixed18) eq to_jump jumpi
     dup1 __FUNC_SIG(exp) eq exp_jump jumpi
+    dup1 __FUNC_SIG(exp2) eq exp2_jump jumpi
     dup1 __FUNC_SIG(ln) eq ln_jump jumpi
+    dup1 __FUNC_SIG(log2) eq log2_jump jumpi
     dup1 __FUNC_SIG(sqrt) eq sqrt_jump jumpi
     dup1 __FUNC_SIG(sqrtRaw) eq sqrt_raw_jump jumpi
     dup1 __FUNC_SIG(expRaw) eq exp_raw_jump jumpi
@@ -37,6 +41,30 @@
     dup1 __FUNC_SIG(divUnsignedRaw) eq div_unsigned_raw_jump jumpi
     dup1 __FUNC_SIG(pow) eq pow_jump jumpi
     dup1 __FUNC_SIG(powRaw) eq pow_raw_jump jumpi
+    dup1 __FUNC_SIG(abs) eq abs_jump jumpi
+    dup1 __FUNC_SIG(neg) eq neg_jump jumpi
+    dup1 __FUNC_SIG(inv) eq inv_jump jumpi
+    dup1 __FUNC_SIG(min) eq min_jump jumpi
+    dup1 __FUNC_SIG(max) eq max_jump jumpi
+    dup1 __FUNC_SIG(clamp) eq clamp_jump jumpi
+    dup1 __FUNC_SIG(avg) eq avg_jump jumpi
+    dup1 __FUNC_SIG(zeroFloorSub) eq zeroFloorSub_jump jumpi
+    dup1 __FUNC_SIG(dist) eq dist_jump jumpi
+    dup1 __FUNC_SIG(gavg) eq gavg_jump jumpi
+    dup1 __FUNC_SIG(log10) eq log10_jump jumpi
+    dup1 __FUNC_SIG(exp10) eq exp10_jump jumpi
+    dup1 __FUNC_SIG(absRaw) eq abs_raw_jump jumpi
+    dup1 __FUNC_SIG(negRaw) eq neg_raw_jump jumpi
+    dup1 __FUNC_SIG(invRaw) eq inv_raw_jump jumpi
+    dup1 __FUNC_SIG(minRaw) eq min_raw_jump jumpi
+    dup1 __FUNC_SIG(maxRaw) eq max_raw_jump jumpi
+    dup1 __FUNC_SIG(clampRaw) eq clamp_raw_jump jumpi
+    dup1 __FUNC_SIG(avgRaw) eq avg_raw_jump jumpi
+    dup1 __FUNC_SIG(zeroFloorSubRaw) eq zeroFloorSub_raw_jump jumpi
+    dup1 __FUNC_SIG(distRaw) eq dist_raw_jump jumpi
+    dup1 __FUNC_SIG(gavgRaw) eq gavg_raw_jump jumpi
+    dup1 __FUNC_SIG(log10Raw) eq log10_raw_jump jumpi
+    dup1 __FUNC_SIG(exp10Raw) eq exp10_raw_jump jumpi
     
     // No match, revert
     0x00 0x00 revert
@@ -131,12 +159,32 @@
         0x00 mstore
         0x20 0x00 return
     
+    exp2_jump:
+        pop
+        // Compute exp2(x) = 2^x with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_EXP2()           // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
     ln_jump:
         pop
         // Compute ln(x) with fixed18 I/O
         0x04 calldataload      // [x_fixed18]
         FP128_FROM_FIXED18()   // [x_fp128]
         FP128_LN()             // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    log2_jump:
+        pop
+        // Compute log2(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_LOG2()           // [result_fp128]
         FP128_TO_FIXED18()     // [result_fixed18]
         0x00 mstore
         0x20 0x00 return
@@ -251,6 +299,234 @@
         FP128_POW()            // [result_fp128]
         0x00 mstore
         0x20 0x00 return
+    
+    abs_jump:
+        pop
+        // Compute abs(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_ABS()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    neg_jump:
+        pop
+        // Compute neg(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_NEG()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    inv_jump:
+        pop
+        // Compute inv(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_INV()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    min_jump:
+        pop
+        // Compute min(a, b) with fixed18 I/O
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_MIN()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    max_jump:
+        pop
+        // Compute max(a, b) with fixed18 I/O
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_MAX()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    clamp_jump:
+        pop
+        // Compute clamp(x, lo, hi) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        0x24 calldataload      // [lo_fixed18, x_fp128]
+        FP128_FROM_FIXED18()   // [lo_fp128, x_fp128]
+        0x44 calldataload      // [hi_fixed18, lo_fp128, x_fp128]
+        FP128_FROM_FIXED18()   // [hi_fp128, lo_fp128, x_fp128]
+        FP128_CLAMP()          // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    avg_jump:
+        pop
+        // Compute avg(a, b) with fixed18 I/O
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_AVG()            // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    zeroFloorSub_jump:
+        pop
+        // Compute zeroFloorSub(a, b) with fixed18 I/O
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_ZERO_FLOOR_SUB() // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    dist_jump:
+        pop
+        // Compute dist(a, b) with fixed18 I/O
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_DIST()           // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    gavg_jump:
+        pop
+        // Compute gavg(a, b) with fixed18 I/O
+        0x04 calldataload      // [a_fixed18]
+        FP128_FROM_FIXED18()   // [a_fp128]
+        0x24 calldataload      // [b_fixed18, a_fp128]
+        FP128_FROM_FIXED18()   // [b_fp128, a_fp128]
+        FP128_GAVG()           // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    log10_jump:
+        pop
+        // Compute log10(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_LOG10()          // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    exp10_jump:
+        pop
+        // Compute exp10(x) with fixed18 I/O
+        0x04 calldataload      // [x_fixed18]
+        FP128_FROM_FIXED18()   // [x_fp128]
+        FP128_EXP10()          // [result_fp128]
+        FP128_TO_FIXED18()     // [result_fixed18]
+        0x00 mstore
+        0x20 0x00 return
+    
+    abs_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        FP128_ABS()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    neg_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        FP128_NEG()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    inv_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        FP128_INV()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    min_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_MIN()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    max_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_MAX()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    clamp_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        0x24 calldataload      // [lo_fp128, x_fp128]
+        0x44 calldataload      // [hi_fp128, lo_fp128, x_fp128]
+        FP128_CLAMP()          // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    avg_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_AVG()            // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    zeroFloorSub_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_ZERO_FLOOR_SUB() // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    dist_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_DIST()           // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    gavg_raw_jump:
+        pop
+        0x04 calldataload      // [a_fp128]
+        0x24 calldataload      // [b_fp128, a_fp128]
+        FP128_GAVG()           // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    log10_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        FP128_LOG10()          // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
+    
+    exp10_raw_jump:
+        pop
+        0x04 calldataload      // [x_fp128]
+        FP128_EXP10()          // [result_fp128]
+        0x00 mstore
+        0x20 0x00 return
 }
 
 #define function add(uint256,uint256) pure returns (uint256)
@@ -262,7 +538,9 @@
 #define function fromFixed18(uint256) pure returns (uint256)
 #define function toFixed18(uint256) pure returns (uint256)
 #define function exp(uint256) pure returns (uint256)
+#define function exp2(uint256) pure returns (uint256)
 #define function ln(uint256) pure returns (uint256)
+#define function log2(uint256) pure returns (uint256)
 #define function sqrt(uint256) pure returns (uint256)
 #define function sqrtRaw(uint256) pure returns (uint256)
 #define function expRaw(uint256) pure returns (uint256)
@@ -275,3 +553,27 @@
 #define function divUnsignedRaw(uint256,uint256) pure returns (uint256)
 #define function pow(uint256,uint256) pure returns (uint256)
 #define function powRaw(uint256,uint256) pure returns (uint256)
+#define function abs(uint256) pure returns (uint256)
+#define function neg(uint256) pure returns (uint256)
+#define function inv(uint256) pure returns (uint256)
+#define function min(uint256,uint256) pure returns (uint256)
+#define function max(uint256,uint256) pure returns (uint256)
+#define function clamp(uint256,uint256,uint256) pure returns (uint256)
+#define function avg(uint256,uint256) pure returns (uint256)
+#define function zeroFloorSub(uint256,uint256) pure returns (uint256)
+#define function dist(uint256,uint256) pure returns (uint256)
+#define function gavg(uint256,uint256) pure returns (uint256)
+#define function log10(uint256) pure returns (uint256)
+#define function exp10(uint256) pure returns (uint256)
+#define function absRaw(uint256) pure returns (uint256)
+#define function negRaw(uint256) pure returns (uint256)
+#define function invRaw(uint256) pure returns (uint256)
+#define function minRaw(uint256,uint256) pure returns (uint256)
+#define function maxRaw(uint256,uint256) pure returns (uint256)
+#define function clampRaw(uint256,uint256,uint256) pure returns (uint256)
+#define function avgRaw(uint256,uint256) pure returns (uint256)
+#define function zeroFloorSubRaw(uint256,uint256) pure returns (uint256)
+#define function distRaw(uint256,uint256) pure returns (uint256)
+#define function gavgRaw(uint256,uint256) pure returns (uint256)
+#define function log10Raw(uint256) pure returns (uint256)
+#define function exp10Raw(uint256) pure returns (uint256)

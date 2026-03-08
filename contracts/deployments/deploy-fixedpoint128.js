@@ -18,7 +18,7 @@ const NETWORK = 'sepolia';
 
 // Load bytecode and ABI
 function loadBytecode() {
-    const p = path.join(__dirname, '../build/bytecode/test_fixedpoint128.json');
+    const p = path.join(__dirname, '../build/bytecode/test_fp128.json');
     if (!fs.existsSync(p)) {
         throw new Error('Bytecode not found. Run compile-huff.sh first.');
     }

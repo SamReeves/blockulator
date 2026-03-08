@@ -1,0 +1,145 @@
+/// @title FP128 Utility Functions
+/// @notice Utility operations for 128.128 fixed-point arithmetic
+/// @dev Simple operations like abs, min, max, avg, etc.
+/// @dev Requires: constants.huff and primitives.huff must be included before this file
+
+// ============================================================================
+// Sign and Negation Utilities
+// ============================================================================
+
+/// @notice Absolute value of a signed 128.128 fixed-point number
+/// @dev takes(1) returns(1)
+/// Stack input:  [x]
+/// Stack output: [|x|]
+/// Formula: abs(x) = x < 0 ? -x : x
+/// Gas: ~8 opcodes
+#define macro FP128_ABS() = takes(1) returns(1) {
+    // mask = x >> 255 (all 1s if negative, all 0s if positive)
+    // abs = (x ^ mask) - mask
+    dup1 0xff sar              // [mask, x]
+    dup1 dup3 xor              // [x^mask, mask, x]
+    sub                        // [abs_x, x]
+    swap1 pop                  // [abs_x]
+}
+
+/// @notice Negate a signed 128.128 fixed-point number
+/// @dev takes(1) returns(1)
+/// Stack input:  [x]
+/// Stack output: [-x]
+/// Gas: ~3 opcodes
+#define macro FP128_NEG() = takes(1) returns(1) {
+    NEGATE()
+}
+
+/// @notice Reciprocal of a 128.128 fixed-point number
+/// @dev takes(1) returns(1)
+/// Stack input:  [x]
+/// Stack output: [1/x]
+/// Formula: 1/x = ONE / x
+/// Gas: ~500-600 (calls FP128_DIV)
+#define macro FP128_INV() = takes(1) returns(1) {
+    [ONE_FP128]                // [1, x]
+    swap1                      // [x, 1]
+    FP128_DIV()                // [1/x]
+}
+
+// ============================================================================
+// Comparison and Selection
+// ============================================================================
+
+/// @notice Minimum of two signed 128.128 fixed-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input:  [b, a] (b on top)
+/// Stack output: [min(a, b)]
+/// Gas: ~10 opcodes
+#define macro FP128_MIN() = takes(2) returns(1) {
+    // Stack: [b, a]
+    dup2 dup2                  // [b, a, b, a]
+    slt                        // [a < b, b, a]
+    min_select jumpi           // [b, a]
+    pop                        // [a] - b is min
+    min_done jump
+    min_select:
+    swap1 pop                  // [b] - a is min
+    min_done:
+}
+
+/// @notice Maximum of two signed 128.128 fixed-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input:  [b, a] (b on top)
+/// Stack output: [max(a, b)]
+/// Gas: ~10 opcodes
+#define macro FP128_MAX() = takes(2) returns(1) {
+    // Stack: [b, a]
+    dup2 dup2                  // [b, a, b, a]
+    sgt                        // [a > b, b, a]
+    max_select jumpi           // [b, a]
+    pop                        // [a] - b is max
+    max_done jump
+    max_select:
+    swap1 pop                  // [b] - a is max
+    max_done:
+}
+
+/// @notice Clamp a value to a range [lo, hi]
+/// @dev takes(3) returns(1)
+/// Stack input:  [hi, lo, x] (hi on top)
+/// Stack output: [clamped_x]
+/// Formula: clamp(x, lo, hi) = max(lo, min(x, hi))
+/// Gas: ~20 opcodes
+#define macro FP128_CLAMP() = takes(3) returns(1) {
+    // Stack: [hi, lo, x]
+    swap2                      // [x, lo, hi]
+    swap1                      // [lo, x, hi]
+    FP128_MAX()                // [max(lo, x), hi]
+    swap1                      // [hi, max(lo, x)]
+    FP128_MIN()                // [min(hi, max(lo, x))]
+}
+
+// ============================================================================
+// Arithmetic Utilities
+// ============================================================================
+
+/// @notice Overflow-safe average of two signed 128.128 fixed-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input:  [b, a] (b on top)
+/// Stack output: [(a + b) / 2]
+/// Formula: avg = (a >> 1) + (b >> 1) + (a & b & 1)
+/// This avoids overflow that would occur with (a + b) / 2
+/// Gas: ~10 opcodes
+#define macro FP128_AVG() = takes(2) returns(1) {
+    // Stack: [b, a]
+    dup2 0x01 sar              // [a>>1, b, a]
+    dup2 0x01 sar              // [b>>1, a>>1, b, a]
+    add                        // [sum, b, a]
+    swap2 and 0x01 and         // [a&b&1, sum]
+    add                        // [avg]
+}
+
+/// @notice Saturating subtraction: max(0, a - b)
+/// @dev takes(2) returns(1)
+/// Stack input:  [b, a] (b on top)
+/// Stack output: [max(0, a - b)]
+/// Gas: ~15 opcodes
+#define macro FP128_ZERO_FLOOR_SUB() = takes(2) returns(1) {
+    // Stack: [b, a]
+    FP128_SUB()                // [a - b]
+    dup1 IS_NEGATIVE()         // [is_neg, a-b]
+    zfs_select jumpi           // [a-b]
+    zfs_done jump
+    zfs_select:
+    pop 0x00                   // [0]
+    zfs_done:
+}
+
+/// @notice Distance between two signed 128.128 fixed-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input:  [b, a] (b on top)
+/// Stack output: [|a - b|]
+/// Formula: dist(a, b) = abs(a - b)
+/// Gas: ~15 opcodes
+#define macro FP128_DIST() = takes(2) returns(1) {
+    // Stack: [b, a]
+    FP128_SUB()                // [a - b]
+    FP128_ABS()                // [|a - b|]
+}

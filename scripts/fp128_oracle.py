@@ -12,6 +12,17 @@ Functions:
   mul <a_hex> <b_hex>         -- a * b
   div <a_hex> <b_hex>         -- a / b
   pow <base_hex> <exp_hex>    -- base^exp
+  abs <x_hex>                 -- |x|
+  neg <x_hex>                 -- -x
+  inv <x_hex>                 -- 1/x
+  min <a_hex> <b_hex>         -- min(a, b)
+  max <a_hex> <b_hex>         -- max(a, b)
+  clamp <x_hex> <lo_hex> <hi_hex> -- clamp(x, lo, hi)
+  avg <a_hex> <b_hex>         -- (a + b) / 2
+  dist <a_hex> <b_hex>        -- |a - b|
+  gavg <a_hex> <b_hex>        -- sqrt(a * b)
+  log10 <x_hex>               -- log10(x)
+  exp10 <x_hex>               -- 10^x
   exp_range_reduce <x_hex>    -- (k_int, x_prime) for exp range reduction
   exp_bkm_only <rem_hex>      -- BKM loop simulation
 """
@@ -129,6 +140,96 @@ def compute_div(a_str, b_str):
     if b == 0:
         return abi_encode_uint256(0)
     result = a / b
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_abs(x_str):
+    """Compute |x| where x is FP128."""
+    x = from_fp128(x_str)
+    result = abs(x)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_neg(x_str):
+    """Compute -x where x is FP128."""
+    x = from_fp128(x_str)
+    result = -x
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_inv(x_str):
+    """Compute 1/x where x is FP128."""
+    x = from_fp128(x_str)
+    if x == 0:
+        return abi_encode_uint256(0)
+    result = mpf(1) / x
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_min(a_str, b_str):
+    """Compute min(a, b) where both are FP128."""
+    a = from_fp128(a_str)
+    b = from_fp128(b_str)
+    result = min(a, b)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_max(a_str, b_str):
+    """Compute max(a, b) where both are FP128."""
+    a = from_fp128(a_str)
+    b = from_fp128(b_str)
+    result = max(a, b)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_clamp(x_str, lo_str, hi_str):
+    """Compute clamp(x, lo, hi) where all are FP128."""
+    x = from_fp128(x_str)
+    lo = from_fp128(lo_str)
+    hi = from_fp128(hi_str)
+    result = max(lo, min(x, hi))
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_avg(a_str, b_str):
+    """Compute (a + b) / 2 where both are FP128."""
+    a = from_fp128(a_str)
+    b = from_fp128(b_str)
+    result = (a + b) / mpf(2)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_dist(a_str, b_str):
+    """Compute |a - b| where both are FP128."""
+    a = from_fp128(a_str)
+    b = from_fp128(b_str)
+    result = abs(a - b)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_gavg(a_str, b_str):
+    """Compute sqrt(a * b) where both are FP128."""
+    a = from_fp128(a_str)
+    b = from_fp128(b_str)
+    if a < 0 or b < 0:
+        return abi_encode_uint256(0)
+    result = mp_sqrt(a * b)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_log10(x_str):
+    """Compute log10(x) where x is FP128."""
+    x = from_fp128(x_str)
+    if x <= 0:
+        return abi_encode_uint256(0)
+    result = log(x, 10)
+    return abi_encode_uint256(to_fp128_int(result))
+
+
+def compute_exp10(x_str):
+    """Compute 10^x where x is FP128."""
+    x = from_fp128(x_str)
+    result = power(mpf(10), x)
     return abi_encode_uint256(to_fp128_int(result))
 
 
@@ -265,6 +366,26 @@ def compute_multi_format(func_name, a_str, b_str=None):
             result = mpf(0)
         else:
             result = power(a, b)
+    elif func_name == "abs":
+        result = abs(a)
+    elif func_name == "neg":
+        result = -a
+    elif func_name == "inv":
+        result = mpf(1) / a if a != 0 else mpf(0)
+    elif func_name == "min":
+        result = min(a, b) if b is not None else a
+    elif func_name == "max":
+        result = max(a, b) if b is not None else a
+    elif func_name == "avg":
+        result = (a + b) / mpf(2) if b is not None else a
+    elif func_name == "dist":
+        result = abs(a - b) if b is not None else abs(a)
+    elif func_name == "gavg":
+        result = mp_sqrt(a * b) if b is not None and a >= 0 and b >= 0 else mpf(0)
+    elif func_name == "log10":
+        result = log(a, 10) if a > 0 else mpf(0)
+    elif func_name == "exp10":
+        result = power(mpf(10), a)
     else:
         result = mpf(0)
     
@@ -297,6 +418,28 @@ def main():
             result = compute_div(sys.argv[2], sys.argv[3])
         elif func == "pow":
             result = compute_pow(sys.argv[2], sys.argv[3])
+        elif func == "abs":
+            result = compute_abs(sys.argv[2])
+        elif func == "neg":
+            result = compute_neg(sys.argv[2])
+        elif func == "inv":
+            result = compute_inv(sys.argv[2])
+        elif func == "min":
+            result = compute_min(sys.argv[2], sys.argv[3])
+        elif func == "max":
+            result = compute_max(sys.argv[2], sys.argv[3])
+        elif func == "clamp":
+            result = compute_clamp(sys.argv[2], sys.argv[3], sys.argv[4])
+        elif func == "avg":
+            result = compute_avg(sys.argv[2], sys.argv[3])
+        elif func == "dist":
+            result = compute_dist(sys.argv[2], sys.argv[3])
+        elif func == "gavg":
+            result = compute_gavg(sys.argv[2], sys.argv[3])
+        elif func == "log10":
+            result = compute_log10(sys.argv[2])
+        elif func == "exp10":
+            result = compute_exp10(sys.argv[2])
         elif func == "exp_range_reduce":
             result = compute_exp_range_reduce(sys.argv[2])
         elif func == "exp_bkm_only":

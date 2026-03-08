@@ -14,6 +14,26 @@ interface IFP128 {
     function log2Raw(uint256) external view returns (uint256);
     function sqrtRaw(uint256) external view returns (uint256);
     function powRaw(uint256, uint256) external view returns (uint256);
+    function abs(uint256) external view returns (uint256);
+    function neg(uint256) external view returns (uint256);
+    function inv(uint256) external view returns (uint256);
+    function min(uint256, uint256) external view returns (uint256);
+    function max(uint256, uint256) external view returns (uint256);
+    function avg(uint256, uint256) external view returns (uint256);
+    function dist(uint256, uint256) external view returns (uint256);
+    function gavg(uint256, uint256) external view returns (uint256);
+    function log10(uint256) external view returns (uint256);
+    function exp10(uint256) external view returns (uint256);
+    function absRaw(uint256) external view returns (uint256);
+    function negRaw(uint256) external view returns (uint256);
+    function invRaw(uint256) external view returns (uint256);
+    function minRaw(uint256, uint256) external view returns (uint256);
+    function maxRaw(uint256, uint256) external view returns (uint256);
+    function avgRaw(uint256, uint256) external view returns (uint256);
+    function distRaw(uint256, uint256) external view returns (uint256);
+    function gavgRaw(uint256, uint256) external view returns (uint256);
+    function log10Raw(uint256) external view returns (uint256);
+    function exp10Raw(uint256) external view returns (uint256);
 }
 
 /// @title PrecisionSweep
@@ -42,7 +62,7 @@ contract PrecisionSweep is Test {
     
     function _measureCallOverhead(address target) internal view returns (uint256) {
         uint256 g0 = gasleft();
-        (bool ok,) = target.staticcall(abi.encodeWithSignature("mulRaw(uint256,uint256)", uint256(0), uint256(0)));
+        (bool ok,) = target.staticcall(abi.encodeWithSignature("abs(uint256)", uint256(1e18)));
         uint256 g1 = gasleft();
         require(ok, "overhead measurement failed");
         return g0 - g1;
@@ -106,6 +126,60 @@ contract PrecisionSweep is Test {
     function test_sweep_pow() public {
         console.log("SWEEP_START");
         _sweepPow();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_abs() public {
+        console.log("SWEEP_START");
+        _sweepAbs();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_inv() public {
+        console.log("SWEEP_START");
+        _sweepInv();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_min() public {
+        console.log("SWEEP_START");
+        _sweepMin();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_max() public {
+        console.log("SWEEP_START");
+        _sweepMax();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_avg() public {
+        console.log("SWEEP_START");
+        _sweepAvg();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_dist() public {
+        console.log("SWEEP_START");
+        _sweepDist();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_gavg() public {
+        console.log("SWEEP_START");
+        _sweepGavg();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_log10() public {
+        console.log("SWEEP_START");
+        _sweepLog10();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_exp10() public {
+        console.log("SWEEP_START");
+        _sweepExp10();
         console.log("SWEEP_END");
     }
     
@@ -586,6 +660,596 @@ contract PrecisionSweep is Test {
         return vals;
     }
     
+    function _sweepAbs() internal {
+        int256[50] memory vals;
+        
+        // Positive values (25)
+        vals[0] = WAD / 1000;
+        vals[1] = WAD / 100;
+        vals[2] = WAD / 10;
+        vals[3] = WAD / 2;
+        vals[4] = WAD;
+        vals[5] = 2 * WAD;
+        vals[6] = 5 * WAD;
+        vals[7] = 10 * WAD;
+        vals[8] = 100 * WAD;
+        vals[9] = 1000 * WAD;
+        vals[10] = 1e20;
+        vals[11] = 1e22;
+        vals[12] = 1e24;
+        vals[13] = 1e26;
+        vals[14] = 1e28;
+        vals[15] = 1e30;
+        vals[16] = 1e32;
+        vals[17] = 1e34;
+        vals[18] = 1e35;
+        vals[19] = 1e36;
+        vals[20] = 3141592653589793238;
+        vals[21] = 2718281828459045235;
+        vals[22] = 1618033988749894848;
+        vals[23] = 2236067977499789696;
+        vals[24] = 1414213562373095048;
+        
+        // Negative values (25)
+        vals[25] = -WAD / 1000;
+        vals[26] = -WAD / 100;
+        vals[27] = -WAD / 10;
+        vals[28] = -WAD / 2;
+        vals[29] = -WAD;
+        vals[30] = -2 * WAD;
+        vals[31] = -5 * WAD;
+        vals[32] = -10 * WAD;
+        vals[33] = -100 * WAD;
+        vals[34] = -1000 * WAD;
+        vals[35] = -1e20;
+        vals[36] = -1e22;
+        vals[37] = -1e24;
+        vals[38] = -1e26;
+        vals[39] = -1e28;
+        vals[40] = -1e30;
+        vals[41] = -1e32;
+        vals[42] = -1e34;
+        vals[43] = -1e35;
+        vals[44] = -1e36;
+        vals[45] = -3141592653589793238;
+        vals[46] = -2718281828459045235;
+        vals[47] = -1618033988749894848;
+        vals[48] = -2236067977499789696;
+        vals[49] = -1414213562373095048;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("abs", vals[i], 0);
+        }
+    }
+    
+    function _sweepInv() internal {
+        int256[50] memory vals;
+        
+        // Small values (10)
+        vals[0] = WAD / 1000;
+        vals[1] = WAD / 100;
+        vals[2] = WAD / 10;
+        vals[3] = WAD / 5;
+        vals[4] = WAD / 3;
+        vals[5] = WAD / 2;
+        vals[6] = 2 * WAD / 3;
+        vals[7] = 3 * WAD / 4;
+        vals[8] = 9 * WAD / 10;
+        vals[9] = 99 * WAD / 100;
+        
+        // Around 1 (10)
+        vals[10] = WAD;
+        vals[11] = 11 * WAD / 10;
+        vals[12] = 12 * WAD / 10;
+        vals[13] = 13 * WAD / 10;
+        vals[14] = 15 * WAD / 10;
+        vals[15] = 2 * WAD;
+        vals[16] = 3 * WAD;
+        vals[17] = 4 * WAD;
+        vals[18] = 5 * WAD;
+        vals[19] = 10 * WAD;
+        
+        // Large values (20)
+        vals[20] = 100 * WAD;
+        vals[21] = 1000 * WAD;
+        vals[22] = 1e20;
+        vals[23] = 1e21;
+        vals[24] = 1e22;
+        vals[25] = 1e23;
+        vals[26] = 1e24;
+        vals[27] = 1e25;
+        vals[28] = 1e26;
+        vals[29] = 1e27;
+        vals[30] = 1e28;
+        vals[31] = 1e29;
+        vals[32] = 1e30;
+        vals[33] = 1e31;
+        vals[34] = 1e32;
+        vals[35] = 1e33;
+        vals[36] = 1e34;
+        vals[37] = 1e35;
+        vals[38] = 1e36;
+        vals[39] = 1e37;
+        
+        // Special values (10)
+        vals[40] = 3141592653589793238;
+        vals[41] = 2718281828459045235;
+        vals[42] = 1618033988749894848;
+        vals[43] = 2236067977499789696;
+        vals[44] = 1414213562373095048;
+        vals[45] = 7071067811865475244;
+        vals[46] = 5772156649015328606;
+        vals[47] = 6931471805599453094;
+        vals[48] = 4342944819032518276;
+        vals[49] = 3010299956639811952;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("inv", vals[i], 0);
+        }
+    }
+    
+    function _sweepMin() internal {
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Both positive (15)
+        a[0] = WAD; b[0] = 2 * WAD;
+        a[1] = 2 * WAD; b[1] = WAD;
+        a[2] = 5 * WAD; b[2] = 10 * WAD;
+        a[3] = 10 * WAD; b[3] = 5 * WAD;
+        a[4] = 100 * WAD; b[4] = 1000 * WAD;
+        a[5] = 1e20; b[5] = 1e22;
+        a[6] = 1e24; b[6] = 1e26;
+        a[7] = 1e28; b[7] = 1e30;
+        a[8] = 3141592653589793238; b[8] = 2718281828459045235;
+        a[9] = WAD / 2; b[9] = WAD / 3;
+        a[10] = WAD / 10; b[10] = WAD / 100;
+        a[11] = 1e6; b[11] = 1e9;
+        a[12] = 1e12; b[12] = 1e15;
+        a[13] = 1e18; b[13] = 1e21;
+        a[14] = 1e24; b[14] = 1e27;
+        
+        // Both negative (15)
+        a[15] = -WAD; b[15] = -2 * WAD;
+        a[16] = -2 * WAD; b[16] = -WAD;
+        a[17] = -5 * WAD; b[17] = -10 * WAD;
+        a[18] = -10 * WAD; b[18] = -5 * WAD;
+        a[19] = -100 * WAD; b[19] = -1000 * WAD;
+        a[20] = -1e20; b[20] = -1e22;
+        a[21] = -1e24; b[21] = -1e26;
+        a[22] = -1e28; b[22] = -1e30;
+        a[23] = -3141592653589793238; b[23] = -2718281828459045235;
+        a[24] = -WAD / 2; b[24] = -WAD / 3;
+        a[25] = -WAD / 10; b[25] = -WAD / 100;
+        a[26] = -1e6; b[26] = -1e9;
+        a[27] = -1e12; b[27] = -1e15;
+        a[28] = -1e18; b[28] = -1e21;
+        a[29] = -1e24; b[29] = -1e27;
+        
+        // Mixed signs (20)
+        a[30] = WAD; b[30] = -WAD;
+        a[31] = -WAD; b[31] = WAD;
+        a[32] = 5 * WAD; b[32] = -2 * WAD;
+        a[33] = -5 * WAD; b[33] = 2 * WAD;
+        a[34] = 100 * WAD; b[34] = -100 * WAD;
+        a[35] = -100 * WAD; b[35] = 100 * WAD;
+        a[36] = 1e20; b[36] = -1e20;
+        a[37] = -1e20; b[37] = 1e20;
+        a[38] = 1e24; b[38] = -1e22;
+        a[39] = -1e24; b[39] = 1e22;
+        a[40] = WAD / 2; b[40] = -WAD / 3;
+        a[41] = -WAD / 2; b[41] = WAD / 3;
+        a[42] = 1e6; b[42] = -1e9;
+        a[43] = -1e6; b[43] = 1e9;
+        a[44] = 1e12; b[44] = -1e15;
+        a[45] = -1e12; b[45] = 1e15;
+        a[46] = 1e18; b[46] = -1e21;
+        a[47] = -1e18; b[47] = 1e21;
+        a[48] = 1e24; b[48] = -1e27;
+        a[49] = -1e24; b[49] = 1e27;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("min", a[i], b[i]);
+        }
+    }
+    
+    function _sweepMax() internal {
+        // Use same test cases as min
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Both positive (15)
+        a[0] = WAD; b[0] = 2 * WAD;
+        a[1] = 2 * WAD; b[1] = WAD;
+        a[2] = 5 * WAD; b[2] = 10 * WAD;
+        a[3] = 10 * WAD; b[3] = 5 * WAD;
+        a[4] = 100 * WAD; b[4] = 1000 * WAD;
+        a[5] = 1e20; b[5] = 1e22;
+        a[6] = 1e24; b[6] = 1e26;
+        a[7] = 1e28; b[7] = 1e30;
+        a[8] = 3141592653589793238; b[8] = 2718281828459045235;
+        a[9] = WAD / 2; b[9] = WAD / 3;
+        a[10] = WAD / 10; b[10] = WAD / 100;
+        a[11] = 1e6; b[11] = 1e9;
+        a[12] = 1e12; b[12] = 1e15;
+        a[13] = 1e18; b[13] = 1e21;
+        a[14] = 1e24; b[14] = 1e27;
+        
+        // Both negative (15)
+        a[15] = -WAD; b[15] = -2 * WAD;
+        a[16] = -2 * WAD; b[16] = -WAD;
+        a[17] = -5 * WAD; b[17] = -10 * WAD;
+        a[18] = -10 * WAD; b[18] = -5 * WAD;
+        a[19] = -100 * WAD; b[19] = -1000 * WAD;
+        a[20] = -1e20; b[20] = -1e22;
+        a[21] = -1e24; b[21] = -1e26;
+        a[22] = -1e28; b[22] = -1e30;
+        a[23] = -3141592653589793238; b[23] = -2718281828459045235;
+        a[24] = -WAD / 2; b[24] = -WAD / 3;
+        a[25] = -WAD / 10; b[25] = -WAD / 100;
+        a[26] = -1e6; b[26] = -1e9;
+        a[27] = -1e12; b[27] = -1e15;
+        a[28] = -1e18; b[28] = -1e21;
+        a[29] = -1e24; b[29] = -1e27;
+        
+        // Mixed signs (20)
+        a[30] = WAD; b[30] = -WAD;
+        a[31] = -WAD; b[31] = WAD;
+        a[32] = 5 * WAD; b[32] = -2 * WAD;
+        a[33] = -5 * WAD; b[33] = 2 * WAD;
+        a[34] = 100 * WAD; b[34] = -100 * WAD;
+        a[35] = -100 * WAD; b[35] = 100 * WAD;
+        a[36] = 1e20; b[36] = -1e20;
+        a[37] = -1e20; b[37] = 1e20;
+        a[38] = 1e24; b[38] = -1e22;
+        a[39] = -1e24; b[39] = 1e22;
+        a[40] = WAD / 2; b[40] = -WAD / 3;
+        a[41] = -WAD / 2; b[41] = WAD / 3;
+        a[42] = 1e6; b[42] = -1e9;
+        a[43] = -1e6; b[43] = 1e9;
+        a[44] = 1e12; b[44] = -1e15;
+        a[45] = -1e12; b[45] = 1e15;
+        a[46] = 1e18; b[46] = -1e21;
+        a[47] = -1e18; b[47] = 1e21;
+        a[48] = 1e24; b[48] = -1e27;
+        a[49] = -1e24; b[49] = 1e27;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("max", a[i], b[i]);
+        }
+    }
+    
+    function _sweepAvg() internal {
+        // Use same test cases as min/max
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Both positive (20)
+        a[0] = WAD; b[0] = 2 * WAD;
+        a[1] = 2 * WAD; b[1] = WAD;
+        a[2] = 5 * WAD; b[2] = 10 * WAD;
+        a[3] = 10 * WAD; b[3] = 5 * WAD;
+        a[4] = 100 * WAD; b[4] = 1000 * WAD;
+        a[5] = 1e20; b[5] = 1e22;
+        a[6] = 1e24; b[6] = 1e26;
+        a[7] = 1e28; b[7] = 1e30;
+        a[8] = 3141592653589793238; b[8] = 2718281828459045235;
+        a[9] = WAD / 2; b[9] = WAD / 3;
+        a[10] = WAD / 10; b[10] = WAD / 100;
+        a[11] = 1e6; b[11] = 1e9;
+        a[12] = 1e12; b[12] = 1e15;
+        a[13] = 1e18; b[13] = 1e21;
+        a[14] = 1e24; b[14] = 1e27;
+        a[15] = 1e30; b[15] = 1e32;
+        a[16] = 1e34; b[16] = 1e36;
+        a[17] = 1e37; b[17] = 1e37;
+        a[18] = 1e36; b[18] = 1e35;
+        a[19] = 1e35; b[19] = 1e34;
+        
+        // Both negative (15)
+        a[20] = -WAD; b[20] = -2 * WAD;
+        a[21] = -2 * WAD; b[21] = -WAD;
+        a[22] = -5 * WAD; b[22] = -10 * WAD;
+        a[23] = -10 * WAD; b[23] = -5 * WAD;
+        a[24] = -100 * WAD; b[24] = -1000 * WAD;
+        a[25] = -1e20; b[25] = -1e22;
+        a[26] = -1e24; b[26] = -1e26;
+        a[27] = -1e28; b[27] = -1e30;
+        a[28] = -3141592653589793238; b[28] = -2718281828459045235;
+        a[29] = -WAD / 2; b[29] = -WAD / 3;
+        a[30] = -WAD / 10; b[30] = -WAD / 100;
+        a[31] = -1e6; b[31] = -1e9;
+        a[32] = -1e12; b[32] = -1e15;
+        a[33] = -1e18; b[33] = -1e21;
+        a[34] = -1e24; b[34] = -1e27;
+        
+        // Mixed signs (15)
+        a[35] = WAD; b[35] = -WAD;
+        a[36] = -WAD; b[36] = WAD;
+        a[37] = 5 * WAD; b[37] = -2 * WAD;
+        a[38] = -5 * WAD; b[38] = 2 * WAD;
+        a[39] = 100 * WAD; b[39] = -100 * WAD;
+        a[40] = -100 * WAD; b[40] = 100 * WAD;
+        a[41] = 1e20; b[41] = -1e20;
+        a[42] = -1e20; b[42] = 1e20;
+        a[43] = 1e24; b[43] = -1e22;
+        a[44] = -1e24; b[44] = 1e22;
+        a[45] = WAD / 2; b[45] = -WAD / 3;
+        a[46] = -WAD / 2; b[46] = WAD / 3;
+        a[47] = 1e6; b[47] = -1e9;
+        a[48] = -1e6; b[48] = 1e9;
+        a[49] = 0; b[49] = 0;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("avg", a[i], b[i]);
+        }
+    }
+    
+    function _sweepDist() internal {
+        // Use same test cases as min/max
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Both positive (15)
+        a[0] = WAD; b[0] = 2 * WAD;
+        a[1] = 2 * WAD; b[1] = WAD;
+        a[2] = 5 * WAD; b[2] = 10 * WAD;
+        a[3] = 10 * WAD; b[3] = 5 * WAD;
+        a[4] = 100 * WAD; b[4] = 1000 * WAD;
+        a[5] = 1e20; b[5] = 1e22;
+        a[6] = 1e24; b[6] = 1e26;
+        a[7] = 1e28; b[7] = 1e30;
+        a[8] = 3141592653589793238; b[8] = 2718281828459045235;
+        a[9] = WAD / 2; b[9] = WAD / 3;
+        a[10] = WAD / 10; b[10] = WAD / 100;
+        a[11] = 1e6; b[11] = 1e9;
+        a[12] = 1e12; b[12] = 1e15;
+        a[13] = 1e18; b[13] = 1e21;
+        a[14] = 1e24; b[14] = 1e27;
+        
+        // Both negative (15)
+        a[15] = -WAD; b[15] = -2 * WAD;
+        a[16] = -2 * WAD; b[16] = -WAD;
+        a[17] = -5 * WAD; b[17] = -10 * WAD;
+        a[18] = -10 * WAD; b[18] = -5 * WAD;
+        a[19] = -100 * WAD; b[19] = -1000 * WAD;
+        a[20] = -1e20; b[20] = -1e22;
+        a[21] = -1e24; b[21] = -1e26;
+        a[22] = -1e28; b[22] = -1e30;
+        a[23] = -3141592653589793238; b[23] = -2718281828459045235;
+        a[24] = -WAD / 2; b[24] = -WAD / 3;
+        a[25] = -WAD / 10; b[25] = -WAD / 100;
+        a[26] = -1e6; b[26] = -1e9;
+        a[27] = -1e12; b[27] = -1e15;
+        a[28] = -1e18; b[28] = -1e21;
+        a[29] = -1e24; b[29] = -1e27;
+        
+        // Mixed signs (20)
+        a[30] = WAD; b[30] = -WAD;
+        a[31] = -WAD; b[31] = WAD;
+        a[32] = 5 * WAD; b[32] = -2 * WAD;
+        a[33] = -5 * WAD; b[33] = 2 * WAD;
+        a[34] = 100 * WAD; b[34] = -100 * WAD;
+        a[35] = -100 * WAD; b[35] = 100 * WAD;
+        a[36] = 1e20; b[36] = -1e20;
+        a[37] = -1e20; b[37] = 1e20;
+        a[38] = 1e24; b[38] = -1e22;
+        a[39] = -1e24; b[39] = 1e22;
+        a[40] = WAD / 2; b[40] = -WAD / 3;
+        a[41] = -WAD / 2; b[41] = WAD / 3;
+        a[42] = 1e6; b[42] = -1e9;
+        a[43] = -1e6; b[43] = 1e9;
+        a[44] = 1e12; b[44] = -1e15;
+        a[45] = -1e12; b[45] = 1e15;
+        a[46] = 1e18; b[46] = -1e21;
+        a[47] = -1e18; b[47] = 1e21;
+        a[48] = 1e24; b[48] = -1e27;
+        a[49] = -1e24; b[49] = 1e27;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("dist", a[i], b[i]);
+        }
+    }
+    
+    function _sweepGavg() internal {
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Small * small (10)
+        a[0] = WAD / 100; b[0] = WAD / 50;
+        a[1] = WAD / 10; b[1] = WAD / 5;
+        a[2] = WAD / 5; b[2] = WAD / 3;
+        a[3] = WAD / 3; b[3] = WAD / 2;
+        a[4] = WAD / 2; b[4] = WAD;
+        a[5] = WAD; b[5] = WAD / 10;
+        a[6] = 2 * WAD; b[6] = WAD / 2;
+        a[7] = 5 * WAD; b[7] = WAD / 5;
+        a[8] = 10 * WAD; b[8] = WAD / 10;
+        a[9] = 4 * WAD; b[9] = 9 * WAD;
+        
+        // Typical * typical (20)
+        a[10] = WAD; b[10] = WAD;
+        a[11] = 2 * WAD; b[11] = 3 * WAD;
+        a[12] = 5 * WAD; b[12] = 7 * WAD;
+        a[13] = 10 * WAD; b[13] = 10 * WAD;
+        a[14] = WAD / 2; b[14] = WAD / 3;
+        a[15] = 3141592653589793238; b[15] = 2718281828459045235;
+        a[16] = 100 * WAD; b[16] = WAD / 100;
+        a[17] = 1000 * WAD; b[17] = WAD / 1000;
+        a[18] = 1e6; b[18] = 1e12;
+        a[19] = 1e9; b[19] = 1e9;
+        a[20] = 1e12; b[20] = 1e6;
+        a[21] = 1e15; b[21] = 1e3;
+        a[22] = 1e16; b[22] = 1e2;
+        a[23] = 1e17; b[23] = 1e1;
+        a[24] = 5e17; b[24] = 2e17;
+        a[25] = 1e20; b[25] = 1e18;
+        a[26] = 1e22; b[26] = 1e16;
+        a[27] = 1e24; b[27] = 1e14;
+        a[28] = 1e26; b[28] = 1e12;
+        a[29] = 1e28; b[29] = 1e10;
+        
+        // Large * large (10)
+        a[30] = 1e20; b[30] = 1e20;
+        a[31] = 1e22; b[31] = 1e18;
+        a[32] = 1e24; b[32] = 1e16;
+        a[33] = 1e26; b[33] = 1e14;
+        a[34] = 1e28; b[34] = 1e12;
+        a[35] = 1e30; b[35] = 1e10;
+        a[36] = 1e32; b[36] = 1e8;
+        a[37] = 1e34; b[37] = 1e6;
+        a[38] = 1e35; b[38] = 1e5;
+        a[39] = 1e36; b[39] = 1e4;
+        
+        // Perfect squares (10)
+        a[40] = WAD; b[40] = 4 * WAD;
+        a[41] = 4 * WAD; b[41] = 9 * WAD;
+        a[42] = 9 * WAD; b[42] = 16 * WAD;
+        a[43] = 16 * WAD; b[43] = 25 * WAD;
+        a[44] = 25 * WAD; b[44] = 36 * WAD;
+        a[45] = 36 * WAD; b[45] = 49 * WAD;
+        a[46] = 49 * WAD; b[46] = 64 * WAD;
+        a[47] = 64 * WAD; b[47] = 81 * WAD;
+        a[48] = 81 * WAD; b[48] = 100 * WAD;
+        a[49] = 100 * WAD; b[49] = 121 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("gavg", a[i], b[i]);
+        }
+    }
+    
+    function _sweepLog10() internal {
+        int256[50] memory vals;
+        
+        // Small values (10)
+        vals[0] = WAD / 1000;
+        vals[1] = WAD / 100;
+        vals[2] = WAD / 10;
+        vals[3] = WAD / 5;
+        vals[4] = WAD / 3;
+        vals[5] = WAD / 2;
+        vals[6] = 2 * WAD / 3;
+        vals[7] = 3 * WAD / 4;
+        vals[8] = 9 * WAD / 10;
+        vals[9] = 99 * WAD / 100;
+        
+        // Around 1 (10)
+        vals[10] = WAD;
+        vals[11] = 11 * WAD / 10;
+        vals[12] = 12 * WAD / 10;
+        vals[13] = 15 * WAD / 10;
+        vals[14] = 2 * WAD;
+        vals[15] = 3 * WAD;
+        vals[16] = 5 * WAD;
+        vals[17] = 7 * WAD;
+        vals[18] = 9 * WAD;
+        vals[19] = 10 * WAD;
+        
+        // Powers of 10 (10)
+        vals[20] = 10 * WAD;
+        vals[21] = 100 * WAD;
+        vals[22] = 1000 * WAD;
+        vals[23] = 1e22;
+        vals[24] = 1e23;
+        vals[25] = 1e24;
+        vals[26] = 1e25;
+        vals[27] = 1e26;
+        vals[28] = 1e27;
+        vals[29] = 1e28;
+        
+        // Large values (10)
+        vals[30] = 1e29;
+        vals[31] = 1e30;
+        vals[32] = 1e31;
+        vals[33] = 1e32;
+        vals[34] = 1e33;
+        vals[35] = 1e34;
+        vals[36] = 1e35;
+        vals[37] = 1e36;
+        vals[38] = 1e37;
+        vals[39] = 1e38;
+        
+        // Special values (10)
+        vals[40] = 3141592653589793238;
+        vals[41] = 2718281828459045235;
+        vals[42] = 1618033988749894848;
+        vals[43] = 2236067977499789696;
+        vals[44] = 1414213562373095048;
+        vals[45] = 7071067811865475244;
+        vals[46] = 5772156649015328606;
+        vals[47] = 6931471805599453094;
+        vals[48] = 4342944819032518276;
+        vals[49] = 3010299956639811952;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("log10", vals[i], 0);
+        }
+    }
+    
+    function _sweepExp10() internal {
+        int256[50] memory vals;
+        
+        // Negative exponents (15)
+        vals[0] = -10 * WAD;
+        vals[1] = -9 * WAD;
+        vals[2] = -8 * WAD;
+        vals[3] = -7 * WAD;
+        vals[4] = -6 * WAD;
+        vals[5] = -5 * WAD;
+        vals[6] = -4 * WAD;
+        vals[7] = -3 * WAD;
+        vals[8] = -2 * WAD;
+        vals[9] = -WAD;
+        vals[10] = -WAD / 2;
+        vals[11] = -WAD / 3;
+        vals[12] = -WAD / 5;
+        vals[13] = -WAD / 10;
+        vals[14] = -WAD / 100;
+        
+        // Around zero (10)
+        vals[15] = 0;
+        vals[16] = WAD / 100;
+        vals[17] = WAD / 10;
+        vals[18] = WAD / 5;
+        vals[19] = WAD / 3;
+        vals[20] = WAD / 2;
+        vals[21] = 2 * WAD / 3;
+        vals[22] = 3 * WAD / 4;
+        vals[23] = 9 * WAD / 10;
+        vals[24] = 99 * WAD / 100;
+        
+        // Positive exponents (25)
+        vals[25] = WAD;
+        vals[26] = 11 * WAD / 10;
+        vals[27] = 12 * WAD / 10;
+        vals[28] = 15 * WAD / 10;
+        vals[29] = 2 * WAD;
+        vals[30] = 3 * WAD;
+        vals[31] = 4 * WAD;
+        vals[32] = 5 * WAD;
+        vals[33] = 6 * WAD;
+        vals[34] = 7 * WAD;
+        vals[35] = 8 * WAD;
+        vals[36] = 9 * WAD;
+        vals[37] = 10 * WAD;
+        vals[38] = 11 * WAD;
+        vals[39] = 12 * WAD;
+        vals[40] = 13 * WAD;
+        vals[41] = 14 * WAD;
+        vals[42] = 15 * WAD;
+        vals[43] = 16 * WAD;
+        vals[44] = 17 * WAD;
+        vals[45] = 18 * WAD;
+        vals[46] = 19 * WAD;
+        vals[47] = 20 * WAD;
+        vals[48] = 18 * WAD;
+        vals[49] = 19 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("exp10", vals[i], 0);
+        }
+    }
+    
     // ============================================================================
     // SAMPLE RUNNER
     // ============================================================================
@@ -596,17 +1260,29 @@ contract PrecisionSweep is Test {
         
         // Run FP128
         (uint256 fp128_gas, uint256 fp128_digits, int256 fp128_error_bits) = _runFp128(func, a_wad, b_wad, fp128_exp);
-        
-        // Run ABDK
-        (uint256 abdk_gas, uint256 abdk_digits, int256 abdk_error_bits) = _runAbdk(func, a_wad, b_wad, abdk_exp);
-        
-        // Run Solady
-        (uint256 solady_gas, uint256 solady_digits, int256 solady_error_bits) = _runSolady(func, a_wad, b_wad, wad_exp);
-        
-        // Emit SWEEP lines
         _emitSweep("fp128", func, a_wad, b_wad, fp128_gas, fp128_digits, fp128_error_bits);
-        _emitSweep("abdk", func, a_wad, b_wad, abdk_gas, abdk_digits, abdk_error_bits);
-        _emitSweep("solady", func, a_wad, b_wad, solady_gas, solady_digits, solady_error_bits);
+        
+        // Run ABDK (try-catch to handle overflow/unsupported inputs)
+        try this.runAbdkExternal(func, a_wad, b_wad, abdk_exp) returns (uint256 ag, uint256 ad, int256 ae) {
+            _emitSweep("abdk", func, a_wad, b_wad, ag, ad, ae);
+        } catch {}
+        
+        // Run Solady (try-catch to handle overflow/unsupported inputs)
+        try this.runSoladyExternal(func, a_wad, b_wad, wad_exp) returns (uint256 sg, uint256 sd, int256 se) {
+            _emitSweep("solady", func, a_wad, b_wad, sg, sd, se);
+        } catch {}
+    }
+    
+    function runAbdkExternal(string calldata func, int256 a_wad, int256 b_wad, uint256 exp_abdk)
+        external view returns (uint256, uint256, int256)
+    {
+        return _runAbdk(func, a_wad, b_wad, exp_abdk);
+    }
+    
+    function runSoladyExternal(string calldata func, int256 a_wad, int256 b_wad, uint256 exp_wad)
+        external view returns (uint256, uint256, int256)
+    {
+        return _runSolady(func, a_wad, b_wad, exp_wad);
     }
     
     function _emitSweep(
@@ -665,6 +1341,24 @@ contract PrecisionSweep is Test {
             result_fp128 = fp128.sqrtRaw(a_fp128);
         } else if (funcHash == keccak256("pow")) {
             result_fp128 = fp128.powRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("abs")) {
+            result_fp128 = fp128.absRaw(a_fp128);
+        } else if (funcHash == keccak256("inv")) {
+            result_fp128 = fp128.invRaw(a_fp128);
+        } else if (funcHash == keccak256("min")) {
+            result_fp128 = fp128.minRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("max")) {
+            result_fp128 = fp128.maxRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("avg")) {
+            result_fp128 = fp128.avgRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("dist")) {
+            result_fp128 = fp128.distRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("gavg")) {
+            result_fp128 = fp128.gavgRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("log10")) {
+            result_fp128 = fp128.log10Raw(a_fp128);
+        } else if (funcHash == keccak256("exp10")) {
+            result_fp128 = fp128.exp10Raw(a_fp128);
         }
         
         gas_ = g0 - gasleft();
@@ -720,6 +1414,24 @@ contract PrecisionSweep is Test {
                 error_bits_ = 0;
                 return (gas_, digits_, error_bits_);
             }
+        } else if (funcHash == keccak256("abs")) {
+            result64 = ABDKMath64x64.abs(a64);
+        } else if (funcHash == keccak256("inv")) {
+            result64 = ABDKMath64x64.inv(a64);
+        } else if (funcHash == keccak256("min")) {
+            result64 = a64 < b64 ? a64 : b64;
+        } else if (funcHash == keccak256("max")) {
+            result64 = a64 > b64 ? a64 : b64;
+        } else if (funcHash == keccak256("avg")) {
+            result64 = ABDKMath64x64.avg(a64, b64);
+        } else if (funcHash == keccak256("dist")) {
+            result64 = ABDKMath64x64.abs(ABDKMath64x64.sub(a64, b64));
+        } else if (funcHash == keccak256("gavg")) {
+            result64 = ABDKMath64x64.gavg(a64, b64);
+        } else if (funcHash == keccak256("log10")) {
+            result64 = ABDKMath64x64.div(ABDKMath64x64.log_2(a64), ABDKMath64x64.log_2(int128(10 << 64)));
+        } else if (funcHash == keccak256("exp10")) {
+            result64 = ABDKMath64x64.exp_2(ABDKMath64x64.mul(a64, ABDKMath64x64.log_2(int128(10 << 64))));
         }
         
         gas_ = g0 - gasleft();
@@ -760,6 +1472,28 @@ contract PrecisionSweep is Test {
             result = FixedPointMathLib.sqrtWad(ua);
         } else if (funcHash == keccak256("pow")) {
             result = uint256(FixedPointMathLib.powWad(a_wad, b_wad));
+        } else if (funcHash == keccak256("abs")) {
+            result = uint256(FixedPointMathLib.abs(a_wad));
+        } else if (funcHash == keccak256("inv")) {
+            result = FixedPointMathLib.divWad(uint256(WAD), ua);
+        } else if (funcHash == keccak256("min")) {
+            result = uint256(FixedPointMathLib.min(a_wad, b_wad));
+        } else if (funcHash == keccak256("max")) {
+            result = uint256(FixedPointMathLib.max(a_wad, b_wad));
+        } else if (funcHash == keccak256("avg")) {
+            result = uint256(FixedPointMathLib.avg(a_wad, b_wad));
+        } else if (funcHash == keccak256("dist")) {
+            result = uint256(FixedPointMathLib.dist(a_wad, b_wad));
+        } else if (funcHash == keccak256("gavg")) {
+            result = FixedPointMathLib.sqrtWad(FixedPointMathLib.mulWad(ua, ub));
+        } else if (funcHash == keccak256("log10")) {
+            // Solady log10 is integer-only (floor), not fixed-point. Use ln(x)/ln(10) instead.
+            int256 ln10 = 2302585092994045684;
+            result = uint256(FixedPointMathLib.lnWad(a_wad) * WAD / ln10);
+        } else if (funcHash == keccak256("exp10")) {
+            // Solady doesn't have exp10, use exp10(x) = exp(x * ln(10))
+            int256 ln10 = 2302585092994045684; // ln(10) in WAD
+            result = uint256(FixedPointMathLib.expWad((a_wad * ln10) / WAD));
         }
         
         gas_ = g0 - gasleft();
@@ -775,12 +1509,20 @@ contract PrecisionSweep is Test {
     function _oracleMulti(string memory func, int256 a_wad, int256 b_wad)
         internal returns (uint256 fp128_exp, uint256 wad_exp, uint256 abdk_exp)
     {
-        string[] memory cmd = new string[](b_wad == 0 ? 4 : 5);
+        bytes32 funcHash = keccak256(bytes(func));
+        bool isBinary = (
+            funcHash == keccak256("mul") || funcHash == keccak256("div") ||
+            funcHash == keccak256("add") || funcHash == keccak256("sub") ||
+            funcHash == keccak256("pow") || funcHash == keccak256("min") ||
+            funcHash == keccak256("max") || funcHash == keccak256("avg") ||
+            funcHash == keccak256("dist") || funcHash == keccak256("gavg")
+        );
+        string[] memory cmd = new string[](isBinary ? 5 : 4);
         cmd[0] = "python3";
         cmd[1] = "scripts/fp128_oracle.py";
         cmd[2] = string.concat("multi_", func);
         cmd[3] = vm.toString(a_wad);
-        if (b_wad != 0) {
+        if (isBinary) {
             cmd[4] = vm.toString(b_wad);
         }
         bytes memory out = vm.ffi(cmd);

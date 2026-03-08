@@ -86,29 +86,43 @@ compile_huff_file() {
   },
   {
     "type": "function",
-    "name": "mulRaw",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "divRaw",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "fromFixed18",
+    "name": "exp",
     "inputs": [{"name": "x", "type": "uint256"}],
     "outputs": [{"type": "uint256"}],
     "stateMutability": "pure"
   },
   {
     "type": "function",
-    "name": "toFixed18",
+    "name": "exp2",
     "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "ln",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "log2",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "sqrt",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "pow",
+    "inputs": [{"name": "x", "type": "uint256"}, {"name": "y", "type": "uint256"}],
     "outputs": [{"type": "uint256"}],
     "stateMutability": "pure"
   }

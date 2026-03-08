@@ -5,7 +5,7 @@
  */
 
 const LIBS = ['fp128', 'abdk', 'solady'];
-const FUNCTIONS = ['mul', 'div', 'add', 'sub', 'exp', 'exp2', 'ln', 'log2', 'sqrt', 'pow'];
+const FUNCTIONS = ['mul', 'div', 'add', 'sub', 'exp', 'exp2', 'ln', 'log2', 'sqrt', 'pow', 'abs', 'inv', 'min', 'max', 'avg', 'dist', 'gavg', 'log10', 'exp10'];
 
 const LIB_META = {
     fp128:  { name: 'FP128',  format: '128.128 fixed-point', lang: 'Huff',            color: '#2196F3' },

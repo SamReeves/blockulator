@@ -1,0 +1,73 @@
+/// @title FP128 Transcendental Utility Functions
+/// @notice Additional transcendental operations built on core functions
+/// @dev Requires: constants.huff, arithmetic.huff, log2.huff, exp.huff, sqrt.huff
+
+// ============================================================================
+// Constants for Base-10 Operations
+// ============================================================================
+
+// log2(10) in 128.128 format ≈ 3.321928094887362347870319429489390175864831393024580612054756395815934776608
+#define constant LOG2_10_FP128 = 0x00000000000000000000000000000003526ce8a82ac2cf3ad07ad8e1cf1bf68a
+
+// 1/log2(10) in 128.128 format ≈ 0.301029995663981195213738894724493026768189881462108541310427461127108189274
+#define constant INV_LOG2_10_FP128 = 0x000000000000000000000000000000004d104d427de7fbcc47c4acd605be48bc
+
+// ============================================================================
+// Geometric Mean
+// ============================================================================
+
+/// @notice Geometric mean of two 128.128 fixed-point numbers
+/// @dev takes(2) returns(1)
+/// Stack input:  [b, a] (b on top)
+/// Stack output: [sqrt(a * b)]
+/// Formula: gavg(a, b) = sqrt(a * b)
+/// Gas: ~600-700 (mul + sqrt)
+/// Note: Both inputs should be non-negative for real result
+#define macro FP128_GAVG() = takes(2) returns(1) {
+    // Stack: [b, a]
+    FP128_MUL()                // [a * b]
+    FP128_SQRT()               // [sqrt(a * b)]
+}
+
+// Alias for compatibility with Solady naming
+#define macro FP128_MUL_SQRT() = takes(2) returns(1) {
+    FP128_GAVG()
+}
+
+// ============================================================================
+// Base-10 Logarithm
+// ============================================================================
+
+/// @notice Base-10 logarithm of a 128.128 fixed-point number
+/// @dev takes(1) returns(1)
+/// Stack input:  [x]
+/// Stack output: [log10(x)]
+/// Formula: log10(x) = log2(x) / log2(10)
+/// Gas: ~1100-1200 (log2 + mul)
+/// Precision: ~38 decimal digits (inherits from log2)
+#define macro FP128_LOG10() = takes(1) returns(1) {
+    // Stack: [x]
+    FP128_LOG2()               // [log2(x)]
+    [INV_LOG2_10_FP128]        // [1/log2(10), log2(x)]
+    FP128_MUL()                // [log10(x)]
+}
+
+// ============================================================================
+// Base-10 Exponential
+// ============================================================================
+
+/// @notice Base-10 exponential: 10^x
+/// @dev takes(1) returns(1)
+/// Stack input:  [x]
+/// Stack output: [10^x]
+/// Formula: 10^x = 2^(x * log2(10))
+/// Gas: ~1000-1100 (mul + exp2)
+/// Precision: ~38 decimal digits (inherits from exp2)
+/// Range: x must be in range where 10^x doesn't overflow/underflow
+///        Roughly -38 < x < 38 for safe operation
+#define macro FP128_EXP10() = takes(1) returns(1) {
+    // Stack: [x]
+    [LOG2_10_FP128]            // [log2(10), x]
+    FP128_MUL()                // [x * log2(10)]
+    FP128_EXP2()               // [2^(x * log2(10)) = 10^x]
+}

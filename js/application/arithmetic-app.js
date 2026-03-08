@@ -37,7 +37,7 @@ export class ArithmeticApp {
                 <!-- Header -->
                 <div class="arithmetic-header">
                     <h2 class="arithmetic-title">FP128</h2>
-                    <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point • exp, ln, sqrt</p>
+                    <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point • exp, exp2, ln, log2, sqrt, pow</p>
                 </div>
 
                 <!-- LCD Screen -->
@@ -75,8 +75,13 @@ export class ArithmeticApp {
                     </div>
                     <div class="arithmetic-operators" style="margin-top: 0.5rem;">
                         <button class="ti-key" data-op="exp" data-cat="transcendental" title="Exponential">exp</button>
+                        <button class="ti-key" data-op="exp2" data-cat="transcendental" title="Base-2 Exponential">exp2</button>
                         <button class="ti-key" data-op="ln" data-cat="transcendental" title="Natural Logarithm">ln</button>
+                        <button class="ti-key" data-op="log2" data-cat="transcendental" title="Base-2 Logarithm">log2</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
                         <button class="ti-key" data-op="sqrt" data-cat="transcendental" title="Square Root">√</button>
+                        <button class="ti-key" data-op="pow" data-cat="power" title="Power (x^y)">x^y</button>
                     </div>
                     <button id="arith-calculate" class="ti-calculate-btn">CALCULATE</button>
                 </div>
@@ -103,7 +108,7 @@ export class ArithmeticApp {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Operations:</span>
-                            <span class="info-value">ADD, SUB, MUL, DIV, EXP, LN, SQRT</span>
+                            <span class="info-value">ADD, SUB, MUL, DIV, EXP, EXP2, LN, LOG2, SQRT, POW</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Internal:</span>
@@ -323,6 +328,18 @@ export class ArithmeticApp {
                     border-color: #6db4d5;
                 }
 
+                .ti-key[data-cat="power"] {
+                    background: #301a30;
+                    border-color: #603560;
+                    color: #d56db4;
+                    font-size: 0.875rem;
+                }
+
+                .ti-key[data-cat="power"]:hover {
+                    background: #502550;
+                    border-color: #d56db4;
+                }
+
                 .arithmetic-input-row.hidden {
                     display: none;
                 }
@@ -484,6 +501,7 @@ export class ArithmeticApp {
                 btn.classList.add('selected');
                 this.selectedOp = btn.dataset.op;
                 this.isTranscendental = btn.dataset.cat === 'transcendental';
+                const isPower = btn.dataset.cat === 'power';
                 
                 // Show/hide B input based on operation type
                 const inputBRow = document.getElementById('input-b-row');
@@ -491,9 +509,14 @@ export class ArithmeticApp {
                 if (this.isTranscendental) {
                     inputBRow.classList.add('hidden');
                     labelA.textContent = 'x:';
+                } else if (isPower) {
+                    inputBRow.classList.remove('hidden');
+                    labelA.textContent = 'x:';
+                    document.querySelector('#input-b-row .arithmetic-label').textContent = 'y:';
                 } else {
                     inputBRow.classList.remove('hidden');
                     labelA.textContent = 'A:';
+                    document.querySelector('#input-b-row .arithmetic-label').textContent = 'B:';
                 }
                 
                 this.updateExpression();
@@ -536,9 +559,16 @@ export class ArithmeticApp {
         const a = document.getElementById('input-a').value.trim() || '0';
         
         if (this.isTranscendental) {
-            const opNames = { exp: 'exp', ln: 'ln', sqrt: '√' };
+            const opNames = { exp: 'exp', exp2: '2^', ln: 'ln', log2: 'log2', sqrt: '√' };
             const name = opNames[this.selectedOp] || 'f';
-            document.getElementById('arith-expr').textContent = `${name}(${a})`;
+            if (this.selectedOp === 'exp2') {
+                document.getElementById('arith-expr').textContent = `2^(${a})`;
+            } else {
+                document.getElementById('arith-expr').textContent = `${name}(${a})`;
+            }
+        } else if (this.selectedOp === 'pow') {
+            const b = document.getElementById('input-b').value.trim() || '0';
+            document.getElementById('arith-expr').textContent = `${a} ^ ${b}`;
         } else {
             const b = document.getElementById('input-b').value.trim() || '0';
             const opSymbols = { add: '+', sub: '−', mul: '×', div: '÷' };
@@ -584,6 +614,9 @@ export class ArithmeticApp {
                     case 'exp':
                         result = await this.contract.exp(scaledA);
                         break;
+                    case 'exp2':
+                        result = await this.contract.exp2(scaledA);
+                        break;
                     case 'ln':
                         if (a <= 0) {
                             this.showStatus('ln requires positive input', 'error');
@@ -591,6 +624,14 @@ export class ArithmeticApp {
                             return;
                         }
                         result = await this.contract.ln(scaledA);
+                        break;
+                    case 'log2':
+                        if (a <= 0) {
+                            this.showStatus('log2 requires positive input', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.log2(scaledA);
                         break;
                     case 'sqrt':
                         if (a < 0) {
@@ -604,6 +645,44 @@ export class ArithmeticApp {
                         this.showStatus('Unknown operation', 'error');
                         return;
                 }
+
+                // Convert result back from fixed18
+                const resultBigInt = BigInt(result.toString());
+                const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
+                const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
+                const resultNumber = Number(absValue) / 1e18;
+                const displayResult = (isNegative ? -resultNumber : resultNumber).toFixed(18);
+
+                resultEl.textContent = displayResult;
+                this.showStatus('Calculated successfully', 'success');
+
+            } else if (this.selectedOp === 'pow') {
+                // Power function needs both x and y
+                const bValue = inputB.value.trim();
+                if (!bValue) {
+                    this.showStatus('Please enter both values', 'error');
+                    return;
+                }
+
+                const b = parseFloat(bValue);
+                if (isNaN(b)) {
+                    this.showStatus('Invalid number format', 'error');
+                    return;
+                }
+
+                if (a < 0) {
+                    this.showStatus('pow requires non-negative base', 'error');
+                    resultEl.textContent = 'Error';
+                    return;
+                }
+
+                this.showStatus('Calculating on-chain...', 'loading');
+                resultEl.textContent = '...';
+
+                const scaledA = BigInt(Math.floor(a * 1e18));
+                const scaledB = BigInt(Math.floor(b * 1e18));
+
+                const result = await this.contract.pow(scaledA, scaledB);
 
                 // Convert result back from fixed18
                 const resultBigInt = BigInt(result.toString());

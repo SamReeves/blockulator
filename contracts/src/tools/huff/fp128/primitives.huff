@@ -57,7 +57,7 @@
 ///
 /// Comparison pattern used throughout: "THRESHOLD swap1 lt" = "x < THRESHOLD"
 /// If x >= THRESHOLD, we don't jump, we add bits and shift.
-#define macro MSB() = takes(1) returns(1) {
+#define fn MSB() = takes(1) returns(1) {
     // Binary search for MSB
     // Stack: [x]
     0x00                       // [msb=0, x]
