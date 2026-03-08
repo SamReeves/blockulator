@@ -6255,7 +6255,7 @@ details[open] .collapsible-arrow {
 
 .bench-dist-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1rem;
 }
 
@@ -6278,7 +6278,8 @@ details[open] .collapsible-arrow {
 }
 
 .bench-dist-card canvas {
-    max-height: 140px;
+    width: 100%;
+    height: 180px;
 }
 
 .bench-dist-card-note {

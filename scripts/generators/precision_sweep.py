@@ -65,7 +65,7 @@ def compute_percentiles(values):
 
 
 def analyze_samples(samples):
-    """Group samples by library and function, compute stats."""
+    """Group samples by library and function, compute stats and raw data."""
     
     # Group by lib and func
     groups = defaultdict(lambda: defaultdict(list))
@@ -77,9 +77,11 @@ def analyze_samples(samples):
     
     # Compute stats for each group
     stats = {}
+    raw = {}
     
     for lib in groups:
         stats[lib] = {}
+        raw[lib] = {}
         for func in groups[lib]:
             samples_list = groups[lib][func]
             
@@ -93,8 +95,17 @@ def analyze_samples(samples):
                 "digits": compute_percentiles(digit_values),
                 "error_bits": compute_percentiles(error_bit_values)
             }
+            
+            # Store raw data points for box-whisker plots
+            raw[lib][func] = [
+                {
+                    "gas": s["gas"],
+                    "digits": s["digits"]
+                }
+                for s in samples_list
+            ]
     
-    return stats
+    return stats, raw
 
 
 def print_summary_table(stats):
@@ -154,18 +165,18 @@ def print_detailed_percentiles(stats):
             print(f"{lib:<10} {s['count']:<7} {d['min']:<8.1f} {d['p5']:<8.1f} {d['p25']:<8.1f} {d['median']:<8.1f} {d['p75']:<8.1f} {d['p95']:<8.1f} {d['max']:<8.1f} {d['mean']:<8.1f}")
 
 
-def export_to_json(stats, output_path="docs/benchmarks/precision_distribution.json"):
-    """Export distribution stats to JSON."""
+def export_to_json(stats, raw, output_path="docs/benchmarks/precision_distribution.json"):
+    """Export raw data points to JSON. Stats are computed by frontend."""
     data = {
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "description": "Precision distribution statistics across hundreds of inputs per function",
-        "stats": stats
+        "description": "Raw benchmark data points - all stats computed by frontend",
+        "raw": raw
     }
     
     with open(output_path, 'w') as f:
         json.dump(data, f, indent=2)
     
-    print(f"\nExported distribution stats to: {output_path}")
+    print(f"\nExported raw data to: {output_path}")
 
 
 def plot_distributions(samples, stats):
@@ -273,13 +284,13 @@ def main():
     print(f"Parsed {len(samples)} samples")
     
     print("\nAnalyzing distributions...")
-    stats = analyze_samples(samples)
+    stats, raw = analyze_samples(samples)
     
     print_summary_table(stats)
     print_detailed_percentiles(stats)
     
     if args.json:
-        export_to_json(stats)
+        export_to_json(stats, raw)
     
     if args.plot:
         plot_distributions(samples, stats)

@@ -1,7 +1,7 @@
 /**
  * Benchmark App - Gas & Precision Comparison
  * Compares fp128, abdk, and solady across arithmetic and transcendental operations.
- * Data driven from precision_distribution.json (statistical sweep) and benchmark-data.json (named cases).
+ * All data derived from precision_distribution.json raw sweep data.
  */
 
 const LIBS = ['fp128', 'abdk', 'solady'];
@@ -19,7 +19,6 @@ export class BenchmarkApp {
         this.walletComponent = walletComponent;
         this.toastComponent = toastComponent;
         this.distData = null;
-        this.caseData = null;
         this.charts = {};
         this.useMedian = false;
     }
@@ -37,13 +36,9 @@ export class BenchmarkApp {
 
     async loadData() {
         try {
-            const [distResp, caseResp] = await Promise.all([
-                fetch(`docs/benchmarks/precision_distribution.json?v=${Date.now()}`),
-                fetch(`docs/benchmarks/benchmark-data.json?v=${Date.now()}`)
-            ]);
-            if (!distResp.ok || !caseResp.ok) throw new Error('Failed to load benchmark data');
-            this.distData = await distResp.json();
-            this.caseData = await caseResp.json();
+            const resp = await fetch(`docs/benchmarks/precision_distribution.json?v=${Date.now()}`);
+            if (!resp.ok) throw new Error('Failed to load benchmark data');
+            this.distData = await resp.json();
         } catch (error) {
             console.error('Error loading benchmark data:', error);
             document.getElementById('bench-loading').textContent =
@@ -126,13 +121,17 @@ export class BenchmarkApp {
 
     // ── Summary Table ─────────────────────────────────────────────────
 
-    getStatValue(distEntry, metric) {
-        if (!distEntry) return null;
-        return this.useMedian ? distEntry[metric]?.median : distEntry[metric]?.mean;
+    computeStats(values) {
+        if (!values || values.length === 0) return null;
+        const sorted = [...values].sort((a, b) => a - b);
+        return {
+            median: this.percentile(sorted, 50),
+            mean: sorted.reduce((a, b) => a + b, 0) / sorted.length
+        };
     }
 
     renderSummaryTable() {
-        const stats = this.distData.stats;
+        const raw = this.distData.raw;
         const statLabel = this.useMedian ? 'Median' : 'Mean';
 
         let html = `<table class="bench-summary">
@@ -157,12 +156,17 @@ export class BenchmarkApp {
         for (const func of FUNCTIONS) {
             const rowData = {};
             let sampleCount = 0;
+            
             for (const lib of LIBS) {
-                const entry = stats[lib]?.[func];
-                if (entry) sampleCount = Math.max(sampleCount, entry.count || 0);
+                const rawData = raw[lib]?.[func] || [];
+                sampleCount = Math.max(sampleCount, rawData.length);
+                
+                const gasStats = this.computeStats(rawData.map(d => d.gas));
+                const digitStats = this.computeStats(rawData.map(d => d.digits));
+                
                 rowData[lib] = {
-                    gas: this.getStatValue(entry, 'gas'),
-                    digits: this.getStatValue(entry, 'digits')
+                    gas: gasStats ? (this.useMedian ? gasStats.median : gasStats.mean) : null,
+                    digits: digitStats ? (this.useMedian ? digitStats.median : digitStats.mean) : null
                 };
             }
 
@@ -194,7 +198,7 @@ export class BenchmarkApp {
     // ── Distribution Histograms ───────────────────────────────────────
 
     renderDistributions() {
-        const stats = this.distData.stats;
+        const raw = this.distData.raw;
         let html = '';
 
         for (const func of FUNCTIONS) {
@@ -202,12 +206,15 @@ export class BenchmarkApp {
             const libData = [];
             
             for (const lib of LIBS) {
-                const entry = stats[lib]?.[func];
-                if (!entry) continue;
-                sampleCount = Math.max(sampleCount, entry.count || 0);
-                const median = entry.digits?.median;
-                if (median != null && median > 0) {
-                    libData.push({ lib, median });
+                const rawData = raw[lib]?.[func] || [];
+                if (rawData.length === 0) continue;
+                sampleCount = Math.max(sampleCount, rawData.length);
+                
+                const digits = rawData.map(d => d.digits).sort((a, b) => a - b);
+                const median = this.percentile(digits, 50);
+                
+                if (median > 0) {
+                    libData.push({ lib });
                 }
             }
 
@@ -224,76 +231,168 @@ export class BenchmarkApp {
 
         document.getElementById('bench-dist-grid').innerHTML = html;
 
-        // Render charts after DOM is updated
+        // Render box-whisker charts after DOM is updated
         for (const func of FUNCTIONS) {
             const canvasId = `bench-hist-${func}`;
             const canvas = document.getElementById(canvasId);
             if (!canvas) continue;
 
-            const libData = [];
+            const datasets = [];
             for (const lib of LIBS) {
-                const entry = stats[lib]?.[func];
-                if (!entry) continue;
-                const median = entry.digits?.median;
-                if (median != null && median > 0) {
-                    libData.push({ lib, median });
-                }
+                const rawData = raw[lib]?.[func] || [];
+                const digits = rawData.map(d => d.digits).sort((a, b) => a - b);
+                
+                if (digits.length === 0) continue;
+                
+                // Compute quartiles from raw data
+                const q1 = this.percentile(digits, 25);
+                const median = this.percentile(digits, 50);
+                const q3 = this.percentile(digits, 75);
+                const min = digits[0];
+                const max = digits[digits.length - 1];
+                
+                // Skip if median is 0 (unsupported function)
+                if (median <= 0) continue;
+                
+                datasets.push({
+                    label: LIB_META[lib].name,
+                    data: [{
+                        x: lib,
+                        min: min,
+                        q1: q1,
+                        median: median,
+                        q3: q3,
+                        max: max
+                    }],
+                    backgroundColor: LIB_META[lib].color + '40',
+                    borderColor: LIB_META[lib].color,
+                    borderWidth: 2
+                });
             }
 
-            if (libData.length === 0) continue;
+            if (datasets.length === 0) continue;
 
-            new Chart(canvas, {
-                type: 'bar',
-                data: {
-                    labels: libData.map(d => LIB_META[d.lib].name),
-                    datasets: [{
-                        data: libData.map(d => d.median),
-                        backgroundColor: libData.map(d => LIB_META[d.lib].color),
-                        borderColor: libData.map(d => LIB_META[d.lib].color),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    aspectRatio: 2,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: 'rgba(0,0,0,0.9)',
-                            titleColor: '#fff',
-                            bodyColor: '#ccc',
-                            borderColor: '#444',
-                            borderWidth: 1,
-                            padding: 8,
-                            displayColors: false,
-                            callbacks: {
-                                label: (ctx) => `${ctx.parsed.y.toFixed(1)} digits`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 40,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#999', font: { size: 10 } },
-                            title: { display: false }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#ccc', font: { size: 10 } }
-                        }
-                    }
-                }
-            });
+            // Custom box-whisker rendering
+            const ctx = canvas.getContext('2d');
+            this.renderBoxWhisker(ctx, datasets, func);
         }
+    }
+    
+    percentile(arr, p) {
+        if (arr.length === 0) return 0;
+        const idx = (p / 100) * (arr.length - 1);
+        const lower = Math.floor(idx);
+        const upper = Math.ceil(idx);
+        const weight = idx - lower;
+        return arr[lower] * (1 - weight) + arr[upper] * weight;
+    }
+    
+    renderBoxWhisker(ctx, datasets, func) {
+        const canvas = ctx.canvas;
+        const width = canvas.width;
+        const height = canvas.height;
+        const padding = { top: 20, right: 20, bottom: 40, left: 50 };
+        const plotWidth = width - padding.left - padding.right;
+        const plotHeight = height - padding.top - padding.bottom;
+        
+        // Clear canvas
+        ctx.fillStyle = '#111';
+        ctx.fillRect(0, 0, width, height);
+        
+        // Y-axis (digits 0-40)
+        const maxDigits = 40;
+        const yScale = plotHeight / maxDigits;
+        
+        // Draw y-axis
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, padding.top);
+        ctx.lineTo(padding.left, padding.top + plotHeight);
+        ctx.stroke();
+        
+        // Y-axis labels
+        ctx.fillStyle = '#999';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'right';
+        for (let i = 0; i <= 40; i += 10) {
+            const y = padding.top + plotHeight - (i * yScale);
+            ctx.fillText(i.toString(), padding.left - 5, y + 3);
+            ctx.strokeStyle = '#222';
+            ctx.beginPath();
+            ctx.moveTo(padding.left, y);
+            ctx.lineTo(padding.left + plotWidth, y);
+            ctx.stroke();
+        }
+        
+        // Draw boxes
+        const boxWidth = plotWidth / datasets.length;
+        datasets.forEach((ds, i) => {
+            const d = ds.data[0];
+            const x = padding.left + i * boxWidth + boxWidth * 0.2;
+            const w = boxWidth * 0.6;
+            
+            const minY = padding.top + plotHeight - (d.min * yScale);
+            const q1Y = padding.top + plotHeight - (d.q1 * yScale);
+            const medianY = padding.top + plotHeight - (d.median * yScale);
+            const q3Y = padding.top + plotHeight - (d.q3 * yScale);
+            const maxY = padding.top + plotHeight - (d.max * yScale);
+            
+            // Whiskers
+            ctx.strokeStyle = ds.borderColor;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x + w/2, minY);
+            ctx.lineTo(x + w/2, q1Y);
+            ctx.moveTo(x + w/2, q3Y);
+            ctx.lineTo(x + w/2, maxY);
+            ctx.stroke();
+            
+            // Min/max caps
+            ctx.beginPath();
+            ctx.moveTo(x + w*0.3, minY);
+            ctx.lineTo(x + w*0.7, minY);
+            ctx.moveTo(x + w*0.3, maxY);
+            ctx.lineTo(x + w*0.7, maxY);
+            ctx.stroke();
+            
+            // IQR box
+            ctx.fillStyle = ds.backgroundColor;
+            ctx.fillRect(x, q3Y, w, q1Y - q3Y);
+            ctx.strokeStyle = ds.borderColor;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, q3Y, w, q1Y - q3Y);
+            
+            // Median line
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, medianY);
+            ctx.lineTo(x + w, medianY);
+            ctx.stroke();
+            
+            // Library label
+            ctx.fillStyle = '#ccc';
+            ctx.font = '11px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(ds.label, x + w/2, padding.top + plotHeight + 20);
+        });
+        
+        // Y-axis label
+        ctx.save();
+        ctx.translate(15, padding.top + plotHeight/2);
+        ctx.rotate(-Math.PI/2);
+        ctx.fillStyle = '#999';
+        ctx.font = '11px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('Matching Digits', 0, 0);
+        ctx.restore();
     }
 
     // ── Scatter Chart ─────────────────────────────────────────────────
 
     renderScatterChart() {
-        const stats = this.distData.stats;
+        const raw = this.distData.raw;
         const canvas = document.getElementById('bench-scatter-chart');
 
         if (this.charts.scatter) {
@@ -303,12 +402,23 @@ export class BenchmarkApp {
         const datasets = LIBS.map(lib => {
             const points = [];
             for (const func of FUNCTIONS) {
-                const entry = stats[lib]?.[func];
-                if (!entry) continue;
-                const gas = this.useMedian ? entry.gas?.median : entry.gas?.mean;
-                const digits = this.useMedian ? entry.digits?.median : entry.digits?.mean;
-                // Filter out functions not supported by library (median == 0 indicates no support)
-                if (gas == null || digits == null || entry.digits?.median <= 0) continue;
+                const rawData = raw[lib]?.[func] || [];
+                if (rawData.length === 0) continue;
+                
+                // Compute stats from raw data
+                const gasValues = rawData.map(d => d.gas);
+                const digitValues = rawData.map(d => d.digits);
+                const gasStats = this.computeStats(gasValues);
+                const digitStats = this.computeStats(digitValues);
+                
+                if (!gasStats || !digitStats) continue;
+                
+                const gas = this.useMedian ? gasStats.median : gasStats.mean;
+                const digits = this.useMedian ? digitStats.median : digitStats.mean;
+                
+                // Filter out functions not supported by library (median == 0)
+                if (digitStats.median <= 0) continue;
+                
                 points.push({ x: gas, y: digits, func: func.toUpperCase() });
             }
             return {
