@@ -37,7 +37,7 @@ export class ArithmeticApp {
                 <!-- Header -->
                 <div class="arithmetic-header">
                     <h2 class="arithmetic-title">FP128</h2>
-                    <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point • exp, exp2, ln, log2, sqrt, pow</p>
+                    <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point • 22 Operations</p>
                 </div>
 
                 <!-- LCD Screen -->
@@ -58,6 +58,10 @@ export class ArithmeticApp {
                         <span class="arithmetic-label">B:</span>
                         <input type="text" id="input-b" class="ti-input" placeholder="0" autocomplete="off" inputmode="decimal">
                     </div>
+                    <div class="arithmetic-input-row" id="input-c-row" style="display: none;">
+                        <span class="arithmetic-label">C:</span>
+                        <input type="text" id="input-c" class="ti-input" placeholder="0" autocomplete="off" inputmode="decimal">
+                    </div>
                     <div id="arith-status" class="ti-status"></div>
                 </div>
 
@@ -74,14 +78,52 @@ export class ArithmeticApp {
                         <button class="ti-key" data-op="div" data-cat="arithmetic" title="Division">÷</button>
                     </div>
                     <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="exp" data-cat="transcendental" title="Exponential">exp</button>
-                        <button class="ti-key" data-op="exp2" data-cat="transcendental" title="Base-2 Exponential">exp2</button>
-                        <button class="ti-key" data-op="ln" data-cat="transcendental" title="Natural Logarithm">ln</button>
-                        <button class="ti-key" data-op="log2" data-cat="transcendental" title="Base-2 Logarithm">log2</button>
+                        <button class="ti-key" data-op="exp" data-cat="unary" title="Exponential">exp</button>
+                        <button class="ti-key" data-op="exp2" data-cat="unary" title="Base-2 Exponential">exp2</button>
+                        <button class="ti-key" data-op="ln" data-cat="unary" title="Natural Logarithm">ln</button>
+                        <button class="ti-key" data-op="log2" data-cat="unary" title="Base-2 Logarithm">log2</button>
                     </div>
                     <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="sqrt" data-cat="transcendental" title="Square Root">√</button>
-                        <button class="ti-key" data-op="pow" data-cat="power" title="Power (x^y)">x^y</button>
+                        <button class="ti-key" data-op="log10" data-cat="unary" title="Base-10 Logarithm">log10</button>
+                        <button class="ti-key" data-op="exp10" data-cat="unary" title="Base-10 Exponential">exp10</button>
+                        <button class="ti-key" data-op="sqrt" data-cat="unary" title="Square Root">√</button>
+                        <button class="ti-key" data-op="pow" data-cat="binary" title="Power (x^y)">x^y</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="abs" data-cat="unary" title="Absolute Value">abs</button>
+                        <button class="ti-key" data-op="neg" data-cat="unary" title="Negate">neg</button>
+                        <button class="ti-key" data-op="inv" data-cat="unary" title="Inverse (1/x)">inv</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="min" data-cat="binary" title="Minimum">min</button>
+                        <button class="ti-key" data-op="max" data-cat="binary" title="Maximum">max</button>
+                        <button class="ti-key" data-op="clamp" data-cat="ternary" title="Clamp (x, min, max)">clamp</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="avg" data-cat="binary" title="Average">avg</button>
+                        <button class="ti-key" data-op="gavg" data-cat="binary" title="Geometric Mean">gavg</button>
+                        <button class="ti-key" data-op="dist" data-cat="binary" title="Distance |a-b|">dist</button>
+                        <button class="ti-key" data-op="zeroFloorSub" data-cat="binary" title="Zero-Floor Subtraction">zfs</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="sign" data-cat="unary" title="Sign (-1, 0, or +1)">sign</button>
+                        <button class="ti-key" data-op="floor" data-cat="unary" title="Floor">floor</button>
+                        <button class="ti-key" data-op="ceil" data-cat="unary" title="Ceiling">ceil</button>
+                        <button class="ti-key" data-op="frac" data-cat="unary" title="Fractional Part">frac</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="cbrt" data-cat="unary" title="Cube Root">cbrt</button>
+                        <button class="ti-key" data-op="lerp" data-cat="ternary" title="Linear Interpolation">lerp</button>
+                        <button class="ti-key" data-op="hypot" data-cat="binary" title="Hypotenuse">hypot</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="round" data-cat="unary" title="Round to Nearest Integer">round</button>
+                        <button class="ti-key" data-op="log2Up" data-cat="unary" title="Ceiling of Log2">log2Up</button>
+                        <button class="ti-key" data-op="gcd" data-cat="binary" title="Greatest Common Divisor">gcd</button>
+                    </div>
+                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
+                        <button class="ti-key" data-op="factorial" data-cat="unary" title="Factorial">n!</button>
+                        <button class="ti-key" data-op="lambertW0" data-cat="unary" title="Lambert W0 Function">W₀(x)</button>
                     </div>
                     <button id="arith-calculate" class="ti-calculate-btn">CALCULATE</button>
                 </div>
@@ -108,7 +150,7 @@ export class ArithmeticApp {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Operations:</span>
-                            <span class="info-value">ADD, SUB, MUL, DIV, EXP, EXP2, LN, LOG2, SQRT, POW</span>
+                            <span class="info-value">34 functions: arithmetic, transcendental, utility, comparison, rounding, special</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Internal:</span>
@@ -500,21 +542,43 @@ export class ArithmeticApp {
                 document.querySelectorAll('.ti-key[data-op]').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 this.selectedOp = btn.dataset.op;
-                this.isTranscendental = btn.dataset.cat === 'transcendental';
-                const isPower = btn.dataset.cat === 'power';
+                const cat = btn.dataset.cat;
                 
-                // Show/hide B input based on operation type
+                // Show/hide inputs based on operation type
                 const inputBRow = document.getElementById('input-b-row');
+                const inputCRow = document.getElementById('input-c-row');
                 const labelA = document.getElementById('label-a');
-                if (this.isTranscendental) {
-                    inputBRow.classList.add('hidden');
+                
+                if (cat === 'unary') {
+                    inputBRow.style.display = 'none';
+                    inputCRow.style.display = 'none';
                     labelA.textContent = 'x:';
-                } else if (isPower) {
-                    inputBRow.classList.remove('hidden');
-                    labelA.textContent = 'x:';
-                    document.querySelector('#input-b-row .arithmetic-label').textContent = 'y:';
+                } else if (cat === 'binary') {
+                    inputBRow.style.display = 'flex';
+                    inputCRow.style.display = 'none';
+                    if (this.selectedOp === 'pow') {
+                        labelA.textContent = 'x:';
+                        document.querySelector('#input-b-row .arithmetic-label').textContent = 'y:';
+                    } else {
+                        labelA.textContent = 'A:';
+                        document.querySelector('#input-b-row .arithmetic-label').textContent = 'B:';
+                    }
+                } else if (cat === 'ternary') {
+                    inputBRow.style.display = 'flex';
+                    inputCRow.style.display = 'flex';
+                    if (this.selectedOp === 'lerp') {
+                        labelA.textContent = 'a:';
+                        document.querySelector('#input-b-row .arithmetic-label').textContent = 'b:';
+                        document.querySelector('#input-c-row .arithmetic-label').textContent = 't:';
+                    } else {
+                        labelA.textContent = 'x:';
+                        document.querySelector('#input-b-row .arithmetic-label').textContent = 'min:';
+                        document.querySelector('#input-c-row .arithmetic-label').textContent = 'max:';
+                    }
                 } else {
-                    inputBRow.classList.remove('hidden');
+                    // arithmetic
+                    inputBRow.style.display = 'flex';
+                    inputCRow.style.display = 'none';
                     labelA.textContent = 'A:';
                     document.querySelector('#input-b-row .arithmetic-label').textContent = 'B:';
                 }
@@ -545,6 +609,9 @@ export class ArithmeticApp {
         document.getElementById('input-b').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.calculate();
         });
+        document.getElementById('input-c').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.calculate();
+        });
 
         // Update expression as user types
         document.getElementById('input-a').addEventListener('input', () => {
@@ -553,24 +620,55 @@ export class ArithmeticApp {
         document.getElementById('input-b').addEventListener('input', () => {
             this.updateExpression();
         });
+        document.getElementById('input-c').addEventListener('input', () => {
+            this.updateExpression();
+        });
     }
 
     updateExpression() {
         const a = document.getElementById('input-a').value.trim() || '0';
+        const b = document.getElementById('input-b').value.trim() || '0';
+        const c = document.getElementById('input-c').value.trim() || '0';
         
-        if (this.isTranscendental) {
-            const opNames = { exp: 'exp', exp2: '2^', ln: 'ln', log2: 'log2', sqrt: '√' };
+        const cat = document.querySelector('.ti-key[data-op].selected')?.dataset.cat;
+        
+        if (cat === 'unary') {
+            const opNames = { 
+                exp: 'exp', exp2: '2^', exp10: '10^',
+                ln: 'ln', log2: 'log2', log10: 'log10',
+                sqrt: '√', abs: 'abs', neg: 'neg', inv: 'inv',
+                sign: 'sign', floor: 'floor', ceil: 'ceil', frac: 'frac',
+                cbrt: 'cbrt', round: 'round', log2Up: 'log2Up',
+                factorial: 'factorial', lambertW0: 'W₀'
+            };
             const name = opNames[this.selectedOp] || 'f';
             if (this.selectedOp === 'exp2') {
                 document.getElementById('arith-expr').textContent = `2^(${a})`;
+            } else if (this.selectedOp === 'exp10') {
+                document.getElementById('arith-expr').textContent = `10^(${a})`;
             } else {
                 document.getElementById('arith-expr').textContent = `${name}(${a})`;
             }
-        } else if (this.selectedOp === 'pow') {
-            const b = document.getElementById('input-b').value.trim() || '0';
-            document.getElementById('arith-expr').textContent = `${a} ^ ${b}`;
+        } else if (cat === 'ternary') {
+            if (this.selectedOp === 'lerp') {
+                document.getElementById('arith-expr').textContent = `lerp(${a}, ${b}, ${c})`;
+            } else {
+                document.getElementById('arith-expr').textContent = `clamp(${a}, ${b}, ${c})`;
+            }
+        } else if (cat === 'binary') {
+            const opNames = { 
+                pow: '^', min: 'min', max: 'max', avg: 'avg', 
+                gavg: 'gavg', dist: 'dist', zeroFloorSub: 'zfs',
+                gcd: 'gcd', hypot: 'hypot', lerp: 'lerp'
+            };
+            const name = opNames[this.selectedOp] || this.selectedOp;
+            if (this.selectedOp === 'pow') {
+                document.getElementById('arith-expr').textContent = `${a} ^ ${b}`;
+            } else {
+                document.getElementById('arith-expr').textContent = `${name}(${a}, ${b})`;
+            }
         } else {
-            const b = document.getElementById('input-b').value.trim() || '0';
+            // arithmetic
             const opSymbols = { add: '+', sub: '−', mul: '×', div: '÷' };
             const symbol = opSymbols[this.selectedOp] || '+';
             document.getElementById('arith-expr').textContent = `${a} ${symbol} ${b}`;
@@ -602,8 +700,10 @@ export class ArithmeticApp {
                 return;
             }
 
-            // For transcendental functions, we only need one input
-            if (this.isTranscendental) {
+            const cat = document.querySelector('.ti-key[data-op].selected')?.dataset.cat;
+
+            // Unary operations
+            if (cat === 'unary') {
                 this.showStatus('Calculating on-chain...', 'loading');
                 resultEl.textContent = '...';
 
@@ -616,6 +716,9 @@ export class ArithmeticApp {
                         break;
                     case 'exp2':
                         result = await this.contract.exp2(scaledA);
+                        break;
+                    case 'exp10':
+                        result = await this.contract.exp10(scaledA);
                         break;
                     case 'ln':
                         if (a <= 0) {
@@ -633,6 +736,14 @@ export class ArithmeticApp {
                         }
                         result = await this.contract.log2(scaledA);
                         break;
+                    case 'log10':
+                        if (a <= 0) {
+                            this.showStatus('log10 requires positive input', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.log10(scaledA);
+                        break;
                     case 'sqrt':
                         if (a < 0) {
                             this.showStatus('sqrt requires non-negative input', 'error');
@@ -641,12 +752,67 @@ export class ArithmeticApp {
                         }
                         result = await this.contract.sqrt(scaledA);
                         break;
+                    case 'abs':
+                        result = await this.contract.abs(scaledA);
+                        break;
+                    case 'neg':
+                        result = await this.contract.neg(scaledA);
+                        break;
+                    case 'inv':
+                        if (a === 0) {
+                            this.showStatus('inv: division by zero', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.inv(scaledA);
+                        break;
+                    case 'sign':
+                        result = await this.contract.sign(scaledA);
+                        break;
+                    case 'floor':
+                        result = await this.contract.floor(scaledA);
+                        break;
+                    case 'ceil':
+                        result = await this.contract.ceil(scaledA);
+                        break;
+                    case 'frac':
+                        result = await this.contract.frac(scaledA);
+                        break;
+                    case 'cbrt':
+                        result = await this.contract.cbrt(scaledA);
+                        break;
+                    case 'round':
+                        result = await this.contract.round(scaledA);
+                        break;
+                    case 'log2Up':
+                        if (a <= 0) {
+                            this.showStatus('log2Up requires positive input', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.log2Up(scaledA);
+                        break;
+                    case 'factorial':
+                        if (a < 0 || a > 33) {
+                            this.showStatus('Factorial requires 0 <= n <= 33', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.factorial(scaledA);
+                        break;
+                    case 'lambertW0':
+                        if (a < -0.3679) {
+                            this.showStatus('Lambert W0 requires x >= -1/e', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.lambertW0(scaledA);
+                        break;
                     default:
                         this.showStatus('Unknown operation', 'error');
                         return;
                 }
 
-                // Convert result back from fixed18
                 const resultBigInt = BigInt(result.toString());
                 const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
                 const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
@@ -656,23 +822,20 @@ export class ArithmeticApp {
                 resultEl.textContent = displayResult;
                 this.showStatus('Calculated successfully', 'success');
 
-            } else if (this.selectedOp === 'pow') {
-                // Power function needs both x and y
+            } else if (cat === 'ternary') {
+                const inputC = document.getElementById('input-c');
                 const bValue = inputB.value.trim();
-                if (!bValue) {
-                    this.showStatus('Please enter both values', 'error');
+                const cValue = inputC.value.trim();
+                
+                if (!bValue || !cValue) {
+                    this.showStatus('Please enter all three values', 'error');
                     return;
                 }
 
                 const b = parseFloat(bValue);
-                if (isNaN(b)) {
+                const c = parseFloat(cValue);
+                if (isNaN(b) || isNaN(c)) {
                     this.showStatus('Invalid number format', 'error');
-                    return;
-                }
-
-                if (a < 0) {
-                    this.showStatus('pow requires non-negative base', 'error');
-                    resultEl.textContent = 'Error';
                     return;
                 }
 
@@ -681,10 +844,15 @@ export class ArithmeticApp {
 
                 const scaledA = BigInt(Math.floor(a * 1e18));
                 const scaledB = BigInt(Math.floor(b * 1e18));
+                const scaledC = BigInt(Math.floor(c * 1e18));
 
-                const result = await this.contract.pow(scaledA, scaledB);
+                let result;
+                if (this.selectedOp === 'lerp') {
+                    result = await this.contract.lerp(scaledA, scaledB, scaledC);
+                } else {
+                    result = await this.contract.clamp(scaledA, scaledB, scaledC);
+                }
 
-                // Convert result back from fixed18
                 const resultBigInt = BigInt(result.toString());
                 const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
                 const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
@@ -695,7 +863,7 @@ export class ArithmeticApp {
                 this.showStatus('Calculated successfully', 'success');
 
             } else {
-                // Arithmetic operations need both A and B
+                // Binary operations (arithmetic + new binary ops)
                 const bValue = inputB.value.trim();
                 if (!bValue) {
                     this.showStatus('Please enter both values', 'error');
@@ -711,11 +879,9 @@ export class ArithmeticApp {
                 this.showStatus('Calculating on-chain...', 'loading');
                 resultEl.textContent = '...';
 
-                // Convert to fixed18 (scale by 1e18)
                 const scaledA = BigInt(Math.floor(a * 1e18));
                 const scaledB = BigInt(Math.floor(b * 1e18));
 
-                // Call the appropriate contract method
                 let result;
                 switch (this.selectedOp) {
                     case 'add':
@@ -735,12 +901,48 @@ export class ArithmeticApp {
                         }
                         result = await this.contract.div(scaledA, scaledB);
                         break;
+                    case 'pow':
+                        if (a < 0) {
+                            this.showStatus('pow requires non-negative base', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.pow(scaledA, scaledB);
+                        break;
+                    case 'min':
+                        result = await this.contract.min(scaledA, scaledB);
+                        break;
+                    case 'max':
+                        result = await this.contract.max(scaledA, scaledB);
+                        break;
+                    case 'avg':
+                        result = await this.contract.avg(scaledA, scaledB);
+                        break;
+                    case 'gavg':
+                        if (a < 0 || b < 0) {
+                            this.showStatus('gavg requires non-negative inputs', 'error');
+                            resultEl.textContent = 'Error';
+                            return;
+                        }
+                        result = await this.contract.gavg(scaledA, scaledB);
+                        break;
+                    case 'dist':
+                        result = await this.contract.dist(scaledA, scaledB);
+                        break;
+                    case 'zeroFloorSub':
+                        result = await this.contract.zeroFloorSub(scaledA, scaledB);
+                        break;
+                    case 'hypot':
+                        result = await this.contract.hypot(scaledA, scaledB);
+                        break;
+                    case 'gcd':
+                        result = await this.contract.gcd(scaledA, scaledB);
+                        break;
                     default:
                         this.showStatus('Unknown operation', 'error');
                         return;
                 }
 
-                // Convert result back from fixed18
                 const resultBigInt = BigInt(result.toString());
                 const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
                 const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
@@ -761,6 +963,7 @@ export class ArithmeticApp {
     clear() {
         document.getElementById('input-a').value = '';
         document.getElementById('input-b').value = '';
+        document.getElementById('input-c').value = '';
         document.getElementById('arith-result').textContent = '0';
         this.showStatus('', '');
         this.updateExpression();

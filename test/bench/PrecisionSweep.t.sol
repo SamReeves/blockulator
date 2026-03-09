@@ -4,6 +4,10 @@ pragma solidity ^0.8.24;
 import "forge-std/Test.sol";
 import {ABDKMath64x64} from "../../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
 import {FixedPointMathLib} from "../../lib/solady/src/utils/FixedPointMathLib.sol";
+import {SD59x18} from "../../lib/prb-math/src/sd59x18/ValueType.sol";
+import {wrap as prbWrap} from "../../lib/prb-math/src/sd59x18/Casting.sol";
+import {abs as prbAbs, avg as prbAvg, ceil as prbCeil, div as prbDiv, exp as prbExp, exp2 as prbExp2, floor as prbFloor, frac as prbFrac, gm as prbGm, inv as prbInv, ln as prbLn, log10 as prbLog10, log2 as prbLog2, mul as prbMul, pow as prbPow, sqrt as prbSqrt} from "../../lib/prb-math/src/sd59x18/Math.sol";
+import {add as prbAdd, sub as prbSub} from "../../lib/prb-math/src/sd59x18/Helpers.sol";
 
 interface IFP128 {
     function mulRaw(uint256, uint256) external view returns (uint256);
@@ -34,6 +38,18 @@ interface IFP128 {
     function gavgRaw(uint256, uint256) external view returns (uint256);
     function log10Raw(uint256) external view returns (uint256);
     function exp10Raw(uint256) external view returns (uint256);
+    function signRaw(uint256) external view returns (uint256);
+    function floorRaw(uint256) external view returns (uint256);
+    function ceilRaw(uint256) external view returns (uint256);
+    function fracRaw(uint256) external view returns (uint256);
+    function cbrtRaw(uint256) external view returns (uint256);
+    function lerpRaw(uint256,uint256,uint256) external view returns (uint256);
+    function hypotRaw(uint256,uint256) external view returns (uint256);
+    function roundRaw(uint256) external view returns (uint256);
+    function log2UpRaw(uint256) external view returns (uint256);
+    function gcdRaw(uint256,uint256) external view returns (uint256);
+    function factorialRaw(uint256) external view returns (uint256);
+    function lambertW0Raw(uint256) external view returns (uint256);
 }
 
 /// @title PrecisionSweep
@@ -43,7 +59,6 @@ contract PrecisionSweep is Test {
     using FixedPointMathLib for uint256;
     
     IFP128 fp128;
-    uint256 _fp128Overhead;
     
     int256 constant WAD = 1e18;
     uint256 constant ONE_FP128 = uint256(1) << 128;
@@ -55,17 +70,6 @@ contract PrecisionSweep is Test {
         address a1 = makeAddr("fp128");
         vm.etch(a1, code1);
         fp128 = IFP128(a1);
-        
-        // Measure call overhead
-        _fp128Overhead = _measureCallOverhead(address(fp128));
-    }
-    
-    function _measureCallOverhead(address target) internal view returns (uint256) {
-        uint256 g0 = gasleft();
-        (bool ok,) = target.staticcall(abi.encodeWithSignature("abs(uint256)", uint256(1e18)));
-        uint256 g1 = gasleft();
-        require(ok, "overhead measurement failed");
-        return g0 - g1;
     }
     
     /// @notice Split sweep into separate tests to avoid gas limits
@@ -180,6 +184,78 @@ contract PrecisionSweep is Test {
     function test_sweep_exp10() public {
         console.log("SWEEP_START");
         _sweepExp10();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_sign() public {
+        console.log("SWEEP_START");
+        _sweepSign();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_floor() public {
+        console.log("SWEEP_START");
+        _sweepFloor();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_ceil() public {
+        console.log("SWEEP_START");
+        _sweepCeil();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_frac() public {
+        console.log("SWEEP_START");
+        _sweepFrac();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_cbrt() public {
+        console.log("SWEEP_START");
+        _sweepCbrt();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_lerp() public {
+        console.log("SWEEP_START");
+        _sweepLerp();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_hypot() public {
+        console.log("SWEEP_START");
+        _sweepHypot();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_round() public {
+        console.log("SWEEP_START");
+        _sweepRound();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_log2up() public {
+        console.log("SWEEP_START");
+        _sweepLog2Up();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_gcd() public {
+        console.log("SWEEP_START");
+        _sweepGcd();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_factorial() public {
+        console.log("SWEEP_START");
+        _sweepFactorial();
+        console.log("SWEEP_END");
+    }
+    
+    function test_sweep_lambertw0() public {
+        console.log("SWEEP_START");
+        _sweepLambertW0();
         console.log("SWEEP_END");
     }
     
@@ -446,9 +522,9 @@ contract PrecisionSweep is Test {
         a[44] = 1e22; b[44] = 1e15;
         a[45] = 1e20; b[45] = 1e16;
         a[46] = 1e18; b[46] = 1e17;
-        a[47] = 1e16; b[47] = 5e17;
-        a[48] = 1e15; b[48] = 1e18;
-        a[49] = 1e14; b[49] = 1e18;
+        a[47] = 5e17; b[47] = 1e16;
+        a[48] = 1e18; b[48] = 1e15;
+        a[49] = 1e18; b[49] = 1e14;
         
         for (uint256 i = 0; i < 50; i++) {
             _runSample("sub", a[i], b[i]);
@@ -1250,6 +1326,797 @@ contract PrecisionSweep is Test {
         }
     }
     
+    function _sweepSign() internal {
+        // 50 representative values including negative, zero, and positive
+        int256[50] memory vals;
+        
+        // Negative values (20)
+        vals[0] = -1000 * WAD;
+        vals[1] = -100 * WAD;
+        vals[2] = -50 * WAD;
+        vals[3] = -20 * WAD;
+        vals[4] = -10 * WAD;
+        vals[5] = -5 * WAD;
+        vals[6] = -3 * WAD;
+        vals[7] = -2 * WAD;
+        vals[8] = -WAD;
+        vals[9] = -WAD / 2;
+        vals[10] = -WAD / 3;
+        vals[11] = -WAD / 5;
+        vals[12] = -WAD / 10;
+        vals[13] = -WAD / 100;
+        vals[14] = -WAD / 1000;
+        vals[15] = -WAD / 10000;
+        vals[16] = -WAD / 100000;
+        vals[17] = -WAD / 1000000;
+        vals[18] = -1;
+        vals[19] = -2;
+        
+        // Zero (1)
+        vals[20] = 0;
+        
+        // Positive values (29)
+        vals[21] = 1;
+        vals[22] = 2;
+        vals[23] = WAD / 1000000;
+        vals[24] = WAD / 100000;
+        vals[25] = WAD / 10000;
+        vals[26] = WAD / 1000;
+        vals[27] = WAD / 100;
+        vals[28] = WAD / 10;
+        vals[29] = WAD / 5;
+        vals[30] = WAD / 3;
+        vals[31] = WAD / 2;
+        vals[32] = WAD;
+        vals[33] = 2 * WAD;
+        vals[34] = 3 * WAD;
+        vals[35] = 5 * WAD;
+        vals[36] = 10 * WAD;
+        vals[37] = 20 * WAD;
+        vals[38] = 50 * WAD;
+        vals[39] = 100 * WAD;
+        vals[40] = 1000 * WAD;
+        vals[41] = 10000 * WAD;
+        vals[42] = 100000 * WAD;
+        vals[43] = 1000000 * WAD;
+        vals[44] = 10000000 * WAD;
+        vals[45] = 100000000 * WAD;
+        vals[46] = 1000000000 * WAD;
+        vals[47] = 10000000000 * WAD;
+        vals[48] = 100000000000 * WAD;
+        vals[49] = 1000000000000 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("sign", vals[i], 0);
+        }
+    }
+    
+    function _sweepFloor() internal {
+        // 50 representative values with various fractional parts
+        int256[50] memory vals;
+        
+        // Negative with fractions (15)
+        vals[0] = -10 * WAD - WAD / 2;
+        vals[1] = -10 * WAD - WAD / 3;
+        vals[2] = -10 * WAD - WAD / 4;
+        vals[3] = -5 * WAD - WAD / 2;
+        vals[4] = -5 * WAD - WAD / 10;
+        vals[5] = -3 * WAD - 7 * WAD / 10;
+        vals[6] = -2 * WAD - WAD / 2;
+        vals[7] = -WAD - WAD / 2;
+        vals[8] = -WAD - WAD / 3;
+        vals[9] = -WAD - WAD / 10;
+        vals[10] = -WAD / 2;
+        vals[11] = -WAD / 3;
+        vals[12] = -WAD / 10;
+        vals[13] = -WAD / 100;
+        vals[14] = -1;
+        
+        // Zero and near-zero (5)
+        vals[15] = 0;
+        vals[16] = 1;
+        vals[17] = WAD / 100;
+        vals[18] = WAD / 10;
+        vals[19] = WAD / 3;
+        
+        // Positive with fractions (30)
+        vals[20] = WAD / 2;
+        vals[21] = WAD + WAD / 10;
+        vals[22] = WAD + WAD / 3;
+        vals[23] = WAD + WAD / 2;
+        vals[24] = 2 * WAD + WAD / 2;
+        vals[25] = 3 * WAD + 7 * WAD / 10;
+        vals[26] = 5 * WAD + WAD / 10;
+        vals[27] = 5 * WAD + WAD / 2;
+        vals[28] = 10 * WAD + WAD / 4;
+        vals[29] = 10 * WAD + WAD / 3;
+        vals[30] = 10 * WAD + WAD / 2;
+        vals[31] = 100 * WAD + WAD / 2;
+        vals[32] = 1000 * WAD + WAD / 2;
+        vals[33] = 12345 * WAD / 1000;
+        vals[34] = 67890 * WAD / 1000;
+        vals[35] = 11111 * WAD / 1000;
+        vals[36] = 22222 * WAD / 1000;
+        vals[37] = 33333 * WAD / 1000;
+        vals[38] = 44444 * WAD / 1000;
+        vals[39] = 55555 * WAD / 1000;
+        vals[40] = 66666 * WAD / 1000;
+        vals[41] = 77777 * WAD / 1000;
+        vals[42] = 88888 * WAD / 1000;
+        vals[43] = 99999 * WAD / 1000;
+        vals[44] = 123456 * WAD / 10000;
+        vals[45] = 234567 * WAD / 10000;
+        vals[46] = 345678 * WAD / 10000;
+        vals[47] = 456789 * WAD / 10000;
+        vals[48] = 567890 * WAD / 10000;
+        vals[49] = 678901 * WAD / 10000;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("floor", vals[i], 0);
+        }
+    }
+    
+    function _sweepCeil() internal {
+        // Same test values as floor (ceil and floor are related)
+        int256[50] memory vals;
+        
+        vals[0] = -10 * WAD - WAD / 2;
+        vals[1] = -10 * WAD - WAD / 3;
+        vals[2] = -10 * WAD - WAD / 4;
+        vals[3] = -5 * WAD - WAD / 2;
+        vals[4] = -5 * WAD - WAD / 10;
+        vals[5] = -3 * WAD - 7 * WAD / 10;
+        vals[6] = -2 * WAD - WAD / 2;
+        vals[7] = -WAD - WAD / 2;
+        vals[8] = -WAD - WAD / 3;
+        vals[9] = -WAD - WAD / 10;
+        vals[10] = -WAD / 2;
+        vals[11] = -WAD / 3;
+        vals[12] = -WAD / 10;
+        vals[13] = -WAD / 100;
+        vals[14] = -1;
+        vals[15] = 0;
+        vals[16] = 1;
+        vals[17] = WAD / 100;
+        vals[18] = WAD / 10;
+        vals[19] = WAD / 3;
+        vals[20] = WAD / 2;
+        vals[21] = WAD + WAD / 10;
+        vals[22] = WAD + WAD / 3;
+        vals[23] = WAD + WAD / 2;
+        vals[24] = 2 * WAD + WAD / 2;
+        vals[25] = 3 * WAD + 7 * WAD / 10;
+        vals[26] = 5 * WAD + WAD / 10;
+        vals[27] = 5 * WAD + WAD / 2;
+        vals[28] = 10 * WAD + WAD / 4;
+        vals[29] = 10 * WAD + WAD / 3;
+        vals[30] = 10 * WAD + WAD / 2;
+        vals[31] = 100 * WAD + WAD / 2;
+        vals[32] = 1000 * WAD + WAD / 2;
+        vals[33] = 12345 * WAD / 1000;
+        vals[34] = 67890 * WAD / 1000;
+        vals[35] = 11111 * WAD / 1000;
+        vals[36] = 22222 * WAD / 1000;
+        vals[37] = 33333 * WAD / 1000;
+        vals[38] = 44444 * WAD / 1000;
+        vals[39] = 55555 * WAD / 1000;
+        vals[40] = 66666 * WAD / 1000;
+        vals[41] = 77777 * WAD / 1000;
+        vals[42] = 88888 * WAD / 1000;
+        vals[43] = 99999 * WAD / 1000;
+        vals[44] = 123456 * WAD / 10000;
+        vals[45] = 234567 * WAD / 10000;
+        vals[46] = 345678 * WAD / 10000;
+        vals[47] = 456789 * WAD / 10000;
+        vals[48] = 567890 * WAD / 10000;
+        vals[49] = 678901 * WAD / 10000;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("ceil", vals[i], 0);
+        }
+    }
+    
+    function _sweepFrac() internal {
+        // Same test values as floor/ceil
+        int256[50] memory vals;
+        
+        vals[0] = -10 * WAD - WAD / 2;
+        vals[1] = -10 * WAD - WAD / 3;
+        vals[2] = -10 * WAD - WAD / 4;
+        vals[3] = -5 * WAD - WAD / 2;
+        vals[4] = -5 * WAD - WAD / 10;
+        vals[5] = -3 * WAD - 7 * WAD / 10;
+        vals[6] = -2 * WAD - WAD / 2;
+        vals[7] = -WAD - WAD / 2;
+        vals[8] = -WAD - WAD / 3;
+        vals[9] = -WAD - WAD / 10;
+        vals[10] = -WAD / 2;
+        vals[11] = -WAD / 3;
+        vals[12] = -WAD / 10;
+        vals[13] = -WAD / 100;
+        vals[14] = -1;
+        vals[15] = 0;
+        vals[16] = 1;
+        vals[17] = WAD / 100;
+        vals[18] = WAD / 10;
+        vals[19] = WAD / 3;
+        vals[20] = WAD / 2;
+        vals[21] = WAD + WAD / 10;
+        vals[22] = WAD + WAD / 3;
+        vals[23] = WAD + WAD / 2;
+        vals[24] = 2 * WAD + WAD / 2;
+        vals[25] = 3 * WAD + 7 * WAD / 10;
+        vals[26] = 5 * WAD + WAD / 10;
+        vals[27] = 5 * WAD + WAD / 2;
+        vals[28] = 10 * WAD + WAD / 4;
+        vals[29] = 10 * WAD + WAD / 3;
+        vals[30] = 10 * WAD + WAD / 2;
+        vals[31] = 100 * WAD + WAD / 2;
+        vals[32] = 1000 * WAD + WAD / 2;
+        vals[33] = 12345 * WAD / 1000;
+        vals[34] = 67890 * WAD / 1000;
+        vals[35] = 11111 * WAD / 1000;
+        vals[36] = 22222 * WAD / 1000;
+        vals[37] = 33333 * WAD / 1000;
+        vals[38] = 44444 * WAD / 1000;
+        vals[39] = 55555 * WAD / 1000;
+        vals[40] = 66666 * WAD / 1000;
+        vals[41] = 77777 * WAD / 1000;
+        vals[42] = 88888 * WAD / 1000;
+        vals[43] = 99999 * WAD / 1000;
+        vals[44] = 123456 * WAD / 10000;
+        vals[45] = 234567 * WAD / 10000;
+        vals[46] = 345678 * WAD / 10000;
+        vals[47] = 456789 * WAD / 10000;
+        vals[48] = 567890 * WAD / 10000;
+        vals[49] = 678901 * WAD / 10000;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("frac", vals[i], 0);
+        }
+    }
+    
+    function _sweepCbrt() internal {
+        // 50 representative values for cube root
+        int256[50] memory vals;
+        
+        // Negative values (10)
+        vals[0] = -1000 * WAD;
+        vals[1] = -100 * WAD;
+        vals[2] = -27 * WAD;
+        vals[3] = -8 * WAD;
+        vals[4] = -WAD;
+        vals[5] = -WAD / 8;
+        vals[6] = -WAD / 27;
+        vals[7] = -WAD / 100;
+        vals[8] = -WAD / 1000;
+        vals[9] = -WAD / 10000;
+        
+        // Zero (1)
+        vals[10] = 0;
+        
+        // Small positive (9)
+        vals[11] = WAD / 10000;
+        vals[12] = WAD / 1000;
+        vals[13] = WAD / 100;
+        vals[14] = WAD / 27;
+        vals[15] = WAD / 8;
+        vals[16] = WAD / 2;
+        vals[17] = 2 * WAD / 3;
+        vals[18] = 9 * WAD / 10;
+        vals[19] = 99 * WAD / 100;
+        
+        // Around 1 (5)
+        vals[20] = WAD;
+        vals[21] = 11 * WAD / 10;
+        vals[22] = 12 * WAD / 10;
+        vals[23] = 15 * WAD / 10;
+        vals[24] = 2 * WAD;
+        
+        // Perfect cubes (10)
+        vals[25] = 8 * WAD;
+        vals[26] = 27 * WAD;
+        vals[27] = 64 * WAD;
+        vals[28] = 125 * WAD;
+        vals[29] = 216 * WAD;
+        vals[30] = 343 * WAD;
+        vals[31] = 512 * WAD;
+        vals[32] = 729 * WAD;
+        vals[33] = 1000 * WAD;
+        vals[34] = 1331 * WAD;
+        
+        // Large values (15)
+        vals[35] = 10000 * WAD;
+        vals[36] = 100000 * WAD;
+        vals[37] = 1000000 * WAD;
+        vals[38] = 10000000 * WAD;
+        vals[39] = 100000000 * WAD;
+        vals[40] = 1000000000 * WAD;
+        vals[41] = 10000000000 * WAD;
+        vals[42] = 100000000000 * WAD;
+        vals[43] = 1000000000000 * WAD;
+        vals[44] = 10000000000000 * WAD;
+        vals[45] = 100000000000000 * WAD;
+        vals[46] = 1000000000000000 * WAD;
+        vals[47] = 10000000000000000 * WAD;
+        vals[48] = 100000000000000000 * WAD;
+        vals[49] = 1000000000000000000 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("cbrt", vals[i], 0);
+        }
+    }
+    
+    function _sweepLerp() internal {
+        // 50 representative (a, b) pairs with t=0.5
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Various ranges
+        a[0] = 0; b[0] = WAD;
+        a[1] = 0; b[1] = 10 * WAD;
+        a[2] = 0; b[2] = 100 * WAD;
+        a[3] = WAD; b[3] = 2 * WAD;
+        a[4] = WAD; b[4] = 10 * WAD;
+        a[5] = 10 * WAD; b[5] = 20 * WAD;
+        a[6] = 10 * WAD; b[6] = 100 * WAD;
+        a[7] = 100 * WAD; b[7] = 200 * WAD;
+        a[8] = -WAD; b[8] = WAD;
+        a[9] = -10 * WAD; b[9] = 10 * WAD;
+        a[10] = -100 * WAD; b[10] = 100 * WAD;
+        a[11] = -WAD; b[11] = 0;
+        a[12] = -10 * WAD; b[12] = 0;
+        a[13] = -100 * WAD; b[13] = 0;
+        a[14] = -10 * WAD; b[14] = -WAD;
+        a[15] = -100 * WAD; b[15] = -10 * WAD;
+        a[16] = WAD / 10; b[16] = WAD;
+        a[17] = WAD / 100; b[17] = WAD / 10;
+        a[18] = WAD / 1000; b[18] = WAD / 100;
+        a[19] = WAD; b[19] = 10 * WAD;
+        a[20] = 2 * WAD; b[20] = 3 * WAD;
+        a[21] = 5 * WAD; b[21] = 10 * WAD;
+        a[22] = 10 * WAD; b[22] = 15 * WAD;
+        a[23] = 20 * WAD; b[23] = 30 * WAD;
+        a[24] = 50 * WAD; b[24] = 100 * WAD;
+        a[25] = 100 * WAD; b[25] = 150 * WAD;
+        a[26] = 100 * WAD; b[26] = 1000 * WAD;
+        a[27] = 1000 * WAD; b[27] = 2000 * WAD;
+        a[28] = 1000 * WAD; b[28] = 10000 * WAD;
+        a[29] = 10000 * WAD; b[29] = 20000 * WAD;
+        a[30] = -5 * WAD; b[30] = 5 * WAD;
+        a[31] = -50 * WAD; b[31] = 50 * WAD;
+        a[32] = -500 * WAD; b[32] = 500 * WAD;
+        a[33] = -1000 * WAD; b[33] = 1000 * WAD;
+        a[34] = -2 * WAD; b[34] = 3 * WAD;
+        a[35] = -20 * WAD; b[35] = 30 * WAD;
+        a[36] = -200 * WAD; b[36] = 300 * WAD;
+        a[37] = WAD / 2; b[37] = 3 * WAD / 2;
+        a[38] = WAD / 3; b[38] = 2 * WAD / 3;
+        a[39] = WAD / 4; b[39] = 3 * WAD / 4;
+        a[40] = WAD / 5; b[40] = 4 * WAD / 5;
+        a[41] = 3 * WAD; b[41] = 7 * WAD;
+        a[42] = 11 * WAD; b[42] = 13 * WAD;
+        a[43] = 17 * WAD; b[43] = 19 * WAD;
+        a[44] = 23 * WAD; b[44] = 29 * WAD;
+        a[45] = 31 * WAD; b[45] = 37 * WAD;
+        a[46] = 41 * WAD; b[46] = 43 * WAD;
+        a[47] = 47 * WAD; b[47] = 53 * WAD;
+        a[48] = 59 * WAD; b[48] = 61 * WAD;
+        a[49] = 67 * WAD; b[49] = 71 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("lerp", a[i], b[i]);
+        }
+    }
+    
+    function _sweepHypot() internal {
+        // 50 representative (a, b) pairs for hypotenuse
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Pythagorean triples and variations
+        a[0] = 3 * WAD; b[0] = 4 * WAD;
+        a[1] = 5 * WAD; b[1] = 12 * WAD;
+        a[2] = 8 * WAD; b[2] = 15 * WAD;
+        a[3] = 7 * WAD; b[3] = 24 * WAD;
+        a[4] = 20 * WAD; b[4] = 21 * WAD;
+        a[5] = 9 * WAD; b[5] = 40 * WAD;
+        a[6] = 12 * WAD; b[6] = 35 * WAD;
+        a[7] = 11 * WAD; b[7] = 60 * WAD;
+        a[8] = 13 * WAD; b[8] = 84 * WAD;
+        a[9] = 36 * WAD; b[9] = 77 * WAD;
+        
+        // Equal values
+        a[10] = WAD; b[10] = WAD;
+        a[11] = 2 * WAD; b[11] = 2 * WAD;
+        a[12] = 5 * WAD; b[12] = 5 * WAD;
+        a[13] = 10 * WAD; b[13] = 10 * WAD;
+        a[14] = 100 * WAD; b[14] = 100 * WAD;
+        
+        // One zero
+        a[15] = 0; b[15] = WAD;
+        a[16] = WAD; b[16] = 0;
+        a[17] = 0; b[17] = 10 * WAD;
+        a[18] = 10 * WAD; b[18] = 0;
+        a[19] = 0; b[19] = 100 * WAD;
+        
+        // Small values
+        a[20] = WAD / 100; b[20] = WAD / 100;
+        a[21] = WAD / 10; b[21] = WAD / 10;
+        a[22] = WAD / 5; b[22] = WAD / 5;
+        a[23] = WAD / 3; b[23] = WAD / 3;
+        a[24] = WAD / 2; b[24] = WAD / 2;
+        
+        // Large values
+        a[25] = 100 * WAD; b[25] = 100 * WAD;
+        a[26] = 1000 * WAD; b[26] = 1000 * WAD;
+        a[27] = 10000 * WAD; b[27] = 10000 * WAD;
+        a[28] = 100000 * WAD; b[28] = 100000 * WAD;
+        a[29] = 1000000 * WAD; b[29] = 1000000 * WAD;
+        
+        // Negative values (should work due to squaring)
+        a[30] = -3 * WAD; b[30] = 4 * WAD;
+        a[31] = 3 * WAD; b[31] = -4 * WAD;
+        a[32] = -3 * WAD; b[32] = -4 * WAD;
+        a[33] = -5 * WAD; b[33] = 12 * WAD;
+        a[34] = 5 * WAD; b[34] = -12 * WAD;
+        
+        // Mixed scales
+        a[35] = WAD / 10; b[35] = 10 * WAD;
+        a[36] = WAD / 100; b[36] = 100 * WAD;
+        a[37] = WAD; b[37] = 10 * WAD;
+        a[38] = WAD; b[38] = 100 * WAD;
+        a[39] = 10 * WAD; b[39] = 100 * WAD;
+        
+        // Random pairs
+        a[40] = 7 * WAD; b[40] = 11 * WAD;
+        a[41] = 13 * WAD; b[41] = 17 * WAD;
+        a[42] = 19 * WAD; b[42] = 23 * WAD;
+        a[43] = 29 * WAD; b[43] = 31 * WAD;
+        a[44] = 37 * WAD; b[44] = 41 * WAD;
+        a[45] = 43 * WAD; b[45] = 47 * WAD;
+        a[46] = 53 * WAD; b[46] = 59 * WAD;
+        a[47] = 61 * WAD; b[47] = 67 * WAD;
+        a[48] = 71 * WAD; b[48] = 73 * WAD;
+        a[49] = 79 * WAD; b[49] = 83 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("hypot", a[i], b[i]);
+        }
+    }
+    
+    function _sweepRound() internal {
+        // 50 representative values for rounding
+        int256[50] memory vals;
+        
+        // Values near integers
+        vals[0] = 1 * WAD + WAD / 10;  // 1.1
+        vals[1] = 1 * WAD + WAD / 4;   // 1.25
+        vals[2] = 1 * WAD + WAD / 3;   // 1.33...
+        vals[3] = 1 * WAD + WAD / 2;   // 1.5
+        vals[4] = 1 * WAD + 3 * WAD / 4; // 1.75
+        vals[5] = 2 * WAD + WAD / 10;  // 2.1
+        vals[6] = 2 * WAD + WAD / 2;   // 2.5
+        vals[7] = 2 * WAD + 9 * WAD / 10; // 2.9
+        vals[8] = 3 * WAD + WAD / 2;   // 3.5
+        vals[9] = 10 * WAD + WAD / 2;  // 10.5
+        
+        // Negative values
+        vals[10] = -1 * WAD - WAD / 10;
+        vals[11] = -1 * WAD - WAD / 2;
+        vals[12] = -2 * WAD - WAD / 2;
+        vals[13] = -3 * WAD - WAD / 4;
+        vals[14] = -10 * WAD - WAD / 2;
+        
+        // Small fractional values
+        vals[15] = WAD / 10;
+        vals[16] = WAD / 4;
+        vals[17] = WAD / 3;
+        vals[18] = WAD / 2;
+        vals[19] = 3 * WAD / 4;
+        
+        // Large values
+        vals[20] = 100 * WAD + WAD / 2;
+        vals[21] = 1000 * WAD + WAD / 2;
+        vals[22] = 10000 * WAD + WAD / 2;
+        vals[23] = 100000 * WAD + WAD / 2;
+        vals[24] = 1000000 * WAD + WAD / 2;
+        
+        // Edge cases
+        vals[25] = 0;
+        vals[26] = WAD;
+        vals[27] = -WAD;
+        vals[28] = 2 * WAD;
+        vals[29] = -2 * WAD;
+        
+        // More fractional values
+        vals[30] = 5 * WAD + WAD / 10;
+        vals[31] = 5 * WAD + WAD / 5;
+        vals[32] = 5 * WAD + 3 * WAD / 10;
+        vals[33] = 5 * WAD + 2 * WAD / 5;
+        vals[34] = 5 * WAD + WAD / 2;
+        vals[35] = 5 * WAD + 3 * WAD / 5;
+        vals[36] = 5 * WAD + 7 * WAD / 10;
+        vals[37] = 5 * WAD + 4 * WAD / 5;
+        vals[38] = 5 * WAD + 9 * WAD / 10;
+        vals[39] = 6 * WAD;
+        
+        // Negative fractional values
+        vals[40] = -5 * WAD - WAD / 10;
+        vals[41] = -5 * WAD - WAD / 5;
+        vals[42] = -5 * WAD - 3 * WAD / 10;
+        vals[43] = -5 * WAD - 2 * WAD / 5;
+        vals[44] = -5 * WAD - WAD / 2;
+        vals[45] = -5 * WAD - 3 * WAD / 5;
+        vals[46] = -5 * WAD - 7 * WAD / 10;
+        vals[47] = -5 * WAD - 4 * WAD / 5;
+        vals[48] = -5 * WAD - 9 * WAD / 10;
+        vals[49] = -6 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("round", vals[i], 0);
+        }
+    }
+    
+    function _sweepLog2Up() internal {
+        // 50 representative values for log2 ceiling
+        int256[50] memory vals;
+        
+        // Powers of 2
+        vals[0] = WAD / 2;       // 0.5 -> log2 = -1
+        vals[1] = WAD;           // 1 -> log2 = 0
+        vals[2] = 2 * WAD;       // 2 -> log2 = 1
+        vals[3] = 4 * WAD;       // 4 -> log2 = 2
+        vals[4] = 8 * WAD;       // 8 -> log2 = 3
+        vals[5] = 16 * WAD;      // 16 -> log2 = 4
+        vals[6] = 32 * WAD;      // 32 -> log2 = 5
+        vals[7] = 64 * WAD;      // 64 -> log2 = 6
+        vals[8] = 128 * WAD;     // 128 -> log2 = 7
+        vals[9] = 256 * WAD;     // 256 -> log2 = 8
+        
+        // Non-powers of 2 (should round up)
+        vals[10] = 3 * WAD;      // 3 -> log2 ~ 1.58 -> ceil = 2
+        vals[11] = 5 * WAD;      // 5 -> log2 ~ 2.32 -> ceil = 3
+        vals[12] = 6 * WAD;      // 6 -> log2 ~ 2.58 -> ceil = 3
+        vals[13] = 7 * WAD;      // 7 -> log2 ~ 2.81 -> ceil = 3
+        vals[14] = 9 * WAD;      // 9 -> log2 ~ 3.17 -> ceil = 4
+        vals[15] = 10 * WAD;     // 10 -> log2 ~ 3.32 -> ceil = 4
+        vals[16] = 15 * WAD;     // 15 -> log2 ~ 3.91 -> ceil = 4
+        vals[17] = 17 * WAD;     // 17 -> log2 ~ 4.09 -> ceil = 5
+        vals[18] = 20 * WAD;     // 20 -> log2 ~ 4.32 -> ceil = 5
+        vals[19] = 100 * WAD;    // 100 -> log2 ~ 6.64 -> ceil = 7
+        
+        // Small values
+        vals[20] = WAD / 4;      // 0.25 -> log2 = -2
+        vals[21] = WAD / 8;      // 0.125 -> log2 = -3
+        vals[22] = WAD / 16;     // 0.0625 -> log2 = -4
+        vals[23] = WAD / 32;     // 0.03125 -> log2 = -5
+        vals[24] = WAD / 64;     // 0.015625 -> log2 = -6
+        
+        // Non-power-of-2 small values
+        vals[25] = WAD / 3;      // 0.333... -> log2 ~ -1.58 -> ceil = -1
+        vals[26] = WAD / 5;      // 0.2 -> log2 ~ -2.32 -> ceil = -2
+        vals[27] = WAD / 10;     // 0.1 -> log2 ~ -3.32 -> ceil = -3
+        vals[28] = WAD / 100;    // 0.01 -> log2 ~ -6.64 -> ceil = -6
+        vals[29] = WAD / 1000;   // 0.001 -> log2 ~ -9.97 -> ceil = -9
+        
+        // Large values
+        vals[30] = 1000 * WAD;   // 1000 -> log2 ~ 9.97 -> ceil = 10
+        vals[31] = 10000 * WAD;  // 10000 -> log2 ~ 13.29 -> ceil = 14
+        vals[32] = 100000 * WAD; // 100000 -> log2 ~ 16.61 -> ceil = 17
+        vals[33] = 1000000 * WAD; // 1000000 -> log2 ~ 19.93 -> ceil = 20
+        
+        // More non-powers
+        vals[34] = 11 * WAD;
+        vals[35] = 12 * WAD;
+        vals[36] = 13 * WAD;
+        vals[37] = 14 * WAD;
+        vals[38] = 18 * WAD;
+        vals[39] = 19 * WAD;
+        vals[40] = 21 * WAD;
+        vals[41] = 22 * WAD;
+        vals[42] = 23 * WAD;
+        vals[43] = 24 * WAD;
+        vals[44] = 25 * WAD;
+        vals[45] = 30 * WAD;
+        vals[46] = 40 * WAD;
+        vals[47] = 50 * WAD;
+        vals[48] = 60 * WAD;
+        vals[49] = 70 * WAD;
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("log2up", vals[i], 0);
+        }
+    }
+    
+    function _sweepGcd() internal {
+        // 50 representative (a, b) pairs for GCD
+        int256[50] memory a;
+        int256[50] memory b;
+        
+        // Classic GCD pairs
+        a[0] = 48 * WAD; b[0] = 18 * WAD;  // gcd = 6
+        a[1] = 54 * WAD; b[1] = 24 * WAD;  // gcd = 6
+        a[2] = 100 * WAD; b[2] = 50 * WAD; // gcd = 50
+        a[3] = 120 * WAD; b[3] = 80 * WAD; // gcd = 40
+        a[4] = 144 * WAD; b[4] = 60 * WAD; // gcd = 12
+        
+        // Coprime pairs
+        a[5] = 17 * WAD; b[5] = 19 * WAD;  // gcd = 1
+        a[6] = 23 * WAD; b[6] = 29 * WAD;  // gcd = 1
+        a[7] = 31 * WAD; b[7] = 37 * WAD;  // gcd = 1
+        a[8] = 41 * WAD; b[8] = 43 * WAD;  // gcd = 1
+        a[9] = 47 * WAD; b[9] = 53 * WAD;  // gcd = 1
+        
+        // One is zero
+        a[10] = 42 * WAD; b[10] = 0;       // gcd = 42
+        a[11] = 0; b[11] = 42 * WAD;       // gcd = 42
+        a[12] = 100 * WAD; b[12] = 0;      // gcd = 100
+        a[13] = 0; b[13] = 100 * WAD;      // gcd = 100
+        a[14] = 1 * WAD; b[14] = 0;        // gcd = 1
+        
+        // Same values
+        a[15] = 10 * WAD; b[15] = 10 * WAD; // gcd = 10
+        a[16] = 25 * WAD; b[16] = 25 * WAD; // gcd = 25
+        a[17] = 100 * WAD; b[17] = 100 * WAD; // gcd = 100
+        a[18] = 1 * WAD; b[18] = 1 * WAD;   // gcd = 1
+        a[19] = 7 * WAD; b[19] = 7 * WAD;   // gcd = 7
+        
+        // Powers of 2
+        a[20] = 16 * WAD; b[20] = 8 * WAD;  // gcd = 8
+        a[21] = 32 * WAD; b[21] = 16 * WAD; // gcd = 16
+        a[22] = 64 * WAD; b[22] = 32 * WAD; // gcd = 32
+        a[23] = 128 * WAD; b[23] = 64 * WAD; // gcd = 64
+        a[24] = 256 * WAD; b[24] = 128 * WAD; // gcd = 128
+        
+        // Large values
+        a[25] = 1000 * WAD; b[25] = 500 * WAD; // gcd = 500
+        a[26] = 10000 * WAD; b[26] = 5000 * WAD; // gcd = 5000
+        a[27] = 100000 * WAD; b[27] = 50000 * WAD; // gcd = 50000
+        a[28] = 999 * WAD; b[28] = 666 * WAD; // gcd = 333
+        a[29] = 1024 * WAD; b[29] = 512 * WAD; // gcd = 512
+        
+        // Small values
+        a[30] = 2 * WAD; b[30] = 1 * WAD;   // gcd = 1
+        a[31] = 3 * WAD; b[31] = 2 * WAD;   // gcd = 1
+        a[32] = 4 * WAD; b[32] = 2 * WAD;   // gcd = 2
+        a[33] = 5 * WAD; b[33] = 3 * WAD;   // gcd = 1
+        a[34] = 6 * WAD; b[34] = 3 * WAD;   // gcd = 3
+        
+        // Fibonacci pairs (coprime)
+        a[35] = 21 * WAD; b[35] = 13 * WAD; // gcd = 1
+        a[36] = 34 * WAD; b[36] = 21 * WAD; // gcd = 1
+        a[37] = 55 * WAD; b[37] = 34 * WAD; // gcd = 1
+        a[38] = 89 * WAD; b[38] = 55 * WAD; // gcd = 1
+        a[39] = 144 * WAD; b[39] = 89 * WAD; // gcd = 1
+        
+        // Random pairs
+        a[40] = 36 * WAD; b[40] = 24 * WAD; // gcd = 12
+        a[41] = 45 * WAD; b[41] = 30 * WAD; // gcd = 15
+        a[42] = 56 * WAD; b[42] = 42 * WAD; // gcd = 14
+        a[43] = 63 * WAD; b[43] = 49 * WAD; // gcd = 7
+        a[44] = 72 * WAD; b[44] = 54 * WAD; // gcd = 18
+        a[45] = 81 * WAD; b[45] = 63 * WAD; // gcd = 9
+        a[46] = 90 * WAD; b[46] = 75 * WAD; // gcd = 15
+        a[47] = 96 * WAD; b[47] = 84 * WAD; // gcd = 12
+        a[48] = 105 * WAD; b[48] = 91 * WAD; // gcd = 7
+        a[49] = 108 * WAD; b[49] = 96 * WAD; // gcd = 12
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("gcd", a[i], b[i]);
+        }
+    }
+    
+    function _sweepFactorial() internal {
+        // 34 values for factorial (0! through 33!)
+        int256[50] memory vals;
+        
+        // Factorials 0-33 (34! overflows uint256)
+        for (uint256 i = 0; i <= 33; i++) {
+            vals[i] = int256(i) * WAD;
+        }
+        
+        // Fill remaining slots with edge cases
+        vals[34] = 0;  // 0! = 1
+        vals[35] = WAD;  // 1! = 1
+        vals[36] = 2 * WAD;  // 2! = 2
+        vals[37] = 3 * WAD;  // 3! = 6
+        vals[38] = 4 * WAD;  // 4! = 24
+        vals[39] = 5 * WAD;  // 5! = 120
+        vals[40] = 10 * WAD; // 10! = 3628800
+        vals[41] = 15 * WAD; // 15!
+        vals[42] = 20 * WAD; // 20!
+        vals[43] = 25 * WAD; // 25!
+        vals[44] = 30 * WAD; // 30!
+        vals[45] = 31 * WAD; // 31!
+        vals[46] = 32 * WAD; // 32!
+        vals[47] = 33 * WAD; // 33!
+        vals[48] = 12 * WAD; // 12!
+        vals[49] = 7 * WAD;  // 7!
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("factorial", vals[i], 0);
+        }
+    }
+    
+    function _sweepLambertW0() internal {
+        // 50 representative values for Lambert W0
+        int256[50] memory vals;
+        
+        // Domain: x >= -1/e ≈ -0.3679
+        // Near lower bound
+        vals[0] = -367879441 * WAD / 1000000000;  // -1/e
+        vals[1] = -350000000 * WAD / 1000000000;  // -0.35
+        vals[2] = -300000000 * WAD / 1000000000;  // -0.30
+        vals[3] = -250000000 * WAD / 1000000000;  // -0.25
+        vals[4] = -200000000 * WAD / 1000000000;  // -0.20
+        
+        // Small negative values
+        vals[5] = -100000000 * WAD / 1000000000;  // -0.1
+        vals[6] = -50000000 * WAD / 1000000000;   // -0.05
+        vals[7] = -10000000 * WAD / 1000000000;   // -0.01
+        vals[8] = -1000000 * WAD / 1000000000;    // -0.001
+        vals[9] = -100000 * WAD / 1000000000;     // -0.0001
+        
+        // Zero and small positive
+        vals[10] = 0;                              // W(0) = 0
+        vals[11] = 100000 * WAD / 1000000000;     // 0.0001
+        vals[12] = 1000000 * WAD / 1000000000;    // 0.001
+        vals[13] = 10000000 * WAD / 1000000000;   // 0.01
+        vals[14] = 50000000 * WAD / 1000000000;   // 0.05
+        
+        // Around 0.1 to 1
+        vals[15] = 100000000 * WAD / 1000000000;  // 0.1
+        vals[16] = 200000000 * WAD / 1000000000;  // 0.2
+        vals[17] = 300000000 * WAD / 1000000000;  // 0.3
+        vals[18] = 500000000 * WAD / 1000000000;  // 0.5
+        vals[19] = WAD;                            // 1.0, W(1) ≈ 0.5671
+        
+        // Around e
+        vals[20] = 2 * WAD;                        // 2.0
+        vals[21] = 2718281828459045235;           // e, W(e) = 1
+        vals[22] = 3 * WAD;                        // 3.0
+        vals[23] = 4 * WAD;                        // 4.0
+        vals[24] = 5 * WAD;                        // 5.0
+        
+        // Larger values
+        vals[25] = 10 * WAD;                       // 10
+        vals[26] = 20 * WAD;                       // 20
+        vals[27] = 50 * WAD;                       // 50
+        vals[28] = 100 * WAD;                      // 100
+        vals[29] = 200 * WAD;                      // 200
+        
+        // Very large values
+        vals[30] = 500 * WAD;                      // 500
+        vals[31] = 1000 * WAD;                     // 1000
+        vals[32] = 2000 * WAD;                     // 2000
+        vals[33] = 5000 * WAD;                     // 5000
+        vals[34] = 10000 * WAD;                    // 10000
+        
+        // More intermediate values
+        vals[35] = WAD / 2;                        // 0.5
+        vals[36] = WAD / 4;                        // 0.25
+        vals[37] = 3 * WAD / 4;                    // 0.75
+        vals[38] = WAD + WAD / 2;                  // 1.5
+        vals[39] = 2 * WAD + WAD / 2;              // 2.5
+        
+        // Around special values
+        vals[40] = 6 * WAD;                        // 6
+        vals[41] = 7 * WAD;                        // 7
+        vals[42] = 8 * WAD;                        // 8
+        vals[43] = 9 * WAD;                        // 9
+        vals[44] = 15 * WAD;                       // 15
+        vals[45] = 25 * WAD;                       // 25
+        vals[46] = 30 * WAD;                       // 30
+        vals[47] = 40 * WAD;                       // 40
+        vals[48] = 60 * WAD;                       // 60
+        vals[49] = 80 * WAD;                       // 80
+        
+        for (uint256 i = 0; i < 50; i++) {
+            _runSample("lambertw0", vals[i], 0);
+        }
+    }
+    
     // ============================================================================
     // SAMPLE RUNNER
     // ============================================================================
@@ -1268,8 +2135,13 @@ contract PrecisionSweep is Test {
         } catch {}
         
         // Run Solady (try-catch to handle overflow/unsupported inputs)
-        try this.runSoladyExternal(func, a_wad, b_wad, wad_exp) returns (uint256 sg, uint256 sd, int256 se) {
-            _emitSweep("solady", func, a_wad, b_wad, sg, sd, se);
+        try this.runSoladyExternal(func, a_wad, b_wad, wad_exp) returns (uint256 sg, uint256 sd_, int256 se) {
+            _emitSweep("solady", func, a_wad, b_wad, sg, sd_, se);
+        } catch {}
+
+        // Run PRBMath (try-catch to handle overflow/unsupported inputs)
+        try this.runPrbExternal(func, a_wad, b_wad, wad_exp) returns (uint256 pg, uint256 pd, int256 pe) {
+            _emitSweep("prb", func, a_wad, b_wad, pg, pd, pe);
         } catch {}
     }
     
@@ -1283,6 +2155,12 @@ contract PrecisionSweep is Test {
         external view returns (uint256, uint256, int256)
     {
         return _runSolady(func, a_wad, b_wad, exp_wad);
+    }
+
+    function runPrbExternal(string calldata func, int256 a_wad, int256 b_wad, uint256 exp_wad)
+        external view returns (uint256, uint256, int256)
+    {
+        return _runPrb(func, a_wad, b_wad, exp_wad);
     }
     
     function _emitSweep(
@@ -1359,14 +2237,34 @@ contract PrecisionSweep is Test {
             result_fp128 = fp128.log10Raw(a_fp128);
         } else if (funcHash == keccak256("exp10")) {
             result_fp128 = fp128.exp10Raw(a_fp128);
+        } else if (funcHash == keccak256("sign")) {
+            result_fp128 = fp128.signRaw(a_fp128);
+        } else if (funcHash == keccak256("floor")) {
+            result_fp128 = fp128.floorRaw(a_fp128);
+        } else if (funcHash == keccak256("ceil")) {
+            result_fp128 = fp128.ceilRaw(a_fp128);
+        } else if (funcHash == keccak256("frac")) {
+            result_fp128 = fp128.fracRaw(a_fp128);
+        } else if (funcHash == keccak256("cbrt")) {
+            result_fp128 = fp128.cbrtRaw(a_fp128);
+        } else if (funcHash == keccak256("lerp")) {
+            uint256 half_fp128 = uint256(1) << 127;
+            result_fp128 = fp128.lerpRaw(a_fp128, b_fp128, half_fp128);
+        } else if (funcHash == keccak256("hypot")) {
+            result_fp128 = fp128.hypotRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("round")) {
+            result_fp128 = fp128.roundRaw(a_fp128);
+        } else if (funcHash == keccak256("log2up")) {
+            result_fp128 = fp128.log2UpRaw(a_fp128);
+        } else if (funcHash == keccak256("gcd")) {
+            result_fp128 = fp128.gcdRaw(a_fp128, b_fp128);
+        } else if (funcHash == keccak256("factorial")) {
+            result_fp128 = fp128.factorialRaw(a_fp128);
+        } else if (funcHash == keccak256("lambertw0")) {
+            result_fp128 = fp128.lambertW0Raw(a_fp128);
         }
         
         gas_ = g0 - gasleft();
-        
-        // Subtract overhead for external calls
-        if (funcHash != keccak256("add") && funcHash != keccak256("sub")) {
-            gas_ = gas_ > _fp128Overhead ? gas_ - _fp128Overhead : 0;
-        }
         
         digits_ = _matchingDigits(result_fp128, exp_fp128, 38);
         error_bits_ = _errorBits(result_fp128, exp_fp128);
@@ -1432,6 +2330,78 @@ contract PrecisionSweep is Test {
             result64 = ABDKMath64x64.div(ABDKMath64x64.log_2(a64), ABDKMath64x64.log_2(int128(10 << 64)));
         } else if (funcHash == keccak256("exp10")) {
             result64 = ABDKMath64x64.exp_2(ABDKMath64x64.mul(a64, ABDKMath64x64.log_2(int128(10 << 64))));
+        } else if (funcHash == keccak256("sign")) {
+            // ABDK doesn't have sign, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("floor")) {
+            // ABDK doesn't have floor, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("ceil")) {
+            // ABDK doesn't have ceil, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("frac")) {
+            // ABDK doesn't have frac, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("cbrt")) {
+            // ABDK doesn't have cbrt, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("lerp")) {
+            // ABDK doesn't have lerp, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("hypot")) {
+            // ABDK doesn't have hypot, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("round")) {
+            // ABDK doesn't have round, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("log2up")) {
+            // ABDK doesn't have log2up, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("gcd")) {
+            // ABDK doesn't have gcd, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("factorial")) {
+            // ABDK doesn't have factorial, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        } else if (funcHash == keccak256("lambertw0")) {
+            // ABDK doesn't have lambertW0, return 0
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
         }
         
         gas_ = g0 - gasleft();
@@ -1494,10 +2464,107 @@ contract PrecisionSweep is Test {
             // Solady doesn't have exp10, use exp10(x) = exp(x * ln(10))
             int256 ln10 = 2302585092994045684; // ln(10) in WAD
             result = uint256(FixedPointMathLib.expWad((a_wad * ln10) / WAD));
+        } else if (funcHash == keccak256("sign")) {
+            // Solady doesn't have sign, return 0
+            result = 0;
+        } else if (funcHash == keccak256("floor")) {
+            // Solady doesn't have floor for WAD, return 0
+            result = 0;
+        } else if (funcHash == keccak256("ceil")) {
+            // Solady doesn't have ceil for WAD, return 0
+            result = 0;
+        } else if (funcHash == keccak256("frac")) {
+            // Solady doesn't have frac, return 0
+            result = 0;
+        } else if (funcHash == keccak256("cbrt")) {
+            // Solady has cbrtWad
+            result = FixedPointMathLib.cbrtWad(ua);
+        } else if (funcHash == keccak256("lerp")) {
+            // Solady lerp has different signature (5 params), return 0
+            result = 0;
+        } else if (funcHash == keccak256("hypot")) {
+            // Solady doesn't have hypot, return 0
+            result = 0;
+        } else if (funcHash == keccak256("round")) {
+            // Solady doesn't have round for WAD, return 0
+            result = 0;
+        } else if (funcHash == keccak256("log2up")) {
+            // Solady has log2Up but it's integer-only
+            result = 0;
+        } else if (funcHash == keccak256("gcd")) {
+            // Solady has gcd
+            result = uint256(FixedPointMathLib.gcd(uint256(a_wad / WAD), uint256(b_wad / WAD))) * uint256(WAD);
+        } else if (funcHash == keccak256("factorial")) {
+            // Solady has factorial
+            uint256 n = uint256(a_wad / WAD);
+            result = FixedPointMathLib.factorial(n) * uint256(WAD);
+        } else if (funcHash == keccak256("lambertw0")) {
+            // Solady has lambertW0Wad
+            result = uint256(FixedPointMathLib.lambertW0Wad(a_wad));
         }
         
         gas_ = g0 - gasleft();
         
+        digits_ = _matchingDigits(result, exp_wad, 18);
+        error_bits_ = _errorBits(result, exp_wad);
+    }
+
+    function _runPrb(string memory func, int256 a_wad, int256 b_wad, uint256 exp_wad)
+        internal view returns (uint256 gas_, uint256 digits_, int256 error_bits_)
+    {
+        SD59x18 a = prbWrap(a_wad);
+        SD59x18 b = prbWrap(b_wad);
+
+        uint256 g0 = gasleft();
+        int256 resultInt;
+
+        bytes32 funcHash = keccak256(bytes(func));
+        if (funcHash == keccak256("mul")) {
+            resultInt = prbMul(a, b).unwrap();
+        } else if (funcHash == keccak256("div")) {
+            resultInt = prbDiv(a, b).unwrap();
+        } else if (funcHash == keccak256("add")) {
+            resultInt = prbAdd(a, b).unwrap();
+        } else if (funcHash == keccak256("sub")) {
+            resultInt = prbSub(a, b).unwrap();
+        } else if (funcHash == keccak256("exp")) {
+            resultInt = prbExp(a).unwrap();
+        } else if (funcHash == keccak256("exp2")) {
+            resultInt = prbExp2(a).unwrap();
+        } else if (funcHash == keccak256("ln")) {
+            resultInt = prbLn(a).unwrap();
+        } else if (funcHash == keccak256("log2")) {
+            resultInt = prbLog2(a).unwrap();
+        } else if (funcHash == keccak256("sqrt")) {
+            resultInt = prbSqrt(a).unwrap();
+        } else if (funcHash == keccak256("pow")) {
+            resultInt = prbPow(a, b).unwrap();
+        } else if (funcHash == keccak256("abs")) {
+            resultInt = prbAbs(a).unwrap();
+        } else if (funcHash == keccak256("inv")) {
+            resultInt = prbInv(a).unwrap();
+        } else if (funcHash == keccak256("avg")) {
+            resultInt = prbAvg(a, b).unwrap();
+        } else if (funcHash == keccak256("gavg")) {
+            resultInt = prbGm(a, b).unwrap();
+        } else if (funcHash == keccak256("log10")) {
+            resultInt = prbLog10(a).unwrap();
+        } else if (funcHash == keccak256("floor")) {
+            resultInt = prbFloor(a).unwrap();
+        } else if (funcHash == keccak256("ceil")) {
+            resultInt = prbCeil(a).unwrap();
+        } else if (funcHash == keccak256("frac")) {
+            resultInt = prbFrac(a).unwrap();
+        } else {
+            gas_ = 0;
+            digits_ = 0;
+            error_bits_ = 0;
+            return (gas_, digits_, error_bits_);
+        }
+
+        gas_ = g0 - gasleft();
+        uint256 result = uint256(resultInt);
+
         digits_ = _matchingDigits(result, exp_wad, 18);
         error_bits_ = _errorBits(result, exp_wad);
     }
@@ -1515,7 +2582,9 @@ contract PrecisionSweep is Test {
             funcHash == keccak256("add") || funcHash == keccak256("sub") ||
             funcHash == keccak256("pow") || funcHash == keccak256("min") ||
             funcHash == keccak256("max") || funcHash == keccak256("avg") ||
-            funcHash == keccak256("dist") || funcHash == keccak256("gavg")
+            funcHash == keccak256("dist") || funcHash == keccak256("gavg") ||
+            funcHash == keccak256("lerp") || funcHash == keccak256("hypot") ||
+            funcHash == keccak256("gcd")
         );
         string[] memory cmd = new string[](isBinary ? 5 : 4);
         cmd[0] = "python3";

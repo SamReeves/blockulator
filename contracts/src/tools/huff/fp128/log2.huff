@@ -99,7 +99,8 @@
 /// @dev takes(1) returns(1)
 /// Stack input:  [f] where f is in [0, ~0.0054)
 /// Stack output: [log2(1+f)] computed via degree-13 minimax polynomial
-#define macro FP128_LOG2_POLY() = takes(1) returns(1) {
+/// @dev Converted to function to save ~194 bytes (2 call sites would be 1 internal)
+#define fn FP128_LOG2_POLY() = takes(1) returns(1) {
     // Stack: [f]
     // Evaluate P(f) = log2(1+f) directly via Horner
     // P(f) = P13*f^13 + ... + P1*f + P0
@@ -134,7 +135,7 @@
 /// @dev takes(1) returns(1)
 /// Stack input:  [x] (128.128 format, must be > 0)
 /// Stack output: [log2(x)] (128.128 format, signed)
-#define macro FP128_LOG2() = takes(1) returns(1) {
+#define fn FP128_LOG2() = takes(1) returns(1) {
     dup1 iszero log2_zero jumpi
     dup1 IS_NEGATIVE() log2_zero jumpi
     dup1 [ONE_FP128] eq log2_one jumpi

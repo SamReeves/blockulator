@@ -232,7 +232,8 @@
 /// Formula: result = (a * 2^128) / b (signed)
 /// Gas: ~500-600 (sign handling + unsigned div)
 /// Precision: Full 128 fractional bits
-#define macro FP128_DIV() = takes(2) returns(1) {
+/// @dev Converted to function to save ~228 bytes (4 call sites)
+#define fn FP128_DIV() = takes(2) returns(1) {
     // Input: [b, a]
     // Strategy: compute sign, abs both, unsigned div, conditionally negate
     

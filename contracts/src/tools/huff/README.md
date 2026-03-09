@@ -128,10 +128,10 @@ FP128 lookup tables are generated using Python with `mpmath` for high precision:
 
 ```bash
 # Generate exp/ln tables (135 entries each)
-python3 scripts/generate_fp128_tables.py > contracts/src/tools/huff/fp128/tables.huff
+python3 scripts/generators/generate_fp128_tables.py > contracts/src/tools/huff/fp128/tables.huff
 
 # Generate transcendental constants
-python3 scripts/generate_fp128_coefficients.py >> contracts/src/tools/huff/fp128/constants.huff
+python3 scripts/generators/generate_fp128_coefficients.py >> contracts/src/tools/huff/fp128/constants.huff
 ```
 
 ## Performance

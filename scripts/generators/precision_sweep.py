@@ -5,9 +5,9 @@ Precision Sweep Post-Processor
 Parses SWEEP output from PrecisionSweep.t.sol and computes distribution statistics.
 
 Usage:
-    forge test --match-contract PrecisionSweep -vv | python3 scripts/precision_sweep.py
-    python3 scripts/precision_sweep.py < sweep_output.txt
-    forge test --match-contract PrecisionSweep -vv | python3 scripts/precision_sweep.py --plot
+    forge test --match-contract PrecisionSweep -vv | python3 scripts/generators/precision_sweep.py --json
+    python3 scripts/generators/precision_sweep.py < sweep_output.txt
+    forge test --match-contract PrecisionSweep -vv | python3 scripts/generators/precision_sweep.py --plot
 """
 
 import sys
@@ -110,20 +110,24 @@ def analyze_samples(samples):
 
 def print_summary_table(stats):
     """Print a summary table of distribution statistics."""
-    print("\n" + "=" * 100)
-    print("PRECISION DISTRIBUTION SUMMARY")
-    print("=" * 100)
+    print("\n" + "=" * 100, file=sys.stderr)
+    print("PRECISION DISTRIBUTION SUMMARY", file=sys.stderr)
+    print("=" * 100, file=sys.stderr)
     
-    functions = ["mul", "div", "add", "sub", "exp", "exp2", "ln", "log2", "sqrt", "pow"]
+    # Auto-discover functions from stats instead of hardcoding
+    all_functions = set()
+    for lib in stats.values():
+        all_functions.update(lib.keys())
+    functions = sorted(all_functions)
     libraries = sorted(stats.keys())
     
     for func in functions:
-        print(f"\n{func.upper()}")
-        print("-" * 100)
+        print(f"\n{func.upper()}", file=sys.stderr)
+        print("-" * 100, file=sys.stderr)
         
         # Header
-        print(f"{'Library':<10} {'Count':<7} {'Gas (median)':<15} {'Digits (min/median/max)':<30} {'Error Bits (min/median/max)':<30}")
-        print("-" * 100)
+        print(f"{'Library':<10} {'Count':<7} {'Gas (median)':<15} {'Digits (min/median/max)':<30} {'Error Bits (min/median/max)':<30}", file=sys.stderr)
+        print("-" * 100, file=sys.stderr)
         
         for lib in libraries:
             if func not in stats[lib]:
@@ -135,25 +139,29 @@ def print_summary_table(stats):
             digits_str = f"{s['digits']['min']:.1f} / {s['digits']['median']:.1f} / {s['digits']['max']:.1f}"
             error_bits_str = f"{s['error_bits']['min']:.0f} / {s['error_bits']['median']:.0f} / {s['error_bits']['max']:.0f}"
             
-            print(f"{lib:<10} {s['count']:<7} {gas_str:<15} {digits_str:<30} {error_bits_str:<30}")
+            print(f"{lib:<10} {s['count']:<7} {gas_str:<15} {digits_str:<30} {error_bits_str:<30}", file=sys.stderr)
     
-    print("\n" + "=" * 100)
+    print("\n" + "=" * 100, file=sys.stderr)
 
 
 def print_detailed_percentiles(stats):
     """Print detailed percentile breakdown."""
-    print("\n" + "=" * 100)
-    print("DETAILED PERCENTILE STATISTICS (Matching Digits)")
-    print("=" * 100)
+    print("\n" + "=" * 100, file=sys.stderr)
+    print("DETAILED PERCENTILE STATISTICS (Matching Digits)", file=sys.stderr)
+    print("=" * 100, file=sys.stderr)
     
-    functions = ["mul", "div", "add", "sub", "exp", "exp2", "ln", "log2", "sqrt", "pow"]
+    # Auto-discover functions from stats instead of hardcoding
+    all_functions = set()
+    for lib in stats.values():
+        all_functions.update(lib.keys())
+    functions = sorted(all_functions)
     libraries = sorted(stats.keys())
     
     for func in functions:
-        print(f"\n{func.upper()}")
-        print("-" * 100)
-        print(f"{'Library':<10} {'Count':<7} {'Min':<8} {'P5':<8} {'P25':<8} {'Median':<8} {'P75':<8} {'P95':<8} {'Max':<8} {'Mean':<8}")
-        print("-" * 100)
+        print(f"\n{func.upper()}", file=sys.stderr)
+        print("-" * 100, file=sys.stderr)
+        print(f"{'Library':<10} {'Count':<7} {'Min':<8} {'P5':<8} {'P25':<8} {'Median':<8} {'P75':<8} {'P95':<8} {'Max':<8} {'Mean':<8}", file=sys.stderr)
+        print("-" * 100, file=sys.stderr)
         
         for lib in libraries:
             if func not in stats[lib]:
@@ -162,7 +170,7 @@ def print_detailed_percentiles(stats):
             s = stats[lib][func]
             d = s['digits']
             
-            print(f"{lib:<10} {s['count']:<7} {d['min']:<8.1f} {d['p5']:<8.1f} {d['p25']:<8.1f} {d['median']:<8.1f} {d['p75']:<8.1f} {d['p95']:<8.1f} {d['max']:<8.1f} {d['mean']:<8.1f}")
+            print(f"{lib:<10} {s['count']:<7} {d['min']:<8.1f} {d['p5']:<8.1f} {d['p25']:<8.1f} {d['median']:<8.1f} {d['p75']:<8.1f} {d['p95']:<8.1f} {d['max']:<8.1f} {d['mean']:<8.1f}", file=sys.stderr)
 
 
 def export_to_json(stats, raw, output_path="docs/benchmarks/precision_distribution.json"):
@@ -176,7 +184,7 @@ def export_to_json(stats, raw, output_path="docs/benchmarks/precision_distributi
     with open(output_path, 'w') as f:
         json.dump(data, f, indent=2)
     
-    print(f"\nExported raw data to: {output_path}")
+    print(f"\nExported raw data to: {output_path}", file=sys.stderr)
 
 
 def plot_distributions(samples, stats):
@@ -186,12 +194,16 @@ def plot_distributions(samples, stats):
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
     except ImportError:
-        print("matplotlib not available, skipping plots")
+        print("matplotlib not available, skipping plots", file=sys.stderr)
         return
     
-    functions = ["mul", "div", "exp", "exp2", "ln", "log2", "sqrt"]
+    # Auto-discover functions from stats instead of hardcoding
+    all_functions = set()
+    for lib in stats.values():
+        all_functions.update(lib.keys())
+    functions = sorted(all_functions)
     libraries = sorted(stats.keys())
-    colors = {"fp128": "#2196F3", "abdk": "#FF9800", "solady": "#9C27B0"}
+    colors = {"fp128": "#2196F3", "abdk": "#FF9800", "solady": "#9C27B0", "prb": "#4CAF50"}
     
     # Group samples by lib and func
     grouped = defaultdict(lambda: defaultdict(list))
@@ -233,7 +245,7 @@ def plot_distributions(samples, stats):
     
     plt.tight_layout()
     plt.savefig("docs/benchmarks/precision_distribution.png", dpi=150, bbox_inches='tight')
-    print("Saved plot: docs/benchmarks/precision_distribution.png")
+    print("Saved plot: docs/benchmarks/precision_distribution.png", file=sys.stderr)
 
 
 def merge_into_benchmark_data(stats, benchmark_path="docs/benchmarks/benchmark-data.json"):
@@ -242,7 +254,7 @@ def merge_into_benchmark_data(stats, benchmark_path="docs/benchmarks/benchmark-d
         with open(benchmark_path) as f:
             data = json.load(f)
     except FileNotFoundError:
-        print(f"Warning: {benchmark_path} not found, skipping merge")
+        print(f"Warning: {benchmark_path} not found, skipping merge", file=sys.stderr)
         return
     
     for lib, funcs in stats.items():
@@ -262,7 +274,7 @@ def merge_into_benchmark_data(stats, benchmark_path="docs/benchmarks/benchmark-d
     
     with open(benchmark_path, "w") as f:
         json.dump(data, f, indent=2)
-    print(f"Merged distribution into {benchmark_path}")
+    print(f"Merged distribution into {benchmark_path}", file=sys.stderr)
 
 
 def main():
@@ -274,16 +286,16 @@ def main():
     parser.add_argument("--merge", action="store_true", help="Merge into benchmark-data.json for site")
     args = parser.parse_args()
     
-    print("Parsing SWEEP output...")
+    print("Parsing SWEEP output...", file=sys.stderr)
     samples = parse_sweep_lines(sys.stdin)
     
     if not samples:
-        print("No SWEEP lines found in input")
+        print("No SWEEP lines found in input", file=sys.stderr)
         sys.exit(1)
     
-    print(f"Parsed {len(samples)} samples")
+    print(f"Parsed {len(samples)} samples", file=sys.stderr)
     
-    print("\nAnalyzing distributions...")
+    print("\nAnalyzing distributions...", file=sys.stderr)
     stats, raw = analyze_samples(samples)
     
     print_summary_table(stats)

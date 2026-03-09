@@ -52,6 +52,39 @@ interface IFP128 {
     function gavgRaw(uint256, uint256) external view returns (uint256);
     function log10Raw(uint256) external view returns (uint256);
     function exp10Raw(uint256) external view returns (uint256);
+    function sign(uint256) external view returns (uint256);
+    function floor(uint256) external view returns (uint256);
+    function ceil(uint256) external view returns (uint256);
+    function frac(uint256) external view returns (uint256);
+    function cbrt(uint256) external view returns (uint256);
+    function lerp(uint256, uint256, uint256) external view returns (uint256);
+    function hypot(uint256, uint256) external view returns (uint256);
+    function signRaw(uint256) external view returns (uint256);
+    function floorRaw(uint256) external view returns (uint256);
+    function ceilRaw(uint256) external view returns (uint256);
+    function fracRaw(uint256) external view returns (uint256);
+    function cbrtRaw(uint256) external view returns (uint256);
+    function lerpRaw(uint256, uint256, uint256) external view returns (uint256);
+    function hypotRaw(uint256, uint256) external view returns (uint256);
+    function round(uint256) external view returns (uint256);
+    function log2Up(uint256) external view returns (uint256);
+    function gcd(uint256, uint256) external view returns (uint256);
+    function factorial(uint256) external view returns (uint256);
+    function lambertW0(uint256) external view returns (uint256);
+    function roundRaw(uint256) external view returns (uint256);
+    function log2UpRaw(uint256) external view returns (uint256);
+    function gcdRaw(uint256, uint256) external view returns (uint256);
+    function factorialRaw(uint256) external view returns (uint256);
+    function lambertW0Raw(uint256) external view returns (uint256);
+    function lambertW0Guess(uint256) external view returns (uint256);
+    function lambertW0CheckpointS(uint256) external view returns (uint256, uint256, uint256, uint256);
+    function lambertW0DbgLut(uint256) external view returns (uint256, uint256, uint256, uint256, uint256);
+    function lambertW0DbgFsc(uint256, uint256) external view returns (uint256, uint256);
+    function lambertW0DbgFscInit(uint256, uint256) external view returns (uint256, uint256, uint256);
+    function lambertW0DbgFscReuse(uint256, uint256, uint256) external view returns (uint256, uint256, uint256);
+    function dbgMsb(uint256) external view returns (uint256);
+    function dbgLutEntry(uint256) external view returns (uint256);
+    function dbgLutClamp(uint256) external view returns (uint256, uint256);
 }
 
 contract FP128Test is Test {
@@ -100,6 +133,14 @@ contract FP128Test is Test {
             
             result := mul(prod0, inv)
         }
+    }
+
+    function _log2Err(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 d = a > b ? a - b : b - a;
+        if (d == 0) return 128;
+        uint256 bits = 0;
+        while (d > 0) { d >>= 1; bits++; }
+        return bits;
     }
 
     function _oracle(string memory func, uint256 x) internal returns (uint256) {
@@ -1537,15 +1578,687 @@ contract FP128Test is Test {
     
     // Layer 2: Raw FP128 oracle-based precision tests
     function test_precision_exp10() public view {
-        // exp10 is a composed function (mul + exp2) so we test it via cross-check instead
         uint256 TWO_FP128 = uint256(2) << 128;
         uint256 result = fp128.exp10Raw(TWO_FP128);
         uint256 HUNDRED_FP128 = uint256(100) << 128;
-        // exp10(2) should be approximately 100, allow larger tolerance for composition error
-        assertApproxEqAbs(result, HUNDRED_FP128, 1 << 121, "exp10(2) approx 100");
+        assertApproxEqAbs(result, HUNDRED_FP128, 1 << 8, "exp10(2) approx 100");
     }
     
     // Layer 3: Fuzz tests
     // Note: exp10 fuzz test omitted due to large composition error accumulation
     // The function is tested via concrete smoke tests and cross-checks instead
+    
+    // ============================================================================
+    // SIGN TESTS
+    // ============================================================================
+    
+    // Layer 1: Smoke tests
+    function test_sign_positive() public view {
+        uint256 result = fp128.sign(uint256(5e18));
+        assertEq(result, uint256(1e18), "sign(5) = 1");
+    }
+    
+    function test_sign_negative() public view {
+        uint256 result = fp128.sign(uint256(-int256(5e18)));
+        assertEq(result, uint256(-int256(1e18)), "sign(-5) = -1");
+    }
+    
+    function test_sign_zero() public view {
+        uint256 result = fp128.sign(0);
+        assertEq(result, 0, "sign(0) = 0");
+    }
+    
+    // Layer 2: Raw FP128 precision tests
+    function test_precision_sign() public view {
+        uint256 TWO_FP128 = uint256(2) << 128;
+        uint256 result = fp128.signRaw(TWO_FP128);
+        uint256 ONE_FP128 = uint256(1) << 128;
+        assertEq(result, ONE_FP128, "sign(2) = 1 in FP128");
+    }
+    
+    // ============================================================================
+    // FLOOR TESTS
+    // ============================================================================
+    
+    // Layer 1: Smoke tests
+    function test_floor_positive_integer() public view {
+        uint256 result = fp128.floor(uint256(5e18));
+        assertEq(result, uint256(5e18), "floor(5) = 5");
+    }
+    
+    function test_floor_positive_fractional() public view {
+        uint256 result = fp128.floor(uint256(5.7e18));
+        assertEq(result, uint256(5e18), "floor(5.7) = 5");
+    }
+    
+    function test_floor_negative_fractional() public view {
+        uint256 result = fp128.floor(uint256(-int256(5.7e18)));
+        assertEq(result, uint256(-int256(6e18)), "floor(-5.7) = -6");
+    }
+    
+    function test_floor_zero() public view {
+        uint256 result = fp128.floor(0);
+        assertEq(result, 0, "floor(0) = 0");
+    }
+    
+    // Layer 2: Raw FP128 precision tests
+    function test_precision_floor() public view {
+        uint256 TWO_POINT_FIVE_FP128 = (uint256(2) << 128) + (uint256(1) << 127);
+        uint256 result = fp128.floorRaw(TWO_POINT_FIVE_FP128);
+        uint256 TWO_FP128 = uint256(2) << 128;
+        assertEq(result, TWO_FP128, "floor(2.5) = 2 in FP128");
+    }
+    
+    // ============================================================================
+    // CEIL TESTS
+    // ============================================================================
+    
+    // Layer 1: Smoke tests
+    function test_ceil_positive_integer() public view {
+        uint256 result = fp128.ceil(uint256(5e18));
+        assertEq(result, uint256(5e18), "ceil(5) = 5");
+    }
+    
+    function test_ceil_positive_fractional() public view {
+        uint256 result = fp128.ceil(uint256(5.3e18));
+        assertEq(result, uint256(6e18), "ceil(5.3) = 6");
+    }
+    
+    function test_ceil_negative_fractional() public view {
+        uint256 result = fp128.ceil(uint256(-int256(5.3e18)));
+        assertEq(result, uint256(-int256(5e18)), "ceil(-5.3) = -5");
+    }
+    
+    function test_ceil_zero() public view {
+        uint256 result = fp128.ceil(0);
+        assertEq(result, 0, "ceil(0) = 0");
+    }
+    
+    // Layer 2: Raw FP128 precision tests
+    function test_precision_ceil() public view {
+        uint256 TWO_POINT_FIVE_FP128 = (uint256(2) << 128) + (uint256(1) << 127);
+        uint256 result = fp128.ceilRaw(TWO_POINT_FIVE_FP128);
+        uint256 THREE_FP128 = uint256(3) << 128;
+        assertEq(result, THREE_FP128, "ceil(2.5) = 3 in FP128");
+    }
+    
+    // ============================================================================
+    // FRAC TESTS
+    // ============================================================================
+    
+    // Layer 1: Smoke tests
+    function test_frac_positive_integer() public view {
+        uint256 result = fp128.frac(uint256(5e18));
+        assertEq(result, 0, "frac(5) = 0");
+    }
+    
+    function test_frac_positive_fractional() public view {
+        uint256 result = fp128.frac(uint256(5.7e18));
+        assertApproxEqAbs(result, uint256(0.7e18), 1e15, "frac(5.7) ~ 0.7");
+    }
+    
+    function test_frac_negative_fractional() public view {
+        uint256 result = fp128.frac(uint256(-int256(5.7e18)));
+        assertApproxEqAbs(result, uint256(0.3e18), 1e15, "frac(-5.7) ~ 0.3");
+    }
+    
+    function test_frac_zero() public view {
+        uint256 result = fp128.frac(0);
+        assertEq(result, 0, "frac(0) = 0");
+    }
+    
+    // Layer 2: Raw FP128 precision tests
+    function test_precision_frac() public view {
+        uint256 TWO_POINT_FIVE_FP128 = (uint256(2) << 128) + (uint256(1) << 127);
+        uint256 result = fp128.fracRaw(TWO_POINT_FIVE_FP128);
+        uint256 HALF_FP128 = uint256(1) << 127;
+        assertEq(result, HALF_FP128, "frac(2.5) = 0.5 in FP128");
+    }
+    
+    // ============================================================================
+    // CBRT TESTS
+    // ============================================================================
+    
+    // Layer 1: Smoke tests
+    function test_cbrt_eight() public view {
+        uint256 result = fp128.cbrt(uint256(8e18));
+        assertApproxEqAbs(result, uint256(2e18), 1e15, "cbrt(8) ~ 2");
+    }
+    
+    function test_cbrt_twentyseven() public view {
+        uint256 result = fp128.cbrt(uint256(27e18));
+        assertApproxEqAbs(result, uint256(3e18), 1e15, "cbrt(27) ~ 3");
+    }
+    
+    function test_cbrt_negative() public view {
+        uint256 result = fp128.cbrt(uint256(-int256(8e18)));
+        assertApproxEqAbs(result, uint256(-int256(2e18)), 1e15, "cbrt(-8) ~ -2");
+    }
+    
+    function test_cbrt_zero() public view {
+        uint256 result = fp128.cbrt(0);
+        assertEq(result, 0, "cbrt(0) = 0");
+    }
+    
+    // Layer 2: Raw FP128 precision tests
+    function test_precision_cbrt() public view {
+        uint256 EIGHT_FP128 = uint256(8) << 128;
+        uint256 result = fp128.cbrtRaw(EIGHT_FP128);
+        uint256 TWO_FP128 = uint256(2) << 128;
+        assertApproxEqAbs(result, TWO_FP128, 1 << 100, "cbrt(8) ~ 2 in FP128");
+    }
+    
+    // ============================================================================
+    // LERP TESTS
+    // ============================================================================
+    
+    // Layer 1: Smoke tests
+    function test_lerp_at_zero() public view {
+        uint256 result = fp128.lerp(uint256(10e18), uint256(20e18), 0);
+        assertEq(result, uint256(10e18), "lerp(10, 20, 0) = 10");
+    }
+    
+    function test_lerp_at_one() public view {
+        uint256 result = fp128.lerp(uint256(10e18), uint256(20e18), uint256(1e18));
+        assertApproxEqAbs(result, uint256(20e18), 1e15, "lerp(10, 20, 1) ~ 20");
+    }
+    
+    function test_lerp_at_half() public view {
+        uint256 result = fp128.lerp(uint256(10e18), uint256(20e18), uint256(0.5e18));
+        assertApproxEqAbs(result, uint256(15e18), 1e15, "lerp(10, 20, 0.5) ~ 15");
+    }
+    
+    function test_lerp_negative_range() public view {
+        uint256 result = fp128.lerp(uint256(-int256(10e18)), uint256(10e18), uint256(0.5e18));
+        assertApproxEqAbs(result, 0, 1e15, "lerp(-10, 10, 0.5) ~ 0");
+    }
+    
+    // Layer 2: Raw FP128 precision tests
+    function test_precision_lerp() public view {
+        uint256 TEN_FP128 = uint256(10) << 128;
+        uint256 TWENTY_FP128 = uint256(20) << 128;
+        uint256 HALF_FP128 = uint256(1) << 127;
+        uint256 result = fp128.lerpRaw(TEN_FP128, TWENTY_FP128, HALF_FP128);
+        uint256 FIFTEEN_FP128 = uint256(15) << 128;
+        assertApproxEqAbs(result, FIFTEEN_FP128, 1 << 100, "lerp(10, 20, 0.5) ~ 15 in FP128");
+    }
+    
+    // ============================================================================
+    // HYPOT TESTS
+    // ============================================================================
+    
+    // Layer 1: Smoke tests
+    function test_hypot_three_four() public view {
+        uint256 result = fp128.hypot(uint256(3e18), uint256(4e18));
+        assertApproxEqAbs(result, uint256(5e18), 1e15, "hypot(3, 4) ~ 5");
+    }
+    
+    function test_hypot_five_twelve() public view {
+        uint256 result = fp128.hypot(uint256(5e18), uint256(12e18));
+        assertApproxEqAbs(result, uint256(13e18), 1e15, "hypot(5, 12) ~ 13");
+    }
+    
+    function test_hypot_zero() public view {
+        uint256 result = fp128.hypot(0, 0);
+        assertEq(result, 0, "hypot(0, 0) = 0");
+    }
+    
+    function test_hypot_negative() public view {
+        uint256 result = fp128.hypot(uint256(-int256(3e18)), uint256(-int256(4e18)));
+        assertApproxEqAbs(result, uint256(5e18), 1e15, "hypot(-3, -4) ~ 5");
+    }
+    
+    // Layer 2: Raw FP128 precision tests
+    function test_precision_hypot() public view {
+        uint256 THREE_FP128 = uint256(3) << 128;
+        uint256 FOUR_FP128 = uint256(4) << 128;
+        uint256 result = fp128.hypotRaw(THREE_FP128, FOUR_FP128);
+        uint256 FIVE_FP128 = uint256(5) << 128;
+        assertApproxEqAbs(result, FIVE_FP128, 1 << 100, "hypot(3, 4) ~ 5 in FP128");
+    }
+    
+    // ============================================================================
+    // ROUND TESTS
+    // ============================================================================
+    
+    function test_round_positive() public view {
+        uint256 result = fp128.round(uint256(2.3e18));
+        assertEq(result, uint256(2e18), "round(2.3) = 2");
+    }
+    
+    function test_round_half_up() public view {
+        uint256 result = fp128.round(uint256(2.5e18));
+        assertEq(result, uint256(3e18), "round(2.5) = 3");
+    }
+    
+    function test_round_negative() public view {
+        uint256 result = fp128.round(uint256(-int256(2.7e18)));
+        assertEq(result, uint256(-int256(3e18)), "round(-2.7) = -3");
+    }
+    
+    function test_precision_round() public view {
+        uint256 TWO_POINT_FIVE_FP128 = (uint256(2) << 128) + (uint256(1) << 127);
+        uint256 result = fp128.roundRaw(TWO_POINT_FIVE_FP128);
+        uint256 THREE_FP128 = uint256(3) << 128;
+        assertEq(result, THREE_FP128, "round(2.5) = 3 in FP128");
+    }
+    
+    // ============================================================================
+    // LOG2UP TESTS
+    // ============================================================================
+    
+    function test_log2up_power_of_two() public view {
+        uint256 result = fp128.log2Up(uint256(8e18));
+        assertEq(result, uint256(3e18), "log2Up(8) = 3");
+    }
+    
+    function test_log2up_not_power_of_two() public view {
+        uint256 result = fp128.log2Up(uint256(7e18));
+        assertEq(result, uint256(3e18), "log2Up(7) = 3");
+    }
+    
+    function test_precision_log2up() public view {
+        uint256 SEVEN_FP128 = uint256(7) << 128;
+        uint256 result = fp128.log2UpRaw(SEVEN_FP128);
+        uint256 THREE_FP128 = uint256(3) << 128;
+        assertEq(result, THREE_FP128, "log2Up(7) = 3 in FP128");
+    }
+    
+    // ============================================================================
+    // GCD TESTS
+    // ============================================================================
+    
+    function test_gcd_basic() public view {
+        uint256 result = fp128.gcd(uint256(48e18), uint256(18e18));
+        assertEq(result, uint256(6e18), "gcd(48, 18) = 6");
+    }
+    
+    function test_gcd_coprime() public view {
+        uint256 result = fp128.gcd(uint256(17e18), uint256(19e18));
+        assertEq(result, uint256(1e18), "gcd(17, 19) = 1");
+    }
+    
+    function test_gcd_zero() public view {
+        uint256 result = fp128.gcd(uint256(42e18), 0);
+        assertEq(result, uint256(42e18), "gcd(42, 0) = 42");
+    }
+    
+    function test_precision_gcd() public view {
+        uint256 FORTYEIGHT_FP128 = uint256(48) << 128;
+        uint256 EIGHTEEN_FP128 = uint256(18) << 128;
+        uint256 result = fp128.gcdRaw(FORTYEIGHT_FP128, EIGHTEEN_FP128);
+        uint256 SIX_FP128 = uint256(6) << 128;
+        assertEq(result, SIX_FP128, "gcd(48, 18) = 6 in FP128");
+    }
+    
+    // ============================================================================
+    // FACTORIAL TESTS
+    // ============================================================================
+    
+    function test_factorial_zero() public view {
+        uint256 result = fp128.factorial(0);
+        assertEq(result, uint256(1e18), "0! = 1");
+    }
+    
+    function test_factorial_five() public view {
+        uint256 result = fp128.factorial(uint256(5e18));
+        assertEq(result, uint256(120e18), "5! = 120");
+    }
+    
+    function test_factorial_ten() public view {
+        uint256 result = fp128.factorial(uint256(10e18));
+        assertEq(result, uint256(3628800e18), "10! = 3628800");
+    }
+    
+    function test_precision_factorial() public view {
+        uint256 FIVE_FP128 = uint256(5) << 128;
+        uint256 result = fp128.factorialRaw(FIVE_FP128);
+        uint256 ONETWENTY_FP128 = uint256(120) << 128;
+        assertEq(result, ONETWENTY_FP128, "5! = 120 in FP128");
+    }
+    
+    // ============================================================================
+    // LAMBERT W0 TESTS
+    // ============================================================================
+    
+    function test_lambertw0_zero() public view {
+        uint256 result = fp128.lambertW0(0);
+        assertEq(result, 0, "W(0) = 0");
+    }
+    
+    function test_lambertw0_one() public view {
+        uint256 result = fp128.lambertW0(uint256(1e18));
+        assertApproxEqAbs(result, uint256(0.567143290409783873e18), 1e15, "W(1) ~ 0.5671");
+    }
+    
+    function test_lambertw0_e() public view {
+        uint256 result = fp128.lambertW0(uint256(E));
+        assertApproxEqAbs(result, uint256(1e18), 1e15, "W(e) ~ 1");
+    }
+    
+    function test_precision_lambertw0() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+        uint256 result = fp128.lambertW0Raw(ONE_FP128);
+        // W(1) ≈ 0.5671432904097838729999686622103555497538157871865125081351310792230457930866
+        uint256 expected = 0x0000000000000000000000000000000091304d7c74b2ba5eafddaa6286dc28e1;
+        assertApproxEqAbs(result, expected, 1 << 100, "W(1) ~ 0.5671 in FP128");
+    }
+
+    // Checkpoint tests for debugging
+    function test_lambertw0_guess() public view {
+        uint256 x_fp128 = uint256(1) << 128;  // x = 1
+        uint256 w0 = fp128.lambertW0Guess(x_fp128);
+        // Should be LAMBERTW0_W1 = 0x91304d7c74b2ba5eafddaa6286dc28e1
+        uint256 expected = 0x91304d7c74b2ba5eafddaa6286dc28e1;
+        assertEq(w0, expected, "Initial guess W(1) should match LAMBERTW0_W1");
+    }
+
+    function test_lambertw0_guess_x3() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+        uint256 x3 = 3 * ONE_FP128;
+        uint256 w0 = fp128.lambertW0Guess(x3);
+        console.log("Guess for x=3:");
+        console.logBytes32(bytes32(w0));
+        uint256 W2 = 0x00000000000000000000000000000000da445aab89e28ccbe8ac8e1abd5cd1db;
+        console.log("Expected W(2):");
+        console.logBytes32(bytes32(W2));
+        assertEq(w0, W2, "x=3 guess should be W(2)");
+    }
+
+    function test_lambertw0_checkpoint_s() public view {
+        uint256 x_fp128 = uint256(1) << 128;
+        (uint256 w, uint256 x_ret, uint256 ew, uint256 s) = fp128.lambertW0CheckpointS(x_fp128);
+        
+        console.log("x:", x_ret);
+        console.log("w0:", w);
+        console.log("ew:", ew);
+        console.log("s:", s);
+        
+        // Verify s = w*e^w - x is close to 0 for good initial guess
+        // s should be small (< 0.1 in FP128)
+        uint256 threshold = uint256(1 << 128) / 10;  // 0.1 in FP128
+        
+        // Check if s is negative (two's complement)
+        bool is_negative = s > (type(uint256).max / 2);
+        if (is_negative) {
+            uint256 abs_s = type(uint256).max - s + 1;
+            assertLt(abs_s, threshold, "abs(s) should be small for good guess");
+        } else {
+            assertLt(s, threshold, "s should be small for good guess");
+        }
+    }
+
+    function test_lambertw0_dbg_lut_interp() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+
+        // Test x = 3.0 in FP128 (between 2 and 4, should interpolate W(2)..W(4))
+        uint256 x_3 = 3 * ONE_FP128;
+        (uint256 w0, uint256 t, uint256 W_lo, uint256 W_hi, uint256 msb) = fp128.lambertW0DbgLut(x_3);
+        console.log("=== x = 3.0 ===");
+        console.log("msb:", msb);
+        console.log("t (hex):");
+        console.logBytes32(bytes32(t));
+        console.log("W_lo (hex):");
+        console.logBytes32(bytes32(W_lo));
+        console.log("W_hi (hex):");
+        console.logBytes32(bytes32(W_hi));
+        console.log("w0 (hex):");
+        console.logBytes32(bytes32(w0));
+
+        // t should be 0.5 for x=3 in [2,4): (3/2 - 1) = 0.5
+        uint256 half_fp128 = ONE_FP128 / 2;
+        console.log("expected t:", half_fp128);
+        console.log("actual t:", t);
+        console.log("msb:", msb);
+
+        // Test x = 1.0 in FP128 (at the left edge of [1,2))
+        uint256 x_1 = ONE_FP128;
+        (w0, t, W_lo, W_hi, msb) = fp128.lambertW0DbgLut(x_1);
+        console.log("=== x = 1.0 ===");
+        console.log("msb:", msb);
+        console.log("t (hex):");
+        console.logBytes32(bytes32(t));
+        console.log("w0 (hex):");
+        console.logBytes32(bytes32(w0));
+        console.log("expected t for x=1: 0");
+        console.log("actual t:", t);
+        console.log("expected w0 = W(1):");
+        console.logBytes32(bytes32(uint256(0x0000000000000000000000000000000091304d7c74b2ba5eafddaa6286dc28e1)));
+
+        // Test x = e ≈ 2.718 in FP128
+        // e in FP128 = 2718281828459045235 * 2^128 / 1e18
+        uint256 e_fp128 = (2718281828459045235 * ONE_FP128) / 1e18;
+        (w0, t, W_lo, W_hi, msb) = fp128.lambertW0DbgLut(e_fp128);
+        console.log("=== x = e ===");
+        console.log("msb:", msb);
+        console.log("t (hex):");
+        console.logBytes32(bytes32(t));
+        console.log("w0 (hex):");
+        console.logBytes32(bytes32(w0));
+        // W(e) = 1.0 exactly, so w0 should be near ONE_FP128
+        console.log("w0 as approx float (w0 >> 96):", w0 >> 96);
+        console.log("ONE_FP128 >> 96:", ONE_FP128 >> 96);
+    }
+
+    function test_lambertw0_dbg_fsc_step() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+
+        // Test: start with w=W(1) (exact), x=1.0
+        // FSC step should produce w_new ≈ W(1) (no change since it's already converged)
+        uint256 W1 = 0x0000000000000000000000000000000091304d7c74b2ba5eafddaa6286dc28e1;
+        (uint256 w_new, uint256 r_fsc) = fp128.lambertW0DbgFsc(ONE_FP128, W1);
+        console.log("=== FSC step: x=1, w=W(1) exact ===");
+        console.log("r_fsc (should be ~0):");
+        console.logBytes32(bytes32(r_fsc));
+        console.log("w_new (should be ~W(1)):");
+        console.logBytes32(bytes32(w_new));
+
+        // Test: start with w=0.5 (rough guess), x=1.0
+        uint256 w_half = ONE_FP128 / 2;
+        (w_new, r_fsc) = fp128.lambertW0DbgFsc(ONE_FP128, w_half);
+        console.log("=== FSC step: x=1, w=0.5 ===");
+        console.log("r_fsc:");
+        console.logBytes32(bytes32(r_fsc));
+        console.log("w_new:");
+        console.logBytes32(bytes32(w_new));
+        console.log("w_new approx (>>96):", w_new >> 96);
+        // W(1) ≈ 0.5671, so starting from 0.5 should move toward 0.5671
+    }
+
+    function test_dbg_lut_pieces() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+        uint256 W1 = 0x0000000000000000000000000000000091304d7c74b2ba5eafddaa6286dc28e1;
+        uint256 W2 = 0x00000000000000000000000000000000da445aab89e28ccbe8ac8e1abd5cd1db;
+        uint256 W4 = 0x0000000000000000000000000000000133c14613aee484452ac550f2b1a0300d;
+
+        // === Part 1: MSB ===
+        uint256 msb1 = fp128.dbgMsb(ONE_FP128);       // x=1.0 → msb=128
+        uint256 msb3 = fp128.dbgMsb(3 * ONE_FP128);   // x=3.0 → msb=129
+        uint256 msb5 = fp128.dbgMsb(5 * ONE_FP128);   // x=5.0 → msb=130
+        console.log("MSB(1.0):", msb1);
+        console.log("MSB(3.0):", msb3);
+        console.log("MSB(5.0):", msb5);
+        assertEq(msb1, 128, "MSB(1.0) should be 128");
+        assertEq(msb3, 129, "MSB(3.0) should be 129");
+        assertEq(msb5, 130, "MSB(5.0) should be 130");
+
+        // === Part 2: LUT entry at each idx ===
+        uint256 e0 = fp128.dbgLutEntry(0);
+        uint256 e1 = fp128.dbgLutEntry(1);
+        uint256 e2 = fp128.dbgLutEntry(2);
+        console.log("LUT[0] (should be W1):");
+        console.logBytes32(bytes32(e0));
+        console.log("LUT[1] (should be W2):");
+        console.logBytes32(bytes32(e1));
+        console.log("LUT[2] (should be W4):");
+        console.logBytes32(bytes32(e2));
+        assertEq(e0, W1, "LUT[0] should be W(1)");
+        assertEq(e1, W2, "LUT[1] should be W(2)");
+        assertEq(e2, W4, "LUT[2] should be W(4)");
+
+        // === Part 3: Clamping ===
+        (uint256 c128, uint256 r128) = fp128.dbgLutClamp(128); // idx=0
+        (uint256 c129, uint256 r129) = fp128.dbgLutClamp(129); // idx=1
+        (uint256 c135, uint256 r135) = fp128.dbgLutClamp(135); // idx=7 → clamped to 6
+        console.log("clamp(msb=128): clamped=", c128, "raw=", r128);
+        console.log("clamp(msb=129): clamped=", c129, "raw=", r129);
+        console.log("clamp(msb=135): clamped=", c135, "raw=", r135);
+        assertEq(c128, 0, "clamp(128) should be 0");
+        assertEq(r128, 0, "raw(128) should be 0");
+        assertEq(c129, 1, "clamp(129) should be 1");
+        assertEq(r129, 1, "raw(129) should be 1");
+        assertEq(c135, 6, "clamp(135) should be 6");
+        assertEq(r135, 7, "raw(135) should be 7");
+    }
+
+    function test_lambertw0_production_nonpow2() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+
+        // W(3) ≈ 1.04990889496403995998869707...
+        uint256 x3 = 3 * ONE_FP128;
+        uint256 result3 = fp128.lambertW0Raw(x3);
+        uint256 expected3 = 0x000000000000000000000000000000010cc6d44fa669b9692193f0dda5206864;
+        int256 err3 = int256(result3) - int256(expected3);
+        console.log("W(3) result:");
+        console.logBytes32(bytes32(result3));
+        console.log("W(3) expected:");
+        console.logBytes32(bytes32(expected3));
+        console.log("W(3) error (signed):");
+        console.logInt(err3);
+        console.log("W(3) bits correct:", 128 - _log2Err(result3, expected3));
+        console.log("W(3) bits correct:", 128 - _log2Err(result3, expected3));
+
+        // W(5) ≈ 1.32672466524220022363509929...
+        uint256 x5 = 5 * ONE_FP128;
+        uint256 result5 = fp128.lambertW0Raw(x5);
+        uint256 expected5 = 0x0000000000000000000000000000000153a43a4803052f93079ab9ede1d51097;
+        int256 err5 = int256(result5) - int256(expected5);
+        console.log("W(5) error (signed):");
+        console.logInt(err5);
+        console.log("W(5) bits correct:", 128 - _log2Err(result5, expected5));
+
+        // W(e) ≈ 1.0
+        uint256 e_fp128 = (2718281828459045235 * ONE_FP128) / 1e18;
+        uint256 resultE = fp128.lambertW0Raw(e_fp128);
+        uint256 expectedE = 0x00000000000000000000000000000000ffffffffffffffffffffffffffffffff;
+        int256 errE = int256(resultE) - int256(expectedE);
+        console.log("W(e) error (signed):");
+        console.logInt(errE);
+        console.log("W(e) bits correct:", 128 - _log2Err(resultE, expectedE));
+    }
+
+    // ============================================================================
+    // LAMBERT W0 OPTIMIZED FSC TESTS
+    // ============================================================================
+
+    function test_lambertw0_fsc_init_step() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+
+        // Test INIT step: x=1, w=0.5 (rough guess)
+        uint256 w_half = ONE_FP128 / 2;
+        (uint256 w_new, uint256 ew_new, uint256 x_ret) = fp128.lambertW0DbgFscInit(ONE_FP128, w_half);
+        
+        console.log("=== FSC INIT step: x=1, w=0.5 ===");
+        console.log("w_new:");
+        console.logBytes32(bytes32(w_new));
+        console.log("ew_new:");
+        console.logBytes32(bytes32(ew_new));
+        console.log("x_ret:");
+        console.logBytes32(bytes32(x_ret));
+
+        // w_new should be closer to W(1) ≈ 0.5671
+        uint256 W1 = 0x0000000000000000000000000000000091304d7c74b2ba5eafddaa6286dc28e1;
+        
+        // Check that w_new is closer to W1 than w_half was
+        uint256 dist_before = w_half > W1 ? w_half - W1 : W1 - w_half;
+        uint256 dist_after = w_new > W1 ? w_new - W1 : W1 - w_new;
+        assertLt(dist_after, dist_before, "INIT step should converge toward W(1)");
+
+        // Verify ew_new is approximately e^w_new
+        uint256 ew_expected = fp128.expRaw(w_new);
+        uint256 ew_err = ew_new > ew_expected ? ew_new - ew_expected : ew_expected - ew_new;
+        uint256 tolerance = ew_expected / 1000;  // 0.1% tolerance
+        assertLt(ew_err, tolerance, "ew_new should approximate e^w_new");
+    }
+
+    function test_lambertw0_fsc_reuse_step() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+
+        // Test REUSE step: start from INIT output
+        uint256 w_half = ONE_FP128 / 2;
+        (uint256 w1, uint256 ew1, ) = fp128.lambertW0DbgFscInit(ONE_FP128, w_half);
+        
+        // Now run REUSE step with the output from INIT
+        (uint256 w2, uint256 ew2, uint256 x_ret) = fp128.lambertW0DbgFscReuse(ONE_FP128, w1, ew1);
+        
+        console.log("=== FSC REUSE step: x=1, w=w1, ew=ew1 ===");
+        console.log("w2:");
+        console.logBytes32(bytes32(w2));
+        console.log("ew2:");
+        console.logBytes32(bytes32(ew2));
+
+        uint256 W1_exact = 0x0000000000000000000000000000000091304d7c74b2ba5eafddaa6286dc28e1;
+        
+        // Check that w2 is even closer to W(1) than w1 was
+        uint256 dist1 = w1 > W1_exact ? w1 - W1_exact : W1_exact - w1;
+        uint256 dist2 = w2 > W1_exact ? w2 - W1_exact : W1_exact - w2;
+        assertLt(dist2, dist1, "REUSE step should continue converging");
+
+        // Verify ew2 is approximately e^w2 (with looser tolerance since it's updated via approximation)
+        uint256 ew2_expected = fp128.expRaw(w2);
+        uint256 ew2_err = ew2 > ew2_expected ? ew2 - ew2_expected : ew2_expected - ew2;
+        uint256 tolerance = ew2_expected / 100;  // 1% tolerance (looser than INIT)
+        assertLt(ew2_err, tolerance, "ew2 should approximate e^w2");
+    }
+
+    function test_lambertw0_optimized_precision() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+
+        // Test that the optimized version produces the same results as before
+        // W(1) ≈ 0.5671432904097838729999686622103555497538157871865125081351310792230457930866
+        uint256 result = fp128.lambertW0Raw(ONE_FP128);
+        uint256 expected = 0x0000000000000000000000000000000091304d7c74b2ba5eafddaa6286dc28e1;
+        assertApproxEqAbs(result, expected, 1 << 100, "Optimized W(1) should match expected precision");
+
+        // W(3) ≈ 1.04990889496403995998869707...
+        uint256 x3 = 3 * ONE_FP128;
+        uint256 result3 = fp128.lambertW0Raw(x3);
+        uint256 expected3 = 0x000000000000000000000000000000010cc6d44fa669b9692193f0dda5206864;
+        assertApproxEqAbs(result3, expected3, 1 << 100, "Optimized W(3) should match expected precision");
+
+        // W(5) ≈ 1.32672466524220022363509929...
+        uint256 x5 = 5 * ONE_FP128;
+        uint256 result5 = fp128.lambertW0Raw(x5);
+        uint256 expected5 = 0x0000000000000000000000000000000153a43a4803052f93079ab9ede1d51097;
+        assertApproxEqAbs(result5, expected5, 1 << 100, "Optimized W(5) should match expected precision");
+    }
+
+    function test_lambertw0_gas_comparison() public view {
+        uint256 ONE_FP128 = uint256(1) << 128;
+
+        // Measure gas for W(1)
+        uint256 g0 = gasleft();
+        fp128.lambertW0Raw(ONE_FP128);
+        uint256 gas1 = g0 - gasleft();
+
+        // Measure gas for W(3)
+        g0 = gasleft();
+        fp128.lambertW0Raw(3 * ONE_FP128);
+        uint256 gas3 = g0 - gasleft();
+
+        // Measure gas for W(5)
+        g0 = gasleft();
+        fp128.lambertW0Raw(5 * ONE_FP128);
+        uint256 gas5 = g0 - gasleft();
+
+        console.log("=== Lambert W0 Gas (Optimized) ===");
+        console.log("W(1) gas:", gas1);
+        console.log("W(3) gas:", gas3);
+        console.log("W(5) gas:", gas5);
+
+        // 3 INIT + 2 REUSE: ~27,000 gas via LUT, ~32,000 via large-x path
+        assertLt(gas1, 35000, "W(1) should use less than 35,000 gas");
+        assertLt(gas3, 30000, "W(3) should use less than 30,000 gas");
+        assertLt(gas5, 30000, "W(5) should use less than 30,000 gas");
+    }
 }

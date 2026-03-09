@@ -125,6 +125,90 @@ compile_huff_file() {
     "inputs": [{"name": "x", "type": "uint256"}, {"name": "y", "type": "uint256"}],
     "outputs": [{"type": "uint256"}],
     "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "abs",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "neg",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "inv",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "min",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "max",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "clamp",
+    "inputs": [{"name": "x", "type": "uint256"}, {"name": "min", "type": "uint256"}, {"name": "max", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "avg",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "zeroFloorSub",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "dist",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "gavg",
+    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "log10",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "exp10",
+    "inputs": [{"name": "x", "type": "uint256"}],
+    "outputs": [{"type": "uint256"}],
+    "stateMutability": "pure"
   }
 ]
 EOF
@@ -160,9 +244,9 @@ else
             fi
             
             if compile_huff_file "$huff_file"; then
-                ((compiled++))
+                compiled=$((compiled + 1))
             else
-                ((failed++))
+                failed=$((failed + 1))
             fi
         fi
     done
@@ -172,6 +256,9 @@ else
     echo -e "${GREEN}  ✓ Compiled: ${compiled}${NC}"
     if [ $failed -gt 0 ]; then
         echo -e "${RED}  ✗ Failed: ${failed}${NC}"
+        exit 1
     fi
     echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 fi
+
+exit 0

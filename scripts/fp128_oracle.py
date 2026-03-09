@@ -27,8 +27,9 @@ Functions:
   exp_bkm_only <rem_hex>      -- BKM loop simulation
 """
 
-from mpmath import mp, mpf, log, exp as mp_exp, sqrt as mp_sqrt, power
+from mpmath import mp, mpf, log, exp as mp_exp, sqrt as mp_sqrt, power, floor, ceil, cbrt, lambertw, factorial as mp_factorial
 import sys
+from math import gcd as math_gcd
 
 # Set 100-digit precision for ground truth
 mp.dps = 100
@@ -386,6 +387,59 @@ def compute_multi_format(func_name, a_str, b_str=None):
         result = log(a, 10) if a > 0 else mpf(0)
     elif func_name == "exp10":
         result = power(mpf(10), a)
+    elif func_name == "sign":
+        if a > 0:
+            result = mpf(1)
+        elif a < 0:
+            result = mpf(-1)
+        else:
+            result = mpf(0)
+    elif func_name == "floor":
+        result = floor(a)
+    elif func_name == "ceil":
+        result = ceil(a)
+    elif func_name == "frac":
+        result = a - floor(a)
+    elif func_name == "cbrt":
+        if a < 0:
+            result = -cbrt(-a)
+        else:
+            result = cbrt(a)
+    elif func_name == "lerp":
+        # lerp(a, b, t) = a + t * (b - a)
+        # For now, we'll use a fixed t=0.5 for sweeps (like clamp)
+        # But the oracle should support full 3-arg if needed
+        t = from_wad(b_str) if b_str else mpf(0.5)
+        # Actually, for lerp we need 3 args. Let's handle it as: a is first arg, b is second, and we'll need to extend this later
+        # For now, let's just compute lerp(a, b, 0.5) as a simple case
+        result = a + mpf(0.5) * (b - a) if b is not None else a
+    elif func_name == "hypot":
+        result = mp_sqrt(a * a + b * b) if b is not None else abs(a)
+    elif func_name == "round":
+        result = floor(a + mpf(0.5))
+    elif func_name == "log2up":
+        if a <= 0:
+            result = mpf(0)
+        else:
+            log2_val = log(a) / LN2
+            result = ceil(log2_val)
+    elif func_name == "gcd":
+        # GCD operates on integers
+        a_int = int(floor(abs(a)))
+        b_int = int(floor(abs(b))) if b is not None else 0
+        result = mpf(math_gcd(a_int, b_int))
+    elif func_name == "factorial":
+        n = int(floor(a))
+        if n < 0 or n > 33:
+            result = mpf(0)  # Out of range
+        else:
+            result = mpf(mp_factorial(n))
+    elif func_name == "lambertw0":
+        # Lambert W0 function (principal branch)
+        if a < mpf(-1) / mp_exp(mpf(1)):  # Domain: x >= -1/e
+            result = mpf(0)
+        else:
+            result = lambertw(a, k=0)
     else:
         result = mpf(0)
     

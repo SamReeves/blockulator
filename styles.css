@@ -6236,6 +6236,16 @@ details[open] .collapsible-arrow {
     color: #444;
 }
 
+.bench-summary .unsupported {
+    color: #666;
+    font-weight: 700;
+}
+
+.bench-summary .int-only {
+    color: #888;
+    font-style: italic;
+}
+
 /* ── Scatter Chart ───────────────────────────────────────────────────── */
 
 .bench-scatter-wrap {

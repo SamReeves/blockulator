@@ -15,7 +15,7 @@
 ///
 /// Gas: ~1600
 /// Precision: ~38 decimal digits (128 fractional bits)
-#define macro FP128_SQRT() = takes(1) returns(1) {
+#define fn FP128_SQRT() = takes(1) returns(1) {
     // Input: [x]
     dup1 iszero sqrt_is_zero jumpi
     
@@ -52,6 +52,6 @@
     sqrt_done jump
     
     sqrt_is_zero:
-    0x00
+    // x is 0, already on stack
     sqrt_done:
 }

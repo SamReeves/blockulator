@@ -31,16 +31,25 @@ _static/
 contracts/build/bins/
 contracts/build/bytecode/
 contracts/build/huff/*.hex
+contracts/build/huff/*.bin
+contracts/build/huff/*.runtime.bin
+contracts/build/vyper/*.hex
+contracts/build/vyper/*.bin
 
 # Foundry build artifacts
 cache/
 out/
+
+# Foundry VM state
+contracts/src/.states/
 
 # Keep ABIs - they're interface definitions for deployed contracts
 !contracts/build/abis/
 
 # Deployment artifacts
 contracts/deployments/deployment-*.json
+contracts/deployments/active/deployment-*.json
+contracts/deployments/active/*-deployment.json
 contracts/deployments/*.log
 
 # Foundry lock

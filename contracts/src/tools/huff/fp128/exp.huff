@@ -12,13 +12,18 @@
 /// Precision: ~131 bits (max error < 2^-131)
 
 // ============================================================================
-// Horner Step Macro for Polynomial Evaluation
+// Horner Step Function for Polynomial Evaluation
 // ============================================================================
 
 /// @notice Single Horner step: result = result * x + coeff
-/// @dev Stack: [result, x] -> [result * x + coeff, x]
-#define macro HORNER_STEP(COEFF) = takes(2) returns(2) {
-    dup2 FP128_MUL() <COEFF> add
+/// @dev Stack: [coeff, result, x] -> [result * x + coeff, x]
+/// @dev Converted to function to save ~234 bytes (22 call sites)
+#define fn HORNER_STEP() = takes(3) returns(2) {
+    // Input: [coeff, result, x]
+    swap1              // [result, coeff, x]
+    dup3               // [x, result, coeff, x]
+    FP128_MUL()        // [result*x, coeff, x]
+    add                // [result*x+coeff, x]
 }
 
 // ============================================================================
@@ -37,28 +42,28 @@
     // Start with highest coefficient C22
     [EXP2_C22]                // [result = C22, frac]
     
-    // 21 Horner steps using the HORNER_STEP macro
-    HORNER_STEP(EXP2_C21)
-    HORNER_STEP(EXP2_C20)
-    HORNER_STEP(EXP2_C19)
-    HORNER_STEP(EXP2_C18)
-    HORNER_STEP(EXP2_C17)
-    HORNER_STEP(EXP2_C16)
-    HORNER_STEP(EXP2_C15)
-    HORNER_STEP(EXP2_C14)
-    HORNER_STEP(EXP2_C13)
-    HORNER_STEP(EXP2_C12)
-    HORNER_STEP(EXP2_C11)
-    HORNER_STEP(EXP2_C10)
-    HORNER_STEP(EXP2_C9)
-    HORNER_STEP(EXP2_C8)
-    HORNER_STEP(EXP2_C7)
-    HORNER_STEP(EXP2_C6)
-    HORNER_STEP(EXP2_C5)
-    HORNER_STEP(EXP2_C4)
-    HORNER_STEP(EXP2_C3)
-    HORNER_STEP(EXP2_C2)
-    HORNER_STEP(EXP2_C1)
+    // 21 Horner steps using the HORNER_STEP function
+    [EXP2_C21] HORNER_STEP()
+    [EXP2_C20] HORNER_STEP()
+    [EXP2_C19] HORNER_STEP()
+    [EXP2_C18] HORNER_STEP()
+    [EXP2_C17] HORNER_STEP()
+    [EXP2_C16] HORNER_STEP()
+    [EXP2_C15] HORNER_STEP()
+    [EXP2_C14] HORNER_STEP()
+    [EXP2_C13] HORNER_STEP()
+    [EXP2_C12] HORNER_STEP()
+    [EXP2_C11] HORNER_STEP()
+    [EXP2_C10] HORNER_STEP()
+    [EXP2_C9] HORNER_STEP()
+    [EXP2_C8] HORNER_STEP()
+    [EXP2_C7] HORNER_STEP()
+    [EXP2_C6] HORNER_STEP()
+    [EXP2_C5] HORNER_STEP()
+    [EXP2_C4] HORNER_STEP()
+    [EXP2_C3] HORNER_STEP()
+    [EXP2_C2] HORNER_STEP()
+    [EXP2_C1] HORNER_STEP()
     
     // Final Horner step: result = result * frac + C0 (consume frac)
     swap1 FP128_MUL() [EXP2_C0] add
@@ -74,7 +79,7 @@
 /// @dev takes(1) returns(1)
 /// Stack input:  [x] (128.128 format, signed, must be in [-128, 127])
 /// Stack output: [2^x] (128.128 format)
-#define macro FP128_EXP2_CORE() = takes(1) returns(1) {
+#define fn FP128_EXP2_CORE() = takes(1) returns(1) {
     // Check for zero
     dup1 iszero exp2c_zero jumpi
     
