@@ -7,6 +7,17 @@ import { ContractLoader } from '../infrastructure/blockchain/contract-loader.js'
 import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js';
 import { getContractMetadata } from '../infrastructure/config/contract-registry.js';
 
+const OP_ARITY = {
+    add: 'arithmetic', sub: 'arithmetic', mul: 'arithmetic', div: 'arithmetic',
+    exp: 'unary', exp2: 'unary', exp10: 'unary', ln: 'unary', log2: 'unary', log10: 'unary',
+    sqrt: 'unary', cbrt: 'unary', abs: 'unary', neg: 'unary', inv: 'unary',
+    sign: 'unary', floor: 'unary', ceil: 'unary', frac: 'unary', round: 'unary', log2Up: 'unary',
+    factorial: 'unary', lambertW0: 'unary',
+    pow: 'binary', min: 'binary', max: 'binary', avg: 'binary', gavg: 'binary',
+    dist: 'binary', zeroFloorSub: 'binary', hypot: 'binary', gcd: 'binary',
+    clamp: 'ternary', lerp: 'ternary'
+};
+
 export class ArithmeticApp {
     constructor(web3Provider, walletComponent, toastComponent) {
         this.web3Provider = web3Provider;
@@ -35,9 +46,9 @@ export class ArithmeticApp {
         container.innerHTML = `
             <div class="ti-calc-shell">
                 <!-- Header -->
-                <div class="arithmetic-header">
-                    <h2 class="arithmetic-title">FP128</h2>
-                    <p class="arithmetic-subtitle">Huff Assembly • 128.128 Fixed-Point • 22 Operations</p>
+                <div class="vyper-header">
+                    <h2 class="vyper-title">FP128</h2>
+                    <p class="vyper-subtitle">128.128 Fixed-Point • Pure Huff Assembly • 34 Operations</p>
                 </div>
 
                 <!-- LCD Screen -->
@@ -71,59 +82,46 @@ export class ArithmeticApp {
                         <button id="arith-clear" class="ti-tool-btn">CLR</button>
                         <button id="arith-copy" class="ti-tool-btn">COPY</button>
                     </div>
-                    <div class="arithmetic-operators">
+                    <div id="fp128-buttons" class="ti-buttons">
                         <button class="ti-key selected" data-op="add" data-cat="arithmetic" title="Addition">+</button>
                         <button class="ti-key" data-op="sub" data-cat="arithmetic" title="Subtraction">−</button>
                         <button class="ti-key" data-op="mul" data-cat="arithmetic" title="Multiplication">×</button>
                         <button class="ti-key" data-op="div" data-cat="arithmetic" title="Division">÷</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="exp" data-cat="unary" title="Exponential">exp</button>
-                        <button class="ti-key" data-op="exp2" data-cat="unary" title="Base-2 Exponential">exp2</button>
-                        <button class="ti-key" data-op="ln" data-cat="unary" title="Natural Logarithm">ln</button>
-                        <button class="ti-key" data-op="log2" data-cat="unary" title="Base-2 Logarithm">log2</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="log10" data-cat="unary" title="Base-10 Logarithm">log10</button>
-                        <button class="ti-key" data-op="exp10" data-cat="unary" title="Base-10 Exponential">exp10</button>
-                        <button class="ti-key" data-op="sqrt" data-cat="unary" title="Square Root">√</button>
-                        <button class="ti-key" data-op="pow" data-cat="binary" title="Power (x^y)">x^y</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="abs" data-cat="unary" title="Absolute Value">abs</button>
-                        <button class="ti-key" data-op="neg" data-cat="unary" title="Negate">neg</button>
-                        <button class="ti-key" data-op="inv" data-cat="unary" title="Inverse (1/x)">inv</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="min" data-cat="binary" title="Minimum">min</button>
-                        <button class="ti-key" data-op="max" data-cat="binary" title="Maximum">max</button>
-                        <button class="ti-key" data-op="clamp" data-cat="ternary" title="Clamp (x, min, max)">clamp</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="avg" data-cat="binary" title="Average">avg</button>
-                        <button class="ti-key" data-op="gavg" data-cat="binary" title="Geometric Mean">gavg</button>
-                        <button class="ti-key" data-op="dist" data-cat="binary" title="Distance |a-b|">dist</button>
-                        <button class="ti-key" data-op="zeroFloorSub" data-cat="binary" title="Zero-Floor Subtraction">zfs</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="sign" data-cat="unary" title="Sign (-1, 0, or +1)">sign</button>
-                        <button class="ti-key" data-op="floor" data-cat="unary" title="Floor">floor</button>
-                        <button class="ti-key" data-op="ceil" data-cat="unary" title="Ceiling">ceil</button>
-                        <button class="ti-key" data-op="frac" data-cat="unary" title="Fractional Part">frac</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="cbrt" data-cat="unary" title="Cube Root">cbrt</button>
-                        <button class="ti-key" data-op="lerp" data-cat="ternary" title="Linear Interpolation">lerp</button>
-                        <button class="ti-key" data-op="hypot" data-cat="binary" title="Hypotenuse">hypot</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="round" data-cat="unary" title="Round to Nearest Integer">round</button>
-                        <button class="ti-key" data-op="log2Up" data-cat="unary" title="Ceiling of Log2">log2Up</button>
-                        <button class="ti-key" data-op="gcd" data-cat="binary" title="Greatest Common Divisor">gcd</button>
-                    </div>
-                    <div class="arithmetic-operators" style="margin-top: 0.5rem;">
-                        <button class="ti-key" data-op="factorial" data-cat="unary" title="Factorial">n!</button>
-                        <button class="ti-key" data-op="lambertW0" data-cat="unary" title="Lambert W0 Function">W₀(x)</button>
+                        <button class="ti-key" data-op="pow" data-cat="powers" title="Power (x^y)">x^y</button>
+                        <button class="ti-key" data-op="sqrt" data-cat="powers" title="Square Root">√</button>
+
+                        <button class="ti-key" data-op="exp" data-cat="logarithms" title="Exponential">exp</button>
+                        <button class="ti-key" data-op="exp2" data-cat="logarithms" title="Base-2 Exponential">exp2</button>
+                        <button class="ti-key" data-op="exp10" data-cat="logarithms" title="Base-10 Exponential">exp10</button>
+                        <button class="ti-key" data-op="ln" data-cat="logarithms" title="Natural Logarithm">ln</button>
+                        <button class="ti-key" data-op="log2" data-cat="logarithms" title="Base-2 Logarithm">log2</button>
+                        <button class="ti-key" data-op="log10" data-cat="logarithms" title="Base-10 Logarithm">log10</button>
+
+                        <button class="ti-key" data-op="cbrt" data-cat="powers" title="Cube Root">cbrt</button>
+                        <button class="ti-key" data-op="abs" data-cat="powers" title="Absolute Value">abs</button>
+                        <button class="ti-key" data-op="neg" data-cat="powers" title="Negate">neg</button>
+                        <button class="ti-key" data-op="inv" data-cat="powers" title="Inverse (1/x)">inv</button>
+                        <button class="ti-key" data-op="hypot" data-cat="powers" title="Hypotenuse">hypot</button>
+                        <button class="ti-key" data-op="dist" data-cat="powers" title="Distance |a-b|">dist</button>
+
+                        <button class="ti-key" data-op="floor" data-cat="statistics" title="Floor">floor</button>
+                        <button class="ti-key" data-op="ceil" data-cat="statistics" title="Ceiling">ceil</button>
+                        <button class="ti-key" data-op="round" data-cat="statistics" title="Round">round</button>
+                        <button class="ti-key" data-op="frac" data-cat="statistics" title="Fractional Part">frac</button>
+                        <button class="ti-key" data-op="sign" data-cat="statistics" title="Sign (-1, 0, +1)">sign</button>
+                        <button class="ti-key" data-op="log2Up" data-cat="statistics" title="Ceiling of Log2">log2↑</button>
+
+                        <button class="ti-key" data-op="min" data-cat="combinatorics" title="Minimum">min</button>
+                        <button class="ti-key" data-op="max" data-cat="combinatorics" title="Maximum">max</button>
+                        <button class="ti-key" data-op="avg" data-cat="combinatorics" title="Average">avg</button>
+                        <button class="ti-key" data-op="gavg" data-cat="combinatorics" title="Geometric Mean">gavg</button>
+                        <button class="ti-key" data-op="clamp" data-cat="combinatorics" title="Clamp (x, min, max)">clamp</button>
+                        <button class="ti-key" data-op="lerp" data-cat="combinatorics" title="Linear Interpolation">lerp</button>
+
+                        <button class="ti-key" data-op="zeroFloorSub" data-cat="special" title="Zero-Floor Subtraction">zfs</button>
+                        <button class="ti-key" data-op="gcd" data-cat="special" title="Greatest Common Divisor">gcd</button>
+                        <button class="ti-key" data-op="factorial" data-cat="special" title="Factorial">n!</button>
+                        <button class="ti-key" data-op="lambertW0" data-cat="special" title="Lambert W₀ Function">W₀(x)</button>
                     </div>
                     <button id="arith-calculate" class="ti-calculate-btn">CALCULATE</button>
                 </div>
@@ -150,11 +148,11 @@ export class ArithmeticApp {
                         </div>
                         <div class="info-item">
                             <span class="info-label">Operations:</span>
-                            <span class="info-value">34 functions: arithmetic, transcendental, utility, comparison, rounding, special</span>
+                            <span class="info-value">34 functions</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Internal:</span>
-                            <span class="info-value">int256 / 2^128 (signed)</span>
+                            <span class="info-value">int256 / 2¹²⁸</span>
                         </div>
                     </div>
                 </div>
@@ -171,19 +169,19 @@ export class ArithmeticApp {
                     font-family: 'Courier New', 'Consolas', monospace;
                 }
 
-                .arithmetic-header {
+                .vyper-header {
                     text-align: center;
                     margin-bottom: 1rem;
                 }
 
-                .arithmetic-title {
+                .vyper-title {
                     color: #00ff88;
                     font-size: 1.5rem;
                     margin-bottom: 0.25rem;
                     font-weight: 700;
                 }
 
-                .arithmetic-subtitle {
+                .vyper-subtitle {
                     color: #4a7a4a;
                     font-size: 0.875rem;
                     letter-spacing: 0.5px;
@@ -228,7 +226,7 @@ export class ArithmeticApp {
                     text-shadow: 0 0 8px rgba(0,255,136,0.3);
                 }
 
-                /* ── Input Area ── */
+                /* ── Input ── */
                 .ti-input-area {
                     margin-bottom: 0.75rem;
                 }
@@ -245,6 +243,10 @@ export class ArithmeticApp {
                     font-size: 0.875rem;
                     font-weight: 600;
                     min-width: 1.5rem;
+                }
+
+                .arithmetic-input-row.hidden {
+                    display: none;
                 }
 
                 .ti-input {
@@ -275,11 +277,7 @@ export class ArithmeticApp {
                 .ti-status.success { color: #00ff88; }
                 .ti-status.error { color: #ff4444; }
 
-                /* ── Keypad ── */
-                .ti-keypad {
-                    margin-bottom: 1.5rem;
-                }
-
+                /* ── Toolbar ── */
                 .ti-toolbar {
                     display: flex;
                     gap: 0.5rem;
@@ -313,11 +311,15 @@ export class ArithmeticApp {
                     color: #00ff88;
                 }
 
-                .arithmetic-operators {
+                /* ── Keypad ── */
+                .ti-keypad {
+                    margin-bottom: 1.5rem;
+                }
+
+                .ti-buttons {
                     display: grid;
-                    grid-template-columns: repeat(4, 1fr);
+                    grid-template-columns: repeat(6, 1fr);
                     gap: 0.375rem;
-                    margin-bottom: 0.5rem;
                 }
 
                 .ti-key {
@@ -325,14 +327,14 @@ export class ArithmeticApp {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 0.75rem 0.25rem;
-                    min-height: 56px;
+                    padding: 0.625rem 0.25rem;
+                    min-height: 48px;
                     border-radius: 0.375rem;
                     cursor: pointer;
                     transition: all 0.1s;
                     font-family: 'Courier New', monospace;
                     font-weight: 700;
-                    font-size: 1.25rem;
+                    font-size: 0.85rem;
                     letter-spacing: 0.5px;
                     text-align: center;
                     border-width: 2px;
@@ -347,53 +349,76 @@ export class ArithmeticApp {
                     border-bottom-width: 2px;
                 }
 
+                .ti-key.selected {
+                    box-shadow: 0 0 0 2px #00ff88;
+                }
+
+                /* Category colors — matching Vyper page */
                 .ti-key[data-cat="arithmetic"] {
                     background: #1a2a20;
                     border-color: #2a4535;
                     color: #6dd5c4;
                 }
-
                 .ti-key[data-cat="arithmetic"]:hover {
                     background: #254035;
                     border-color: #6dd5c4;
                 }
 
-                .ti-key[data-cat="transcendental"] {
+                .ti-key[data-cat="logarithms"] {
+                    background: #1a2a2a;
+                    border-color: #2a4545;
+                    color: #6dd5c4;
+                }
+                .ti-key[data-cat="logarithms"]:hover {
+                    background: #254040;
+                    border-color: #6dd5c4;
+                }
+
+                .ti-key[data-cat="powers"] {
                     background: #1a2030;
-                    border-color: #354560;
-                    color: #6db4d5;
-                    font-size: 0.875rem;
+                    border-color: #2a3550;
+                    color: #8ab4f8;
+                }
+                .ti-key[data-cat="powers"]:hover {
+                    background: #253050;
+                    border-color: #8ab4f8;
                 }
 
-                .ti-key[data-cat="transcendental"]:hover {
-                    background: #253550;
-                    border-color: #6db4d5;
+                .ti-key[data-cat="statistics"] {
+                    background: #201a2a;
+                    border-color: #352a50;
+                    color: #b4a0f8;
+                }
+                .ti-key[data-cat="statistics"]:hover {
+                    background: #302545;
+                    border-color: #b4a0f8;
                 }
 
-                .ti-key[data-cat="power"] {
-                    background: #301a30;
-                    border-color: #603560;
-                    color: #d56db4;
-                    font-size: 0.875rem;
+                .ti-key[data-cat="combinatorics"] {
+                    background: #1f1f1a;
+                    border-color: #3a3a28;
+                    color: #c8c080;
+                }
+                .ti-key[data-cat="combinatorics"]:hover {
+                    background: #2d2d22;
+                    border-color: #c8c080;
                 }
 
-                .ti-key[data-cat="power"]:hover {
-                    background: #502550;
-                    border-color: #d56db4;
+                .ti-key[data-cat="special"] {
+                    background: #2a1f0a;
+                    border-color: #503a15;
+                    color: #f0c060;
                 }
-
-                .arithmetic-input-row.hidden {
-                    display: none;
-                }
-
-                .ti-key.selected {
-                    box-shadow: 0 0 0 2px #00ff88;
+                .ti-key[data-cat="special"]:hover {
+                    background: #3a2a10;
+                    border-color: #f0c060;
                 }
 
                 .ti-calculate-btn {
                     width: 100%;
                     position: relative;
                     padding: 1rem;
+                    margin-top: 0.375rem;
                     background: #1a3020;
                     border: 2px solid #2a5030;
                     border-bottom-width: 4px;
@@ -466,29 +491,33 @@ export class ArithmeticApp {
                     margin-top: 2rem;
                 }
 
+                .fp128-contracts-section {
+                    max-width: 1200px;
+                    margin: 3rem auto 2rem;
+                    padding: 0 1rem;
+                }
+
+                .fp128-contracts-section .section-title {
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    margin-bottom: 1.5rem;
+                    color: #fff;
+                    text-align: center;
+                }
+
+                .fp128-contract-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                    gap: 1.5rem;
+                }
+
                 @media (max-width: 480px) {
-                    .ti-calc-shell {
-                        padding: 0.75rem 0.5rem;
-                    }
-
-                    .arithmetic-operators {
-                        grid-template-columns: repeat(4, 1fr);
-                        gap: 0.25rem;
-                    }
-
-                    .ti-key {
-                        font-size: 1rem;
-                        padding: 0.625rem 0.125rem;
-                        min-height: 48px;
-                    }
-
-                    .ti-result {
-                        font-size: 1.25rem;
-                    }
-
-                    .info-grid {
-                        grid-template-columns: 1fr;
-                    }
+                    .ti-calc-shell { padding: 0.75rem 0.5rem; }
+                    .ti-buttons { grid-template-columns: repeat(3, 1fr); gap: 0.25rem; }
+                    .ti-key { font-size: 0.75rem; padding: 0.5rem 0.125rem; min-height: 40px; }
+                    .ti-result { font-size: 1.25rem; }
+                    .info-grid { grid-template-columns: 1fr; }
+                    .fp128-contract-grid { grid-template-columns: 1fr; }
                 }
             </style>
         `;
@@ -508,52 +537,97 @@ export class ArithmeticApp {
         const metadata = getContractMetadata('fixedpoint128');
         if (!metadata) return;
 
-        const contractCard = document.createElement('div');
-        contractCard.style.background = '#1a1a1a';
-        contractCard.style.border = '2px solid #333';
-        contractCard.style.borderRadius = '0.5rem';
-        contractCard.style.padding = '1.5rem';
-        
-        const header = document.createElement('div');
-        header.innerHTML = `
-            <h3 style="color: #00ff88; margin-bottom: 0.5rem; font-size: 1rem; letter-spacing: 1px;">
-                ${metadata.emoji} ${metadata.name}
-            </h3>
-            <p style="color: #888; margin-bottom: 1rem; font-size: 0.875rem;">
-                ${metadata.description}
-            </p>
+        const SOURCE_MODULES = [
+            { file: 'contracts/src/tools/huff/fp128/test_fp128.huff', name: 'FP128 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
+            { file: 'contracts/src/tools/huff/fp128/constants.huff', name: 'Constants', desc: '128.128 format constants: ONE, LN2, LOG2E, E, PI' },
+            { file: 'contracts/src/tools/huff/fp128/primitives.huff', name: 'Primitives', desc: 'Safe comparisons, negation, and bit operations' },
+            { file: 'contracts/src/tools/huff/fp128/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 128.128 fixed-point' },
+            { file: 'contracts/src/tools/huff/fp128/exp.huff', name: 'Exponential', desc: '2^x and e^x via degree-22 minimax polynomial' },
+            { file: 'contracts/src/tools/huff/fp128/ln.huff', name: 'Natural Log', desc: 'ln(x) = log2(x) * ln(2)' },
+            { file: 'contracts/src/tools/huff/fp128/log2.huff', name: 'Log Base 2', desc: 'log2(x) via MSB extraction + Horner polynomial' },
+            { file: 'contracts/src/tools/huff/fp128/sqrt.huff', name: 'Square Root', desc: 'Carmack CLZ initial guess + Newton-Raphson refinement' },
+            { file: 'contracts/src/tools/huff/fp128/pow.huff', name: 'Power', desc: 'x^y = 2^(y * log2(x))' },
+            { file: 'contracts/src/tools/huff/fp128/utils.huff', name: 'Utilities', desc: 'abs, min, max, avg, gavg, dist, clamp, sign, floor, ceil' },
+            { file: 'contracts/src/tools/huff/fp128/transcendental_utils.huff', name: 'Transcendental Utils', desc: 'cbrt, hypot, lerp, log10, exp10, lambertW0, factorial' },
+        ];
+
+        container.innerHTML = `
+            <div class="fp128-contracts-section">
+                <h2 class="section-title">Source Code</h2>
+                <div id="fp128-contract-grid" class="fp128-contract-grid"></div>
+            </div>
         `;
-        contractCard.appendChild(header);
-        
+
+        const grid = document.getElementById('fp128-contract-grid');
+
+        // Contract card (address, Etherscan, ABI)
+        const contractCard = document.createElement('div');
+        contractCard.className = 'contract-info-card';
+        contractCard.innerHTML = `
+            <div class="contract-card-header">
+                <h4>${metadata.emoji} ${metadata.name} Contract</h4>
+                <p class="contract-card-description">Deployed contract — Etherscan link and ABI</p>
+            </div>
+        `;
         const contractInfo = ContractInfoRenderer.createContractInfo(
             metadata.contractAddress,
-            metadata.sourceFile,
+            null,
             metadata.abiFile
         );
+        contractInfo.style.marginTop = '1rem';
         contractCard.appendChild(contractInfo);
-        
-        container.appendChild(contractCard);
+        grid.appendChild(contractCard);
+
+        // Source module cards
+        for (const mod of SOURCE_MODULES) {
+            const card = document.createElement('div');
+            card.className = 'contract-info-card';
+            card.innerHTML = `
+                <div class="contract-card-header">
+                    <h4>0x ${mod.name}</h4>
+                    <p class="contract-card-description">${mod.desc}</p>
+                </div>
+            `;
+            const sourceInfo = document.createElement('div');
+            sourceInfo.className = 'contract-info';
+            sourceInfo.style.marginTop = '1rem';
+
+            const pathLabel = document.createElement('span');
+            pathLabel.className = 'contract-label';
+            pathLabel.textContent = mod.file.split('/').pop();
+            pathLabel.style.fontFamily = "'Courier New', monospace";
+            pathLabel.style.fontSize = '0.75rem';
+            sourceInfo.appendChild(pathLabel);
+
+            const viewSourceBtn = document.createElement('button');
+            viewSourceBtn.className = 'contract-badge contract-badge-source';
+            viewSourceBtn.innerHTML = '📜 View Source';
+            viewSourceBtn.title = `View ${mod.name} source code`;
+            viewSourceBtn.onclick = () => ContractInfoRenderer.showSourceModal(mod.file);
+            sourceInfo.appendChild(viewSourceBtn);
+
+            card.appendChild(sourceInfo);
+            grid.appendChild(card);
+        }
     }
 
     setupListeners() {
-        // Operator selection
-        document.querySelectorAll('.ti-key[data-op]').forEach(btn => {
+        document.querySelectorAll('#fp128-buttons .ti-key[data-op]').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.ti-key[data-op]').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('#fp128-buttons .ti-key[data-op]').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 this.selectedOp = btn.dataset.op;
-                const cat = btn.dataset.cat;
+                const arity = OP_ARITY[this.selectedOp] || 'arithmetic';
                 
-                // Show/hide inputs based on operation type
                 const inputBRow = document.getElementById('input-b-row');
                 const inputCRow = document.getElementById('input-c-row');
                 const labelA = document.getElementById('label-a');
                 
-                if (cat === 'unary') {
+                if (arity === 'unary') {
                     inputBRow.style.display = 'none';
                     inputCRow.style.display = 'none';
                     labelA.textContent = 'x:';
-                } else if (cat === 'binary') {
+                } else if (arity === 'binary') {
                     inputBRow.style.display = 'flex';
                     inputCRow.style.display = 'none';
                     if (this.selectedOp === 'pow') {
@@ -563,7 +637,7 @@ export class ArithmeticApp {
                         labelA.textContent = 'A:';
                         document.querySelector('#input-b-row .arithmetic-label').textContent = 'B:';
                     }
-                } else if (cat === 'ternary') {
+                } else if (arity === 'ternary') {
                     inputBRow.style.display = 'flex';
                     inputCRow.style.display = 'flex';
                     if (this.selectedOp === 'lerp') {
@@ -576,7 +650,6 @@ export class ArithmeticApp {
                         document.querySelector('#input-c-row .arithmetic-label').textContent = 'max:';
                     }
                 } else {
-                    // arithmetic
                     inputBRow.style.display = 'flex';
                     inputCRow.style.display = 'none';
                     labelA.textContent = 'A:';
@@ -630,9 +703,9 @@ export class ArithmeticApp {
         const b = document.getElementById('input-b').value.trim() || '0';
         const c = document.getElementById('input-c').value.trim() || '0';
         
-        const cat = document.querySelector('.ti-key[data-op].selected')?.dataset.cat;
+        const arity = OP_ARITY[this.selectedOp] || 'arithmetic';
         
-        if (cat === 'unary') {
+        if (arity === 'unary') {
             const opNames = { 
                 exp: 'exp', exp2: '2^', exp10: '10^',
                 ln: 'ln', log2: 'log2', log10: 'log10',
@@ -649,13 +722,13 @@ export class ArithmeticApp {
             } else {
                 document.getElementById('arith-expr').textContent = `${name}(${a})`;
             }
-        } else if (cat === 'ternary') {
+        } else if (arity === 'ternary') {
             if (this.selectedOp === 'lerp') {
                 document.getElementById('arith-expr').textContent = `lerp(${a}, ${b}, ${c})`;
             } else {
                 document.getElementById('arith-expr').textContent = `clamp(${a}, ${b}, ${c})`;
             }
-        } else if (cat === 'binary') {
+        } else if (arity === 'binary') {
             const opNames = { 
                 pow: '^', min: 'min', max: 'max', avg: 'avg', 
                 gavg: 'gavg', dist: 'dist', zeroFloorSub: 'zfs',
@@ -700,10 +773,9 @@ export class ArithmeticApp {
                 return;
             }
 
-            const cat = document.querySelector('.ti-key[data-op].selected')?.dataset.cat;
+            const arity = OP_ARITY[this.selectedOp] || 'arithmetic';
 
-            // Unary operations
-            if (cat === 'unary') {
+            if (arity === 'unary') {
                 this.showStatus('Calculating on-chain...', 'loading');
                 resultEl.textContent = '...';
 
@@ -822,7 +894,7 @@ export class ArithmeticApp {
                 resultEl.textContent = displayResult;
                 this.showStatus('Calculated successfully', 'success');
 
-            } else if (cat === 'ternary') {
+            } else if (arity === 'ternary') {
                 const inputC = document.getElementById('input-c');
                 const bValue = inputB.value.trim();
                 const cValue = inputC.value.trim();

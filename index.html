@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Blockulator - Blockchain games, on-chain calculators, futures markets, and identity badges on Sepolia testnet">
+    <meta name="description" content="Blockulator - FP128 high-precision on-chain math library. 128.128 fixed-point in pure Huff assembly. Benchmarked against Solady, PRBMath, and ABDK.">
     <title>Blockulator</title>
     <link rel="icon" type="image/png" href="/blockulator_favicon.png">
     <link rel="stylesheet" href="styles.css">
@@ -339,116 +339,127 @@
                     
                     <!-- Hero Section -->
                     <section class="about-hero">
-                        <h1>On-Chain Math, Markets, and Games</h1>
+                        <h1>FP128</h1>
+                        <p class="hero-tagline">Higher precision. Same 256-bit word.</p>
                         <p class="hero-subtitle">
-                            Scientific computing and mechanism design, implemented entirely as smart contracts
+                            A signed 128.128 fixed-point math library written in pure Huff assembly for the EVM.
                         </p>
                     </section>
 
-                    <!-- What This Is -->
+                    <!-- The Problem -->
                     <section class="about-section">
-                        <h2>🔬 What This Is</h2>
+                        <h2>The Problem</h2>
                         <p>
-                            Blockulator is a collection of smart contracts that implement mathematical functions, 
-                            financial instruments, and game mechanics directly on the Ethereum blockchain. 
-                            Everything runs on-chain -- calculations, state, assets, payouts. No databases, 
-                            no APIs, no off-chain dependencies.
+                            On-chain math libraries today force you to choose between precision, gas, and coverage.
+                            WAD libraries give you 18 decimal digits. ABDK's 64.64 format gives you 19.
+                            Most are missing common functions. None of them use the full 256-bit word the EVM gives you.
                         </p>
                     </section>
 
-                    <!-- What's Here -->
+                    <!-- FP128 Advantage -->
                     <section class="about-section">
-                        <h2>🧮 What's Here</h2>
-                        
-                        <div class="about-grid">
-                            <div class="about-card">
-                                <h3>🔬 Vyper Math</h3>
+                        <h2>What FP128 Does Differently</h2>
+                        <div class="fp128-advantages">
+                            <div class="advantage-item">
+                                <h3>Full-Word Precision</h3>
                                 <p>
-                                    30+ on-chain scientific functions in Vyper 0.4: trigonometric, 
-                                    logarithmic, exponential, statistical distributions, and combinatorics. 
-                                    A scientific calculator powered entirely by smart contracts.
+                                    128 bits for the fraction, 127 for the integer magnitude, one sign 
+                                    bit — packed into a single <code>int256</code>. No wasted bits.  The 128 fractional bits 
+                                    give you ~38 decimal digits of precision, compared to 18 (Solady, PRBMath) 
+                                    or 19 (ABDK).
                                 </p>
                             </div>
-
-                            <div class="about-card">
-                                <h3>🔢 FP128</h3>
+                            <div class="advantage-item">
+                                <h3>34 Operations</h3>
                                 <p>
-                                    Signed 128.128 fixed-point arithmetic engine written in pure Huff assembly. 
-                                    Basic operations (add, sub, mul, div) plus transcendental functions 
-                                    (exp, ln, sqrt) using BKM algorithm.
+                                    Arithmetic, transcendentals (exp, ln, log2, log10, sqrt, cbrt, pow), 
+                                    rounding (floor, ceil, round, frac), comparisons, utility functions, 
+                                    and special functions like Lambert W&#8320; and factorial -- operations the 
+                                    other libraries simply don't have.
                                 </p>
                             </div>
-
-                            <div class="about-card">
-                                <h3>📊 Benchmarks</h3>
+                            <div class="advantage-item">
+                                <h3>Competitive Gas</h3>
                                 <p>
-                                    Gas cost and precision comparisons across on-chain math libraries: 
-                                    Vyper, FP128, ABDK, and Solady. Interactive charts showing performance 
-                                    across a range of operations and test cases.
-                                </p>
-                            </div>
-
-                            <div class="about-card">
-                                <h3>📈 Futures</h3>
-                                <p>
-                                    Time-weighted payout contracts with 7 distribution curves. 
-                                    Value accrues according to the chosen distribution; ownership 
-                                    transfers extract the accumulated payout.
-                                </p>
-                            </div>
-
-                            <div class="about-card">
-                                <h3>🎖️ Pixel Badges</h3>
-                                <p>
-                                    32x32 pixel art stored entirely on-chain. Draw, edit, and 
-                                    use as your on-chain identity. All image data lives in the contract.
-                                </p>
-                            </div>
-
-                            <div class="about-card">
-                                <h3>🎮 Games</h3>
-                                <p>
-                                    Nine autonomous game contracts exploring different mechanism designs: 
-                                    auctions, timers, coordination games, and adversarial dynamics.
+                                    Written in pure Huff assembly. Despite carrying twice the precision, 
+                                    FP128 is gas-competitive with Solidity-based libraries on many operations.
+                                    Check the <a href="#/benchmarks" class="about-link">benchmarks</a> for the full comparison.
                                 </p>
                             </div>
                         </div>
                     </section>
 
-                    <!-- The Stack -->
+                    <!-- Comparison Context -->
                     <section class="about-section">
-                        <h2>🛠️ Stack</h2>
-                        
-                        <div class="tech-stack">
-                            <div class="stack-layer">
-                                <div class="stack-label">Contracts</div>
-                                <div class="stack-content">
-                                    <strong>Vyper 0.4</strong> + <strong>Huff</strong> on Ethereum Sepolia
-                                </div>
-                            </div>
-
-                            <div class="stack-layer">
-                                <div class="stack-label">Frontend</div>
-                                <div class="stack-content">
-                                    <strong>Vanilla JS</strong> -- no frameworks, no build step
-                                </div>
-                            </div>
-
-                            <div class="stack-layer">
-                                <div class="stack-label">Storage</div>
-                                <div class="stack-content">
-                                    <strong>100% on-chain</strong> -- all state and data lives in contracts
-                                </div>
-                            </div>
+                        <h2>Compared To</h2>
+                        <div class="comparison-table-wrap">
+                            <table class="comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Library</th>
+                                        <th>Format</th>
+                                        <th>Precision</th>
+                                        <th>Language</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="comparison-highlight">
+                                        <td><strong>FP128</strong></td>
+                                        <td>128.128 fixed-point</td>
+                                        <td>~38 digits</td>
+                                        <td>Huff</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Solady</td>
+                                        <td>WAD (18 decimals)</td>
+                                        <td>~18 digits</td>
+                                        <td>Solidity (inline asm)</td>
+                                    </tr>
+                                    <tr>
+                                        <td>PRBMath</td>
+                                        <td>WAD (18 decimals)</td>
+                                        <td>~18 digits</td>
+                                        <td>Solidity</td>
+                                    </tr>
+                                    <tr>
+                                        <td>ABDK</td>
+                                        <td>64.64 fixed-point</td>
+                                        <td>~19 digits</td>
+                                        <td>Solidity</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </section>
 
-                    <!-- Status -->
-                    <section class="about-section">
-                        <h2>🚀 Status</h2>
+                    <!-- Also Here -->
+                    <section class="about-section about-also">
+                        <h2>Also on Blockulator</h2>
+                        <div class="also-grid">
+                            <a href="#/vyper" class="also-item">
+                                <strong>Vyper Math</strong>
+                                <span>30+ scientific functions in Vyper 0.4</span>
+                            </a>
+                            <a href="#/games" class="also-item">
+                                <strong>Games</strong>
+                                <span>9 autonomous on-chain game contracts</span>
+                            </a>
+                            <a href="#/futures" class="also-item">
+                                <strong>Futures</strong>
+                                <span>Time-weighted payout instruments</span>
+                            </a>
+                            <a href="#/badges" class="also-item">
+                                <strong>Badges</strong>
+                                <span>32x32 on-chain pixel art identity</span>
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- Technical -->
+                    <section class="about-section about-tech">
                         <p>
-                            Live on Sepolia testnet. All contract source is viewable from each contract's 
-                            info panel or in <code>/contracts/src/</code>.
+                            Live on Sepolia testnet. All contracts are Vyper 0.4 or Huff.
+                            Source viewable from each contract's info panel.
                         </p>
                     </section>
 
