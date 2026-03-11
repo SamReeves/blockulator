@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Deploy FP128 contract and update contract registry
+# Deploy FP127 contract and update contract registry
 # Usage: PRIVATE_KEY=your_key ./deploy-and-update.sh
 
 set -e
@@ -11,15 +11,15 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-echo -e "${GREEN}  FP128 Deployment Pipeline${NC}"
+echo -e "${GREEN}  FP127 Deployment Pipeline${NC}"
 echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}\n"
 
 # Step 1: Compile
 echo -e "${YELLOW}Step 1: Compiling contract...${NC}"
-./contracts/deployments/compile-huff.sh contracts/src/tools/huff/fp128/test_fp128.huff
+./contracts/deployments/compile-huff.sh contracts/src/tools/huff/fp127/test_fp127.huff
 
 # Verify bytecode size
-RUNTIME_BYTES=$(( $(wc -c < contracts/build/huff/test_fp128.runtime.bin) / 2 ))
+RUNTIME_BYTES=$(( $(wc -c < contracts/build/huff/test_fp127.runtime.bin) / 2 ))
 echo -e "${GREEN}✓ Runtime bytecode: ${RUNTIME_BYTES} bytes${NC}"
 
 if [ $RUNTIME_BYTES -ge 24576 ]; then
@@ -31,7 +31,7 @@ echo -e "${GREEN}✓ Under EVM limit by $((24576 - RUNTIME_BYTES)) bytes${NC}\n"
 
 # Step 2: Deploy
 echo -e "${YELLOW}Step 2: Deploying to Sepolia...${NC}"
-DEPLOY_OUTPUT=$(node contracts/deployments/deploy-fixedpoint128.js)
+DEPLOY_OUTPUT=$(node contracts/deployments/deploy-fixedpoint127.js)
 echo "$DEPLOY_OUTPUT"
 
 # Extract contract address from deployment output
@@ -59,6 +59,6 @@ echo -e "📍 Contract Address: ${GREEN}${CONTRACT_ADDRESS}${NC}"
 echo -e "🔗 Sepolia Explorer: https://sepolia.etherscan.io/address/${CONTRACT_ADDRESS}"
 echo -e "📝 Bytecode Size: ${RUNTIME_BYTES} bytes ($(( (24576 - RUNTIME_BYTES) * 100 / 24576 ))% under limit)\n"
 echo -e "${YELLOW}Next steps:${NC}"
-echo -e "  1. Test the contract at: http://localhost:8000/#/fp128"
+echo -e "  1. Test the contract at: http://localhost:8000/#/fp127"
 echo -e "  2. Verify on Etherscan (optional)"
 echo -e "  3. Update mainnet address when ready for production\n"

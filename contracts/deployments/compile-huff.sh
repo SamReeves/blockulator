@@ -53,8 +53,8 @@ compile_huff_file() {
         
         # Generate minimal ABI (Huff doesn't auto-generate ABI, so we create a basic one)
         # This should be customized based on the contract's interface
-        if [ "$contract_name" = "test_fp128" ]; then
-            cat > "${ABI_DIR}/fixedpoint128.json" << EOF
+        if [ "$contract_name" = "test_fp127" ]; then
+            cat > "${ABI_DIR}/fixedpoint127.json" << EOF
 [
   {
     "type": "function",

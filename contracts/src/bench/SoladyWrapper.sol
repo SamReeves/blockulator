@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "../../../lib/solady/src/utils/FixedPointMathLib.sol";
 
 /// @title Solady Wrapper
-/// @notice Wrapper for Solady's FixedPointMathLib to match fp128 interface
+/// @notice Wrapper for Solady's FixedPointMathLib to match fp127 interface
 /// @dev Uses WAD (18 decimals) for fixed-point arithmetic
 contract SoladyWrapper {
     using FixedPointMathLib for uint256;

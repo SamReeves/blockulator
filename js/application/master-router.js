@@ -1,6 +1,6 @@
 /**
  * Master Router
- * Handles top-level navigation between major views (games, vyper, fp128, futures, badges)
+ * Handles top-level navigation between major views (games, vyper, fp127, futures, badges)
  * Uses hash-based routing (#/games, #/vyper, etc.) for SPA navigation without page reloads
  * Supports sub-routes: #/games/pissing-contest
  * 
@@ -84,7 +84,7 @@ export class MasterRouter {
 
     /**
      * Navigate to a view with optional sub-route
-     * @param {string} viewName - Name of view to navigate to (games, vyper, fp128, futures, badges, about)
+     * @param {string} viewName - Name of view to navigate to (games, vyper, fp127, futures, badges, about)
      * @param {object} options - Navigation options
      */
     async navigateTo(viewName, options = {}) {

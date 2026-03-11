@@ -67,9 +67,9 @@ def verify_precision(coeffs, func, a=0, b=1, num_points=10000):
     
     return max_err, worst_x
 
-def to_fp128_hex(value):
-    """Convert a decimal value to FP128 hex string (128.128 fixed-point)."""
-    # FP128 = value * 2^128
+def to_fp127_hex(value):
+    """Convert a decimal value to FP127 hex string (128.128 fixed-point)."""
+    # FP127 = value * 2^128
     scaled = value * mpmath.mpf(2)**128
     
     # Round to nearest integer
@@ -147,7 +147,7 @@ def main():
     print()
     
     for i, c in enumerate(best_coeffs):
-        hex_val = to_fp128_hex(c)
+        hex_val = to_fp127_hex(c)
         print(f"#define constant LOG2_P{i} = {hex_val}")
     
     print()

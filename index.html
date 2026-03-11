@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Blockulator - FP128 high-precision on-chain math library. 128.128 fixed-point in pure Huff assembly. Benchmarked against Solady, PRBMath, and ABDK.">
+    <meta name="description" content="Blockulator - FP127 high-precision on-chain math library. 128.128 fixed-point in pure Huff assembly. Benchmarked against Solady, PRBMath, and ABDK.">
     <title>Blockulator</title>
     <link rel="icon" type="image/png" href="/blockulator_favicon.png">
     <link rel="stylesheet" href="styles.css">
@@ -22,7 +22,7 @@
             <nav class="header-nav">
                 <a href="#/games" class="nav-link" data-route="games">Games</a>
                 <a href="#/vyper" class="nav-link" data-route="vyper">Vyper</a>
-                <a href="#/fp128" class="nav-link" data-route="fp128">FP128</a>
+                <a href="#/fp127" class="nav-link" data-route="fp127">FP127</a>
                 <a href="#/benchmarks" class="nav-link" data-route="benchmarks">Benchmarks</a>
                 <a href="#/futures" class="nav-link" data-route="futures">Futures</a>
                 <a href="#/badges" class="nav-link" data-route="badges">Badges</a>
@@ -84,10 +84,10 @@
                 </div>
             </div>
 
-            <!-- FP128 VIEW -->
-            <div id="fp128-view" class="view-container hidden" data-view="fp128">
-                <div id="fp128-content" class="content">
-                    <div id="fp128-container"></div>
+            <!-- FP127 VIEW -->
+            <div id="fp127-view" class="view-container hidden" data-view="fp127">
+                <div id="fp127-content" class="content">
+                    <div id="fp127-container"></div>
                 </div>
             </div>
 
@@ -339,7 +339,7 @@
                     
                     <!-- Hero Section -->
                     <section class="about-hero">
-                        <h1>FP128</h1>
+                        <h1>FP127</h1>
                         <p class="hero-tagline">Higher precision. Same 256-bit word.</p>
                         <p class="hero-subtitle">
                             A signed 128.128 fixed-point math library written in pure Huff assembly for the EVM.
@@ -356,10 +356,10 @@
                         </p>
                     </section>
 
-                    <!-- FP128 Advantage -->
+                    <!-- FP127 Advantage -->
                     <section class="about-section">
-                        <h2>What FP128 Does Differently</h2>
-                        <div class="fp128-advantages">
+                        <h2>What FP127 Does Differently</h2>
+                        <div class="fp127-advantages">
                             <div class="advantage-item">
                                 <h3>Full-Word Precision</h3>
                                 <p>
@@ -382,7 +382,7 @@
                                 <h3>Competitive Gas</h3>
                                 <p>
                                     Written in pure Huff assembly. Despite carrying twice the precision, 
-                                    FP128 is gas-competitive with Solidity-based libraries on many operations.
+                                    FP127 is gas-competitive with Solidity-based libraries on many operations.
                                     Check the <a href="#/benchmarks" class="about-link">benchmarks</a> for the full comparison.
                                 </p>
                             </div>
@@ -404,7 +404,7 @@
                                 </thead>
                                 <tbody>
                                     <tr class="comparison-highlight">
-                                        <td><strong>FP128</strong></td>
+                                        <td><strong>FP127</strong></td>
                                         <td>128.128 fixed-point</td>
                                         <td>~38 digits</td>
                                         <td>Huff</td>

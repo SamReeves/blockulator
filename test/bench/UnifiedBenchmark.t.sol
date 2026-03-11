@@ -21,7 +21,7 @@ contract UnifiedBenchmark is Test {
     IArith abdk;
     IArith solady;
     IArith vyper;
-    IArithU fp128;
+    IArithU fp127;
 
     int256 constant F18 = 1e18;
 
@@ -34,7 +34,7 @@ contract UnifiedBenchmark is Test {
         abdk = IArith(deployCode("ABDKWrapper.sol:ABDKWrapper"));
         solady = IArith(deployCode("SoladyWrapper.sol:SoladyWrapper"));
         vyper = IArith(_deployBinaryBytecode("contracts/build/vyper/arith.bin"));
-        fp128 = IArithU(_deployHuffBytecode("contracts/build/huff/test_fp128.runtime.bin"));
+        fp127 = IArithU(_deployHuffBytecode("contracts/build/huff/test_fp127.runtime.bin"));
     }
 
     function _deployBinaryBytecode(string memory path) internal returns (address addr) {
@@ -66,8 +66,8 @@ contract UnifiedBenchmark is Test {
         vyper.mul(A1, B1);
     }
 
-    function testGas_fp128_mul_single() public view {
-        fp128.mul(uint256(A1), uint256(B1));
+    function testGas_fp127_mul_single() public view {
+        fp127.mul(uint256(A1), uint256(B1));
     }
 
     function testGas_ABDK_div_single() public view {
@@ -82,8 +82,8 @@ contract UnifiedBenchmark is Test {
         vyper.div(A1, B1);
     }
 
-    function testGas_fp128_div_single() public view {
-        fp128.div(uint256(A1), uint256(B1));
+    function testGas_fp127_div_single() public view {
+        fp127.div(uint256(A1), uint256(B1));
     }
 
     function testGas_ABDK_add_single() public view {
@@ -98,8 +98,8 @@ contract UnifiedBenchmark is Test {
         vyper.add(A1, B1);
     }
 
-    function testGas_fp128_add_single() public view {
-        fp128.add(uint256(A1), uint256(B1));
+    function testGas_fp127_add_single() public view {
+        fp127.add(uint256(A1), uint256(B1));
     }
 
     // --- Correctness checks ---
@@ -112,8 +112,8 @@ contract UnifiedBenchmark is Test {
         assertApproxEqAbs(expected_abdk, expected_solady, 1, "ABDK vs Solady mul");
         assertApproxEqAbs(expected_solady, expected_vyper, 1, "Solady vs Vyper mul");
 
-        uint256 fp128_result = fp128.mul(uint256(A1), uint256(B1));
-        assertApproxEqAbs(int256(fp128_result), expected_vyper, 2, "fp128 vs Vyper mul");
+        uint256 fp127_result = fp127.mul(uint256(A1), uint256(B1));
+        assertApproxEqAbs(int256(fp127_result), expected_vyper, 2, "fp127 vs Vyper mul");
     }
 
     function testCorrectness_div() public view {
@@ -124,7 +124,7 @@ contract UnifiedBenchmark is Test {
         assertApproxEqAbs(expected_abdk, expected_solady, 1, "ABDK vs Solady div");
         assertApproxEqAbs(expected_solady, expected_vyper, 1, "Solady vs Vyper div");
 
-        uint256 fp128_result = fp128.div(uint256(A1), uint256(B1));
-        assertApproxEqAbs(int256(fp128_result), expected_vyper, 2, "fp128 vs Vyper div");
+        uint256 fp127_result = fp127.div(uint256(A1), uint256(B1));
+        assertApproxEqAbs(int256(fp127_result), expected_vyper, 2, "fp127 vs Vyper div");
     }
 }

@@ -9,7 +9,7 @@ import {wrap as prbWrap} from "../../lib/prb-math/src/sd59x18/Casting.sol";
 import {abs as prbAbs, avg as prbAvg, ceil as prbCeil, div as prbDiv, exp as prbExp, exp2 as prbExp2, floor as prbFloor, frac as prbFrac, gm as prbGm, inv as prbInv, ln as prbLn, log10 as prbLog10, log2 as prbLog2, mul as prbMul, pow as prbPow, sqrt as prbSqrt} from "../../lib/prb-math/src/sd59x18/Math.sol";
 import {add as prbAdd, sub as prbSub} from "../../lib/prb-math/src/sd59x18/Helpers.sol";
 
-interface IFP128 {
+interface IFP127 {
     function mulRaw(uint256, uint256) external view returns (uint256);
     function divRaw(uint256, uint256) external view returns (uint256);
     function expRaw(uint256) external view returns (uint256);
@@ -58,18 +58,18 @@ interface IFP128 {
 contract PrecisionSweep is Test {
     using FixedPointMathLib for uint256;
     
-    IFP128 fp128;
+    IFP127 fp127;
     
     int256 constant WAD = 1e18;
-    uint256 constant ONE_FP128 = uint256(1) << 128;
+    uint256 constant ONE_FP127 = uint256(1) << 128;
     
     function setUp() public {
-        // Deploy fp128
-        string memory hex1 = vm.readFile("contracts/build/huff/test_fp128.runtime.bin");
+        // Deploy fp127
+        string memory hex1 = vm.readFile("contracts/build/huff/test_fp127.runtime.bin");
         bytes memory code1 = vm.parseBytes(string.concat("0x", hex1));
-        address a1 = makeAddr("fp128");
+        address a1 = makeAddr("fp127");
         vm.etch(a1, code1);
-        fp128 = IFP128(a1);
+        fp127 = IFP127(a1);
     }
     
     /// @notice Split sweep into separate tests to avoid gas limits
@@ -2123,11 +2123,11 @@ contract PrecisionSweep is Test {
     
     function _runSample(string memory func, int256 a_wad, int256 b_wad) internal {
         // Get oracle values
-        (uint256 fp128_exp, uint256 wad_exp, uint256 abdk_exp) = _oracleMulti(func, a_wad, b_wad);
+        (uint256 fp127_exp, uint256 wad_exp, uint256 abdk_exp) = _oracleMulti(func, a_wad, b_wad);
         
-        // Run FP128
-        (uint256 fp128_gas, uint256 fp128_digits, int256 fp128_error_bits) = _runFp128(func, a_wad, b_wad, fp128_exp);
-        _emitSweep("fp128", func, a_wad, b_wad, fp128_gas, fp128_digits, fp128_error_bits);
+        // Run FP127
+        (uint256 fp127_gas, uint256 fp127_digits, int256 fp127_error_bits) = _runFp127(func, a_wad, b_wad, fp127_exp);
+        _emitSweep("fp127", func, a_wad, b_wad, fp127_gas, fp127_digits, fp127_error_bits);
         
         // Run ABDK (try-catch to handle overflow/unsupported inputs)
         try this.runAbdkExternal(func, a_wad, b_wad, abdk_exp) returns (uint256 ag, uint256 ad, int256 ae) {
@@ -2189,85 +2189,85 @@ contract PrecisionSweep is Test {
     // LIBRARY RUNNERS
     // ============================================================================
     
-    function _runFp128(string memory func, int256 a_wad, int256 b_wad, uint256 exp_fp128)
+    function _runFp127(string memory func, int256 a_wad, int256 b_wad, uint256 exp_fp127)
         internal view returns (uint256 gas_, uint256 digits_, int256 error_bits_)
     {
-        uint256 a_fp128 = _wadToFp128(a_wad);
-        uint256 b_fp128 = _wadToFp128(b_wad);
+        uint256 a_fp127 = _wadToFp127(a_wad);
+        uint256 b_fp127 = _wadToFp127(b_wad);
         
         uint256 g0 = gasleft();
-        uint256 result_fp128;
+        uint256 result_fp127;
         
         bytes32 funcHash = keccak256(bytes(func));
         if (funcHash == keccak256("mul")) {
-            result_fp128 = fp128.mulRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.mulRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("div")) {
-            result_fp128 = fp128.divRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.divRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("add")) {
-            result_fp128 = a_fp128 + b_fp128;
+            result_fp127 = a_fp127 + b_fp127;
         } else if (funcHash == keccak256("sub")) {
-            result_fp128 = a_fp128 - b_fp128;
+            result_fp127 = a_fp127 - b_fp127;
         } else if (funcHash == keccak256("exp")) {
-            result_fp128 = fp128.expRaw(a_fp128);
+            result_fp127 = fp127.expRaw(a_fp127);
         } else if (funcHash == keccak256("exp2")) {
-            result_fp128 = fp128.exp2Raw(a_fp128);
+            result_fp127 = fp127.exp2Raw(a_fp127);
         } else if (funcHash == keccak256("ln")) {
-            result_fp128 = fp128.lnRaw(a_fp128);
+            result_fp127 = fp127.lnRaw(a_fp127);
         } else if (funcHash == keccak256("log2")) {
-            result_fp128 = fp128.log2Raw(a_fp128);
+            result_fp127 = fp127.log2Raw(a_fp127);
         } else if (funcHash == keccak256("sqrt")) {
-            result_fp128 = fp128.sqrtRaw(a_fp128);
+            result_fp127 = fp127.sqrtRaw(a_fp127);
         } else if (funcHash == keccak256("pow")) {
-            result_fp128 = fp128.powRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.powRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("abs")) {
-            result_fp128 = fp128.absRaw(a_fp128);
+            result_fp127 = fp127.absRaw(a_fp127);
         } else if (funcHash == keccak256("inv")) {
-            result_fp128 = fp128.invRaw(a_fp128);
+            result_fp127 = fp127.invRaw(a_fp127);
         } else if (funcHash == keccak256("min")) {
-            result_fp128 = fp128.minRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.minRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("max")) {
-            result_fp128 = fp128.maxRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.maxRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("avg")) {
-            result_fp128 = fp128.avgRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.avgRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("dist")) {
-            result_fp128 = fp128.distRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.distRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("gavg")) {
-            result_fp128 = fp128.gavgRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.gavgRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("log10")) {
-            result_fp128 = fp128.log10Raw(a_fp128);
+            result_fp127 = fp127.log10Raw(a_fp127);
         } else if (funcHash == keccak256("exp10")) {
-            result_fp128 = fp128.exp10Raw(a_fp128);
+            result_fp127 = fp127.exp10Raw(a_fp127);
         } else if (funcHash == keccak256("sign")) {
-            result_fp128 = fp128.signRaw(a_fp128);
+            result_fp127 = fp127.signRaw(a_fp127);
         } else if (funcHash == keccak256("floor")) {
-            result_fp128 = fp128.floorRaw(a_fp128);
+            result_fp127 = fp127.floorRaw(a_fp127);
         } else if (funcHash == keccak256("ceil")) {
-            result_fp128 = fp128.ceilRaw(a_fp128);
+            result_fp127 = fp127.ceilRaw(a_fp127);
         } else if (funcHash == keccak256("frac")) {
-            result_fp128 = fp128.fracRaw(a_fp128);
+            result_fp127 = fp127.fracRaw(a_fp127);
         } else if (funcHash == keccak256("cbrt")) {
-            result_fp128 = fp128.cbrtRaw(a_fp128);
+            result_fp127 = fp127.cbrtRaw(a_fp127);
         } else if (funcHash == keccak256("lerp")) {
-            uint256 half_fp128 = uint256(1) << 127;
-            result_fp128 = fp128.lerpRaw(a_fp128, b_fp128, half_fp128);
+            uint256 half_fp127 = uint256(1) << 127;
+            result_fp127 = fp127.lerpRaw(a_fp127, b_fp127, half_fp127);
         } else if (funcHash == keccak256("hypot")) {
-            result_fp128 = fp128.hypotRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.hypotRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("round")) {
-            result_fp128 = fp128.roundRaw(a_fp128);
+            result_fp127 = fp127.roundRaw(a_fp127);
         } else if (funcHash == keccak256("log2up")) {
-            result_fp128 = fp128.log2UpRaw(a_fp128);
+            result_fp127 = fp127.log2UpRaw(a_fp127);
         } else if (funcHash == keccak256("gcd")) {
-            result_fp128 = fp128.gcdRaw(a_fp128, b_fp128);
+            result_fp127 = fp127.gcdRaw(a_fp127, b_fp127);
         } else if (funcHash == keccak256("factorial")) {
-            result_fp128 = fp128.factorialRaw(a_fp128);
+            result_fp127 = fp127.factorialRaw(a_fp127);
         } else if (funcHash == keccak256("lambertw0")) {
-            result_fp128 = fp128.lambertW0Raw(a_fp128);
+            result_fp127 = fp127.lambertW0Raw(a_fp127);
         }
         
         gas_ = g0 - gasleft();
         
-        digits_ = _matchingDigits(result_fp128, exp_fp128, 38);
-        error_bits_ = _errorBits(result_fp128, exp_fp128);
+        digits_ = _matchingDigits(result_fp127, exp_fp127, 38);
+        error_bits_ = _errorBits(result_fp127, exp_fp127);
     }
     
     function _runAbdk(string memory func, int256 a_wad, int256 b_wad, uint256 exp_abdk)
@@ -2574,7 +2574,7 @@ contract PrecisionSweep is Test {
     // ============================================================================
     
     function _oracleMulti(string memory func, int256 a_wad, int256 b_wad)
-        internal returns (uint256 fp128_exp, uint256 wad_exp, uint256 abdk_exp)
+        internal returns (uint256 fp127_exp, uint256 wad_exp, uint256 abdk_exp)
     {
         bytes32 funcHash = keccak256(bytes(func));
         bool isBinary = (
@@ -2588,14 +2588,14 @@ contract PrecisionSweep is Test {
         );
         string[] memory cmd = new string[](isBinary ? 5 : 4);
         cmd[0] = "python3";
-        cmd[1] = "scripts/fp128_oracle.py";
+        cmd[1] = "scripts/fp127_oracle.py";
         cmd[2] = string.concat("multi_", func);
         cmd[3] = vm.toString(a_wad);
         if (isBinary) {
             cmd[4] = vm.toString(b_wad);
         }
         bytes memory out = vm.ffi(cmd);
-        (fp128_exp, wad_exp, abdk_exp) = abi.decode(out, (uint256, uint256, uint256));
+        (fp127_exp, wad_exp, abdk_exp) = abi.decode(out, (uint256, uint256, uint256));
     }
     
     // ============================================================================
@@ -2678,7 +2678,7 @@ contract PrecisionSweep is Test {
     // CONVERSIONS
     // ============================================================================
     
-    function _wadToFp128(int256 wad) internal pure returns (uint256) {
+    function _wadToFp127(int256 wad) internal pure returns (uint256) {
         bool negative = wad < 0;
         uint256 abs_wad = uint256(negative ? -wad : wad);
         uint256 result = (abs_wad << 128) / 1e18;

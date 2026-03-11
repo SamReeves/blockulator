@@ -20,7 +20,7 @@ export class MasterApp {
         // Sub-apps (lazy loaded)
         this.gamesApp = null;
         this.vyperApp = null;
-        this.fp128App = null;
+        this.fp127App = null;
         this.benchmarkApp = null;
         this.futuresApp = null;
         this.badgesModule = null;
@@ -140,7 +140,7 @@ export class MasterApp {
         
         this.masterRouter.registerView('games', () => this.initGamesView());
         this.masterRouter.registerView('vyper', () => this.initVyperView());
-        this.masterRouter.registerView('fp128', () => this.initFp128View());
+        this.masterRouter.registerView('fp127', () => this.initFp127View());
         this.masterRouter.registerView('benchmarks', () => this.initBenchmarksView());
         this.masterRouter.registerView('futures', () => this.initFuturesView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
@@ -189,19 +189,19 @@ export class MasterApp {
     }
 
     /**
-     * Initialize FP128 view (lazy loaded)
+     * Initialize FP127 view (lazy loaded)
      */
-    async initFp128View() {
-        console.log('🔢 Initializing FP128 view...');
+    async initFp127View() {
+        console.log('🔢 Initializing FP127 view...');
         
-        if (!this.fp128App) {
-            // Import and create fp128 app
+        if (!this.fp127App) {
+            // Import and create fp127 app
             const { ArithmeticApp } = await import('./arithmetic-app.js');
-            this.fp128App = new ArithmeticApp(this.web3Provider, this.walletComponent, this.toastComponent);
-            await this.fp128App.init();
+            this.fp127App = new ArithmeticApp(this.web3Provider, this.walletComponent, this.toastComponent);
+            await this.fp127App.init();
         }
         
-        console.log('✅ FP128 view initialized');
+        console.log('✅ FP127 view initialized');
     }
 
     /**

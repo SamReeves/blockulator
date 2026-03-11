@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 import "../../../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
 
 /// @title ABDK Math Wrapper
-/// @notice Wrapper for ABDKMath64x64 to match fp128 interface
+/// @notice Wrapper for ABDKMath64x64 to match fp127 interface
 /// @dev Converts between fixed18 and 64.64 fixed-point format
 contract ABDKWrapper {
     using ABDKMath64x64 for int128;

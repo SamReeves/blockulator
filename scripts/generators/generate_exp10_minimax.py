@@ -66,9 +66,9 @@ def verify_precision(coeffs, func, a=0, b=1, num_points=10000):
     
     return max_err, worst_x
 
-def to_fp128_hex(value):
-    """Convert a decimal value to FP128 hex string (128.128 fixed-point)."""
-    # FP128 = value * 2^128
+def to_fp127_hex(value):
+    """Convert a decimal value to FP127 hex string (128.128 fixed-point)."""
+    # FP127 = value * 2^128
     scaled = value * mpmath.mpf(2)**128
     
     # Round to nearest integer
@@ -144,7 +144,7 @@ def main():
     print()
     
     for i, c in enumerate(best_coeffs):
-        hex_val = to_fp128_hex(c)
+        hex_val = to_fp127_hex(c)
         print(f"#define constant EXP10_C{i} = {hex_val}")
     
     print()
@@ -159,12 +159,12 @@ def main():
     
     # 10^38 ~ 2^126, so x=38 is near overflow
     exp10_overflow = 38 << 128
-    print(f"// EXP10_OVERFLOW_THRESHOLD: 38 in FP128 format (10^38 ~ 2^126)")
+    print(f"// EXP10_OVERFLOW_THRESHOLD: 38 in FP127 format (10^38 ~ 2^126)")
     print(f"#define constant EXP10_OVERFLOW_THRESHOLD = 0x{exp10_overflow:064x}")
     
     # -38 in two's complement
     exp10_underflow = ((-38) << 128) & ((1 << 256) - 1)
-    print(f"// EXP10_UNDERFLOW_THRESHOLD: -38 in FP128 format (10^-38 underflows)")
+    print(f"// EXP10_UNDERFLOW_THRESHOLD: -38 in FP127 format (10^-38 underflows)")
     print(f"#define constant EXP10_UNDERFLOW_THRESHOLD = 0x{exp10_underflow:064x}")
 
 if __name__ == "__main__":

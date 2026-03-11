@@ -1,16 +1,16 @@
 /**
  * Benchmark App - Gas & Precision Comparison
- * Compares fp128, abdk, solady, and prbmath across arithmetic and transcendental operations.
+ * Compares fp127, abdk, solady, and prbmath across arithmetic and transcendental operations.
  * All data derived from precision_distribution.json raw sweep data.
  */
 
-const LIBS = ['fp128', 'abdk', 'solady', 'prb'];
+const LIBS = ['fp127', 'abdk', 'solady', 'prb'];
 
 // Preferred display order for functions (new functions will be appended)
 const PREFERRED_FUNCTION_ORDER = ['mul', 'div', 'add', 'sub', 'exp', 'exp2', 'ln', 'log2', 'sqrt', 'pow', 'abs', 'inv', 'min', 'max', 'avg', 'dist', 'gavg', 'log10', 'exp10', 'sign', 'floor', 'ceil', 'frac', 'cbrt', 'lerp', 'hypot', 'round', 'log2up', 'gcd', 'factorial', 'lambertw0'];
 
 const LIB_META = {
-    fp128:  { name: 'FP128',    format: '128.128 fixed-point', lang: 'Huff',            color: '#2196F3' },
+    fp127:  { name: 'FP127',    format: '128.128 fixed-point', lang: 'Huff',            color: '#2196F3' },
     abdk:   { name: 'ABDK',     format: '64.64 fixed-point',   lang: 'Solidity',        color: '#FF9800' },
     solady: { name: 'Solady',   format: 'WAD 18-decimal',      lang: 'Solidity (asm)',   color: '#9C27B0' },
     prb:    { name: 'PRBMath',  format: 'WAD 18-decimal',      lang: 'Solidity',         color: '#4CAF50' }
@@ -21,7 +21,7 @@ const INTEGER_ONLY_FUNCTIONS = new Set([
 ]);
 
 const LIB_UNSUPPORTED = {
-    fp128:  new Set(),
+    fp127:  new Set(),
     abdk:   new Set(['sign', 'floor', 'ceil', 'frac', 'cbrt', 'lerp', 'hypot', 'round', 'log2up', 'gcd', 'factorial', 'lambertw0']),
     solady: new Set(['exp2', 'log2', 'sign', 'floor', 'ceil', 'frac', 'lerp', 'hypot', 'round', 'log2up']),
     prb:    new Set(['min', 'max', 'dist', 'exp10', 'sign', 'cbrt', 'lerp', 'hypot', 'round', 'log2up', 'gcd', 'factorial', 'lambertw0'])
@@ -120,8 +120,48 @@ export class BenchmarkApp {
                     <section class="bench-section">
                         <h3>Gas vs Precision Tradeoff</h3>
                         <p class="bench-section-note">Each candlestick shows precision spread across 50 test inputs. Upper-left is better (less gas, more precision).</p>
-                        <div class="bench-scatter-wrap">
-                            <canvas id="bench-scatter-chart"></canvas>
+                        <div class="bench-scatter-container">
+                            <div class="bench-scatter-wrap">
+                                <canvas id="bench-scatter-chart"></canvas>
+                            </div>
+                            <div class="bench-scatter-legend">
+                                <h4>How to Read</h4>
+                                <div class="legend-candlestick">
+                                    <svg width="60" height="120" viewBox="0 0 60 120">
+                                        <!-- Max whisker cap -->
+                                        <line x1="20" y1="10" x2="40" y2="10" stroke="#888" stroke-width="1.5"/>
+                                        <!-- Upper whisker -->
+                                        <line x1="30" y1="10" x2="30" y2="30" stroke="#888" stroke-width="1.5"/>
+                                        <!-- IQR box -->
+                                        <rect x="22" y="30" width="16" height="40" fill="#2196F340" stroke="#2196F3" stroke-width="2"/>
+                                        <!-- Median line -->
+                                        <line x1="22" y1="50" x2="38" y2="50" stroke="#fff" stroke-width="2"/>
+                                        <!-- Lower whisker -->
+                                        <line x1="30" y1="70" x2="30" y2="90" stroke="#888" stroke-width="1.5"/>
+                                        <!-- Min whisker cap -->
+                                        <line x1="20" y1="90" x2="40" y2="90" stroke="#888" stroke-width="1.5"/>
+                                        <!-- Labels -->
+                                        <text x="45" y="13" fill="#aaa" font-size="10">Max</text>
+                                        <text x="45" y="43" fill="#aaa" font-size="10">Q3</text>
+                                        <text x="45" y="53" fill="#fff" font-size="10">Median</text>
+                                        <text x="45" y="73" fill="#aaa" font-size="10">Q1</text>
+                                        <text x="45" y="93" fill="#aaa" font-size="10">Min</text>
+                                    </svg>
+                                </div>
+                                <div class="legend-note">
+                                    <strong>Upper-left is better:</strong><br>
+                                    Lower gas cost, higher precision
+                                </div>
+                                <div class="legend-colors">
+                                    <h5>Libraries</h5>
+                                    ${LIBS.map(lib => `
+                                        <div class="legend-color-item">
+                                            <span class="legend-color-box" style="background:${LIB_META[lib].color}"></span>
+                                            <span>${LIB_META[lib].name}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
                         </div>
                     </section>
 
@@ -306,7 +346,7 @@ export class BenchmarkApp {
                 backgroundColor: LIB_META[lib].color + '40',
                 borderColor: LIB_META[lib].color,
                 pointRadius: 0,
-                pointHoverRadius: 0
+                pointHoverRadius: 12
             };
         });
 
@@ -396,6 +436,7 @@ export class BenchmarkApp {
                         grid: { color: '#2a2a2a' }
                     },
                     y: {
+                        min: 0,
                         title: { display: true, text: 'Matching Digits (spread)', color: '#888' },
                         ticks: { color: '#888' },
                         grid: { color: '#2a2a2a' }

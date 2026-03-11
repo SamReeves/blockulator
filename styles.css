@@ -4049,7 +4049,7 @@ details[open] .panel-arrow {
    ============================================================================ */
 
 /* ═══════════════════════════════════════════════════════════════════
-   About Page - FP128 Focused
+   About Page - FP127 Focused
    ═══════════════════════════════════════════════════════════════════ */
 
 .about-content {
@@ -4149,7 +4149,7 @@ details[open] .panel-arrow {
 }
 
 /* Advantage Cards */
-.fp128-advantages {
+.fp127-advantages {
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -6212,17 +6212,88 @@ details[open] .collapsible-arrow {
 
 /* ── Scatter Chart ───────────────────────────────────────────────────── */
 
+.bench-scatter-container {
+    display: flex;
+    gap: 1.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: flex-start;
+}
+
 .bench-scatter-wrap {
     background: #111;
     border: 1px solid #2a2a2a;
     border-radius: 6px;
     padding: 1.25rem;
-    max-width: 800px;
-    margin: 0 auto;
+    flex: 1;
+    min-width: 0;
 }
 
 .bench-scatter-wrap canvas {
-    max-height: 400px;
+    max-height: 550px;
+}
+
+.bench-scatter-legend {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 1.25rem;
+    width: 200px;
+    flex-shrink: 0;
+}
+
+.bench-scatter-legend h4 {
+    margin: 0 0 1rem 0;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.bench-scatter-legend h5 {
+    margin: 0 0 0.5rem 0;
+    color: #aaa;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.legend-candlestick {
+    margin-bottom: 1.5rem;
+}
+
+.legend-note {
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    background: #0a0a0a;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: #aaa;
+}
+
+.legend-note strong {
+    color: #fff;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.legend-colors {
+    margin-top: 1rem;
+}
+
+.legend-color-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.85rem;
+    color: #ccc;
+}
+
+.legend-color-box {
+    width: 14px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
 }
 
 /* ── Distribution Grid ────────────────────────────────────────────────── */
@@ -6302,6 +6373,14 @@ details[open] .collapsible-arrow {
     .bench-summary thead th,
     .bench-summary tbody td {
         padding: 0.4rem;
+    }
+
+    .bench-scatter-container {
+        flex-direction: column;
+    }
+
+    .bench-scatter-legend {
+        width: 100%;
     }
 
     .bench-scatter-wrap {

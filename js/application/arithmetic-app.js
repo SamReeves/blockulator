@@ -1,5 +1,5 @@
 /**
- * Arithmetic App - FixedPoint128 Calculator
+ * Arithmetic App - FixedPoint127 Calculator
  * Two-operand calculator (A op B) using the Huff-based 128.128 fixed-point arithmetic
  */
 
@@ -42,12 +42,12 @@ export class ArithmeticApp {
     }
 
     renderHTML() {
-        const container = document.getElementById('fp128-container');
+        const container = document.getElementById('fp127-container');
         container.innerHTML = `
             <div class="ti-calc-shell">
                 <!-- Header -->
                 <div class="vyper-header">
-                    <h2 class="vyper-title">FP128</h2>
+                    <h2 class="vyper-title">FP127</h2>
                     <p class="vyper-subtitle">128.128 Fixed-Point • Pure Huff Assembly • 34 Operations</p>
                 </div>
 
@@ -82,7 +82,7 @@ export class ArithmeticApp {
                         <button id="arith-clear" class="ti-tool-btn">CLR</button>
                         <button id="arith-copy" class="ti-tool-btn">COPY</button>
                     </div>
-                    <div id="fp128-buttons" class="ti-buttons">
+                    <div id="fp127-buttons" class="ti-buttons">
                         <button class="ti-key selected" data-op="add" data-cat="arithmetic" title="Addition">+</button>
                         <button class="ti-key" data-op="sub" data-cat="arithmetic" title="Subtraction">−</button>
                         <button class="ti-key" data-op="mul" data-cat="arithmetic" title="Multiplication">×</button>
@@ -491,13 +491,13 @@ export class ArithmeticApp {
                     margin-top: 2rem;
                 }
 
-                .fp128-contracts-section {
+                .fp127-contracts-section {
                     max-width: 1200px;
                     margin: 3rem auto 2rem;
                     padding: 0 1rem;
                 }
 
-                .fp128-contracts-section .section-title {
+                .fp127-contracts-section .section-title {
                     font-size: 1.5rem;
                     font-weight: 700;
                     margin-bottom: 1.5rem;
@@ -505,7 +505,7 @@ export class ArithmeticApp {
                     text-align: center;
                 }
 
-                .fp128-contract-grid {
+                .fp127-contract-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
                     gap: 1.5rem;
@@ -517,16 +517,16 @@ export class ArithmeticApp {
                     .ti-key { font-size: 0.75rem; padding: 0.5rem 0.125rem; min-height: 40px; }
                     .ti-result { font-size: 1.25rem; }
                     .info-grid { grid-template-columns: 1fr; }
-                    .fp128-contract-grid { grid-template-columns: 1fr; }
+                    .fp127-contract-grid { grid-template-columns: 1fr; }
                 }
             </style>
         `;
     }
 
     async loadContract() {
-        this.contract = await ContractLoader.load('fixedpoint128', this.web3Provider);
+        this.contract = await ContractLoader.load('fixedpoint127', this.web3Provider);
         if (!this.contract) {
-            console.error('Failed to load FixedPoint128 contract');
+            console.error('Failed to load FixedPoint127 contract');
         }
     }
 
@@ -534,31 +534,31 @@ export class ArithmeticApp {
         const container = document.getElementById('arithmetic-contract-info');
         if (!container) return;
 
-        const metadata = getContractMetadata('fixedpoint128');
+        const metadata = getContractMetadata('fixedpoint127');
         if (!metadata) return;
 
         const SOURCE_MODULES = [
-            { file: 'contracts/src/tools/huff/fp128/test_fp128.huff', name: 'FP128 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
-            { file: 'contracts/src/tools/huff/fp128/constants.huff', name: 'Constants', desc: '128.128 format constants: ONE, LN2, LOG2E, E, PI' },
-            { file: 'contracts/src/tools/huff/fp128/primitives.huff', name: 'Primitives', desc: 'Safe comparisons, negation, and bit operations' },
-            { file: 'contracts/src/tools/huff/fp128/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 128.128 fixed-point' },
-            { file: 'contracts/src/tools/huff/fp128/exp.huff', name: 'Exponential', desc: '2^x and e^x via degree-22 minimax polynomial' },
-            { file: 'contracts/src/tools/huff/fp128/ln.huff', name: 'Natural Log', desc: 'ln(x) = log2(x) * ln(2)' },
-            { file: 'contracts/src/tools/huff/fp128/log2.huff', name: 'Log Base 2', desc: 'log2(x) via MSB extraction + Horner polynomial' },
-            { file: 'contracts/src/tools/huff/fp128/sqrt.huff', name: 'Square Root', desc: 'Carmack CLZ initial guess + Newton-Raphson refinement' },
-            { file: 'contracts/src/tools/huff/fp128/pow.huff', name: 'Power', desc: 'x^y = 2^(y * log2(x))' },
-            { file: 'contracts/src/tools/huff/fp128/utils.huff', name: 'Utilities', desc: 'abs, min, max, avg, gavg, dist, clamp, sign, floor, ceil' },
-            { file: 'contracts/src/tools/huff/fp128/transcendental_utils.huff', name: 'Transcendental Utils', desc: 'cbrt, hypot, lerp, log10, exp10, lambertW0, factorial' },
+            { file: 'contracts/src/tools/huff/fp127/test_fp127.huff', name: 'FP127 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
+            { file: 'contracts/src/tools/huff/fp127/constants.huff', name: 'Constants', desc: '128.128 format constants: ONE, LN2, LOG2E, E, PI' },
+            { file: 'contracts/src/tools/huff/fp127/primitives.huff', name: 'Primitives', desc: 'Safe comparisons, negation, and bit operations' },
+            { file: 'contracts/src/tools/huff/fp127/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 128.128 fixed-point' },
+            { file: 'contracts/src/tools/huff/fp127/exp.huff', name: 'Exponential', desc: '2^x and e^x via degree-22 minimax polynomial' },
+            { file: 'contracts/src/tools/huff/fp127/ln.huff', name: 'Natural Log', desc: 'ln(x) = log2(x) * ln(2)' },
+            { file: 'contracts/src/tools/huff/fp127/log2.huff', name: 'Log Base 2', desc: 'log2(x) via MSB extraction + Horner polynomial' },
+            { file: 'contracts/src/tools/huff/fp127/sqrt.huff', name: 'Square Root', desc: 'Carmack CLZ initial guess + Newton-Raphson refinement' },
+            { file: 'contracts/src/tools/huff/fp127/pow.huff', name: 'Power', desc: 'x^y = 2^(y * log2(x))' },
+            { file: 'contracts/src/tools/huff/fp127/utils.huff', name: 'Utilities', desc: 'abs, min, max, avg, gavg, dist, clamp, sign, floor, ceil' },
+            { file: 'contracts/src/tools/huff/fp127/transcendental_utils.huff', name: 'Transcendental Utils', desc: 'cbrt, hypot, lerp, log10, exp10, lambertW0, factorial' },
         ];
 
         container.innerHTML = `
-            <div class="fp128-contracts-section">
+            <div class="fp127-contracts-section">
                 <h2 class="section-title">Source Code</h2>
-                <div id="fp128-contract-grid" class="fp128-contract-grid"></div>
+                <div id="fp127-contract-grid" class="fp127-contract-grid"></div>
             </div>
         `;
 
-        const grid = document.getElementById('fp128-contract-grid');
+        const grid = document.getElementById('fp127-contract-grid');
 
         // Contract card (address, Etherscan, ABI)
         const contractCard = document.createElement('div');
@@ -612,9 +612,9 @@ export class ArithmeticApp {
     }
 
     setupListeners() {
-        document.querySelectorAll('#fp128-buttons .ti-key[data-op]').forEach(btn => {
+        document.querySelectorAll('#fp127-buttons .ti-key[data-op]').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('#fp128-buttons .ti-key[data-op]').forEach(b => b.classList.remove('selected'));
+                document.querySelectorAll('#fp127-buttons .ti-key[data-op]').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 this.selectedOp = btn.dataset.op;
                 const arity = OP_ARITY[this.selectedOp] || 'arithmetic';

@@ -512,9 +512,9 @@ export const CONTRACT_REGISTRY = {
     },
     
     // ========== ARITHMETIC (HUFF) ==========
-    'fixedpoint128': {
+    'fixedpoint127': {
         type: 'arithmetic',
-        name: 'FP128',
+        name: 'FP127',
         symbol: '+−×÷',
         emoji: '0x',
         category: 'huff',
@@ -523,8 +523,8 @@ export const CONTRACT_REGISTRY = {
             sepolia: 'PENDING_DEPLOYMENT',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
-        source: 'contracts/src/tools/huff/fp128/test_fp128.huff',
-        abi: 'contracts/build/abis/fixedpoint128.json'
+        source: 'contracts/src/tools/huff/fp127/test_fp127.huff',
+        abi: 'contracts/build/abis/fixedpoint127.json'
     },
     
     // ========== FUTURES ==========

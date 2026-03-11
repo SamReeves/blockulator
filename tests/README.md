@@ -41,7 +41,7 @@ Open these in a browser after starting the test server.
 
 ### Python Tests (Contract testing)
 
-- **test_fp128_*.py** - Huff FP128 arithmetic tests
+- **test_fp127_*.py** - Huff FP127 arithmetic tests
 - **test_fp.py** - Fixed-point math tests
 
 Run with:

@@ -203,7 +203,7 @@ def plot_distributions(samples, stats):
         all_functions.update(lib.keys())
     functions = sorted(all_functions)
     libraries = sorted(stats.keys())
-    colors = {"fp128": "#2196F3", "abdk": "#FF9800", "solady": "#9C27B0", "prb": "#4CAF50"}
+    colors = {"fp127": "#2196F3", "abdk": "#FF9800", "solady": "#9C27B0", "prb": "#4CAF50"}
     
     # Group samples by lib and func
     grouped = defaultdict(lambda: defaultdict(list))
