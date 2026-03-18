@@ -520,7 +520,7 @@ export const CONTRACT_REGISTRY = {
         category: 'huff',
         description: 'Signed 127.128 fixed-point arithmetic with 34 operations: add, sub, mul, div, exp, exp2, exp10, ln, log2, log10, sqrt, pow, abs, neg, inv, min, max, clamp, avg, gavg, dist, zeroFloorSub, hypot, cbrt, lerp, sign, floor, ceil, frac, round, log2Up, gcd, factorial, lambertW0',
         addresses: {
-            sepolia: '0x38999881d76a9EbA876022Bf48433840F1Aa41Eb',
+            sepolia: '0xfae694D0c2c44181791F838c54Ed64C3151FfE30',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/huff/fp127/fp127.huff',

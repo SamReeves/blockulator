@@ -67,7 +67,7 @@ export class MasterRouter {
         let path = window.location.hash.slice(1); // Remove #
         
         if (!path || path === '/') {
-            path = '/benchmarks'; // Default route
+            path = '/fp127'; // Default route - FP127 calculator is the landing page
         }
         
         // Remove leading slash if present

@@ -48,6 +48,7 @@ export class ArithmeticApp {
         this.isTranscendental = false;
         this.showRawHex = false;
         this.lastRawResult = null;
+        this.executeOnChain = false;
 
         console.log('ArithmeticApp created');
     }
@@ -166,6 +167,29 @@ export class ArithmeticApp {
                         <button class="ti-key" data-op="lambertW0" data-cat="special" title="Lambert W₀ Function">W₀(x)</button>
                     </div>
                     <button id="arith-calculate" class="ti-calculate-btn">CALCULATE</button>
+                    <div class="ti-onchain-toggle">
+                        <label class="ti-toggle-label">
+                            <input type="checkbox" id="arith-onchain" />
+                            <span class="ti-toggle-text">Execute On-Chain</span>
+                            <span class="ti-toggle-hint">(costs gas)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- On-Chain Result Info -->
+                <div id="arith-tx-info" class="ti-tx-info" style="display: none;">
+                    <div class="ti-tx-row">
+                        <span class="ti-tx-label">Tx Hash:</span>
+                        <a id="arith-tx-hash" class="ti-tx-link" href="#" target="_blank" rel="noopener"></a>
+                    </div>
+                    <div class="ti-tx-row">
+                        <span class="ti-tx-label">Gas Used:</span>
+                        <span id="arith-tx-gas" class="ti-tx-value"></span>
+                    </div>
+                    <div class="ti-tx-row">
+                        <span class="ti-tx-label">Cost:</span>
+                        <span id="arith-tx-cost" class="ti-tx-value"></span>
+                    </div>
                 </div>
 
                 <!-- Technical Info Section -->
@@ -635,6 +659,75 @@ export class ArithmeticApp {
                     gap: 1.5rem;
                 }
 
+                /* On-Chain Toggle */
+                .ti-onchain-toggle {
+                    margin-top: 0.75rem;
+                    text-align: center;
+                }
+
+                .ti-toggle-label {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    cursor: pointer;
+                    color: #888;
+                    font-size: 0.8rem;
+                }
+
+                .ti-toggle-label input[type="checkbox"] {
+                    width: 16px;
+                    height: 16px;
+                    accent-color: #00ff88;
+                    cursor: pointer;
+                }
+
+                .ti-toggle-label:has(input:checked) .ti-toggle-text {
+                    color: #00ff88;
+                }
+
+                .ti-toggle-hint {
+                    color: #555;
+                    font-size: 0.7rem;
+                }
+
+                /* Transaction Info */
+                .ti-tx-info {
+                    margin-top: 1rem;
+                    padding: 0.75rem;
+                    background: #0d1a0d;
+                    border: 1px solid #1a3a1a;
+                    border-radius: 0.375rem;
+                }
+
+                .ti-tx-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 0.25rem 0;
+                    font-size: 0.75rem;
+                }
+
+                .ti-tx-label {
+                    color: #888;
+                }
+
+                .ti-tx-value {
+                    color: #6dd5c4;
+                    font-family: 'Courier New', monospace;
+                }
+
+                .ti-tx-link {
+                    color: #6dd5c4;
+                    text-decoration: none;
+                    font-family: 'Courier New', monospace;
+                    font-size: 0.7rem;
+                }
+
+                .ti-tx-link:hover {
+                    color: #00ff88;
+                    text-decoration: underline;
+                }
+
                 @media (max-width: 480px) {
                     .ti-calc-shell { padding: 0.75rem 0.5rem; }
                     .ti-buttons { grid-template-columns: repeat(3, 1fr); gap: 0.25rem; }
@@ -803,6 +896,15 @@ export class ArithmeticApp {
         // HEX toggle button
         document.getElementById('arith-hex').addEventListener('click', () => {
             this.toggleHex();
+        });
+
+        // On-Chain toggle
+        document.getElementById('arith-onchain').addEventListener('change', (e) => {
+            this.executeOnChain = e.target.checked;
+            // Hide tx info when toggling off
+            if (!this.executeOnChain) {
+                document.getElementById('arith-tx-info').style.display = 'none';
+            }
         });
 
         // Preset demo buttons
@@ -1035,7 +1137,6 @@ export class ArithmeticApp {
                 const displayResult = formatFp127Display(fp127ToDecimal(resultBigInt, 38));
 
                 resultEl.textContent = displayResult;
-                this.showStatus('Calculated successfully', 'success');
 
                 // Update raw hex if toggle is on
                 if (this.showRawHex) {
@@ -1045,8 +1146,15 @@ export class ArithmeticApp {
                     rawEl.style.display = 'block';
                 }
 
-                // Estimate gas
-                this.estimateGas(this.selectedOp, [fp127A]);
+                // Execute on-chain if toggle is on, otherwise just estimate
+                if (this.executeOnChain) {
+                    const { gasUsed } = await this.executeOnChainTransaction(this.selectedOp, [fp127A]);
+                    document.getElementById('arith-gas').textContent = `Gas: ${gasUsed.toLocaleString()} (actual)`;
+                    this.showStatus('Executed on-chain successfully', 'success');
+                } else {
+                    this.estimateGas(this.selectedOp, [fp127A]);
+                    this.showStatus('Calculated successfully', 'success');
+                }
 
                 // Check precision for known values
                 this.checkPrecision(this.selectedOp, aValue, displayResult);
@@ -1085,7 +1193,6 @@ export class ArithmeticApp {
                 const displayResult = formatFp127Display(fp127ToDecimal(resultBigInt, 38));
 
                 resultEl.textContent = displayResult;
-                this.showStatus('Calculated successfully', 'success');
 
                 // Update raw hex if toggle is on
                 if (this.showRawHex) {
@@ -1095,8 +1202,15 @@ export class ArithmeticApp {
                     rawEl.style.display = 'block';
                 }
 
-                // Estimate gas
-                this.estimateGas(this.selectedOp, [fp127A, fp127B, fp127C]);
+                // Execute on-chain if toggle is on, otherwise just estimate
+                if (this.executeOnChain) {
+                    const { gasUsed } = await this.executeOnChainTransaction(this.selectedOp, [fp127A, fp127B, fp127C]);
+                    document.getElementById('arith-gas').textContent = `Gas: ${gasUsed.toLocaleString()} (actual)`;
+                    this.showStatus('Executed on-chain successfully', 'success');
+                } else {
+                    this.estimateGas(this.selectedOp, [fp127A, fp127B, fp127C]);
+                    this.showStatus('Calculated successfully', 'success');
+                }
 
             } else {
                 // Binary operations (arithmetic + new binary ops)
@@ -1183,7 +1297,6 @@ export class ArithmeticApp {
                 const displayResult = formatFp127Display(fp127ToDecimal(resultBigInt, 38));
 
                 resultEl.textContent = displayResult;
-                this.showStatus('Calculated successfully', 'success');
 
                 // Update raw hex if toggle is on
                 if (this.showRawHex) {
@@ -1193,8 +1306,15 @@ export class ArithmeticApp {
                     rawEl.style.display = 'block';
                 }
 
-                // Estimate gas
-                this.estimateGas(this.selectedOp, [fp127A, fp127B]);
+                // Execute on-chain if toggle is on, otherwise just estimate
+                if (this.executeOnChain) {
+                    const { gasUsed } = await this.executeOnChainTransaction(this.selectedOp, [fp127A, fp127B]);
+                    document.getElementById('arith-gas').textContent = `Gas: ${gasUsed.toLocaleString()} (actual)`;
+                    this.showStatus('Executed on-chain successfully', 'success');
+                } else {
+                    this.estimateGas(this.selectedOp, [fp127A, fp127B]);
+                    this.showStatus('Calculated successfully', 'success');
+                }
             }
 
         } catch (error) {
@@ -1213,6 +1333,7 @@ export class ArithmeticApp {
         document.getElementById('arith-precision').textContent = '';
         document.getElementById('arith-raw').textContent = '';
         document.getElementById('arith-raw').style.display = 'none';
+        document.getElementById('arith-tx-info').style.display = 'none';
         this.lastRawResult = null;
         this.showStatus('', '');
         this.updateExpression();
@@ -1327,13 +1448,13 @@ export class ArithmeticApp {
 
     async estimateGas(op, args) {
         const gasEl = document.getElementById('arith-gas');
-        
+
         try {
             // Ethers v6 uses contract.methodName.estimateGas(args)
             // Ethers v5 uses contract.estimateGas.methodName(args)
             let gasEstimate;
             const method = `${op}Raw`;
-            
+
             if (this.contract[method] && this.contract[method].estimateGas) {
                 // Ethers v6
                 gasEstimate = await this.contract[method].estimateGas(...args);
@@ -1351,5 +1472,71 @@ export class ArithmeticApp {
             console.warn('Gas estimation failed:', error);
             gasEl.textContent = '';
         }
+    }
+
+    async executeOnChainTransaction(op, args) {
+        const txInfoEl = document.getElementById('arith-tx-info');
+        const txHashEl = document.getElementById('arith-tx-hash');
+        const txGasEl = document.getElementById('arith-tx-gas');
+        const txCostEl = document.getElementById('arith-tx-cost');
+
+        if (!this.web3Provider || !this.web3Provider.isConnected()) {
+            throw new Error('Wallet not connected. Connect wallet to execute on-chain.');
+        }
+
+        const method = `${op}Raw`;
+        const contractFn = this.contract[method];
+        if (!contractFn) {
+            throw new Error(`Unknown method: ${method}`);
+        }
+
+        // Get the signer from wallet
+        const signer = await this.web3Provider.getSigner();
+        const contractWithSigner = this.contract.connect(signer);
+
+        // Encode the function call data
+        const data = contractWithSigner.interface.encodeFunctionData(method, args);
+        const contractAddress = this.contract.address;
+
+        // Send the transaction
+        this.showStatus('Sending transaction...', 'loading');
+        const tx = await signer.sendTransaction({
+            to: contractAddress,
+            data: data,
+        });
+
+        this.showStatus('Waiting for confirmation...', 'loading');
+        const receipt = await tx.wait();
+
+        // Get gas price for cost calculation
+        const gasUsed = typeof receipt.gasUsed === 'bigint' ? receipt.gasUsed : BigInt(receipt.gasUsed.toString());
+        const effectiveGasPrice = receipt.effectiveGasPrice 
+            ? (typeof receipt.effectiveGasPrice === 'bigint' ? receipt.effectiveGasPrice : BigInt(receipt.effectiveGasPrice.toString()))
+            : 0n;
+        const totalCost = gasUsed * effectiveGasPrice;
+
+        // Format the cost in ETH
+        const costInEth = Number(totalCost) / 1e18;
+        const costStr = costInEth < 0.000001 
+            ? `${(costInEth * 1e9).toFixed(4)} Gwei`
+            : `${costInEth.toFixed(8)} ETH`;
+
+        // Get network for Etherscan link
+        const chainId = this.web3Provider.chainId;
+        let explorerBase = 'https://etherscan.io';
+        if (chainId === 11155111) explorerBase = 'https://sepolia.etherscan.io';
+        else if (chainId === 5) explorerBase = 'https://goerli.etherscan.io';
+
+        // Calculate computation gas (subtract 21k base tx overhead)
+        const computeGas = Number(gasUsed) - 21000;
+
+        // Display transaction info
+        txHashEl.textContent = `${tx.hash.slice(0, 10)}...${tx.hash.slice(-8)}`;
+        txHashEl.href = `${explorerBase}/tx/${tx.hash}`;
+        txGasEl.textContent = `${computeGas.toLocaleString()} (+ 21k tx base)`;
+        txCostEl.textContent = costStr;
+        txInfoEl.style.display = 'block';
+
+        return { receipt, gasUsed: computeGas };
     }
 }

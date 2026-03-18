@@ -166,6 +166,13 @@ export class BenchmarkApp {
         };
     }
 
+    hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r},${g},${b},${alpha})`;
+    }
+
     renderSummaryTable() {
         const raw = this.distData.raw;
         const statLabel = this.useMedian ? 'Median' : 'Mean';
@@ -224,16 +231,17 @@ export class BenchmarkApp {
                 const d = rowData[lib].digits;
                 const gasClass = g != null && g === bestGas ? 'best' : '';
                 const digClass = d != null && d === bestDigits ? 'best' : '';
+                const tint = this.hexToRgba(LIB_META[lib].color, 0.08);
 
                 if (unsupported) {
-                    html += `<td class="col-gas"><span class="unsupported">✗</span></td>`;
-                    html += `<td class="col-digits"><span class="unsupported">✗</span></td>`;
+                    html += `<td class="col-gas" style="background:${tint}"><span class="unsupported">✗</span></td>`;
+                    html += `<td class="col-digits" style="background:${tint}"><span class="unsupported">✗</span></td>`;
                 } else {
-                    html += `<td class="col-gas ${gasClass}">${g != null ? Math.round(g).toLocaleString() : '<span class="na">—</span>'}</td>`;
+                    html += `<td class="col-gas ${gasClass}" style="background:${tint}">${g != null ? Math.round(g).toLocaleString() : '<span class="na">—</span>'}</td>`;
                     const digitDisplay = isIntOnly
-                        ? '<span class="int-only">i</span>'
+                        ? '<span class="int-only">int</span>'
                         : (d != null ? d.toFixed(1) : '<span class="na">—</span>');
-                    html += `<td class="col-digits ${digClass}">${digitDisplay}</td>`;
+                    html += `<td class="col-digits ${digClass}" style="background:${tint}">${digitDisplay}</td>`;
                 }
             }
             html += '</tr>';
@@ -332,15 +340,36 @@ export class BenchmarkApp {
         Plotly.newPlot(container, traces, layout, config);
     }
 
-    // ── 3D Scatter Chart (Plotly.js) ──────────────────────────────────
+    // ── WebGL Detection ─────────────────────────────────────────────
+
+    hasWebGL() {
+        try {
+            const canvas = document.createElement('canvas');
+            return !!(window.WebGLRenderingContext && 
+                (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // ── 3D/2D Scatter Chart (Plotly.js) ───────────────────────────────
 
     renderScatterChart() {
         const container = document.getElementById('bench-scatter-3d');
         if (!container || typeof Plotly === 'undefined') {
-            if (container) container.innerHTML = '<p style="color:#f66;text-align:center;padding:2rem;">Failed to load 3D library</p>';
+            if (container) container.innerHTML = '<p style="color:#f66;text-align:center;padding:2rem;">Failed to load charting library</p>';
             return;
         }
 
+        // Check for WebGL support and render appropriate chart
+        if (this.hasWebGL()) {
+            this.render3DScatter(container);
+        } else {
+            this.render2DFallback(container);
+        }
+    }
+
+    render3DScatter(container) {
         const raw = this.distData.raw;
 
         // Create function index mapping
@@ -377,7 +406,8 @@ export class BenchmarkApp {
                 marker: {
                     size: 3,
                     color: LIB_META[lib].color,
-                    opacity: 0.7
+                    opacity: 0.7,
+                    line: { width: 0 }
                 }
             };
         });
@@ -434,6 +464,87 @@ export class BenchmarkApp {
             displayModeBar: true,
             modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
             displaylogo: false
+        };
+
+        Plotly.newPlot(container, traces, layout, config);
+    }
+
+    render2DFallback(container) {
+        const raw = this.distData.raw;
+
+        // 2D fallback: X = Gas (log), Y = Digits, Color = Library, with jitter by function
+        const traces = LIBS.map(lib => {
+            const x = [], y = [], text = [], sizes = [];
+
+            for (const func of this.functions) {
+                const rawData = raw[lib]?.[func] || [];
+                for (const d of rawData) {
+                    if (d.gas <= 0 || d.digits <= 0) continue;
+
+                    x.push(d.gas);
+                    y.push(d.digits);
+                    text.push(`${func.toUpperCase()}: ${d.gas.toLocaleString()} gas, ${d.digits} digits`);
+                    sizes.push(6);
+                }
+            }
+
+            return {
+                type: 'scatter',
+                mode: 'markers',
+                name: LIB_META[lib].name,
+                x: x,
+                y: y,
+                text: text,
+                hovertemplate: '%{text}<extra>' + LIB_META[lib].name + '</extra>',
+                marker: {
+                    size: sizes,
+                    color: LIB_META[lib].color,
+                    opacity: 0.6,
+                    line: { width: 0 }
+                }
+            };
+        });
+
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { family: 'Courier New, monospace', color: '#888' },
+            margin: { l: 60, r: 20, t: 30, b: 60 },
+            xaxis: {
+                title: { text: 'Gas (log scale)', font: { size: 11 } },
+                type: 'log',
+                gridcolor: '#222',
+                zerolinecolor: '#333'
+            },
+            yaxis: {
+                title: { text: 'Precision (digits)', font: { size: 11 } },
+                gridcolor: '#222',
+                zerolinecolor: '#333',
+                range: [0, 42]
+            },
+            legend: {
+                x: 0.5,
+                y: -0.15,
+                xanchor: 'center',
+                orientation: 'h',
+                font: { size: 11 }
+            },
+            showlegend: true,
+            hovermode: 'closest',
+            annotations: [{
+                x: 0.5,
+                y: 1.05,
+                xref: 'paper',
+                yref: 'paper',
+                text: '2D view (WebGL not available)',
+                showarrow: false,
+                font: { size: 10, color: '#666' }
+            }]
+        };
+
+        const config = {
+            responsive: true,
+            displayModeBar: false
         };
 
         Plotly.newPlot(container, traces, layout, config);
