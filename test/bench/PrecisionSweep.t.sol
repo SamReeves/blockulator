@@ -65,7 +65,7 @@ contract PrecisionSweep is Test {
     
     function setUp() public {
         // Deploy fp127
-        string memory hex1 = vm.readFile("contracts/build/huff/test_fp127.runtime.bin");
+        string memory hex1 = vm.readFile("contracts/build/huff/fp127.runtime.bin");
         bytes memory code1 = vm.parseBytes(string.concat("0x", hex1));
         address a1 = makeAddr("fp127");
         vm.etch(a1, code1);

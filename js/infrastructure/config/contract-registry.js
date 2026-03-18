@@ -518,12 +518,12 @@ export const CONTRACT_REGISTRY = {
         symbol: '+−×÷',
         emoji: '0x',
         category: 'huff',
-        description: 'Signed 127.128 fixed-point arithmetic with 22 operations: add, sub, mul, div, exp, exp2, exp10, ln, log2, log10, sqrt, pow, abs, neg, inv, min, max, clamp, avg, gavg, dist, zeroFloorSub',
+        description: 'Signed 127.128 fixed-point arithmetic with 34 operations: add, sub, mul, div, exp, exp2, exp10, ln, log2, log10, sqrt, pow, abs, neg, inv, min, max, clamp, avg, gavg, dist, zeroFloorSub, hypot, cbrt, lerp, sign, floor, ceil, frac, round, log2Up, gcd, factorial, lambertW0',
         addresses: {
-            sepolia: 'PENDING_DEPLOYMENT',
+            sepolia: '0x38999881d76a9EbA876022Bf48433840F1Aa41Eb',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
-        source: 'contracts/src/tools/huff/fp127/test_fp127.huff',
+        source: 'contracts/src/tools/huff/fp127/fp127.huff',
         abi: 'contracts/build/abis/fixedpoint127.json'
     },
     

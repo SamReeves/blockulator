@@ -2,7 +2,7 @@
  * Deploy FixedPoint127 to Sepolia Testnet
  * 
  * Prerequisites:
- *   1. Compile: ./contracts/deployments/compile-huff.sh contracts/src/tools/huff/fp127/test_fp127.huff
+ *   1. Compile: ./contracts/deployments/compile-huff.sh contracts/src/tools/huff/fp127/fp127.huff
  *   2. Set environment: export PRIVATE_KEY=your_private_key
  *   3. Run: node contracts/deployments/deploy-fixedpoint127.js
  */
@@ -18,7 +18,7 @@ const NETWORK = 'sepolia';
 
 // Load bytecode and ABI
 function loadBytecode() {
-    const p = path.join(__dirname, '../build/bytecode/test_fp127.json');
+    const p = path.join(__dirname, '../build/bytecode/fp127.json');
     if (!fs.existsSync(p)) {
         throw new Error('Bytecode not found. Run compile-huff.sh first.');
     }

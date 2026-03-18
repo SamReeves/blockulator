@@ -16,10 +16,10 @@ echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━
 
 # Step 1: Compile
 echo -e "${YELLOW}Step 1: Compiling contract...${NC}"
-./contracts/deployments/compile-huff.sh contracts/src/tools/huff/fp127/test_fp127.huff
+./contracts/deployments/compile-huff.sh contracts/src/tools/huff/fp127/fp127.huff
 
 # Verify bytecode size
-RUNTIME_BYTES=$(( $(wc -c < contracts/build/huff/test_fp127.runtime.bin) / 2 ))
+RUNTIME_BYTES=$(( $(wc -c < contracts/build/huff/fp127.runtime.bin) / 2 ))
 echo -e "${GREEN}✓ Runtime bytecode: ${RUNTIME_BYTES} bytes${NC}"
 
 if [ $RUNTIME_BYTES -ge 24576 ]; then

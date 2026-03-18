@@ -6,6 +6,7 @@
 import { ContractLoader } from '../infrastructure/blockchain/contract-loader.js';
 import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js';
 import { getContractMetadata } from '../infrastructure/config/contract-registry.js';
+import { decimalToFp127, fp127ToDecimal, isValidFp127Decimal, formatFp127Display } from '../infrastructure/math/fp127-math.js';
 
 const OP_ARITY = {
     add: 'arithmetic', sub: 'arithmetic', mul: 'arithmetic', div: 'arithmetic',
@@ -18,6 +19,25 @@ const OP_ARITY = {
     clamp: 'ternary', lerp: 'ternary'
 };
 
+const KNOWN_VALUES = {
+    'exp_1': {
+        value: '2.71828182845904523536028747135266249775724709369995957496696762772407663035354759457138217852516642742746639193200305992181741359662904357290033429526059563073813232862794349076323382988075319525101901',
+        label: 'e (Euler\'s number)'
+    },
+    'sqrt_2': {
+        value: '1.41421356237309504880168872420969807856967187537694807317667973799073247846210703885038753432764157273501384623091229702492483605585073721264412149709993583141322266592750559275579995050115278206057147',
+        label: '√2'
+    },
+    'ln_2': {
+        value: '0.69314718055994530941723212145817656807550013436025525412068000949339362196969471560586332699641868754200148102057068573368552023575813055703267075163507596193072757082837143519030703862389167347112335',
+        label: 'ln(2)'
+    },
+    'lambertW0_1': {
+        value: '0.56714329040978387299996866221035554975381578718651250406296283552215802394490717487293865296938284421303',
+        label: 'Ω (omega constant)'
+    }
+};
+
 export class ArithmeticApp {
     constructor(web3Provider, walletComponent, toastComponent) {
         this.web3Provider = web3Provider;
@@ -26,6 +46,8 @@ export class ArithmeticApp {
         this.contract = null;
         this.selectedOp = 'add';
         this.isTranscendental = false;
+        this.showRawHex = false;
+        this.lastRawResult = null;
 
         console.log('ArithmeticApp created');
     }
@@ -48,7 +70,23 @@ export class ArithmeticApp {
                 <!-- Header -->
                 <div class="vyper-header">
                     <h2 class="vyper-title">FP127</h2>
-                    <p class="vyper-subtitle">127.128 Fixed-Point • Pure Huff Assembly • 34 Operations</p>
+                    <p class="vyper-subtitle">
+                        127.128 Fixed-Point • Pure Huff Assembly • 34 Operations<br>
+                        <a href="https://sepolia.etherscan.io/address/0x38999881d76a9EbA876022Bf48433840F1Aa41Eb" target="_blank" rel="noopener noreferrer" class="etherscan-link">
+                            Live on Sepolia ↗
+                        </a>
+                    </p>
+                </div>
+
+                <!-- Preset Demos -->
+                <div class="preset-demos">
+                    <div class="preset-label">Try it:</div>
+                    <button class="preset-btn" data-preset="exp_1">exp(1) = e</button>
+                    <button class="preset-btn" data-preset="sqrt_2">√2</button>
+                    <button class="preset-btn" data-preset="ln_2">ln(2)</button>
+                    <button class="preset-btn" data-preset="pi_e">π × e</button>
+                    <button class="preset-btn" data-preset="factorial_20">20!</button>
+                    <button class="preset-btn" data-preset="w0_1">W₀(1)</button>
                 </div>
 
                 <!-- LCD Screen -->
@@ -56,6 +94,9 @@ export class ArithmeticApp {
                     <div class="ti-lcd-inner">
                         <div id="arith-expr" class="ti-expr">A + B</div>
                         <div id="arith-result" class="ti-result">0</div>
+                        <div id="arith-raw" class="ti-raw" style="display: none;"></div>
+                        <div id="arith-gas" class="ti-gas"></div>
+                        <div id="arith-precision" class="ti-precision"></div>
                     </div>
                 </div>
 
@@ -81,6 +122,7 @@ export class ArithmeticApp {
                     <div class="ti-toolbar">
                         <button id="arith-clear" class="ti-tool-btn">CLR</button>
                         <button id="arith-copy" class="ti-tool-btn">COPY</button>
+                        <button id="arith-hex" class="ti-tool-btn">HEX</button>
                     </div>
                     <div id="fp127-buttons" class="ti-buttons">
                         <button class="ti-key selected" data-op="add" data-cat="arithmetic" title="Addition">+</button>
@@ -134,10 +176,10 @@ export class ArithmeticApp {
                             <span class="info-label">Format:</span>
                             <span class="info-value">Signed 127.128 Fixed-Point</span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Precision:</span>
-                            <span class="info-value">~38 decimal digits</span>
-                        </div>
+                    <div class="info-item">
+                        <span class="info-label">Precision:</span>
+                        <span class="info-value">38 decimal digits (128 bits)</span>
+                    </div>
                         <div class="info-item">
                             <span class="info-label">Range:</span>
                             <span class="info-value">±1.7e38</span>
@@ -162,6 +204,88 @@ export class ArithmeticApp {
             </div>
 
             <style>
+                /* Preset Demos */
+                .preset-demos {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                    padding: 0.75rem;
+                    background: #1a1a1a;
+                    border: 1px solid #333;
+                    border-radius: 0.375rem;
+                }
+
+                .preset-label {
+                    color: #888;
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    margin-right: 0.5rem;
+                }
+
+                .preset-btn {
+                    padding: 0.375rem 0.75rem;
+                    background: #2a2a2a;
+                    border: 1px solid #444;
+                    border-radius: 0.25rem;
+                    color: #6dd5c4;
+                    font-family: 'Courier New', monospace;
+                    font-size: 0.8rem;
+                    cursor: pointer;
+                    transition: all 0.15s;
+                }
+
+                .preset-btn:hover {
+                    background: #3a3a3a;
+                    border-color: #00ff88;
+                    color: #00ff88;
+                }
+
+                .preset-btn:active {
+                    transform: translateY(1px);
+                }
+
+                /* Etherscan Link */
+                .etherscan-link {
+                    color: #6dd5c4;
+                    text-decoration: none;
+                    font-size: 0.8rem;
+                    transition: color 0.2s;
+                }
+
+                .etherscan-link:hover {
+                    color: #00ff88;
+                }
+
+                /* LCD additions */
+                .ti-raw {
+                    text-align: right;
+                    color: #6dd5c4;
+                    font-size: 0.7rem;
+                    margin-top: 0.5rem;
+                    font-family: 'Courier New', monospace;
+                    word-break: break-all;
+                }
+
+                .ti-gas {
+                    text-align: right;
+                    color: #4a7a4a;
+                    font-size: 0.75rem;
+                    margin-top: 0.5rem;
+                    font-family: 'Courier New', monospace;
+                    min-height: 1rem;
+                }
+
+                .ti-precision {
+                    text-align: right;
+                    color: #4a7a4a;
+                    font-size: 0.7rem;
+                    margin-top: 0.25rem;
+                    font-family: 'Courier New', monospace;
+                    font-style: italic;
+                }
+
                 .ti-calc-shell {
                     max-width: 600px;
                     margin: 0 auto;
@@ -538,7 +662,7 @@ export class ArithmeticApp {
         if (!metadata) return;
 
         const SOURCE_MODULES = [
-            { file: 'contracts/src/tools/huff/fp127/test_fp127.huff', name: 'FP127 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
+            { file: 'contracts/src/tools/huff/fp127/fp127.huff', name: 'FP127 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
             { file: 'contracts/src/tools/huff/fp127/constants.huff', name: 'Constants', desc: '127.128 format constants: ONE, LN2, LOG2E, E, PI' },
             { file: 'contracts/src/tools/huff/fp127/primitives.huff', name: 'Primitives', desc: 'Safe comparisons, negation, and bit operations' },
             { file: 'contracts/src/tools/huff/fp127/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 127.128 fixed-point' },
@@ -548,7 +672,8 @@ export class ArithmeticApp {
             { file: 'contracts/src/tools/huff/fp127/sqrt.huff', name: 'Square Root', desc: 'Carmack CLZ initial guess + Newton-Raphson refinement' },
             { file: 'contracts/src/tools/huff/fp127/pow.huff', name: 'Power', desc: 'x^y = 2^(y * log2(x))' },
             { file: 'contracts/src/tools/huff/fp127/utils.huff', name: 'Utilities', desc: 'abs, min, max, avg, gavg, dist, clamp, sign, floor, ceil' },
-            { file: 'contracts/src/tools/huff/fp127/transcendental_utils.huff', name: 'Transcendental Utils', desc: 'cbrt, hypot, lerp, log10, exp10, lambertW0, factorial' },
+            { file: 'contracts/src/tools/huff/fp127/transcendental_utils.huff', name: 'Transcendental Utils', desc: 'cbrt, hypot, lerp, log10, exp10, factorial' },
+            { file: 'contracts/src/tools/huff/fp127/lambertw0.huff', name: 'Lambert W0', desc: 'Lambert W principal branch via Fritsch iteration' },
         ];
 
         container.innerHTML = `
@@ -675,6 +800,19 @@ export class ArithmeticApp {
             this.copyResult();
         });
 
+        // HEX toggle button
+        document.getElementById('arith-hex').addEventListener('click', () => {
+            this.toggleHex();
+        });
+
+        // Preset demo buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = btn.dataset.preset;
+                this.runPreset(preset);
+            });
+        });
+
         // Enter key on inputs
         document.getElementById('input-a').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.calculate();
@@ -766,9 +904,8 @@ export class ArithmeticApp {
         }
 
         try {
-            const a = parseFloat(aValue);
-
-            if (isNaN(a)) {
+            // Validate input format (no parseFloat - preserve precision)
+            if (!isValidFp127Decimal(aValue)) {
                 this.showStatus('Invalid number format', 'error');
                 return;
             }
@@ -779,120 +916,138 @@ export class ArithmeticApp {
                 this.showStatus('Calculating on-chain...', 'loading');
                 resultEl.textContent = '...';
 
-                const scaledA = BigInt(Math.floor(a * 1e18));
+                // Convert to native fp127 format (preserves all digits)
+                const fp127A = decimalToFp127(aValue);
 
+                // Domain validation using BigInt comparison
+                const negativeOneOverE = decimalToFp127('-0.36787944117144232159552377016146');
+                
                 let result;
                 switch (this.selectedOp) {
                     case 'exp':
-                        result = await this.contract.exp(scaledA);
+                        result = await this.contract.expRaw(fp127A);
                         break;
                     case 'exp2':
-                        result = await this.contract.exp2(scaledA);
+                        result = await this.contract.exp2Raw(fp127A);
                         break;
                     case 'exp10':
-                        result = await this.contract.exp10(scaledA);
+                        result = await this.contract.exp10Raw(fp127A);
                         break;
                     case 'ln':
-                        if (a <= 0) {
+                        if (fp127A <= 0n) {
                             this.showStatus('ln requires positive input', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.ln(scaledA);
+                        result = await this.contract.lnRaw(fp127A);
                         break;
                     case 'log2':
-                        if (a <= 0) {
+                        if (fp127A <= 0n) {
                             this.showStatus('log2 requires positive input', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.log2(scaledA);
+                        result = await this.contract.log2Raw(fp127A);
                         break;
                     case 'log10':
-                        if (a <= 0) {
+                        if (fp127A <= 0n) {
                             this.showStatus('log10 requires positive input', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.log10(scaledA);
+                        result = await this.contract.log10Raw(fp127A);
                         break;
                     case 'sqrt':
-                        if (a < 0) {
+                        if (fp127A < 0n) {
                             this.showStatus('sqrt requires non-negative input', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.sqrt(scaledA);
+                        result = await this.contract.sqrtRaw(fp127A);
                         break;
                     case 'abs':
-                        result = await this.contract.abs(scaledA);
+                        result = await this.contract.absRaw(fp127A);
                         break;
                     case 'neg':
-                        result = await this.contract.neg(scaledA);
+                        result = await this.contract.negRaw(fp127A);
                         break;
                     case 'inv':
-                        if (a === 0) {
+                        if (fp127A === 0n) {
                             this.showStatus('inv: division by zero', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.inv(scaledA);
+                        result = await this.contract.invRaw(fp127A);
                         break;
                     case 'sign':
-                        result = await this.contract.sign(scaledA);
+                        result = await this.contract.signRaw(fp127A);
                         break;
                     case 'floor':
-                        result = await this.contract.floor(scaledA);
+                        result = await this.contract.floorRaw(fp127A);
                         break;
                     case 'ceil':
-                        result = await this.contract.ceil(scaledA);
+                        result = await this.contract.ceilRaw(fp127A);
                         break;
                     case 'frac':
-                        result = await this.contract.frac(scaledA);
+                        result = await this.contract.fracRaw(fp127A);
                         break;
                     case 'cbrt':
-                        result = await this.contract.cbrt(scaledA);
+                        result = await this.contract.cbrtRaw(fp127A);
                         break;
                     case 'round':
-                        result = await this.contract.round(scaledA);
+                        result = await this.contract.roundRaw(fp127A);
                         break;
                     case 'log2Up':
-                        if (a <= 0) {
+                        if (fp127A <= 0n) {
                             this.showStatus('log2Up requires positive input', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.log2Up(scaledA);
+                        result = await this.contract.log2UpRaw(fp127A);
                         break;
                     case 'factorial':
-                        if (a < 0 || a > 33) {
+                        const aFp127Num = Number(fp127A >> 128n);
+                        if (aFp127Num < 0 || aFp127Num > 33) {
                             this.showStatus('Factorial requires 0 <= n <= 33', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.factorial(scaledA);
+                        result = await this.contract.factorialRaw(fp127A);
                         break;
                     case 'lambertW0':
-                        if (a < -0.3679) {
+                        if (fp127A < negativeOneOverE) {
                             this.showStatus('Lambert W0 requires x >= -1/e', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.lambertW0(scaledA);
+                        result = await this.contract.lambertW0Raw(fp127A);
                         break;
                     default:
                         this.showStatus('Unknown operation', 'error');
                         return;
                 }
 
+                // Convert result back to decimal string with full precision
                 const resultBigInt = BigInt(result.toString());
-                const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
-                const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
-                const resultNumber = Number(absValue) / 1e18;
-                const displayResult = (isNegative ? -resultNumber : resultNumber).toFixed(18);
+                this.lastRawResult = resultBigInt;
+                const displayResult = formatFp127Display(fp127ToDecimal(resultBigInt, 38));
 
                 resultEl.textContent = displayResult;
                 this.showStatus('Calculated successfully', 'success');
+
+                // Update raw hex if toggle is on
+                if (this.showRawHex) {
+                    const rawEl = document.getElementById('arith-raw');
+                    const hex = resultBigInt.toString(16).padStart(64, '0');
+                    rawEl.textContent = `0x${hex}`;
+                    rawEl.style.display = 'block';
+                }
+
+                // Estimate gas
+                this.estimateGas(this.selectedOp, [fp127A]);
+
+                // Check precision for known values
+                this.checkPrecision(this.selectedOp, aValue, displayResult);
 
             } else if (arity === 'ternary') {
                 const inputC = document.getElementById('input-c');
@@ -904,9 +1059,7 @@ export class ArithmeticApp {
                     return;
                 }
 
-                const b = parseFloat(bValue);
-                const c = parseFloat(cValue);
-                if (isNaN(b) || isNaN(c)) {
+                if (!isValidFp127Decimal(bValue) || !isValidFp127Decimal(cValue)) {
                     this.showStatus('Invalid number format', 'error');
                     return;
                 }
@@ -914,25 +1067,34 @@ export class ArithmeticApp {
                 this.showStatus('Calculating on-chain...', 'loading');
                 resultEl.textContent = '...';
 
-                const scaledA = BigInt(Math.floor(a * 1e18));
-                const scaledB = BigInt(Math.floor(b * 1e18));
-                const scaledC = BigInt(Math.floor(c * 1e18));
+                const fp127A = decimalToFp127(aValue);
+                const fp127B = decimalToFp127(bValue);
+                const fp127C = decimalToFp127(cValue);
 
                 let result;
                 if (this.selectedOp === 'lerp') {
-                    result = await this.contract.lerp(scaledA, scaledB, scaledC);
+                    result = await this.contract.lerpRaw(fp127A, fp127B, fp127C);
                 } else {
-                    result = await this.contract.clamp(scaledA, scaledB, scaledC);
+                    result = await this.contract.clampRaw(fp127A, fp127B, fp127C);
                 }
 
                 const resultBigInt = BigInt(result.toString());
-                const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
-                const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
-                const resultNumber = Number(absValue) / 1e18;
-                const displayResult = (isNegative ? -resultNumber : resultNumber).toFixed(18);
+                this.lastRawResult = resultBigInt;
+                const displayResult = formatFp127Display(fp127ToDecimal(resultBigInt, 38));
 
                 resultEl.textContent = displayResult;
                 this.showStatus('Calculated successfully', 'success');
+
+                // Update raw hex if toggle is on
+                if (this.showRawHex) {
+                    const rawEl = document.getElementById('arith-raw');
+                    const hex = resultBigInt.toString(16).padStart(64, '0');
+                    rawEl.textContent = `0x${hex}`;
+                    rawEl.style.display = 'block';
+                }
+
+                // Estimate gas
+                this.estimateGas(this.selectedOp, [fp127A, fp127B, fp127C]);
 
             } else {
                 // Binary operations (arithmetic + new binary ops)
@@ -942,8 +1104,7 @@ export class ArithmeticApp {
                     return;
                 }
 
-                const b = parseFloat(bValue);
-                if (isNaN(b)) {
+                if (!isValidFp127Decimal(bValue)) {
                     this.showStatus('Invalid number format', 'error');
                     return;
                 }
@@ -951,64 +1112,64 @@ export class ArithmeticApp {
                 this.showStatus('Calculating on-chain...', 'loading');
                 resultEl.textContent = '...';
 
-                const scaledA = BigInt(Math.floor(a * 1e18));
-                const scaledB = BigInt(Math.floor(b * 1e18));
+                const fp127A = decimalToFp127(aValue);
+                const fp127B = decimalToFp127(bValue);
 
                 let result;
                 switch (this.selectedOp) {
                     case 'add':
-                        result = await this.contract.add(scaledA, scaledB);
+                        result = await this.contract.addRaw(fp127A, fp127B);
                         break;
                     case 'sub':
-                        result = await this.contract.sub(scaledA, scaledB);
+                        result = await this.contract.subRaw(fp127A, fp127B);
                         break;
                     case 'mul':
-                        result = await this.contract.mul(scaledA, scaledB);
+                        result = await this.contract.mulRaw(fp127A, fp127B);
                         break;
                     case 'div':
-                        if (b === 0) {
+                        if (fp127B === 0n) {
                             this.showStatus('Division by zero', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.div(scaledA, scaledB);
+                        result = await this.contract.divRaw(fp127A, fp127B);
                         break;
                     case 'pow':
-                        if (a < 0) {
+                        if (fp127A < 0n) {
                             this.showStatus('pow requires non-negative base', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.pow(scaledA, scaledB);
+                        result = await this.contract.powRaw(fp127A, fp127B);
                         break;
                     case 'min':
-                        result = await this.contract.min(scaledA, scaledB);
+                        result = await this.contract.minRaw(fp127A, fp127B);
                         break;
                     case 'max':
-                        result = await this.contract.max(scaledA, scaledB);
+                        result = await this.contract.maxRaw(fp127A, fp127B);
                         break;
                     case 'avg':
-                        result = await this.contract.avg(scaledA, scaledB);
+                        result = await this.contract.avgRaw(fp127A, fp127B);
                         break;
                     case 'gavg':
-                        if (a < 0 || b < 0) {
+                        if (fp127A < 0n || fp127B < 0n) {
                             this.showStatus('gavg requires non-negative inputs', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }
-                        result = await this.contract.gavg(scaledA, scaledB);
+                        result = await this.contract.gavgRaw(fp127A, fp127B);
                         break;
                     case 'dist':
-                        result = await this.contract.dist(scaledA, scaledB);
+                        result = await this.contract.distRaw(fp127A, fp127B);
                         break;
                     case 'zeroFloorSub':
-                        result = await this.contract.zeroFloorSub(scaledA, scaledB);
+                        result = await this.contract.zeroFloorSubRaw(fp127A, fp127B);
                         break;
                     case 'hypot':
-                        result = await this.contract.hypot(scaledA, scaledB);
+                        result = await this.contract.hypotRaw(fp127A, fp127B);
                         break;
                     case 'gcd':
-                        result = await this.contract.gcd(scaledA, scaledB);
+                        result = await this.contract.gcdRaw(fp127A, fp127B);
                         break;
                     default:
                         this.showStatus('Unknown operation', 'error');
@@ -1016,13 +1177,22 @@ export class ArithmeticApp {
                 }
 
                 const resultBigInt = BigInt(result.toString());
-                const isNegative = resultBigInt > (BigInt(2) ** BigInt(255));
-                const absValue = isNegative ? (BigInt(2) ** BigInt(256)) - resultBigInt : resultBigInt;
-                const resultNumber = Number(absValue) / 1e18;
-                const displayResult = (isNegative ? -resultNumber : resultNumber).toFixed(18);
+                this.lastRawResult = resultBigInt;
+                const displayResult = formatFp127Display(fp127ToDecimal(resultBigInt, 38));
 
                 resultEl.textContent = displayResult;
                 this.showStatus('Calculated successfully', 'success');
+
+                // Update raw hex if toggle is on
+                if (this.showRawHex) {
+                    const rawEl = document.getElementById('arith-raw');
+                    const hex = resultBigInt.toString(16).padStart(64, '0');
+                    rawEl.textContent = `0x${hex}`;
+                    rawEl.style.display = 'block';
+                }
+
+                // Estimate gas
+                this.estimateGas(this.selectedOp, [fp127A, fp127B]);
             }
 
         } catch (error) {
@@ -1037,6 +1207,11 @@ export class ArithmeticApp {
         document.getElementById('input-b').value = '';
         document.getElementById('input-c').value = '';
         document.getElementById('arith-result').textContent = '0';
+        document.getElementById('arith-gas').textContent = '';
+        document.getElementById('arith-precision').textContent = '';
+        document.getElementById('arith-raw').textContent = '';
+        document.getElementById('arith-raw').style.display = 'none';
+        this.lastRawResult = null;
         this.showStatus('', '');
         this.updateExpression();
     }
@@ -1053,5 +1228,126 @@ export class ArithmeticApp {
         const statusEl = document.getElementById('arith-status');
         statusEl.textContent = message;
         statusEl.className = `ti-status ${type}`;
+    }
+
+    toggleHex() {
+        this.showRawHex = !this.showRawHex;
+        const rawEl = document.getElementById('arith-raw');
+        const hexBtn = document.getElementById('arith-hex');
+        
+        if (this.showRawHex) {
+            hexBtn.style.background = '#1a3a1a';
+            hexBtn.style.borderColor = '#00ff88';
+            hexBtn.style.color = '#00ff88';
+            if (this.lastRawResult !== null) {
+                const hex = this.lastRawResult.toString(16).padStart(64, '0');
+                rawEl.textContent = `0x${hex}`;
+                rawEl.style.display = 'block';
+            }
+        } else {
+            hexBtn.style.background = '';
+            hexBtn.style.borderColor = '';
+            hexBtn.style.color = '';
+            rawEl.style.display = 'none';
+        }
+    }
+
+    runPreset(preset) {
+        const presets = {
+            'exp_1': { op: 'exp', a: '1' },
+            'sqrt_2': { op: 'sqrt', a: '2' },
+            'ln_2': { op: 'ln', a: '2' },
+            'pi_e': { op: 'mul', a: '3.14159265358979323846264338327950288', b: '2.71828182845904523536028747135266249' },
+            'factorial_20': { op: 'factorial', a: '20' },
+            'w0_1': { op: 'lambertW0', a: '1' }
+        };
+
+        const config = presets[preset];
+        if (!config) return;
+
+        // Select the operation button
+        const opButton = document.querySelector(`#fp127-buttons .ti-key[data-op="${config.op}"]`);
+        if (opButton) {
+            opButton.click();
+        }
+
+        // Fill in the inputs
+        document.getElementById('input-a').value = config.a;
+        if (config.b) {
+            document.getElementById('input-b').value = config.b;
+        }
+        if (config.c) {
+            document.getElementById('input-c').value = config.c;
+        }
+
+        // Update expression and calculate
+        this.updateExpression();
+        setTimeout(() => this.calculate(), 100);
+    }
+
+    checkPrecision(op, inputA, result) {
+        const precisionEl = document.getElementById('arith-precision');
+        
+        // Build key for known values
+        let key = null;
+        if (op === 'exp' && inputA === '1') key = 'exp_1';
+        else if (op === 'sqrt' && inputA === '2') key = 'sqrt_2';
+        else if (op === 'ln' && inputA === '2') key = 'ln_2';
+        else if (op === 'lambertW0' && inputA === '1') key = 'lambertW0_1';
+
+        if (!key || !KNOWN_VALUES[key]) {
+            precisionEl.textContent = '';
+            return;
+        }
+
+        const known = KNOWN_VALUES[key];
+        const resultStr = result.replace(/,/g, '');
+        const knownStr = known.value;
+
+        // Compare digit by digit
+        let matches = 0;
+        const minLen = Math.min(resultStr.length, knownStr.length);
+        for (let i = 0; i < minLen; i++) {
+            if (resultStr[i] === knownStr[i]) {
+                matches++;
+            } else {
+                break;
+            }
+        }
+
+        // Account for decimal point
+        if (matches > 0 && resultStr.includes('.')) {
+            matches--; // Don't count the decimal point
+        }
+
+        precisionEl.textContent = `${matches} digits match ${known.label}`;
+    }
+
+    async estimateGas(op, args) {
+        const gasEl = document.getElementById('arith-gas');
+        
+        try {
+            // Ethers v6 uses contract.methodName.estimateGas(args)
+            // Ethers v5 uses contract.estimateGas.methodName(args)
+            let gasEstimate;
+            const method = `${op}Raw`;
+            
+            if (this.contract[method] && this.contract[method].estimateGas) {
+                // Ethers v6
+                gasEstimate = await this.contract[method].estimateGas(...args);
+            } else if (this.contract.estimateGas && this.contract.estimateGas[method]) {
+                // Ethers v5
+                gasEstimate = await this.contract.estimateGas[method](...args);
+            } else {
+                gasEl.textContent = '';
+                return;
+            }
+
+            const gasNumber = typeof gasEstimate === 'bigint' ? Number(gasEstimate) : gasEstimate.toNumber();
+            gasEl.textContent = `Gas: ~${gasNumber.toLocaleString()}`;
+        } catch (error) {
+            console.warn('Gas estimation failed:', error);
+            gasEl.textContent = '';
+        }
     }
 }

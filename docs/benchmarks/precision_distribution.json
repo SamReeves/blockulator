@@ -1,207 +1,207 @@
 {
-  "generated": "2026-03-12 13:59:30",
+  "generated": "2026-03-17 20:51:52",
   "description": "Raw benchmark data points - all stats computed by frontend",
   "raw": {
     "fp127": {
       "abs": [
         {
-          "gas": 6618,
+          "gas": 6596,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         },
         {
-          "gas": 2118,
+          "gas": 2096,
           "digits": 38
         }
       ],
@@ -409,1623 +409,1627 @@
       ],
       "avg": [
         {
-          "gas": 7209,
+          "gas": 7187,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         },
         {
-          "gas": 2709,
+          "gas": 2687,
           "digits": 38
         }
       ],
       "cbrt": [
         {
-          "gas": 16845,
+          "gas": 16853,
           "digits": 38
         },
         {
-          "gas": 11826,
+          "gas": 11834,
           "digits": 38
         },
         {
-          "gas": 11635,
+          "gas": 11643,
           "digits": 38
         },
         {
-          "gas": 11307,
+          "gas": 11315,
           "digits": 38
         },
         {
-          "gas": 3537,
+          "gas": 3515,
           "digits": 38
         },
         {
-          "gas": 11393,
+          "gas": 11401,
           "digits": 38
         },
         {
-          "gas": 12258,
+          "gas": 12266,
           "digits": 38
         },
         {
-          "gas": 12067,
+          "gas": 12075,
           "digits": 38
         },
         {
-          "gas": 11548,
+          "gas": 11556,
           "digits": 38
         },
         {
-          "gas": 12222,
+          "gas": 12230,
           "digits": 38
         },
         {
-          "gas": 3388,
+          "gas": 3366,
           "digits": 38
         },
         {
-          "gas": 12190,
+          "gas": 12198,
           "digits": 38
         },
         {
-          "gas": 11516,
+          "gas": 11524,
           "digits": 38
         },
         {
-          "gas": 12035,
+          "gas": 12043,
           "digits": 38
         },
         {
-          "gas": 12226,
+          "gas": 12234,
           "digits": 37
         },
         {
-          "gas": 11361,
+          "gas": 11369,
           "digits": 38
         },
         {
-          "gas": 11379,
+          "gas": 11387,
           "digits": 38
         },
         {
-          "gas": 12071,
+          "gas": 12079,
           "digits": 37
         },
         {
-          "gas": 12071,
+          "gas": 12079,
           "digits": 37
         },
         {
-          "gas": 12417,
+          "gas": 12425,
           "digits": 37
         },
         {
-          "gas": 3505,
+          "gas": 3483,
           "digits": 38
         },
         {
-          "gas": 11585,
+          "gas": 11593,
           "digits": 38
         },
         {
-          "gas": 11585,
+          "gas": 11593,
           "digits": 38
         },
         {
-          "gas": 11758,
+          "gas": 11766,
           "digits": 38
         },
         {
-          "gas": 11257,
+          "gas": 11265,
           "digits": 38
         },
         {
-          "gas": 11275,
+          "gas": 11283,
           "digits": 37
         },
         {
-          "gas": 11603,
+          "gas": 11611,
           "digits": 38
         },
         {
-          "gas": 11275,
+          "gas": 11283,
           "digits": 37
         },
         {
-          "gas": 12313,
+          "gas": 12321,
           "digits": 37
         },
         {
-          "gas": 11639,
+          "gas": 11647,
           "digits": 37
         },
         {
-          "gas": 11949,
+          "gas": 11957,
           "digits": 37
         },
         {
-          "gas": 11275,
+          "gas": 11283,
           "digits": 37
         },
         {
-          "gas": 11621,
+          "gas": 11629,
           "digits": 37
         },
         {
-          "gas": 12313,
+          "gas": 12321,
           "digits": 37
         },
         {
-          "gas": 11621,
+          "gas": 11629,
           "digits": 37
         },
         {
-          "gas": 11639,
+          "gas": 11647,
           "digits": 37
         },
         {
-          "gas": 11949,
+          "gas": 11957,
           "digits": 37
         },
         {
-          "gas": 12331,
+          "gas": 12339,
           "digits": 37
         },
         {
-          "gas": 11484,
+          "gas": 11492,
           "digits": 37
         },
         {
-          "gas": 11812,
+          "gas": 11820,
           "digits": 37
         },
         {
-          "gas": 12003,
+          "gas": 12011,
           "digits": 37
         },
         {
-          "gas": 11794,
+          "gas": 11802,
           "digits": 37
         },
         {
-          "gas": 11794,
+          "gas": 11802,
           "digits": 37
         },
         {
-          "gas": 12176,
+          "gas": 12184,
           "digits": 37
         },
         {
-          "gas": 12003,
+          "gas": 12011,
           "digits": 37
         },
         {
-          "gas": 11484,
+          "gas": 11492,
           "digits": 37
         },
         {
-          "gas": 11985,
+          "gas": 11993,
           "digits": 37
         },
         {
-          "gas": 11830,
+          "gas": 11838,
           "digits": 37
         },
         {
-          "gas": 11985,
+          "gas": 11993,
           "digits": 37
         },
         {
-          "gas": 12021,
+          "gas": 12029,
           "digits": 37
         }
       ],
       "ceil": [
         {
-          "gas": 7697,
+          "gas": 7675,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         },
         {
-          "gas": 3197,
+          "gas": 3175,
           "digits": 38
         }
       ],
       "dist": [
         {
-          "gas": 7304,
+          "gas": 7315,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         },
         {
-          "gas": 2804,
+          "gas": 2815,
           "digits": 38
         }
       ],
       "div": [
         {
-          "gas": 6002,
+          "gas": 6046,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         },
         {
-          "gas": 1502,
+          "gas": 1546,
           "digits": 38
         }
       ],
       "exp": [
         {
-          "gas": 10726,
+          "gas": 10785,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 38
         },
         {
-          "gas": 6226,
+          "gas": 6285,
           "digits": 37
         },
         {
-          "gas": 1311,
+          "gas": 1370,
           "digits": 38
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 37
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         },
         {
-          "gas": 6189,
+          "gas": 6248,
           "digits": 36
         }
       ],
       "exp10": [
         {
-          "gas": 12250,
+          "gas": 12258,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 37
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 38
         },
         {
-          "gas": 7750,
+          "gas": 7758,
           "digits": 37
         },
         {
-          "gas": 3101,
+          "gas": 3109,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 38
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         },
         {
-          "gas": 7713,
+          "gas": 7721,
           "digits": 37
         }
       ],
       "exp2": [
         {
-          "gas": 6043,
+          "gas": 6117,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 6108,
+          "gas": 6182,
           "digits": 38
         },
         {
-          "gas": 1543,
+          "gas": 1617,
           "digits": 38
         },
         {
-          "gas": 1459,
+          "gas": 1533,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         },
         {
-          "gas": 6071,
+          "gas": 6145,
           "digits": 38
         }
       ],
       "factorial": [
         {
-          "gas": 8442,
+          "gas": 8420,
+          "digits": 38
+        },
+        {
+          "gas": 3942,
           "digits": 38
         },
         {
@@ -2157,7 +2161,7 @@
           "digits": 38
         },
         {
-          "gas": 4668,
+          "gas": 3920,
           "digits": 38
         },
         {
@@ -2181,23 +2185,23 @@
           "digits": 38
         },
         {
-          "gas": 4052,
+          "gas": 4140,
           "digits": 38
         },
         {
-          "gas": 4162,
+          "gas": 4250,
           "digits": 38
         },
         {
-          "gas": 4272,
+          "gas": 4360,
           "digits": 38
         },
         {
-          "gas": 4382,
+          "gas": 4470,
           "digits": 38
         },
         {
-          "gas": 4492,
+          "gas": 4580,
           "digits": 38
         },
         {
@@ -2213,3651 +2217,3445 @@
           "digits": 38
         },
         {
-          "gas": 4668,
+          "gas": 4184,
           "digits": 38
         },
         {
-          "gas": 4206,
-          "digits": 38
-        },
-        {
-          "gas": 4096,
+          "gas": 4074,
           "digits": 38
         }
       ],
       "floor": [
         {
-          "gas": 7610,
+          "gas": 7588,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         },
         {
-          "gas": 3110,
+          "gas": 3088,
           "digits": 38
         }
       ],
       "frac": [
         {
-          "gas": 7734,
+          "gas": 7712,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         },
         {
-          "gas": 3234,
+          "gas": 3212,
           "digits": 38
         }
       ],
       "gavg": [
         {
-          "gas": 10988,
+          "gas": 10966,
           "digits": 35
         },
         {
-          "gas": 6327,
+          "gas": 6305,
           "digits": 37
         },
         {
-          "gas": 6327,
+          "gas": 6305,
           "digits": 37
         },
         {
-          "gas": 6506,
+          "gas": 6484,
           "digits": 38
         },
         {
-          "gas": 6524,
+          "gas": 6502,
           "digits": 38
         },
         {
-          "gas": 6327,
+          "gas": 6305,
           "digits": 38
         },
         {
-          "gas": 6255,
+          "gas": 6233,
           "digits": 38
         },
         {
-          "gas": 6524,
+          "gas": 6502,
           "digits": 38
         },
         {
-          "gas": 6524,
+          "gas": 6502,
           "digits": 38
         },
         {
-          "gas": 6452,
+          "gas": 6430,
           "digits": 38
         },
         {
-          "gas": 6255,
+          "gas": 6233,
           "digits": 38
         },
         {
-          "gas": 6273,
+          "gas": 6251,
           "digits": 38
         },
         {
-          "gas": 6452,
+          "gas": 6430,
           "digits": 38
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6506,
+          "gas": 6484,
           "digits": 38
         },
         {
-          "gas": 6452,
+          "gas": 6430,
           "digits": 38
         },
         {
-          "gas": 6524,
+          "gas": 6502,
           "digits": 38
         },
         {
-          "gas": 6524,
+          "gas": 6502,
           "digits": 38
         },
         {
-          "gas": 6309,
+          "gas": 6287,
           "digits": 35
         },
         {
-          "gas": 6309,
+          "gas": 6287,
           "digits": 35
         },
         {
-          "gas": 6309,
+          "gas": 6287,
           "digits": 35
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 31
         },
         {
-          "gas": 6309,
+          "gas": 6287,
           "digits": 33
         },
         {
-          "gas": 6506,
+          "gas": 6484,
           "digits": 34
         },
         {
-          "gas": 6327,
+          "gas": 6305,
           "digits": 37
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6488,
+          "gas": 6466,
           "digits": 38
         },
         {
-          "gas": 6309,
+          "gas": 6287,
           "digits": 38
         },
         {
-          "gas": 6470,
+          "gas": 6448,
           "digits": 38
         },
         {
-          "gas": 6470,
+          "gas": 6448,
           "digits": 38
         },
         {
-          "gas": 6470,
+          "gas": 6448,
           "digits": 38
         },
         {
-          "gas": 6470,
+          "gas": 6448,
           "digits": 38
         },
         {
-          "gas": 6488,
+          "gas": 6466,
           "digits": 38
         },
         {
-          "gas": 6452,
+          "gas": 6430,
           "digits": 38
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6488,
+          "gas": 6466,
           "digits": 38
         },
         {
-          "gas": 6488,
+          "gas": 6466,
           "digits": 38
         },
         {
-          "gas": 6327,
+          "gas": 6305,
           "digits": 38
         },
         {
-          "gas": 6273,
+          "gas": 6251,
           "digits": 38
         },
         {
-          "gas": 6452,
+          "gas": 6430,
           "digits": 38
         },
         {
-          "gas": 6470,
+          "gas": 6448,
           "digits": 38
         },
         {
-          "gas": 6273,
+          "gas": 6251,
           "digits": 38
         },
         {
-          "gas": 6452,
+          "gas": 6430,
           "digits": 38
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6470,
+          "gas": 6448,
           "digits": 38
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6291,
+          "gas": 6269,
           "digits": 38
         },
         {
-          "gas": 6470,
+          "gas": 6448,
           "digits": 38
         }
       ],
       "gcd": [
         {
-          "gas": 8840,
+          "gas": 8818,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4340,
+          "gas": 4318,
           "digits": 38
         },
         {
-          "gas": 4390,
+          "gas": 4368,
           "digits": 38
         },
         {
-          "gas": 4440,
+          "gas": 4418,
           "digits": 38
         },
         {
-          "gas": 4390,
+          "gas": 4368,
           "digits": 38
         },
         {
-          "gas": 4390,
+          "gas": 4368,
           "digits": 38
         },
         {
-          "gas": 4440,
+          "gas": 4418,
           "digits": 38
         },
         {
-          "gas": 4190,
+          "gas": 4168,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4190,
+          "gas": 4168,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4190,
+          "gas": 4168,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4340,
+          "gas": 4318,
           "digits": 38
         },
         {
-          "gas": 4240,
+          "gas": 4218,
           "digits": 38
         },
         {
-          "gas": 4490,
+          "gas": 4468,
           "digits": 38
         },
         {
-          "gas": 4540,
+          "gas": 4518,
           "digits": 38
         },
         {
-          "gas": 4590,
+          "gas": 4568,
           "digits": 38
         },
         {
-          "gas": 4640,
+          "gas": 4618,
           "digits": 38
         },
         {
-          "gas": 4690,
+          "gas": 4668,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4340,
+          "gas": 4318,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4340,
+          "gas": 4318,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         },
         {
-          "gas": 4340,
+          "gas": 4318,
           "digits": 38
         },
         {
-          "gas": 4290,
+          "gas": 4268,
           "digits": 38
         }
       ],
       "hypot": [
         {
-          "gas": 11850,
+          "gas": 11828,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7350,
+          "gas": 7328,
           "digits": 38
         },
         {
-          "gas": 7529,
+          "gas": 7507,
           "digits": 38
         },
         {
-          "gas": 7529,
+          "gas": 7507,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7511,
+          "gas": 7489,
           "digits": 38
         },
         {
-          "gas": 7529,
+          "gas": 7507,
           "digits": 38
         },
         {
-          "gas": 7529,
+          "gas": 7507,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7386,
+          "gas": 7364,
           "digits": 38
         },
         {
-          "gas": 7332,
+          "gas": 7310,
           "digits": 38
         },
         {
-          "gas": 7332,
+          "gas": 7310,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7565,
+          "gas": 7543,
           "digits": 35
         },
         {
-          "gas": 7404,
+          "gas": 7382,
           "digits": 37
         },
         {
-          "gas": 7404,
+          "gas": 7382,
           "digits": 37
         },
         {
-          "gas": 7583,
+          "gas": 7561,
           "digits": 37
         },
         {
-          "gas": 7601,
+          "gas": 7579,
           "digits": 38
         },
         {
-          "gas": 7386,
+          "gas": 7364,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7565,
+          "gas": 7543,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7350,
+          "gas": 7328,
           "digits": 38
         },
         {
-          "gas": 7350,
+          "gas": 7328,
           "digits": 38
         },
         {
-          "gas": 7350,
+          "gas": 7328,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7350,
+          "gas": 7328,
           "digits": 38
         },
         {
-          "gas": 7529,
+          "gas": 7507,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7368,
+          "gas": 7346,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         },
         {
-          "gas": 7547,
+          "gas": 7525,
           "digits": 38
         }
       ],
       "inv": [
         {
-          "gas": 7194,
+          "gas": 7172,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
         },
         {
-          "gas": 2694,
+          "gas": 2672,
           "digits": 38
-        }
-      ],
-      "lambertw0": [
-        {
-          "gas": 28610,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 24110,
-          "digits": 38
-        },
-        {
-          "gas": 4056,
-          "digits": 38
-        },
-        {
-          "gas": 28643,
-          "digits": 34
-        },
-        {
-          "gas": 28661,
-          "digits": 35
-        },
-        {
-          "gas": 28661,
-          "digits": 36
-        },
-        {
-          "gas": 28679,
-          "digits": 34
-        },
-        {
-          "gas": 28661,
-          "digits": 28
-        },
-        {
-          "gas": 28679,
-          "digits": 21
-        },
-        {
-          "gas": 28679,
-          "digits": 17
-        },
-        {
-          "gas": 28697,
-          "digits": 13
-        },
-        {
-          "gas": 28807,
-          "digits": 38
-        },
-        {
-          "gas": 28825,
-          "digits": 38
-        },
-        {
-          "gas": 28825,
-          "digits": 13
-        },
-        {
-          "gas": 28825,
-          "digits": 12
-        },
-        {
-          "gas": 28825,
-          "digits": 38
-        },
-        {
-          "gas": 28825,
-          "digits": 14
-        },
-        {
-          "gas": 28843,
-          "digits": 14
-        },
-        {
-          "gas": 28825,
-          "digits": 13
-        },
-        {
-          "gas": 28843,
-          "digits": 9
-        },
-        {
-          "gas": 28843,
-          "digits": 9
-        },
-        {
-          "gas": 35999,
-          "digits": 10
-        },
-        {
-          "gas": 36273,
-          "digits": 10
-        },
-        {
-          "gas": 36309,
-          "digits": 10
-        },
-        {
-          "gas": 36655,
-          "digits": 10
-        },
-        {
-          "gas": 35635,
-          "digits": 11
-        },
-        {
-          "gas": 35671,
-          "digits": 11
-        },
-        {
-          "gas": 28697,
-          "digits": 13
-        },
-        {
-          "gas": 28679,
-          "digits": 19
-        },
-        {
-          "gas": 28697,
-          "digits": 9
-        },
-        {
-          "gas": 28807,
-          "digits": 13
-        },
-        {
-          "gas": 28825,
-          "digits": 15
-        },
-        {
-          "gas": 28825,
-          "digits": 11
-        },
-        {
-          "gas": 28825,
-          "digits": 9
-        },
-        {
-          "gas": 28843,
-          "digits": 38
-        },
-        {
-          "gas": 28843,
-          "digits": 17
-        },
-        {
-          "gas": 28843,
-          "digits": 8
-        },
-        {
-          "gas": 28825,
-          "digits": 9
-        },
-        {
-          "gas": 28825,
-          "digits": 8
-        },
-        {
-          "gas": 28843,
-          "digits": 13
-        },
-        {
-          "gas": 28843,
-          "digits": 7
-        },
-        {
-          "gas": 28843,
-          "digits": 13
         }
       ],
       "ln": [
         {
-          "gas": 9517,
+          "gas": 9591,
           "digits": 38
         },
         {
-          "gas": 5017,
+          "gas": 5091,
           "digits": 38
         },
         {
-          "gas": 5518,
+          "gas": 5592,
           "digits": 38
         },
         {
-          "gas": 4999,
+          "gas": 5073,
           "digits": 38
         },
         {
-          "gas": 4999,
+          "gas": 5073,
           "digits": 38
         },
         {
-          "gas": 4826,
+          "gas": 4900,
           "digits": 38
         },
         {
-          "gas": 5208,
+          "gas": 5282,
           "digits": 38
         },
         {
-          "gas": 5208,
+          "gas": 5282,
           "digits": 38
         },
         {
-          "gas": 5208,
+          "gas": 5282,
           "digits": 38
         },
         {
-          "gas": 4999,
+          "gas": 5073,
           "digits": 38
         },
         {
-          "gas": 5190,
+          "gas": 5264,
           "digits": 38
         },
         {
-          "gas": 5190,
+          "gas": 5264,
           "digits": 38
         },
         {
-          "gas": 5518,
+          "gas": 5592,
           "digits": 38
         },
         {
-          "gas": 4671,
+          "gas": 4745,
           "digits": 38
         },
         {
-          "gas": 5053,
+          "gas": 5127,
           "digits": 38
         },
         {
-          "gas": 5053,
+          "gas": 5127,
           "digits": 38
         },
         {
-          "gas": 5363,
+          "gas": 5437,
           "digits": 38
         },
         {
-          "gas": 4689,
+          "gas": 4763,
           "digits": 38
         },
         {
-          "gas": 4689,
+          "gas": 4763,
           "digits": 38
         },
         {
-          "gas": 5208,
+          "gas": 5282,
           "digits": 38
         },
         {
-          "gas": 5208,
+          "gas": 5282,
           "digits": 38
         },
         {
-          "gas": 1557,
+          "gas": 1631,
           "digits": 38
         },
         {
-          "gas": 1557,
+          "gas": 1631,
           "digits": 38
         },
         {
-          "gas": 5004,
+          "gas": 5078,
           "digits": 37
         },
         {
-          "gas": 5004,
+          "gas": 5078,
           "digits": 38
         },
         {
-          "gas": 5004,
+          "gas": 5078,
           "digits": 38
         },
         {
-          "gas": 5523,
+          "gas": 5597,
           "digits": 38
         },
         {
-          "gas": 4849,
+          "gas": 4923,
           "digits": 38
         },
         {
-          "gas": 5159,
+          "gas": 5233,
           "digits": 38
         },
         {
-          "gas": 5159,
+          "gas": 5233,
           "digits": 38
         },
         {
-          "gas": 5541,
+          "gas": 5615,
           "digits": 38
         },
         {
-          "gas": 4694,
+          "gas": 4768,
           "digits": 38
         },
         {
-          "gas": 4694,
+          "gas": 4768,
           "digits": 38
         },
         {
-          "gas": 5022,
+          "gas": 5096,
           "digits": 38
         },
         {
-          "gas": 5213,
+          "gas": 5287,
           "digits": 38
         },
         {
-          "gas": 5004,
+          "gas": 5078,
           "digits": 38
         },
         {
-          "gas": 5004,
+          "gas": 5078,
           "digits": 38
         },
         {
-          "gas": 5004,
+          "gas": 5078,
           "digits": 38
         },
         {
-          "gas": 5386,
+          "gas": 5460,
           "digits": 38
         },
         {
-          "gas": 5386,
+          "gas": 5460,
           "digits": 38
         },
         {
-          "gas": 5213,
+          "gas": 5287,
           "digits": 38
         },
         {
-          "gas": 4694,
+          "gas": 4768,
           "digits": 38
         },
         {
-          "gas": 5195,
+          "gas": 5269,
           "digits": 38
         },
         {
-          "gas": 5195,
+          "gas": 5269,
           "digits": 38
         },
         {
-          "gas": 5040,
+          "gas": 5114,
           "digits": 38
         },
         {
-          "gas": 5195,
+          "gas": 5269,
           "digits": 38
         },
         {
-          "gas": 5195,
+          "gas": 5269,
           "digits": 38
         },
         {
-          "gas": 5231,
+          "gas": 5305,
           "digits": 38
         },
         {
-          "gas": 5076,
+          "gas": 5150,
           "digits": 38
         },
         {
-          "gas": 5004,
+          "gas": 5078,
           "digits": 38
         }
       ],
       "log10": [
         {
-          "gas": 10485,
+          "gas": 10463,
           "digits": 38
         },
         {
-          "gas": 6504,
+          "gas": 6482,
           "digits": 38
         },
         {
-          "gas": 6504,
+          "gas": 6482,
           "digits": 38
         },
         {
-          "gas": 6522,
+          "gas": 6500,
           "digits": 38
         },
         {
-          "gas": 6522,
+          "gas": 6500,
           "digits": 38
         },
         {
-          "gas": 5848,
+          "gas": 5826,
           "digits": 38
         },
         {
-          "gas": 6540,
+          "gas": 6518,
           "digits": 38
         },
         {
-          "gas": 6367,
+          "gas": 6345,
           "digits": 38
         },
         {
-          "gas": 6540,
+          "gas": 6518,
           "digits": 38
         },
         {
-          "gas": 6886,
+          "gas": 6864,
           "digits": 38
         },
         {
-          "gas": 3024,
+          "gas": 3002,
           "digits": 38
         },
         {
-          "gas": 6091,
+          "gas": 6069,
           "digits": 37
         },
         {
-          "gas": 6091,
+          "gas": 6069,
           "digits": 37
         },
         {
-          "gas": 6264,
+          "gas": 6242,
           "digits": 37
         },
         {
-          "gas": 5763,
+          "gas": 5741,
           "digits": 38
         },
         {
-          "gas": 6282,
+          "gas": 6260,
           "digits": 37
         },
         {
-          "gas": 6282,
+          "gas": 6260,
           "digits": 38
         },
         {
-          "gas": 6628,
+          "gas": 6606,
           "digits": 37
         },
         {
-          "gas": 6300,
+          "gas": 6278,
           "digits": 37
         },
         {
-          "gas": 6300,
+          "gas": 6278,
           "digits": 38
         },
         {
-          "gas": 6300,
+          "gas": 6278,
           "digits": 38
         },
         {
-          "gas": 6300,
+          "gas": 6278,
           "digits": 38
         },
         {
-          "gas": 6819,
+          "gas": 6797,
           "digits": 38
         },
         {
-          "gas": 6145,
+          "gas": 6123,
           "digits": 38
         },
         {
-          "gas": 6455,
+          "gas": 6433,
           "digits": 38
         },
         {
-          "gas": 6837,
+          "gas": 6815,
           "digits": 38
         },
         {
-          "gas": 5990,
+          "gas": 5968,
           "digits": 38
         },
         {
-          "gas": 6318,
+          "gas": 6296,
           "digits": 38
         },
         {
-          "gas": 6509,
+          "gas": 6487,
           "digits": 38
         },
         {
-          "gas": 6300,
+          "gas": 6278,
           "digits": 38
         },
         {
-          "gas": 6300,
+          "gas": 6278,
           "digits": 38
         },
         {
-          "gas": 6682,
+          "gas": 6660,
           "digits": 38
         },
         {
-          "gas": 6509,
+          "gas": 6487,
           "digits": 38
         },
         {
-          "gas": 5990,
+          "gas": 5968,
           "digits": 38
         },
         {
-          "gas": 6491,
+          "gas": 6469,
           "digits": 38
         },
         {
-          "gas": 6336,
+          "gas": 6314,
           "digits": 38
         },
         {
-          "gas": 6491,
+          "gas": 6469,
           "digits": 38
         },
         {
-          "gas": 6527,
+          "gas": 6505,
           "digits": 38
         },
         {
-          "gas": 6372,
+          "gas": 6350,
           "digits": 38
         },
         {
-          "gas": 6300,
+          "gas": 6278,
           "digits": 38
         },
         {
-          "gas": 6455,
+          "gas": 6433,
           "digits": 37
         },
         {
-          "gas": 6282,
+          "gas": 6260,
           "digits": 37
         },
         {
-          "gas": 6264,
+          "gas": 6242,
           "digits": 37
         },
         {
-          "gas": 6109,
+          "gas": 6087,
           "digits": 37
         },
         {
-          "gas": 6783,
+          "gas": 6761,
           "digits": 37
         },
         {
-          "gas": 6455,
+          "gas": 6433,
           "digits": 37
         },
         {
-          "gas": 6282,
+          "gas": 6260,
           "digits": 37
         },
         {
-          "gas": 6455,
+          "gas": 6433,
           "digits": 38
         },
         {
-          "gas": 6455,
+          "gas": 6433,
           "digits": 37
         },
         {
-          "gas": 6455,
+          "gas": 6433,
           "digits": 37
         }
       ],
       "log2": [
         {
-          "gas": 9402,
+          "gas": 9446,
           "digits": 38
         },
         {
-          "gas": 4902,
+          "gas": 4946,
           "digits": 38
         },
         {
-          "gas": 5403,
+          "gas": 5447,
           "digits": 38
         },
         {
-          "gas": 4884,
+          "gas": 4928,
           "digits": 38
         },
         {
-          "gas": 4884,
+          "gas": 4928,
           "digits": 38
         },
         {
-          "gas": 4711,
+          "gas": 4755,
           "digits": 38
         },
         {
-          "gas": 5093,
+          "gas": 5137,
           "digits": 38
         },
         {
-          "gas": 5093,
+          "gas": 5137,
           "digits": 38
         },
         {
-          "gas": 5093,
+          "gas": 5137,
           "digits": 38
         },
         {
-          "gas": 4884,
+          "gas": 4928,
           "digits": 38
         },
         {
-          "gas": 5075,
+          "gas": 5119,
           "digits": 38
         },
         {
-          "gas": 5075,
+          "gas": 5119,
           "digits": 38
         },
         {
-          "gas": 5403,
+          "gas": 5447,
           "digits": 38
         },
         {
-          "gas": 4556,
+          "gas": 4600,
           "digits": 38
         },
         {
-          "gas": 4938,
+          "gas": 4982,
           "digits": 38
         },
         {
-          "gas": 4938,
+          "gas": 4982,
           "digits": 38
         },
         {
-          "gas": 5248,
+          "gas": 5292,
           "digits": 38
         },
         {
-          "gas": 4574,
+          "gas": 4618,
           "digits": 38
         },
         {
-          "gas": 4574,
+          "gas": 4618,
           "digits": 38
         },
         {
-          "gas": 5093,
+          "gas": 5137,
           "digits": 38
         },
         {
-          "gas": 5093,
+          "gas": 5137,
           "digits": 38
         },
         {
-          "gas": 1613,
+          "gas": 1657,
           "digits": 38
         },
         {
-          "gas": 1613,
+          "gas": 1657,
           "digits": 38
         },
         {
-          "gas": 4889,
+          "gas": 4933,
           "digits": 38
         },
         {
-          "gas": 4889,
+          "gas": 4933,
           "digits": 38
         },
         {
-          "gas": 4889,
+          "gas": 4933,
           "digits": 38
         },
         {
-          "gas": 5408,
+          "gas": 5452,
           "digits": 38
         },
         {
-          "gas": 4734,
+          "gas": 4778,
           "digits": 38
         },
         {
-          "gas": 5044,
+          "gas": 5088,
           "digits": 38
         },
         {
-          "gas": 5044,
+          "gas": 5088,
           "digits": 38
         },
         {
-          "gas": 5426,
+          "gas": 5470,
           "digits": 38
         },
         {
-          "gas": 4579,
+          "gas": 4623,
           "digits": 38
         },
         {
-          "gas": 4579,
+          "gas": 4623,
           "digits": 38
         },
         {
-          "gas": 4907,
+          "gas": 4951,
           "digits": 38
         },
         {
-          "gas": 5098,
+          "gas": 5142,
           "digits": 38
         },
         {
-          "gas": 4889,
+          "gas": 4933,
           "digits": 38
         },
         {
-          "gas": 4889,
+          "gas": 4933,
           "digits": 38
         },
         {
-          "gas": 4889,
+          "gas": 4933,
           "digits": 38
         },
         {
-          "gas": 5271,
+          "gas": 5315,
           "digits": 38
         },
         {
-          "gas": 5271,
+          "gas": 5315,
           "digits": 38
         },
         {
-          "gas": 5098,
+          "gas": 5142,
           "digits": 38
         },
         {
-          "gas": 4579,
+          "gas": 4623,
           "digits": 38
         },
         {
-          "gas": 5080,
+          "gas": 5124,
           "digits": 38
         },
         {
-          "gas": 5080,
+          "gas": 5124,
           "digits": 38
         },
         {
-          "gas": 4925,
+          "gas": 4969,
           "digits": 38
         },
         {
-          "gas": 5080,
+          "gas": 5124,
           "digits": 38
         },
         {
-          "gas": 5080,
+          "gas": 5124,
           "digits": 38
         },
         {
-          "gas": 5116,
+          "gas": 5160,
           "digits": 38
         },
         {
-          "gas": 4961,
+          "gas": 5005,
           "digits": 38
         },
         {
-          "gas": 4889,
+          "gas": 4933,
           "digits": 38
         }
       ],
       "log2up": [
         {
-          "gas": 8714,
+          "gas": 8692,
           "digits": 38
         },
         {
-          "gas": 4106,
+          "gas": 4084,
           "digits": 38
         },
         {
-          "gas": 4124,
+          "gas": 4102,
           "digits": 38
         },
         {
-          "gas": 4124,
+          "gas": 4102,
           "digits": 38
         },
         {
-          "gas": 4142,
+          "gas": 4120,
           "digits": 38
         },
         {
-          "gas": 4124,
+          "gas": 4102,
           "digits": 38
         },
         {
-          "gas": 4142,
+          "gas": 4120,
           "digits": 38
         },
         {
-          "gas": 4142,
+          "gas": 4120,
           "digits": 38
         },
         {
-          "gas": 4160,
+          "gas": 4138,
           "digits": 38
         },
         {
-          "gas": 4124,
+          "gas": 4102,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7580,
+          "gas": 7558,
           "digits": 38
         },
         {
-          "gas": 7252,
+          "gas": 7230,
           "digits": 38
         },
         {
-          "gas": 7252,
+          "gas": 7230,
           "digits": 38
         },
         {
-          "gas": 7425,
+          "gas": 7403,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7252,
+          "gas": 7230,
           "digits": 38
         },
         {
-          "gas": 4196,
+          "gas": 4174,
           "digits": 38
         },
         {
-          "gas": 4196,
+          "gas": 4174,
           "digits": 38
         },
         {
-          "gas": 4178,
+          "gas": 4156,
           "digits": 38
         },
         {
-          "gas": 4196,
+          "gas": 4174,
           "digits": 38
         },
         {
-          "gas": 4178,
+          "gas": 4156,
           "digits": 38
         },
         {
-          "gas": 7474,
+          "gas": 7452,
           "digits": 38
         },
         {
-          "gas": 7474,
+          "gas": 7452,
           "digits": 38
         },
         {
-          "gas": 7456,
+          "gas": 7434,
           "digits": 38
         },
         {
-          "gas": 7456,
+          "gas": 7434,
           "digits": 38
         },
         {
-          "gas": 6937,
+          "gas": 6915,
           "digits": 38
         },
         {
-          "gas": 7771,
+          "gas": 7749,
           "digits": 38
         },
         {
-          "gas": 7097,
+          "gas": 7075,
           "digits": 38
         },
         {
-          "gas": 7407,
+          "gas": 7385,
           "digits": 38
         },
         {
-          "gas": 7789,
+          "gas": 7767,
           "digits": 38
         },
         {
-          "gas": 7425,
+          "gas": 7403,
           "digits": 38
         },
         {
-          "gas": 7252,
+          "gas": 7230,
           "digits": 38
         },
         {
-          "gas": 7425,
+          "gas": 7403,
           "digits": 38
         },
         {
-          "gas": 7598,
+          "gas": 7576,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7580,
+          "gas": 7558,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7407,
+          "gas": 7385,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7234,
+          "gas": 7212,
           "digits": 38
         },
         {
-          "gas": 7407,
+          "gas": 7385,
           "digits": 38
         },
         {
-          "gas": 7252,
+          "gas": 7230,
           "digits": 38
         },
         {
-          "gas": 7252,
+          "gas": 7230,
           "digits": 38
         },
         {
-          "gas": 7425,
+          "gas": 7403,
           "digits": 38
         },
         {
-          "gas": 6906,
+          "gas": 6884,
           "digits": 38
         }
       ],
       "max": [
         {
-          "gas": 7103,
+          "gas": 7081,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         },
         {
-          "gas": 2610,
+          "gas": 2588,
           "digits": 38
         },
         {
-          "gas": 2603,
+          "gas": 2581,
           "digits": 38
         }
       ],
       "min": [
         {
-          "gas": 7033,
+          "gas": 7011,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         },
         {
-          "gas": 2526,
+          "gas": 2504,
           "digits": 38
         },
         {
-          "gas": 2533,
+          "gas": 2511,
           "digits": 38
         }
       ],
       "mul": [
         {
-          "gas": 5574,
+          "gas": 5618,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         },
         {
-          "gas": 1074,
+          "gas": 1118,
           "digits": 38
         }
       ],
       "pow": [
         {
-          "gas": 15066,
+          "gas": 15074,
           "digits": 38
         },
         {
-          "gas": 10584,
+          "gas": 10592,
           "digits": 38
         },
         {
-          "gas": 10584,
+          "gas": 10592,
           "digits": 37
         },
         {
-          "gas": 5345,
+          "gas": 5353,
           "digits": 38
         },
         {
-          "gas": 9910,
+          "gas": 9918,
           "digits": 38
         },
         {
-          "gas": 9873,
+          "gas": 9881,
           "digits": 38
         },
         {
-          "gas": 10584,
+          "gas": 10592,
           "digits": 38
         },
         {
-          "gas": 5327,
+          "gas": 5335,
           "digits": 38
         },
         {
-          "gas": 10584,
+          "gas": 10592,
           "digits": 38
         },
         {
-          "gas": 10566,
+          "gas": 10574,
           "digits": 38
         },
         {
-          "gas": 5260,
+          "gas": 5268,
           "digits": 38
         },
         {
-          "gas": 5260,
+          "gas": 5268,
           "digits": 38
         },
         {
-          "gas": 5260,
+          "gas": 5268,
           "digits": 38
         },
         {
-          "gas": 1995,
+          "gas": 1973,
           "digits": 38
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 10344,
+          "gas": 10352,
           "digits": 37
         },
         {
-          "gas": 10344,
+          "gas": 10352,
           "digits": 37
         },
         {
-          "gas": 1995,
+          "gas": 1973,
           "digits": 38
         },
         {
-          "gas": 10307,
+          "gas": 10315,
           "digits": 37
         },
         {
-          "gas": 10307,
+          "gas": 10315,
           "digits": 37
         },
         {
-          "gas": 10362,
+          "gas": 10370,
           "digits": 38
         },
         {
-          "gas": 10362,
+          "gas": 10370,
           "digits": 38
         },
         {
-          "gas": 1995,
+          "gas": 1973,
           "digits": 38
         },
         {
-          "gas": 10325,
+          "gas": 10333,
           "digits": 38
         },
         {
-          "gas": 10325,
+          "gas": 10333,
           "digits": 37
         },
         {
-          "gas": 10325,
+          "gas": 10333,
           "digits": 37
         },
         {
-          "gas": 10325,
+          "gas": 10333,
           "digits": 37
         },
         {
-          "gas": 10325,
+          "gas": 10333,
           "digits": 37
         },
         {
-          "gas": 10844,
+          "gas": 10852,
           "digits": 37
         },
         {
-          "gas": 10844,
+          "gas": 10852,
           "digits": 37
         },
         {
-          "gas": 10844,
+          "gas": 10852,
           "digits": 37
         },
         {
-          "gas": 10047,
+          "gas": 10055,
           "digits": 38
         },
         {
-          "gas": 10566,
+          "gas": 10574,
           "digits": 37
         },
         {
-          "gas": 10566,
+          "gas": 10574,
           "digits": 38
         },
         {
-          "gas": 10047,
+          "gas": 10055,
           "digits": 38
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 9806,
+          "gas": 9814,
           "digits": 37
         },
         {
-          "gas": 9788,
+          "gas": 9796,
           "digits": 38
         },
         {
-          "gas": 10134,
+          "gas": 10142,
           "digits": 38
         },
         {
-          "gas": 9806,
+          "gas": 9814,
           "digits": 37
         },
         {
-          "gas": 10844,
+          "gas": 10852,
           "digits": 37
         },
         {
-          "gas": 10307,
+          "gas": 10315,
           "digits": 37
         },
         {
-          "gas": 10307,
+          "gas": 10315,
           "digits": 37
         },
         {
-          "gas": 10653,
+          "gas": 10661,
           "digits": 37
         },
         {
-          "gas": 10498,
+          "gas": 10506,
           "digits": 37
         }
       ],
       "round": [
         {
-          "gas": 8188,
+          "gas": 8166,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         },
         {
-          "gas": 3688,
+          "gas": 3666,
           "digits": 38
         }
       ],
       "sign": [
         {
-          "gas": 7522,
+          "gas": 7500,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         },
         {
-          "gas": 3022,
+          "gas": 3000,
           "digits": 38
         }
       ],
       "sqrt": [
         {
-          "gas": 9270,
+          "gas": 9314,
           "digits": 38
         },
         {
-          "gas": 4770,
+          "gas": 4814,
           "digits": 38
         },
         {
-          "gas": 4913,
+          "gas": 4957,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4788,
+          "gas": 4832,
           "digits": 38
         },
         {
-          "gas": 4788,
+          "gas": 4832,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4931,
+          "gas": 4975,
           "digits": 38
         },
         {
-          "gas": 4931,
+          "gas": 4975,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4770,
+          "gas": 4814,
           "digits": 38
         },
         {
-          "gas": 4967,
+          "gas": 5011,
           "digits": 38
         },
         {
-          "gas": 4967,
+          "gas": 5011,
           "digits": 38
         },
         {
-          "gas": 4770,
+          "gas": 4814,
           "digits": 38
         },
         {
-          "gas": 4788,
+          "gas": 4832,
           "digits": 38
         },
         {
-          "gas": 4788,
+          "gas": 4832,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4788,
+          "gas": 4832,
           "digits": 38
         },
         {
-          "gas": 4716,
+          "gas": 4760,
           "digits": 38
         },
         {
-          "gas": 4716,
+          "gas": 4760,
           "digits": 38
         },
         {
-          "gas": 4913,
+          "gas": 4957,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4913,
+          "gas": 4957,
           "digits": 38
         },
         {
-          "gas": 4931,
+          "gas": 4975,
           "digits": 38
         },
         {
-          "gas": 4734,
+          "gas": 4778,
           "digits": 38
         },
         {
-          "gas": 4734,
+          "gas": 4778,
           "digits": 38
         },
         {
-          "gas": 4931,
+          "gas": 4975,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4770,
+          "gas": 4814,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4913,
+          "gas": 4957,
           "digits": 38
         },
         {
-          "gas": 4913,
+          "gas": 4957,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4788,
+          "gas": 4832,
           "digits": 38
         },
         {
-          "gas": 4931,
+          "gas": 4975,
           "digits": 38
         },
         {
-          "gas": 4931,
+          "gas": 4975,
           "digits": 38
         },
         {
-          "gas": 4949,
+          "gas": 4993,
           "digits": 38
         },
         {
-          "gas": 4770,
+          "gas": 4814,
           "digits": 38
         },
         {
-          "gas": 4770,
+          "gas": 4814,
           "digits": 38
         },
         {
-          "gas": 4967,
+          "gas": 5011,
           "digits": 38
         },
         {
-          "gas": 4985,
+          "gas": 5029,
           "digits": 38
         },
         {
-          "gas": 4752,
+          "gas": 4796,
           "digits": 38
         }
       ],
@@ -9273,208 +9071,6 @@
         {
           "gas": 1013,
           "digits": 19
-        }
-      ],
-      "lambertw0": [
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
         }
       ],
       "ln": [
@@ -15158,208 +14754,6 @@
         },
         {
           "gas": 818,
-          "digits": 18
-        }
-      ],
-      "lambertw0": [
-        {
-          "gas": 11579,
-          "digits": 18
-        },
-        {
-          "gas": 5486,
-          "digits": 18
-        },
-        {
-          "gas": 4809,
-          "digits": 18
-        },
-        {
-          "gas": 4793,
-          "digits": 18
-        },
-        {
-          "gas": 4793,
-          "digits": 18
-        },
-        {
-          "gas": 4116,
-          "digits": 18
-        },
-        {
-          "gas": 4116,
-          "digits": 18
-        },
-        {
-          "gas": 4116,
-          "digits": 18
-        },
-        {
-          "gas": 2873,
-          "digits": 18
-        },
-        {
-          "gas": 2873,
-          "digits": 18
-        },
-        {
-          "gas": 2741,
-          "digits": 18
-        },
-        {
-          "gas": 2873,
-          "digits": 18
-        },
-        {
-          "gas": 3697,
-          "digits": 18
-        },
-        {
-          "gas": 3697,
-          "digits": 15
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5319,
-          "digits": 18
-        },
-        {
-          "gas": 5319,
-          "digits": 18
-        },
-        {
-          "gas": 5319,
-          "digits": 18
-        },
-        {
-          "gas": 5319,
-          "digits": 18
-        },
-        {
-          "gas": 5319,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4374,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 4958,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
-          "digits": 18
-        },
-        {
-          "gas": 5996,
           "digits": 18
         }
       ],
@@ -21061,208 +20455,6 @@
         {
           "gas": 808,
           "digits": 18
-        }
-      ],
-      "lambertw0": [
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
-        },
-        {
-          "gas": 0,
-          "digits": 0
         }
       ],
       "ln": [

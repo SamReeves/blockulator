@@ -1,7 +1,7 @@
 {
   "contractName": "FP127_ARITHMETIC",
-  "contractFile": "test_fp127.huff",
+  "contractFile": "fp127.huff",
   "abiPath": "contracts/build/abis/fixedpoint127.json",
-  "bytecodePath": "contracts/build/huff/test_fp127.bin",
-  "timestamp": "2026-03-02T19:48:00Z"
+  "bytecodePath": "contracts/build/huff/fp127.bin",
+  "timestamp": "2026-03-18T02:34:00Z"
 }

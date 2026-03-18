@@ -142,6 +142,10 @@ Error: ±$0.01 (0.0005%)
 Impact: FixedPoint127 reduces pricing error by 10,000x
 ```
 
+## Archived
+
+- **lambertWm1** — Lambert W_{-1} (secondary branch) archived due to huffc size limit. See [`archive/README.md`](archive/README.md).
+
 ## Documentation
 
 - [`FixedPoint127_FINAL_ANALYSIS.md`](FixedPoint127_FINAL_ANALYSIS.md) - Complete technical analysis with 100-decimal validation

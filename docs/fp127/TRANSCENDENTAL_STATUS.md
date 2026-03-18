@@ -1,5 +1,11 @@
 ## Transcendental Functions Implementation Status
 
+### Archived: lambertWm1
+
+**Lambert W_{-1}** (secondary branch) was removed to stay under huffc's expanded-source limit (~115KB). Source preserved in `docs/fp127/archive/`. See `docs/fp127/archive/README.md` for restoration instructions.
+
+---
+
 ### Completed (Phase 0-3)
 
 #### Phase 0: Cleanup ✅

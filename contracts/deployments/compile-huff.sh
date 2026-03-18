@@ -53,163 +53,80 @@ compile_huff_file() {
         
         # Generate minimal ABI (Huff doesn't auto-generate ABI, so we create a basic one)
         # This should be customized based on the contract's interface
-        if [ "$contract_name" = "test_fp127" ]; then
+        if [ "$contract_name" = "test_fp127" ] || [ "$contract_name" = "fp127" ]; then
             cat > "${ABI_DIR}/fixedpoint127.json" << EOF
 [
-  {
-    "type": "function",
-    "name": "add",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "sub",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "mul",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "div",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "exp",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "exp2",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "ln",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "log2",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "sqrt",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "pow",
-    "inputs": [{"name": "x", "type": "uint256"}, {"name": "y", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "abs",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "neg",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "inv",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "min",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "max",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "clamp",
-    "inputs": [{"name": "x", "type": "uint256"}, {"name": "min", "type": "uint256"}, {"name": "max", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "avg",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "zeroFloorSub",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "dist",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "gavg",
-    "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "log10",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  },
-  {
-    "type": "function",
-    "name": "exp10",
-    "inputs": [{"name": "x", "type": "uint256"}],
-    "outputs": [{"type": "uint256"}],
-    "stateMutability": "pure"
-  }
+  {"type": "function", "name": "add", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "sub", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "mul", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "div", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "addRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "subRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "mulRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "divRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "fromFixed18", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "toFixed18", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "exp", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "exp2", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "ln", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "log2", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "sqrt", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "sqrtRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "expRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "exp2Raw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "lnRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "log2Raw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "divUnsignedRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "pow", "inputs": [{"name": "x", "type": "uint256"}, {"name": "y", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "powRaw", "inputs": [{"name": "x", "type": "uint256"}, {"name": "y", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "abs", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "neg", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "inv", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "min", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "max", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "clamp", "inputs": [{"name": "x", "type": "uint256"}, {"name": "min", "type": "uint256"}, {"name": "max", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "avg", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "zeroFloorSub", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "dist", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "gavg", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "log10", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "exp10", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "absRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "negRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "invRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "minRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "maxRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "clampRaw", "inputs": [{"name": "x", "type": "uint256"}, {"name": "min", "type": "uint256"}, {"name": "max", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "avgRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "zeroFloorSubRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "distRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "gavgRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "log10Raw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "exp10Raw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "sign", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "floor", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "ceil", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "frac", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "cbrt", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "lerp", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}, {"name": "t", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "hypot", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "signRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "floorRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "ceilRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "fracRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "cbrtRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "lerpRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}, {"name": "t", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "hypotRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "round", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "log2Up", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "gcd", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "factorial", "inputs": [{"name": "n", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "lambertW0", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "roundRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "log2UpRaw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "gcdRaw", "inputs": [{"name": "a", "type": "uint256"}, {"name": "b", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "factorialRaw", "inputs": [{"name": "n", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"},
+  {"type": "function", "name": "lambertW0Raw", "inputs": [{"name": "x", "type": "uint256"}], "outputs": [{"type": "uint256"}], "stateMutability": "pure"}
 ]
 EOF
             echo -e "${GREEN}✓ ABI generated${NC}"
@@ -234,12 +151,12 @@ else
     compiled=0
     failed=0
     
-    # Only compile test contracts (files starting with test_) in subdirectories
+    # Only compile test contracts and production contracts (test_* or fp127.huff) in subdirectories
     for huff_file in "$HUFF_DIR"/*/*.huff; do
         if [ -f "$huff_file" ]; then
-            # Skip library files (only compile test_ files)
+            # Skip library files (only compile test_* files and fp127.huff)
             basename_file=$(basename "$huff_file")
-            if [[ "$basename_file" != test_* ]]; then
+            if [[ "$basename_file" != test_* ]] && [[ "$basename_file" != "fp127.huff" ]]; then
                 continue
             fi
             
