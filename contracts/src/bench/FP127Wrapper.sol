@@ -3,7 +3,7 @@ pragma solidity ^0.8.24;
 
 /// @title FP127 Wrapper
 /// @notice Wrapper for Huff fp127 implementation to match fixed18 interface
-/// @dev Deploys and calls the Huff fp127 contract
+/// @dev Wraps a pre-deployed Huff fp127 contract
 contract FP127Wrapper {
     address public immutable huffContract;
 

@@ -1,5 +1,5 @@
 /// @title FP127 Binary Logarithm (base 2)
-/// @notice log2(x) for 128.128 fixed-point arithmetic
+/// @notice log2(x) for 127.128 fixed-point arithmetic
 /// @dev Requires: primitives.huff and arithmetic.huff must be included before this file
 ///
 /// Algorithm:
@@ -133,8 +133,8 @@
 
 /// @notice Compute log2(x) using CLZ + range reduction + polynomial
 /// @dev takes(1) returns(1)
-/// Stack input:  [x] (128.128 format, must be > 0)
-/// Stack output: [log2(x)] (128.128 format, signed)
+/// Stack input:  [x] (127.128 format, must be > 0)
+/// Stack output: [log2(x)] (127.128 format, signed)
 #define fn FP127_LOG2() = takes(1) returns(1) {
     dup1 iszero log2_zero jumpi
     dup1 IS_NEGATIVE() log2_zero jumpi

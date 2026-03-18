@@ -6,7 +6,7 @@ Ultra-high-precision fixed-point arithmetic library written in Huff. Achieves **
 
 | Metric | Value |
 |--------|-------|
-| **Format** | 128.128 fixed-point (signed two's complement) |
+| **Format** | 127.128 fixed-point (signed two's complement) |
 | **Precision** | ~38 decimal digits (128 bits) |
 | **Range** | ±10^38 |
 | **Gas (mul)** | 1,027 gas |
@@ -22,10 +22,6 @@ Ultra-high-precision fixed-point arithmetic library written in Huff. Achieves **
 - Scientific computing (physics, simulations, complex math)
 - Any calculation requiring >18 decimal precision
 
-❌ **Don't use FixedPoint127 for:**
-- Standard DeFi operations (use Solady - 18 decimals is enough)
-- Gas-critical applications (use ABDKMath64x64 - 3x cheaper)
-- Simple token arithmetic (use Solady WAD - ecosystem standard)
 
 ## Performance vs Industry Standards
 
@@ -85,7 +81,7 @@ Note: Division uses 2-step 64-bit chunking for gas efficiency
 **FixedPoint127** uses a schoolbook multiplication algorithm optimized for signed two's complement:
 
 ```huff
-// 128.128 multiplication: (a * b) >> 128
+// 127.128 multiplication: (a * b) >> 128
 // Split into 4 terms to handle 512-bit product:
 Term1: (a_hi * b_hi) << 128
 Term2: a_hi * b_lo
@@ -99,7 +95,7 @@ Gas: ~200 gas (core Huff implementation)
 Division uses 2-step 64-bit chunking:
 
 ```huff
-// 128.128 division: (a << 128) / b
+// 127.128 division: (a << 128) / b
 // Split into 2 chunks to avoid overflow:
 q1 = (a << 64) / b
 r1 = (a << 64) % b
@@ -154,26 +150,28 @@ Impact: FixedPoint127 reduces pricing error by 10,000x
 
 ## Files
 
-- [`FixedPoint127.huff`](contracts/src/tools/huff/FixedPoint127.huff) - Core implementation
-- [`fixedpoint127_constants.huff`](../../contracts/src/tools/huff/fixedpoint127_constants.huff) - Constants and masks
-- [`test_fixedpoint127.huff`](../../contracts/src/tools/huff/test_fixedpoint127.huff) - Test harness
-- [`test_fp127_precision.py`](tests/test_fp127_precision.py) - High-precision validation tests
-- [`test_fp127_edge.py`](tests/test_fp127_edge.py) - Edge case tests
-- [`FPBenchmark.t.sol`](test/FPBenchmark.t.sol) - Foundry gas benchmarks
+- [`constants.huff`](../../contracts/src/tools/huff/fp127/constants.huff) - Constants and masks
+- [`arithmetic.huff`](../../contracts/src/tools/huff/fp127/arithmetic.huff) - Core arithmetic operations
+- [`primitives.huff`](../../contracts/src/tools/huff/fp127/primitives.huff) - Primitive operations
+- [`exp.huff`](../../contracts/src/tools/huff/fp127/exp.huff) - Exponential functions
+- [`ln.huff`](../../contracts/src/tools/huff/fp127/ln.huff) - Natural logarithm
+- [`sqrt.huff`](../../contracts/src/tools/huff/fp127/sqrt.huff) - Square root
+- [`test_fp127.huff`](../../contracts/src/tools/huff/fp127/test_fp127.huff) - Test harness
+- [`FP127Test.t.sol`](../../test/fp127/FP127Test.t.sol) - Foundry precision and gas tests
 
 ## Usage
 
 ### Huff
 
 ```huff
-#include "FixedPoint127.huff"
+#include "fp127/arithmetic.huff"
 
-// Multiply two 128.128 values
+// Multiply two 127.128 values
 // Input: [b, a] (on stack)
 // Output: [a * b]
 FixedPoint127_MUL()
 
-// Divide two 128.128 values  
+// Divide two 127.128 values  
 // Input: [b, a] (on stack)
 // Output: [a / b]
 FixedPoint127_DIV()

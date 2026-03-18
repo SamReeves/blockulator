@@ -1,5 +1,5 @@
 /// @title FP127 Utility Functions
-/// @notice Utility operations for 128.128 fixed-point arithmetic
+/// @notice Utility operations for 127.128 fixed-point arithmetic
 /// @dev Simple operations like abs, min, max, avg, etc.
 /// @dev Requires: constants.huff and primitives.huff must be included before this file
 
@@ -7,7 +7,7 @@
 // Sign and Negation Utilities
 // ============================================================================
 
-/// @notice Absolute value of a signed 128.128 fixed-point number
+/// @notice Absolute value of a signed 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [|x|]
@@ -22,7 +22,7 @@
     swap1 pop                  // [abs_x]
 }
 
-/// @notice Negate a signed 128.128 fixed-point number
+/// @notice Negate a signed 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [-x]
@@ -31,7 +31,7 @@
     NEGATE()
 }
 
-/// @notice Reciprocal of a 128.128 fixed-point number
+/// @notice Reciprocal of a 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [1/x]
@@ -47,7 +47,7 @@
 // Comparison and Selection
 // ============================================================================
 
-/// @notice Minimum of two signed 128.128 fixed-point numbers
+/// @notice Minimum of two signed 127.128 fixed-point numbers
 /// @dev takes(2) returns(1)
 /// Stack input:  [b, a] (b on top)
 /// Stack output: [min(a, b)]
@@ -64,7 +64,7 @@
     min_done:
 }
 
-/// @notice Maximum of two signed 128.128 fixed-point numbers
+/// @notice Maximum of two signed 127.128 fixed-point numbers
 /// @dev takes(2) returns(1)
 /// Stack input:  [b, a] (b on top)
 /// Stack output: [max(a, b)]
@@ -100,7 +100,7 @@
 // Arithmetic Utilities
 // ============================================================================
 
-/// @notice Overflow-safe average of two signed 128.128 fixed-point numbers
+/// @notice Overflow-safe average of two signed 127.128 fixed-point numbers
 /// @dev takes(2) returns(1)
 /// Stack input:  [b, a] (b on top)
 /// Stack output: [(a + b) / 2]
@@ -132,7 +132,7 @@
     zfs_done:
 }
 
-/// @notice Distance between two signed 128.128 fixed-point numbers
+/// @notice Distance between two signed 127.128 fixed-point numbers
 /// @dev takes(2) returns(1)
 /// Stack input:  [b, a] (b on top)
 /// Stack output: [|a - b|]
@@ -148,7 +148,7 @@
 // Rounding and Sign Functions
 // ============================================================================
 
-/// @notice Sign of a signed 128.128 fixed-point number
+/// @notice Sign of a signed 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [-1 if x < 0, 0 if x == 0, +1 if x > 0] (in FP127 format)
@@ -162,7 +162,7 @@
     [FP127_SHIFT] shl          // [sign << 128] = sign in FP127
 }
 
-/// @notice Floor of a signed 128.128 fixed-point number
+/// @notice Floor of a signed 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [floor(x)] (largest integer <= x, in FP127 format)
@@ -175,7 +175,7 @@
     [INT_MASK] and
 }
 
-/// @notice Ceiling of a signed 128.128 fixed-point number
+/// @notice Ceiling of a signed 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [ceil(x)] (smallest integer >= x, in FP127 format)
@@ -188,7 +188,7 @@
     NEGATE()                   // [-floor(-x) = ceil(x)]
 }
 
-/// @notice Fractional part of a signed 128.128 fixed-point number
+/// @notice Fractional part of a signed 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [frac(x)] (x - floor(x), always non-negative)
@@ -199,7 +199,7 @@
     [FRAC_MASK] and
 }
 
-/// @notice Round to nearest integer (banker's rounding: half up)
+/// @notice Round to nearest integer (round half up)
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [round(x)] (nearest integer to x, in FP127 format)

@@ -24,7 +24,7 @@ interface IVyperArith {
 
 /// @title ArithBench
 /// @notice Gas + precision benchmark for four arithmetic backends:
-///   - fp127    (Huff 128.128 fixed-point, fixed18 I/O)
+///   - fp127    (Huff 127.128 fixed-point, fixed18 I/O)
 ///   - vyper    (Vyper int256 18-decimal, fixed18 I/O)
 ///   - ABDK     (Solidity library, 64.64 fixed-point)
 ///   - Solady   (Solidity library, WAD 18-decimal)
@@ -53,7 +53,7 @@ contract ArithBench is Test {
     uint256 _fp127Overhead;
 
     function setUp() public {
-        // Deploy fp127 (128.128 fixed-point, fixed18 I/O)
+        // Deploy fp127 (127.128 fixed-point, fixed18 I/O)
         {
             string memory hex1 = vm.readFile("contracts/build/huff/test_fp127.runtime.bin");
             bytes memory code1 = vm.parseBytes(string.concat("0x", hex1));

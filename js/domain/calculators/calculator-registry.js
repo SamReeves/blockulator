@@ -1115,22 +1115,3 @@ export function getAllCategories() {
     });
     return categories;
 }
-
-/**
- * Validate calculator IDs against contract registry (optional dev-mode check)
- * Ensures all calculator IDs exist in the contract registry
- * @param {Object} CONTRACT_REGISTRY - Import from contract-registry.js to check
- * @returns {Array<string>} Array of missing calculator IDs (empty if all valid)
- */
-export function validateCalculatorIds(CONTRACT_REGISTRY) {
-    const missing = [];
-    CALCULATOR_REGISTRY.forEach(calc => {
-        if (!CONTRACT_REGISTRY[calc.id]) {
-            missing.push(calc.id);
-        }
-    });
-    if (missing.length > 0) {
-        console.warn('⚠️ Calculator IDs not found in contract registry:', missing);
-    }
-    return missing;
-}

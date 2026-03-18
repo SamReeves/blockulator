@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "forge-std/Test.sol";
-import "../contracts/src/tools/FP127Math.sol";
+import "../../contracts/src/tools/FP127Math.sol";
 import "./IFP127.sol";
 
 /// @title TestFP127MathLib
@@ -17,6 +17,9 @@ contract TestFP127MathLib is Test {
         address addr = makeAddr("fp127");
         vm.etch(addr, code);
         huffFP127 = IFP127(addr);
+        
+        // Configure FP127Math to use this address
+        FP127Math.setAddress(addr);
     }
     
     function _wadToFp127(int256 wad) internal pure returns (uint256) {

@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**FixedPoint127** is a production-ready 128.128 fixed-point math library for EVM, achieving:
+**FixedPoint127** is a production-ready 127.128 fixed-point math library for EVM, achieving:
 - ✅ **128-bit multiplication precision** (~38 decimal digits)
 - ✅ **62-bit division precision** (~18 decimal digits, by design)
 - ✅ **±10^38 value range** (full int256 support)
@@ -166,7 +166,7 @@ Value: FixedPoint127 provides the best precision-per-gas among high-precision op
              ABDKMath     Solady       FixedPoint127
 Decimals     ~19          18           ~38
 Range        ±10^19       ±10^59       ±10^38
-Format       64.64        WAD          128.128
+Format       64.64        WAD          127.128
 
 Value: FixedPoint127 provides 2x the precision with practical range
 ```
@@ -255,7 +255,7 @@ Transfer 1000.5 tokens
 
 ## Technical Specifications
 
-- **Format**: 128.128 fixed-point, two's complement signed
+- **Format**: 127.128 fixed-point, two's complement signed
 - **Range**: ±10^38 (2^127 / 2^128)
 - **Precision**: ~38.5 decimal digits (128 bits)
 - **Gas (mul)**: 1,027 (core: ~200 Huff implementation)

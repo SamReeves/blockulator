@@ -1,5 +1,5 @@
 /// @title FP127 Power Function
-/// @notice x^y for 128.128 fixed-point arithmetic
+/// @notice x^y for 127.128 fixed-point arithmetic
 /// @dev Requires: log2.huff, exp.huff, and arithmetic.huff must be included before this file
 ///
 /// Algorithm:
@@ -16,8 +16,8 @@
 
 /// @notice Compute x^y using log2 and exp2
 /// @dev takes(2) returns(1)
-/// Stack input:  [y, x] (both 128.128 format, signed)
-/// Stack output: [x^y] (128.128 format)
+/// Stack input:  [y, x] (both 127.128 format, signed)
+/// Stack output: [x^y] (127.128 format)
 #define macro FP127_POW() = takes(2) returns(1) {
     // Stack: [y, x]
     

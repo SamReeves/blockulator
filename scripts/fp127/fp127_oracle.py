@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-FFI Oracle for FP127 (128.128 fixed-point) precision testing.
+FFI Oracle for FP127 (127.128 fixed-point) precision testing.
 
 Usage: python3 fp127_oracle.py <function> <arg1_hex> [arg2_hex]
 Returns: ABI-encoded result to stdout (raw hex bytes, no 0x prefix)
@@ -310,6 +310,26 @@ def from_wad(wad_str):
     return mpf(wad_int) / mpf(10**18)
 
 
+def wad_to_fp127_exact(wad_int):
+    """
+    Convert WAD integer to FP127 integer using exact Solidity arithmetic.
+    Matches: (abs_wad << 128) / 1e18, with sign handling.
+    """
+    negative = wad_int < 0
+    abs_wad = -wad_int if negative else wad_int
+    fp127_int = (abs_wad << 128) // (10**18)
+    if negative:
+        fp127_int = (1 << 256) - fp127_int
+    return fp127_int
+
+
+def fp127_int_to_mpf(fp127_int):
+    """Convert FP127 integer to mpf for oracle computation."""
+    if fp127_int >= (1 << 255):
+        fp127_int -= (1 << 256)
+    return mpf(fp127_int) / FP127_SCALE
+
+
 def to_wad_int(value):
     """Convert mpf decimal to WAD integer (signed int256)."""
     scaled = int(value * mpf(10**18))
@@ -334,16 +354,37 @@ def to_abdk_int(value):
     return scaled
 
 
-def compute_multi_format(func_name, a_str, b_str=None):
+def wad_to_abdk_exact(wad_int):
     """
-    Compute operation and return results in multiple formats.
-    Returns: (fp127, wad, abdk) as JSON array.
+    Convert WAD integer to ABDK 64.64 integer using exact Solidity arithmetic.
+    Matches: (wad << 64) / 1e18 (signed).
     """
-    # Parse inputs as WAD by default
-    a = from_wad(a_str)
-    b = from_wad(b_str) if b_str else None
+    # Handle two's complement for negative WAD
+    if wad_int >= (1 << 255):
+        wad_int -= (1 << 256)
     
-    # Compute result
+    # Perform the shift and division
+    abdk_int = (wad_int << 64) // (10**18)
+    
+    # Convert back to unsigned representation for negative values
+    if abdk_int < 0:
+        abdk_int = (1 << 128) + abdk_int
+    
+    return abdk_int
+
+
+def abdk_int_to_mpf(abdk_int):
+    """Convert ABDK 64.64 integer to mpf for oracle computation."""
+    if abdk_int >= (1 << 127):
+        abdk_int -= (1 << 128)
+    return mpf(abdk_int) / mpf(2**64)
+
+
+def _compute_func(func_name, a, b=None):
+    """
+    Compute a function on mpf inputs and return mpf result.
+    This is the core computation logic used by all format paths.
+    """
     if func_name == "mul":
         result = a * b if b else mpf(0)
     elif func_name == "div":
@@ -421,8 +462,17 @@ def compute_multi_format(func_name, a_str, b_str=None):
         if a <= 0:
             result = mpf(0)
         else:
-            log2_val = log(a) / LN2
-            result = ceil(log2_val)
+            # Check if a is a power of 2 (exactly one bit set in FP127 representation)
+            # For FP127 127.128 format, powers of 2 have exact log2 values
+            a_int = int(a * FP127_SCALE)
+            if a_int > 0 and (a_int & (a_int - 1)) == 0:
+                # Exact power of 2: compute log2 directly from bit position
+                bit_pos = a_int.bit_length() - 1
+                result = mpf(bit_pos - 128)
+            else:
+                # Not a power of 2: use polynomial approximation + ceil
+                log2_val = log(a) / LN2
+                result = ceil(log2_val)
     elif func_name == "gcd":
         # GCD operates on integers
         a_int = int(floor(abs(a)))
@@ -443,10 +493,36 @@ def compute_multi_format(func_name, a_str, b_str=None):
     else:
         result = mpf(0)
     
-    # Encode in all formats
-    fp127_val = to_fp127_int(result)
-    wad_val = to_wad_int(result)
-    abdk_val = to_abdk_int(result)
+    return result
+
+
+def compute_multi_format(func_name, a_str, b_str=None):
+    """
+    Compute operation and return results in multiple formats.
+    Returns: (fp127, wad, abdk) as JSON array.
+    Each library gets its own ground truth computed from its exact input format.
+    """
+    # Parse WAD inputs
+    wad_int_a = int(a_str, 10)
+    wad_int_b = int(b_str, 10) if b_str else None
+    
+    # --- FP127 path: use FP127-exact conversion ---
+    a_fp127 = fp127_int_to_mpf(wad_to_fp127_exact(wad_int_a))
+    b_fp127 = fp127_int_to_mpf(wad_to_fp127_exact(wad_int_b)) if wad_int_b is not None else None
+    result_fp127 = _compute_func(func_name, a_fp127, b_fp127)
+    fp127_val = to_fp127_int(result_fp127)
+    
+    # --- WAD path: use exact WAD decimal (no truncation) ---
+    a_wad = from_wad(a_str)
+    b_wad = from_wad(b_str) if b_str else None
+    result_wad = _compute_func(func_name, a_wad, b_wad)
+    wad_val = to_wad_int(result_wad)
+    
+    # --- ABDK path: use ABDK-exact conversion ---
+    a_abdk = abdk_int_to_mpf(wad_to_abdk_exact(wad_int_a))
+    b_abdk = abdk_int_to_mpf(wad_to_abdk_exact(wad_int_b)) if wad_int_b is not None else None
+    result_abdk = _compute_func(func_name, a_abdk, b_abdk)
+    abdk_val = to_abdk_int(result_abdk)
     
     # Return as hex tuple (3 uint256 values)
     return f"0x{fp127_val:064x}{wad_val:064x}{abdk_val:064x}"

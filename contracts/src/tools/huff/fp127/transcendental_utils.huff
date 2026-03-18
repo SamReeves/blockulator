@@ -6,17 +6,17 @@
 // Constants for Base-10 Operations
 // ============================================================================
 
-// log2(10) in 128.128 format ≈ 3.321928094887362347870319429489390175864831393024580612054756395815934776608
+// log2(10) in 127.128 format ≈ 3.321928094887362347870319429489390175864831393024580612054756395815934776608
 #define constant LOG2_10_FP127 = 0x000000000000000000000000000000035269e12f346e2bf924afdbfd36bf6d33
 
-// 1/log2(10) in 128.128 format ≈ 0.301029995663981195213738894724493026768189881462108541310427461127108189274
+// 1/log2(10) in 127.128 format ≈ 0.301029995663981195213738894724493026768189881462108541310427461127108189274
 #define constant INV_LOG2_10_FP127 = 0x000000000000000000000000000000004d104d427de7fbcc47c4acd605be48bc
 
 // ============================================================================
 // Geometric Mean
 // ============================================================================
 
-/// @notice Geometric mean of two 128.128 fixed-point numbers
+/// @notice Geometric mean of two 127.128 fixed-point numbers
 /// @dev takes(2) returns(1)
 /// Stack input:  [b, a] (b on top)
 /// Stack output: [sqrt(a * b)]
@@ -29,16 +29,11 @@
     FP127_SQRT()               // [sqrt(a * b)]
 }
 
-// Alias for compatibility with Solady naming
-#define macro FP127_MUL_SQRT() = takes(2) returns(1) {
-    FP127_GAVG()
-}
-
 // ============================================================================
 // Base-10 Logarithm
 // ============================================================================
 
-/// @notice Base-10 logarithm of a 128.128 fixed-point number
+/// @notice Base-10 logarithm of a 127.128 fixed-point number
 /// @dev takes(1) returns(1)
 /// Stack input:  [x]
 /// Stack output: [log10(x)]
@@ -65,6 +60,8 @@
 /// Precision: ~38 decimal digits (inherits from exp2)
 /// Range: x must be in range where 10^x doesn't overflow/underflow
 ///        Roughly -38 < x < 38 for safe operation
+/// NOTE: This function does not perform overflow/underflow checks. Callers are
+///       responsible for range validation. FP127_EXP2 has built-in guards.
 #define macro FP127_EXP10() = takes(1) returns(1) {
     // Stack: [x]
     [LOG2_10_FP127]            // [log2(10), x]
@@ -76,7 +73,7 @@
 // Cube Root
 // ============================================================================
 
-// 1/3 in 128.128 format
+// 1/3 in 127.128 format
 #define constant ONE_THIRD_FP127 = 0x0000000000000000000000000000000055555555555555555555555555555555
 
 /// @notice Cube root via pow(x, 1/3), handles negative inputs
@@ -99,234 +96,22 @@
 
 /// @notice ceil(log2(x)) for positive x
 /// @dev takes(1) returns(1)
+/// Fast path for powers of 2 (exact result via MSB), polynomial + ceil for others
 #define macro FP127_LOG2_UP() = takes(1) returns(1) {
-    FP127_LOG2() FP127_CEIL()
-}
+    // Stack: [x]
+    // Power-of-2 check: x & (x - 1) == 0 means exactly one bit is set
+    dup1 dup1 0x01 swap1 sub   // [x-1, x, x]
+    and                         // [x & (x-1), x]
+    log2up_not_pow2 jumpi       // [x]  (jump if x & (x-1) != 0)
 
-// ============================================================================
-// Lambert W0 (Principal Branch) - Helper Macros
-// ============================================================================
+    // Exact power of 2: log2(x) = msb - 128, already an integer
+    MSB()                       // [msb]
+    0x80 swap1 sub              // [msb - 128]
+    0x80 shl                    // [(msb - 128) << 128] = result in FP127
+    log2up_done jump
 
-/// @notice Flat lookup table for Lambert W0 initial guess (branchless, memory-based)
-/// @dev takes(2) returns(2)
-/// Stack input:  [msb, x] where msb is the most significant bit position
-/// Stack output: [w0, x] where w0 = W(2^idx)
-/// Stores W(2^k) values at scratch memory 0x200..0x2C0, loads via idx*32.
-/// idx = msb - 128, clamped to [0, 6].
-#define macro LAMBERTW0_LUT() = takes(2) returns(2) {
-    // [msb, x]
-    [LAMBERTW0_W1]   0x200 mstore
-    [LAMBERTW0_W2]   0x220 mstore
-    [LAMBERTW0_W4]   0x240 mstore
-    [LAMBERTW0_W8]   0x260 mstore
-    [LAMBERTW0_W16]  0x280 mstore
-    [LAMBERTW0_W32]  0x2a0 mstore
-    [LAMBERTW0_W64]  0x2c0 mstore
+    log2up_not_pow2:
+    FP127_LOG2() FP127_CEIL()   // ceil(log2(x))
 
-    // clamped_idx = min(msb - 128, 6)
-    0x80 swap1 sub                   // [idx, x]
-    0x07 dup2 lt                     // [idx<7, idx, x]
-    swap1                            // [idx, in_range, x]
-    0x06                             // [6, idx, in_range, x]
-    dup3 iszero mul                  // [!in_range?6:0, idx, in_range, x]
-    swap1                            // [idx, fallback, in_range, x]
-    dup3 mul                         // [in_range?idx:0, fallback, in_range, x]
-    add                              // [clamped_idx, in_range, x]
-    swap1 pop                        // [clamped_idx, x]
-
-    // w0 = memory[0x200 + clamped_idx * 32]
-    0x05 shl                         // [clamped_idx * 32, x]
-    0x200 add                        // [addr, x]
-    mload                            // [w0, x]
-}
-
-/// @notice Fritsch-Shafer-Crowley 4th-order iteration step for Lambert W0
-/// @dev takes(2) returns(2)
-/// Stack input:  [x, w]
-/// Stack output: [x, w_new]
-/// Formula: r = (w*e^w - x) / (e^w*(w+1))       (Newton correction)
-///          w_new = w - r * (1 + r / (2*(w+1)))  (FSC 4th-order correction)
-/// Converges quartically: correct bits quadruple each step.
-/// Gas: ~3300-3800 per step (1 exp, 3 muls, 2 divs, adds)
-#define macro LAMBERTW0_FSC_STEP() = takes(2) returns(2) {
-    // [x, w]
-    dup2 [ONE_FP127] add          // [wp1, x, w]             wp1 = w + 1
-    dup3 FP127_EXP()              // [ew, wp1, x, w]
-    dup4 dup2 FP127_MUL()         // [wew, ew, wp1, x, w]    wew = w * e^w
-    dup4 FP127_SUB()              // [s, ew, wp1, x, w]      s = w*e^w - x
-    swap1 dup3 FP127_MUL()        // [ew_wp1, s, wp1, x, w]  denom = e^w * (w+1)
-
-    // r = s / denom: DIV takes [b, a] returns a/b, need [ew_wp1, s]
-    FP127_DIV()                   // [r, wp1, x, w]          r = s / denom
-
-    // FSC correction: r_fsc = r * (1 + r / (2*(w+1)))
-    dup1                          // [r, r, wp1, x, w]
-    dup3 0x01 shl                 // [2*wp1, r, r, wp1, x, w]
-    FP127_DIV()                   // [r/(2*wp1), r, wp1, x, w]
-    [ONE_FP127] add               // [1+r/(2*wp1), r, wp1, x, w]
-    FP127_MUL()                   // [r_fsc, wp1, x, w]
-
-    // Stack: [r_fsc, wp1, x, w]
-    // Goal:  [x, w - r_fsc]
-    swap3                         // [w, wp1, x, r_fsc]
-    swap3                         // [r_fsc, wp1, x, w]
-    swap2                         // [x, wp1, r_fsc, w]
-    swap1 pop                     // [x, r_fsc, w]
-    swap2 sub swap1               // [x, w - r_fsc]
-}
-
-/// @notice Fritsch-Shafer-Crowley 4th-order iteration step for Lambert W0 (INIT variant)
-/// @dev takes(2) returns(3)
-/// Stack input:  [x, w]
-/// Stack output: [x, w_new, ew_new]
-/// Same FSC formula, but also returns approximate e^(w_new) on stack.
-/// ew_new = e^w * (1 - r_fsc + r_fsc^2/2)
-/// Gas: ~4100 per step (1 exp, 5 muls, 2 divs, adds)
-#define macro LAMBERTW0_FSC_STEP_INIT() = takes(2) returns(3) {
-    // [x, w]
-    dup2 [ONE_FP127] add          // [wp1, x, w]
-    dup3 FP127_EXP()              // [ew, wp1, x, w]
-    dup4 dup2 FP127_MUL()         // [wew, ew, wp1, x, w]
-    dup4 FP127_SUB()              // [s, ew, wp1, x, w]
-
-    swap1 dup1                    // [ew, ew, s, wp1, x, w]
-    dup4 FP127_MUL()              // [ew_wp1, ew, s, wp1, x, w]
-    swap1 swap2 swap1             // [ew_wp1, s, ew, wp1, x, w]
-
-    FP127_DIV()                   // [r, ew, wp1, x, w]
-
-    dup1                          // [r, r, ew, wp1, x, w]
-    dup4 0x01 shl                 // [2*wp1, r, r, ew, wp1, x, w]
-    FP127_DIV()                   // [r/(2*wp1), r, ew, wp1, x, w]
-    [ONE_FP127] add               // [1+r/(2*wp1), r, ew, wp1, x, w]
-    FP127_MUL()                   // [r_fsc, ew, wp1, x, w]
-
-    // ew_new = ew * (1 - r_fsc + r_fsc^2/2)
-    dup1 dup1 FP127_MUL()         // [r2, r_fsc, ew, wp1, x, w]
-    0x01 shr                      // [r2/2, r_fsc, ew, wp1, x, w]
-    [ONE_FP127] add               // [1+r2/2, r_fsc, ew, wp1, x, w]
-    swap1 dup1 swap2              // [1+r2/2, r_fsc, r_fsc, ew, wp1, x, w]
-    sub                           // [corr, r_fsc, ew, wp1, x, w]
-    dup3 FP127_MUL()              // [ew_new, r_fsc, ew, wp1, x, w]
-
-    // w_new = w - r_fsc
-    swap1 dup6 sub                // [w_new, ew_new, ew, wp1, x, w]
-
-    // Stack cleanup: [w_new, ew_new, ew, wp1, x, w] -> [x, w_new, ew_new]
-    swap3                         // [wp1, ew_new, ew, w_new, x, w]
-    pop                           // [ew_new, ew, w_new, x, w]
-    swap4                         // [w, ew, w_new, x, ew_new]
-    pop                           // [ew, w_new, x, ew_new]
-    pop                           // [w_new, x, ew_new]
-    swap1                         // [x, w_new, ew_new]
-}
-
-/// @notice Fritsch-Shafer-Crowley 4th-order iteration step for Lambert W0 (REUSE variant)
-/// @dev takes(3) returns(3)
-/// Stack input:  [x, w, ew] where ew is approximate e^w from previous step
-/// Stack output: [x, w_new, ew_new]
-/// Same FSC formula but uses provided ew instead of calling FP127_EXP.
-/// ew_new = ew * (1 - r_fsc + r_fsc^2/2)
-/// Gas: ~1600 per step (5 muls, 2 divs, adds) - saves ~2200 gas vs FP127_EXP
-#define macro LAMBERTW0_FSC_STEP_REUSE() = takes(3) returns(3) {
-    // [x, w, ew]
-    dup2 [ONE_FP127] add          // [wp1, x, w, ew]
-    dup4                          // [ew, wp1, x, w, ew]
-    dup4 dup2 FP127_MUL()         // [wew, ew, wp1, x, w, ew]
-    dup4 FP127_SUB()              // [s, ew, wp1, x, w, ew]
-    swap1 dup3 FP127_MUL()        // [ew_wp1, s, wp1, x, w, ew]
-
-    FP127_DIV()                   // [r, wp1, x, w, ew]
-
-    dup1                          // [r, r, wp1, x, w, ew]
-    dup3 0x01 shl                 // [2*wp1, r, r, wp1, x, w, ew]
-    FP127_DIV()                   // [r/(2*wp1), r, wp1, x, w, ew]
-    [ONE_FP127] add               // [1+r/(2*wp1), r, wp1, x, w, ew]
-    FP127_MUL()                   // [r_fsc, wp1, x, w, ew]
-
-    // ew_new = ew * (1 - r_fsc + r_fsc^2/2)
-    dup1 dup1 FP127_MUL()         // [r2, r_fsc, wp1, x, w, ew]
-    0x01 shr                      // [r2/2, r_fsc, wp1, x, w, ew]
-    [ONE_FP127] add               // [1+r2/2, r_fsc, wp1, x, w, ew]
-    swap1 dup1 swap2              // [1+r2/2, r_fsc, r_fsc, wp1, x, w, ew]
-    sub                           // [corr, r_fsc, wp1, x, w, ew]
-    dup6 FP127_MUL()              // [ew_new, r_fsc, wp1, x, w, ew]
-
-    // w_new = w - r_fsc
-    swap1 dup5 sub                // [w_new, ew_new, wp1, x, w, ew]
-
-    // Stack cleanup: [w_new, ew_new, wp1, x, w, ew] -> [x, w_new, ew_new]
-    swap4                         // [w, ew_new, wp1, x, w_new, ew]
-    pop                           // [ew_new, wp1, x, w_new, ew]
-    swap4                         // [ew, wp1, x, w_new, ew_new]
-    pop                           // [wp1, x, w_new, ew_new]
-    pop                           // [x, w_new, ew_new]
-}
-
-// ============================================================================
-// Lambert W0 (Principal Branch)
-// ============================================================================
-
-/// @notice Lambert W0 with lookup-table initial guess + FSC 4th-order iteration
-/// @dev takes(1) returns(1)
-/// Stack input:  [x] (128.128, must be >= -1/e)
-/// Stack output: [w] where w*e^w = x
-/// Uses Fritsch-Shafer-Crowley quartic iteration (1973):
-///   r = (w*e^w - x) / (e^w*(w+1))
-///   w -= r * (1 + r / (2*(w+1)))
-/// 5 FSC steps: even a 1-bit initial guess → 4 → 16 → 64 → 128+ bits
-/// Optimization: e^w computed exactly in steps 1-3, then reused in steps 4-5
-///               via ew_new = ew * (1 - r_fsc + r_fsc^2/2), saving ~4,400 gas
-/// Gas: ~24,000-29,000 (3 full FSC + 2 reuse steps)
-/// Precision: ~22 mean digits across diverse inputs (38 for small/negative, 7-15 for large)
-#define fn FP127_LAMBERT_W0() = takes(1) returns(1) {
-    // Domain check: x >= -1/e
-    dup1 [INV_E_FP127] FP127_NEG() swap1 slt
-    lambertw0_domain_error jumpi
-
-    // Zero check
-    dup1 iszero lambertw0_zero jumpi
-
-    // MSB dispatch for initial guess
-    dup1 MSB()
-
-    // x < 1 (msb < 128): w0 = x
-    dup1 0x80 gt lambertw0_tiny jumpi
-
-    // x >= 128 (msb >= 135): w0 = ln(x) - ln(ln(x))
-    dup1 0x87 gt iszero lambertw0_large jumpi
-
-    // 1 <= x < 128: flat lookup table
-    LAMBERTW0_LUT()
-    lambertw0_iterate jump
-
-    lambertw0_tiny:
-    pop dup1
-    lambertw0_iterate jump
-
-    lambertw0_large:
-    pop
-    dup1 FP127_LN() dup1 FP127_LN() FP127_SUB()
-
-    lambertw0_iterate:
-    // Steps 1-3: full FSC with exact FP127_EXP (quartic: ~8->16->64->128+ bits)
-    // Steps 4-5: reuse ew (r_fsc ~ 2^-128, approximation error is negligible)
-    swap1
-    LAMBERTW0_FSC_STEP_INIT()
-    swap2 pop swap1               // [x, w1] - drop ew1
-    LAMBERTW0_FSC_STEP_INIT()
-    swap2 pop swap1               // [x, w2] - drop ew2
-    LAMBERTW0_FSC_STEP_INIT()
-    LAMBERTW0_FSC_STEP_REUSE()
-    LAMBERTW0_FSC_STEP_REUSE()
-    pop swap1 pop                  // drop x and ew_new, keep w_new
-    lambertw0_done jump
-
-    lambertw0_zero:
-    lambertw0_done jump
-
-    lambertw0_domain_error:
-    pop 0x00
-
-    lambertw0_done:
+    log2up_done:
 }

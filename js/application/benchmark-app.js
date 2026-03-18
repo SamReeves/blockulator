@@ -10,7 +10,7 @@ const LIBS = ['fp127', 'abdk', 'solady', 'prb'];
 const PREFERRED_FUNCTION_ORDER = ['mul', 'div', 'add', 'sub', 'exp', 'exp2', 'ln', 'log2', 'sqrt', 'pow', 'abs', 'inv', 'min', 'max', 'avg', 'dist', 'gavg', 'log10', 'exp10', 'sign', 'floor', 'ceil', 'frac', 'cbrt', 'lerp', 'hypot', 'round', 'log2up', 'gcd', 'factorial', 'lambertw0'];
 
 const LIB_META = {
-    fp127:  { name: 'FP127',    format: '128.128 fixed-point', lang: 'Huff',            color: '#2196F3' },
+    fp127:  { name: 'FP127',    format: '127.128 fixed-point', lang: 'Huff',            color: '#2196F3' },
     abdk:   { name: 'ABDK',     format: '64.64 fixed-point',   lang: 'Solidity',        color: '#FF9800' },
     solady: { name: 'Solady',   format: 'WAD 18-decimal',      lang: 'Solidity (asm)',   color: '#9C27B0' },
     prb:    { name: 'PRBMath',  format: 'WAD 18-decimal',      lang: 'Solidity',         color: '#4CAF50' }

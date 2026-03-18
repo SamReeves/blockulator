@@ -518,7 +518,7 @@ export const CONTRACT_REGISTRY = {
         symbol: '+−×÷',
         emoji: '0x',
         category: 'huff',
-        description: 'Signed 128.128 fixed-point arithmetic with 22 operations: add, sub, mul, div, exp, exp2, exp10, ln, log2, log10, sqrt, pow, abs, neg, inv, min, max, clamp, avg, gavg, dist, zeroFloorSub',
+        description: 'Signed 127.128 fixed-point arithmetic with 22 operations: add, sub, mul, div, exp, exp2, exp10, ln, log2, log10, sqrt, pow, abs, neg, inv, min, max, clamp, avg, gavg, dist, zeroFloorSub',
         addresses: {
             sepolia: 'PENDING_DEPLOYMENT',
             mainnet: '0x0000000000000000000000000000000000000000'

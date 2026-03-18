@@ -39,16 +39,6 @@ node tests/test-discussion.js
 
 Open these in a browser after starting the test server.
 
-### Python Tests (Contract testing)
-
-- **test_fp127_*.py** - Huff FP127 arithmetic tests
-- **test_fp.py** - Fixed-point math tests
-
-Run with:
-```bash
-pytest tests/
-```
-
 ### Server
 
 - **test-server.sh** - Simple HTTP server for testing

@@ -2,7 +2,7 @@
 
 ## Summary
 
-Completed rigorous testing and optimization of the FixedPoint127 fixed-point arithmetic system. The FixedPoint127 system uses a simple 128.128 two's complement fixed-point format (128 integer bits + 128 fractional bits) for efficient arithmetic on the EVM.
+Completed rigorous testing and optimization of the FixedPoint127 fixed-point arithmetic system. The FixedPoint127 system uses a simple 127.128 two's complement fixed-point format (128 integer bits + 128 fractional bits) for efficient arithmetic on the EVM.
 
 ## Changes Made
 
@@ -75,7 +75,7 @@ Completed rigorous testing and optimization of the FixedPoint127 fixed-point ari
 
 | Feature | FixedPoint127 | HEX_FP |
 |---------|-------|--------|
-| Format | 128.128 two's complement | 1-bit sign + 8-bit exp + 247-bit mantissa |
+| Format | 127.128 two's complement | 1-bit sign + 8-bit exp + 247-bit mantissa |
 | Precision (mul) | 128 bits (exact) | **0.2 bits (BROKEN)** |
 | Precision (div) | 62 bits | **0.0 bits (BROKEN)** |
 | Gas (estimated) | Low (~200-600) | High (~1000-2000+) |

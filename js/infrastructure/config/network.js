@@ -99,9 +99,6 @@ export function switchNetwork(network) {
     return true;
 }
 
-// Legacy export for backwards compatibility (use getConfig() instead)
-export const config = getConfig();
-
 // Helper function to get block explorer URL for an address
 export function getExplorerUrl(address) {
     const currentConfig = getConfig();

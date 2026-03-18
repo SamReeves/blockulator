@@ -8,19 +8,17 @@
 - Updated compile-huff.sh to skip library files and remove exp-specific ABI block
 - Removed empty tables/ directory
 
-#### Phase 1: fixedpoint127 Infrastructure ✅
-- Created `scripts/generate_fp127_coefficients.py` to compute Remco Bloemen rational polynomial coefficients in 128.128 format
-- Added transcendental constants to `fixedpoint127_constants.huff`:
+#### Phase 1: FP127 Infrastructure ✅
+- Created `scripts/fp127/generators/generate_fp127_coefficients.py` to compute coefficients in 127.128 format
+- Added transcendental constants to `contracts/src/tools/huff/fp127/constants.huff`:
   - LN2_FP127, INV_LN2_FP127
   - EXP_OVERFLOW_THRESHOLD, EXP_UNDERFLOW_THRESHOLD  
   - EXP_NUM_C0..C4, EXP_DEN_C0..C5 (exp rational polynomial)
   - LN_NUM_C0..C6, LN_DEN_C0..C6 (ln rational polynomial)
   - SQRT_INITIAL_ESTIMATE
-- Created `contracts/src/tools/huff/fp127_transcendental.huff` with placeholder macros:
-  - **FP127_EXP()**: Returns 1.0 (ONE_FP127) — *Algorithm outlined but not complete*
-  - **FP127_LN()**: Returns 0 — *Needs CLZ range reduction + polynomial*
-  - **FP127_SQRT()**: Returns input unchanged — *Needs MSB search + Newton iterations*
-- Updated `test_fixedpoint127.huff`: Added exp/ln/sqrt selectors with fixed18 I/O
+- Created `contracts/src/tools/huff/fp127/transcendental_utils.huff` with transcendental function implementations
+- FP127 exp/ln/sqrt/pow fully implemented in `contracts/src/tools/huff/fp127/exp.huff`, `ln.huff`, `sqrt.huff`, `pow.huff`
+- Updated `contracts/src/tools/huff/fp127/test_fp127.huff`: Test harness with all function selectors
 
 #### Phase 2: binary256 Infrastructure ✅
 - Created `contracts/src/tools/huff/binary256_transcendental.huff` with placeholder macros:
@@ -39,15 +37,15 @@
 - Updated `scripts/plot_bench.py`:
   - Updated parse_trans() to handle 13-field TRANS format with fp127 and bin256
   - LIBS, COLORS, LABELS, MARKERS already supported 5 backends
-- Updated `compile-huff.sh`: Skip *_transcendental.huff library files
+- Updated `compile-huff.sh`: Compiles modular FP127 library
 - All contracts compiled successfully
-- Created `test/FP127TransTest.t.sol` for isolated testing
+- Created `test/fp127/FP127Test.t.sol` for comprehensive testing
 
 #### Phase 4: Verification ✅
-- **All 100 Foundry tests pass** (including 27 transcendental cases)
-- **Benchmarks generated**: 4 plots + RESULTS.md
-- FP127 test contract: 1.7 KB (6.0 KB runtime bytecode)
-- Binary256 test contract: 41 KB runtime bytecode
+- **All Foundry tests pass** (precision, fuzz, gas benchmarks)
+- **Benchmarks generated**: Performance analysis complete
+- FP127 test contract deployed and functional
+- Python oracle at `scripts/fp127/fp127_oracle.py` for precision validation
 
 ---
 
@@ -117,14 +115,15 @@ The rational polynomial approach is proven (Solady achieves 426 gas for exp, 167
 
 | File | Purpose | Status |
 |------|---------|--------|
-| `contracts/src/tools/huff/fp127_transcendental.huff` | FP127 exp/ln/sqrt macros | Placeholders |
-| `contracts/src/tools/huff/binary256_transcendental.huff` | Binary256 exp/ln/sqrt macros | Placeholders |
-| `contracts/src/tools/huff/fixedpoint127_constants.huff` | All coefficients ready | Complete |
-| `test_fixedpoint127.huff`, `test_binary256.huff` | Test contracts with selectors | Complete |
-| `test/ArithBench.t.sol` | 5-backend transcendental benchmark | Complete |
-| `scripts/plot_bench.py` | Plotting with fp127/bin256 support | Complete |
-| `scripts/generate_fp127_coefficients.py` | Coefficient generator | Complete |
-
----
-
-**Recommendation:** Focus on FP127_SQRT first (Newton-Raphson is straightforward), then FP127_LN (CLZ + polynomial), then FP127_EXP (most complex stack management). Test each in isolation before moving to binary256.
+| `contracts/src/tools/huff/fp127/exp.huff` | FP127 exp/exp2 implementations | Complete ✅ |
+| `contracts/src/tools/huff/fp127/ln.huff` | FP127 ln/log2 implementations | Complete ✅ |
+| `contracts/src/tools/huff/fp127/sqrt.huff` | FP127 sqrt implementation | Complete ✅ |
+| `contracts/src/tools/huff/fp127/pow.huff` | FP127 pow implementation | Complete ✅ |
+| `contracts/src/tools/huff/fp127/transcendental_utils.huff` | Transcendental utilities | Complete ✅ |
+| `contracts/src/tools/huff/fp127/constants.huff` | All coefficients and constants | Complete ✅ |
+| `contracts/src/tools/huff/fp127/test_fp127.huff` | Test contract with all selectors | Complete ✅ |
+| `test/fp127/FP127Test.t.sol` | Comprehensive Foundry tests | Complete ✅ |
+| `test/bench/UnifiedBenchmark.t.sol` | Multi-library benchmark | Complete ✅ |
+| `scripts/plot_bench.py` | Plotting and analysis | Complete ✅ |
+| `scripts/fp127/generators/*.py` | Coefficient generators | Complete ✅ |
+| `scripts/fp127/fp127_oracle.py` | Python precision oracle | Complete ✅ |

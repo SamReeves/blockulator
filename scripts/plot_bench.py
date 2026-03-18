@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 LIBS = ["fp127", "vyper", "abdk", "solady"]
 # Colorblind-friendly palette
 COLORS = {"fp127": "#2196F3", "vyper": "#4CAF50", "abdk": "#FF9800", "solady": "#9C27B0"}
-LABELS = {"fp127": "FP127 (Huff 128.128)", "vyper": "Vyper (int256 18-dec)",
+LABELS = {"fp127": "FP127 (Huff 127.128)", "vyper": "Vyper (int256 18-dec)",
           "abdk": "ABDK (64.64)", "solady": "Solady (WAD)"}
 MARKERS = {"fp127": "o", "vyper": "s", "abdk": "^", "solady": "v"}
 
@@ -574,7 +574,7 @@ def generate_json(cases, trans_cases):
         "libraries": {
             "fp127": {
                 "name": "FP127",
-                "format": "128.128 fixed-point",
+                "format": "127.128 fixed-point",
                 "lang": "Huff",
                 "range": "±1.7e38"
             },

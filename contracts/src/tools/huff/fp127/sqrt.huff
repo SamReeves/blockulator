@@ -1,15 +1,15 @@
 /// @title FP127 Square Root
 /// @notice Carmack CLZ initial guess + Newton-Raphson refinement
-/// @dev 128.128 fixed-point format
-/// @dev Requires: arithmetic.huff (FP127_DIV) must be included before this file
+/// @dev 127.128 fixed-point format
+/// @dev Requires: arithmetic.huff (FP127_DIV_UNSIGNED) must be included before this file
 
 /// @notice Compute sqrt(x) using Carmack initial guess + Newton-Raphson
 /// @dev takes(1) returns(1)
-/// Stack input:  [x] (128.128 format, must be >= 0)
-/// Stack output: [sqrt(x)] (128.128 format)
+/// Stack input:  [x] (127.128 format, must be >= 0)
+/// Stack output: [sqrt(x)] (127.128 format)
 ///
 /// Algorithm:
-///   1. Branchless CLZ to find MSB
+///   1. Binary search to find MSB
 ///   2. Carmack guess: y_0 = 2^((128 + msb) / 2)
 ///   3. 7 Newton iterations: y = (y + x/y) / 2
 ///

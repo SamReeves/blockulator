@@ -125,6 +125,8 @@ contract IsolatedBench_FP127 is Test {
     // ═══════════════════════════════════════════════════════════════════════
     // ADDITION TESTS
     // ═══════════════════════════════════════════════════════════════════════
+    // FP127 addition is native uint256 addition (two's complement preserves correctness).
+    // No contract call overhead -- this benchmarks the raw EVM ADD opcode.
 
     function test_add_pi_plus_e() public view {
         uint256 a = _wadToFp127(3141592653589793238);
@@ -140,6 +142,8 @@ contract IsolatedBench_FP127 is Test {
     // ═══════════════════════════════════════════════════════════════════════
     // SUBTRACTION TESTS
     // ═══════════════════════════════════════════════════════════════════════
+    // FP127 subtraction is native uint256 subtraction.
+    // No contract call overhead -- this benchmarks the raw EVM SUB opcode.
 
     function test_sub_5_minus_3() public view {
         uint256 a = _wadToFp127(5000000000000000000);

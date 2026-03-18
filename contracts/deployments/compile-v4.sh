@@ -35,16 +35,16 @@ echo "STEP 1: Compile TextContentV4 Blueprint"
 echo "─────────────────────────────────────────────────────────────"
 
 # Compile runtime bytecode (NOT blueprint_bytecode!)
-vyper "$SRC_DIR/text_content_v4.vy" -f bytecode_runtime > "$BYTECODE_DIR/text_content_v4_runtime.bin"
-vyper "$SRC_DIR/text_content_v4.vy" -f abi > "$ABIS_DIR/text_content_v4.json"
+vyper "$SRC_DIR/text_content_v4.vy" -f bytecode_runtime > "$BYTECODE_DIR/text-content-v4_runtime.bin"
+vyper "$SRC_DIR/text_content_v4.vy" -f abi > "$ABIS_DIR/text-content-v4.json"
 
 # Wrap with EIP-5202 preamble + initcode
 node utils/prepare-text-blueprint.js
 
 echo "✅ TextContentV4 compiled with blueprint wrapper"
-echo "   Runtime: $BYTECODE_DIR/text_content_v4_runtime.bin"
-echo "   Blueprint: $BYTECODE_DIR/text_content_v4_blueprint.bin"
-echo "   ABI: $ABIS_DIR/text_content_v4.json"
+echo "   Runtime: $BYTECODE_DIR/text-content-v4_runtime.bin"
+echo "   Blueprint: $BYTECODE_DIR/text-content-v4_blueprint.bin"
+echo "   ABI: $ABIS_DIR/text-content-v4.json"
 
 # ============================================================================
 # STEP 2: Compile ContentFactoryV4
@@ -55,12 +55,12 @@ echo "────────────────────────�
 echo "STEP 2: Compile ContentFactoryV4"
 echo "─────────────────────────────────────────────────────────────"
 
-vyper "$SRC_DIR/content_factory_v4.vy" -f bytecode > "$BYTECODE_DIR/content_factory_v4.bin"
-vyper "$SRC_DIR/content_factory_v4.vy" -f abi > "$ABIS_DIR/content_factory_v4.json"
+vyper "$SRC_DIR/content_factory_v4.vy" -f bytecode > "$BYTECODE_DIR/content-factory-v4.bin"
+vyper "$SRC_DIR/content_factory_v4.vy" -f abi > "$ABIS_DIR/content-factory-v4.json"
 
 echo "✅ ContentFactoryV4 compiled"
-echo "   Bytecode: $BYTECODE_DIR/content_factory_v4.bin"
-echo "   ABI: $ABIS_DIR/content_factory_v4.json"
+echo "   Bytecode: $BYTECODE_DIR/content-factory-v4.bin"
+echo "   ABI: $ABIS_DIR/content-factory-v4.json"
 
 # ============================================================================
 # SUMMARY
@@ -78,8 +78,8 @@ echo "  • ContentFactoryV4 (factory)"
 echo ""
 
 echo "📝 File Sizes:"
-ls -lh "$BYTECODE_DIR/text_content_v4.bin"
-ls -lh "$BYTECODE_DIR/content_factory_v4.bin"
+ls -lh "$BYTECODE_DIR/text-content-v4_runtime.bin"
+ls -lh "$BYTECODE_DIR/content-factory-v4.bin"
 echo ""
 
 echo "✅ Ready for deployment!"

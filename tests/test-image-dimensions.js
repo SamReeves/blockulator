@@ -227,7 +227,7 @@ async function runTests(network = 'sepolia') {
     
     // Load ABI
     const factoryABI = JSON.parse(
-        fs.readFileSync(path.join(__dirname, '../contracts/build/abis/content_factory.json'), 'utf8')
+        fs.readFileSync(path.join(__dirname, '../contracts/build/abis/content-factory-v4.json'), 'utf8')
     );
     
     const factory = new ethers.Contract(factoryAddress, factoryABI, wallet);

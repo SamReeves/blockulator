@@ -1,6 +1,6 @@
 /**
  * Arithmetic App - FixedPoint127 Calculator
- * Two-operand calculator (A op B) using the Huff-based 128.128 fixed-point arithmetic
+ * Two-operand calculator (A op B) using the Huff-based 127.128 fixed-point arithmetic
  */
 
 import { ContractLoader } from '../infrastructure/blockchain/contract-loader.js';
@@ -48,7 +48,7 @@ export class ArithmeticApp {
                 <!-- Header -->
                 <div class="vyper-header">
                     <h2 class="vyper-title">FP127</h2>
-                    <p class="vyper-subtitle">128.128 Fixed-Point • Pure Huff Assembly • 34 Operations</p>
+                    <p class="vyper-subtitle">127.128 Fixed-Point • Pure Huff Assembly • 34 Operations</p>
                 </div>
 
                 <!-- LCD Screen -->
@@ -132,7 +132,7 @@ export class ArithmeticApp {
                     <div class="info-grid">
                         <div class="info-item">
                             <span class="info-label">Format:</span>
-                            <span class="info-value">Signed 128.128 Fixed-Point</span>
+                            <span class="info-value">Signed 127.128 Fixed-Point</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Precision:</span>
@@ -539,9 +539,9 @@ export class ArithmeticApp {
 
         const SOURCE_MODULES = [
             { file: 'contracts/src/tools/huff/fp127/test_fp127.huff', name: 'FP127 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
-            { file: 'contracts/src/tools/huff/fp127/constants.huff', name: 'Constants', desc: '128.128 format constants: ONE, LN2, LOG2E, E, PI' },
+            { file: 'contracts/src/tools/huff/fp127/constants.huff', name: 'Constants', desc: '127.128 format constants: ONE, LN2, LOG2E, E, PI' },
             { file: 'contracts/src/tools/huff/fp127/primitives.huff', name: 'Primitives', desc: 'Safe comparisons, negation, and bit operations' },
-            { file: 'contracts/src/tools/huff/fp127/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 128.128 fixed-point' },
+            { file: 'contracts/src/tools/huff/fp127/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 127.128 fixed-point' },
             { file: 'contracts/src/tools/huff/fp127/exp.huff', name: 'Exponential', desc: '2^x and e^x via degree-22 minimax polynomial' },
             { file: 'contracts/src/tools/huff/fp127/ln.huff', name: 'Natural Log', desc: 'ln(x) = log2(x) * ln(2)' },
             { file: 'contracts/src/tools/huff/fp127/log2.huff', name: 'Log Base 2', desc: 'log2(x) via MSB extraction + Horner polynomial' },

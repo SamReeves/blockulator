@@ -15,7 +15,7 @@ import mpmath
 mpmath.mp.dps = 150  # 150 decimal digits for intermediate calculations
 
 def to_fp127_hex(value):
-    """Convert a decimal value to FP127 hex string (128.128 fixed-point)."""
+    """Convert a decimal value to FP127 hex string (127.128 fixed-point)."""
     scaled = value * mpmath.mpf(2)**128
     int_val = int(mpmath.nint(scaled))
     if int_val < 0:

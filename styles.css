@@ -48,18 +48,6 @@
     --md-sys-color-on-surface-variant: #cbd5e1;
     --md-sys-color-outline: #94a3b8;
     
-    /* Legacy support (will be removed) */
-    --bg-primary: var(--md-sys-color-surface);
-    --bg-secondary: var(--md-sys-color-surface-variant);
-    --bg-card: var(--md-sys-color-surface-container);
-    --text-primary: var(--md-sys-color-on-surface);
-    --text-secondary: var(--md-sys-color-on-surface-variant);
-    --text-muted: var(--md-sys-color-outline);
-    --primary: var(--md-sys-color-primary);
-    --success: var(--md-sys-color-success);
-    --danger: var(--md-sys-color-error);
-    --warning: var(--md-sys-color-warning);
-    
     /* MD3 Shape Tokens */
     --md-sys-shape-corner-none: 0;
     --md-sys-shape-corner-small: 8px;
@@ -75,13 +63,6 @@
     --md-sys-spacing-6: 24px;
     --md-sys-spacing-8: 32px;
     --md-sys-spacing-12: 48px;
-    
-    /* Legacy support */
-    --spacing-xs: var(--md-sys-spacing-2);
-    --spacing-sm: var(--md-sys-spacing-3);
-    --spacing-md: var(--md-sys-spacing-4);
-    --spacing-lg: var(--md-sys-spacing-6);
-    --spacing-xl: var(--md-sys-spacing-8);
     
     /* MD3 Motion Tokens */
     --md-sys-motion-duration-short: 150ms;
@@ -1328,41 +1309,6 @@ body {
     height: 100%;
     pointer-events: none;
     z-index: 9999;
-}
-
-/* ============================================
-   LEGACY CLASSES (Keep temporarily for JS)
-   Will be replaced by MD3 components
-   ============================================ */
-
-/* These classes are referenced by JS but will be replaced */
-.game-card, .tool-card {
-    background: var(--md-sys-color-surface-variant);
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-medium);
-    padding: var(--md-sys-spacing-4);
-    cursor: pointer;
-    transition: all var(--md-sys-motion-duration-medium);
-    text-align: left;
-    position: relative;
-    overflow: hidden;
-}
-
-.game-card::before, .tool-card::before {
-    content: attr(data-emoji);
-    position: absolute;
-    top: -15px;
-    right: -15px;
-    font-size: 80px;
-    opacity: 0.08;
-    pointer-events: none;
-    z-index: 0;
-    transition: all var(--md-sys-motion-duration-medium);
-}
-
-.game-card > *, .tool-card > * {
-    position: relative;
-    z-index: 1;
 }
 
 .game-card:hover, .tool-card:hover {

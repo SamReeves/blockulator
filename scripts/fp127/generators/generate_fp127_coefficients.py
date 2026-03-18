@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Generate high-precision rational polynomial coefficients for 128.128 fixed-point transcendentals.
+Generate high-precision rational polynomial coefficients for 127.128 fixed-point transcendentals.
 
 Implements Remco Bloemen's rational polynomial approximations from Solady:
 - EXP: (6,7)-term rational polynomial after range reduction
 - LN: (8,8)-term rational polynomial after range reduction
 - SQRT: Newton-Raphson (no coefficients needed, just initial estimate constant)
 
-All coefficients are scaled to 128.128 format: value * 2^128
+All coefficients are scaled to 127.128 format: value * 2^128
 """
 
 from mpmath import mp, mpf, log, exp as mp_exp
@@ -16,11 +16,11 @@ import sys
 # Set precision to 100 decimal digits for accurate coefficient computation
 mp.dps = 100
 
-# 128.128 fixed-point scale factor
+# 127.128 fixed-point scale factor
 FP127_SCALE = mpf(2) ** 128
 
 def to_fp127(value):
-    """Convert a decimal value to 128.128 format (int)."""
+    """Convert a decimal value to 127.128 format (int)."""
     scaled = int(value * FP127_SCALE)
     # Handle sign for two's complement
     if scaled < 0:
@@ -28,7 +28,7 @@ def to_fp127(value):
     return scaled
 
 def fp127_to_hex(value_int):
-    """Format a 128.128 integer as a 64-char hex constant."""
+    """Format a 127.128 integer as a 64-char hex constant."""
     return f"0x{value_int:064x}"
 
 def generate_basic_constants():
@@ -36,7 +36,7 @@ def generate_basic_constants():
     ln2 = log(2)
     inv_ln2 = mpf(1) / ln2
     
-    # For 128.128, the overflow/underflow thresholds need to be computed based on
+    # For 127.128, the overflow/underflow thresholds need to be computed based on
     # the range of the representation
     # Max exponent for fp127: ~2^127, so ln(2^127) = 127 * ln(2) ≈ 88
     # Min exponent: ~-2^127, so exp would underflow around -88
@@ -51,16 +51,16 @@ def generate_basic_constants():
     print("// Basic Transcendental Constants (for FP127_EXP, FP127_LN)")
     print("// ============================================================================")
     print()
-    print(f"// LN2_FP127: ln(2) in 128.128 format")
+    print(f"// LN2_FP127: ln(2) in 127.128 format")
     print(f"#define constant LN2_FP127 = {fp127_to_hex(to_fp127(ln2))}")
     print()
-    print(f"// INV_LN2_FP127: 1/ln(2) in 128.128 format")
+    print(f"// INV_LN2_FP127: 1/ln(2) in 127.128 format")
     print(f"#define constant INV_LN2_FP127 = {fp127_to_hex(to_fp127(inv_ln2))}")
     print()
-    print(f"// EXP_OVERFLOW_THRESHOLD: max input for exp (88.0 in 128.128)")
+    print(f"// EXP_OVERFLOW_THRESHOLD: max input for exp (88.0 in 127.128)")
     print(f"#define constant EXP_OVERFLOW_THRESHOLD = {fp127_to_hex(to_fp127(exp_overflow))}")
     print()
-    print(f"// EXP_UNDERFLOW_THRESHOLD: min input for exp (-88.0 in 128.128)")
+    print(f"// EXP_UNDERFLOW_THRESHOLD: min input for exp (-88.0 in 127.128)")
     print(f"#define constant EXP_UNDERFLOW_THRESHOLD = {fp127_to_hex(to_fp127(exp_underflow))}")
     print()
 
@@ -71,7 +71,7 @@ def generate_exp_coefficients():
     Solady's expWad uses a (6,7)-term rational approximation after range reduction to (-ln2/2, ln2/2).
     The coefficients are optimized for this specific range.
     
-    We'll use Solady's coefficients but rescale them from 2^96 basis to 128.128 basis.
+    We'll use Solady's coefficients but rescale them from 2^96 basis to 127.128 basis.
     """
     print("// ============================================================================")
     print("// FP127_EXP Rational Polynomial Coefficients")
@@ -81,7 +81,7 @@ def generate_exp_coefficients():
     print()
     
     # Solady uses 2^96 as its internal scale for the polynomial evaluation
-    # We need to rescale these to 128.128 = 2^128
+    # We need to rescale these to 127.128 = 2^128
     # Scaling factor: 2^128 / 2^96 = 2^32
     
     # Solady expWad numerator coefficients (in 2^96 scale):
@@ -119,7 +119,7 @@ def generate_exp_coefficients():
     exp_den_c4 = mpf("-14423608567350463180887372962807573") / solady_2_96_scale
     exp_den_c5 = mpf("26449188498355588339934803723976023") / solady_2_96_scale
     
-    # Now convert to 128.128 scale
+    # Now convert to 127.128 scale
     print("// Numerator coefficients")
     print(f"#define constant EXP_NUM_C0 = {fp127_to_hex(to_fp127(exp_num_c0))}")
     print(f"#define constant EXP_NUM_C1 = {fp127_to_hex(to_fp127(exp_num_c1))}")
@@ -139,7 +139,7 @@ def generate_exp_coefficients():
     # The final scaling constant in Solady:
     # r = (uint256(r) * 3822833074963236453042738258902158003155416615667) >> (195 - k)
     # This combines: scale factor, 2^k, and conversion back to WAD
-    # For 128.128, we'll need a different reconstruction approach
+    # For 127.128, we'll need a different reconstruction approach
     exp_scale_factor = mpf("3822833074963236453042738258902158003155416615667") / (solady_2_96_scale * solady_2_96_scale)
     print(f"// EXP_SCALE_FACTOR: reconstruction scale (from Solady, 2^96 basis)")
     print(f"#define constant EXP_SCALE_FACTOR = {fp127_to_hex(to_fp127(exp_scale_factor))}")
@@ -206,7 +206,7 @@ def generate_ln_coefficients():
     
     # These need special handling as they're very large - they work in Solady's multi-word arithmetic
     # For fp127, we'll need to adapt the reconstruction differently
-    print("// LN reconstruction constants (for reference; may need adaptation for 128.128)")
+    print("// LN reconstruction constants (for reference; may need adaptation for 127.128)")
     print(f"// LN_SCALE_MUL (Solady): {ln_scale_mul}")
     print(f"// LN_K_MUL (Solady): {ln_k_mul}")
     print(f"// LN_BIAS_ADD (Solady): {ln_bias_add}")
@@ -236,11 +236,11 @@ def verify_coefficients():
     print(f"exp(0.1) = {exp_expected}", file=sys.stderr)
     print(f"ln(2) = {ln2}", file=sys.stderr)
     print(f"1/ln(2) = {1/ln2}", file=sys.stderr)
-    print(f"\nAll coefficients scaled to 128.128 format (2^128 scale)", file=sys.stderr)
+    print(f"\nAll coefficients scaled to 127.128 format (2^128 scale)", file=sys.stderr)
 
 def main():
     print("/// @title FP127 Transcendental Function Coefficients")
-    print("/// @notice Rational polynomial coefficients for exp, ln, sqrt in 128.128 format")
+    print("/// @notice Rational polynomial coefficients for exp, ln, sqrt in 127.128 format")
     print("/// @dev Generated by scripts/generate_fp127_coefficients.py")
     print("/// @dev Adapted from Remco Bloemen's Solady implementation")
     print()

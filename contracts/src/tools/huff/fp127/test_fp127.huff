@@ -1,5 +1,5 @@
-/// @title FixedPoint127 Test Contract
-/// @notice Test contract for signed 128.128 fixed-point arithmetic
+/// @title FP127 Test Contract
+/// @notice Test contract for signed 127.128 fixed-point arithmetic
 /// @dev Exposes add, sub, mul, div, exp, ln, sqrt and conversion functions for testing
 
 #include "constants.huff"
@@ -12,6 +12,7 @@
 #include "pow.huff"
 #include "utils.huff"
 #include "transcendental_utils.huff"
+#include "lambertw0.huff"
 
 #define macro MAIN() = takes(0) returns(0) {
     // Read function selector
@@ -89,15 +90,10 @@
     dup1 __FUNC_SIG(gcdRaw) eq gcd_raw_jump jumpi
     dup1 __FUNC_SIG(factorialRaw) eq factorial_raw_jump jumpi
     dup1 __FUNC_SIG(lambertW0Raw) eq lambertw0_raw_jump jumpi
-    dup1 __FUNC_SIG(lambertW0Guess) eq lambertw0_guess_jump jumpi
-    dup1 __FUNC_SIG(lambertW0CheckpointS) eq lambertw0_checkpoint_s_jump jumpi
-    dup1 __FUNC_SIG(lambertW0DbgLut) eq lambertw0_dbg_lut_jump jumpi
     dup1 __FUNC_SIG(lambertW0DbgFsc) eq lambertw0_dbg_fsc_jump jumpi
-    dup1 __FUNC_SIG(lambertW0DbgFscInit) eq lambertw0_dbg_fsc_init_jump jumpi
-    dup1 __FUNC_SIG(lambertW0DbgFscReuse) eq lambertw0_dbg_fsc_reuse_jump jumpi
-    dup1 __FUNC_SIG(dbgMsb) eq dbg_msb_jump jumpi
-    dup1 __FUNC_SIG(dbgLutEntry) eq dbg_lut_entry_jump jumpi
-    dup1 __FUNC_SIG(dbgLutClamp) eq dbg_lut_clamp_jump jumpi
+    dup1 __FUNC_SIG(lambertW0DbgIb) eq lambertw0_dbg_ib_jump jumpi
+    dup1 __FUNC_SIG(lambertW0DbgLutInterp) eq lambertw0_dbg_lut_interp_isolated_jump jumpi
+    dup1 __FUNC_SIG(lambertW0DbgCarmack) eq lambertw0_dbg_carmack_isolated_jump jumpi
 
     // No match, revert
     0x00 0x00 revert
@@ -777,250 +773,67 @@
         0x00 mstore
         0x20 0x00 return
     
-    lambertw0_guess_jump:
-        pop
-        0x04 calldataload      // [x_fp127]
-        // Replicate initial guess logic from FP127_LAMBERT_W0
-        dup1 iszero guess_zero jumpi
-        dup1 MSB()             // [msb, x]
-        dup1 0x80 gt guess_tiny jumpi
-        dup1 0x87 gt iszero guess_large jumpi
-        // Medium range: flat lookup table
-        LAMBERTW0_LUT() // [w0, x]
-        swap1 pop              // [w0]
-        guess_done jump
-        guess_tiny:
-        pop                    // [x]
-        guess_done jump
-        guess_large:
-        pop                    // [x]
-        dup1 FP127_LN() dup1 FP127_LN() FP127_SUB()  // [w0]
-        guess_done jump
-        guess_zero:
-        guess_done:
-        0x00 mstore
-        0x20 0x00 return
-
-    lambertw0_checkpoint_s_jump:
-        pop
-        0x04 calldataload      // [x_fp127]
-        // Get initial guess using flat LUT
-        dup1 iszero chk_s_zero jumpi
-        dup1 MSB()
-        dup1 0x80 gt chk_s_tiny jumpi
-        dup1 0x87 gt iszero chk_s_large jumpi
-        LAMBERTW0_LUT()
-        chk_s_have_w0 jump
-        chk_s_tiny:
-        pop dup1
-        chk_s_have_w0 jump
-        chk_s_large:
-        pop
-        dup1 FP127_LN() dup1 FP127_LN() FP127_SUB()
-        chk_s_have_w0 jump
-        chk_s_zero:
-        0x00 dup1 dup1 dup1
-        chk_s_done jump
-        chk_s_have_w0:
-        // Stack: [w0, x]
-        swap1                  // [x, w0]
-        // Compute s = w*e^w - x
-        dup2 FP127_EXP()       // [ew, x, w]
-        dup3 dup2 FP127_MUL()  // [we, ew, x, w]
-        dup3 FP127_SUB()       // [s, ew, x, w]
-        // Return [w, x, ew, s]
-        chk_s_done:
-        // Stack: [s, ew, x, w] or [0, 0, 0, 0]
-        0x60 mstore            // store s at 0x60
-        0x40 mstore            // store ew at 0x40
-        0x20 mstore            // store x at 0x20
-        0x00 mstore            // store w at 0x00
-        0x80 0x00 return
-
-    // Debug: LUT interpolation internals
-    // Returns (w0, t, W_lo, W_hi, msb) for a given FP127 input
-    lambertw0_dbg_lut_jump:
-        pop
-        0x04 calldataload      // [x]
-        dup1 MSB()             // [msb, x]
-
-        // Compute idx = msb - 128
-        dup1 0x80 sub          // [idx, msb, x]
-
-        // Dispatch: pop idx, push [W_hi, W_lo], jump
-        dup1 iszero dbg_lut0 jumpi
-        dup1 0x01 eq dbg_lut1 jumpi
-        dup1 0x02 eq dbg_lut2 jumpi
-        dup1 0x03 eq dbg_lut3 jumpi
-        dup1 0x04 eq dbg_lut4 jumpi
-        dup1 0x05 eq dbg_lut5 jumpi
-        pop [LAMBERTW0_W128] [LAMBERTW0_W64] dbg_lut_have_bounds jump
-        dbg_lut0: pop [LAMBERTW0_W2]   [LAMBERTW0_W1]  dbg_lut_have_bounds jump
-        dbg_lut1: pop [LAMBERTW0_W4]   [LAMBERTW0_W2]  dbg_lut_have_bounds jump
-        dbg_lut2: pop [LAMBERTW0_W8]   [LAMBERTW0_W4]  dbg_lut_have_bounds jump
-        dbg_lut3: pop [LAMBERTW0_W16]  [LAMBERTW0_W8]  dbg_lut_have_bounds jump
-        dbg_lut4: pop [LAMBERTW0_W32]  [LAMBERTW0_W16] dbg_lut_have_bounds jump
-        dbg_lut5: pop [LAMBERTW0_W64]  [LAMBERTW0_W32] dbg_lut_have_bounds jump
-
-        dbg_lut_have_bounds:
-        // Stack: [W_lo, W_hi, msb, x]
-        // Compute n = msb - 128, then t = (x >> n) - ONE_FP127
-        dup3 0x80 sub          // [n, W_lo, W_hi, msb, x]
-        dup5                   // [x, n, W_lo, W_hi, msb, x]
-        swap1 shr              // [x>>n, W_lo, W_hi, msb, x]
-        [ONE_FP127] sub        // [t, W_lo, W_hi, msb, x]
-
-        // Compute w0 = W_lo + t * (W_hi - W_lo)
-        dup3 dup3 sub          // [W_hi-W_lo, t, W_lo, W_hi, msb, x]
-        dup2 FP127_MUL()       // [t*(W_hi-W_lo), t, W_lo, W_hi, msb, x]
-        dup3 add               // [w0, t, W_lo, W_hi, msb, x]
-
-        // Return (w0, t, W_lo, W_hi, msb)
-        // Stack: [w0, t, W_lo, W_hi, msb, x]
-        0x00 mstore            // w0 at 0x00.   Stack: [t, W_lo, W_hi, msb, x]
-        0x20 mstore            // t at 0x20.    Stack: [W_lo, W_hi, msb, x]
-        0x40 mstore            // W_lo at 0x40. Stack: [W_hi, msb, x]
-        0x60 mstore            // W_hi at 0x60. Stack: [msb, x]
-        0x80 mstore            // msb at 0x80.  Stack: [x]
-        pop                    // Stack: []
-        0xa0 0x00 return
-
-    // Debug: MSB helper — returns MSB(x)
-    dbg_msb_jump:
-        pop
-        0x04 calldataload      // [x]
-        MSB()                  // [msb]
-        0x00 mstore
-        0x20 0x00 return
-
-    // Debug: LUT entry at given idx — writes table to memory, loads entry
-    dbg_lut_entry_jump:
-        pop
-        0x04 calldataload      // [idx]
-
-        // Write LUT to scratch memory
-        [LAMBERTW0_W1]   0x200 mstore
-        [LAMBERTW0_W2]   0x220 mstore
-        [LAMBERTW0_W4]   0x240 mstore
-        [LAMBERTW0_W8]   0x260 mstore
-        [LAMBERTW0_W16]  0x280 mstore
-        [LAMBERTW0_W32]  0x2a0 mstore
-        [LAMBERTW0_W64]  0x2c0 mstore
-
-        // Load entry: memory[0x200 + idx * 32]
-        0x05 shl               // [idx*32]
-        0x200 add              // [addr]
-        mload                  // [w_value]
-        0x00 mstore
-        0x20 0x00 return
-
-    // Debug: clamping logic — given msb, return (clamped_idx, raw_idx)
-    dbg_lut_clamp_jump:
-        pop
-        0x04 calldataload      // [msb]
-        0x80 swap1 sub         // [idx]
-        dup1                   // [idx, idx]
-
-        // Clamp: min(idx, 6)
-        0x07 dup2 lt           // [idx<7, idx, idx_copy]
-        swap1                  // [idx, in_range, idx_copy]
-        0x06                   // [6, idx, in_range, idx_copy]
-        dup3 iszero mul        // [out_of_range?6:0, idx, in_range, idx_copy]
-        swap1                  // [idx, fallback, in_range, idx_copy]
-        dup3 mul               // [in_range?idx:0, fallback, in_range, idx_copy]
-        add                    // [clamped_idx, in_range, idx_copy]
-        swap1 pop              // [clamped_idx, idx_copy]
-
-        // Return (clamped_idx, raw_idx)
-        swap1                  // [raw_idx, clamped_idx]
-        0x20 mstore            // raw_idx at 0x20
-        0x00 mstore            // clamped_idx at 0x00
-        0x40 0x00 return
-
-    // Debug: single FSC step internals
-    // Takes (x_fp127, w_fp127), returns (r, r_fsc, w_new)
+    // Debug: FSC step in isolation
     lambertw0_dbg_fsc_jump:
         pop
-        0x04 calldataload      // [x_fp127]
-        0x24 calldataload      // [w_fp127, x_fp127]
-
-        // Compute wp1 = w + 1
-        dup1 [ONE_FP127] add   // [wp1, w, x]
-
-        // ew = e^w
-        dup2 FP127_EXP()       // [ew, wp1, w, x]
-
-        // wew = w * e^w
-        dup3 dup2 FP127_MUL()  // [wew, ew, wp1, w, x]
-
-        // s = wew - x
-        dup5 FP127_SUB()       // [s, ew, wp1, w, x]
-
-        // denom = ew * wp1
-        swap1 dup3 FP127_MUL() // [ew_wp1, s, wp1, w, x]
-
-        // r = s / denom
-        FP127_DIV()            // [r, wp1, w, x]
-
-        // Save r for return
-        dup1                   // [r, r, wp1, w, x]
-
-        // FSC: r/(2*wp1)
-        dup3 0x01 shl          // [2*wp1, r, r, wp1, w, x]
-        FP127_DIV()            // [r/(2*wp1), r, wp1, w, x]
-        [ONE_FP127] add        // [1+r/(2*wp1), r, wp1, w, x]
-        FP127_MUL()            // [r_fsc, wp1, w, x]
-
-        // w_new = w - r_fsc
-        swap2                  // [w, wp1, r_fsc, x]
-        swap1 pop              // [w, r_fsc, x]
-        dup2                   // [r_fsc, w, r_fsc, x]
-        swap1 sub              // [w-r_fsc, r_fsc, x]
-
-        // Return (w_new, r_fsc, r) - but we lost r. Let me restructure.
-        // Stack: [w_new, r_fsc, x]
-        // We want (w_new, r_fsc). Return those.
-        0x00 mstore            // w_new at 0x00
-        0x20 mstore            // r_fsc at 0x20
-        pop                    // drop x
+        0x04 calldataload      // [x]
+        0x24 calldataload      // [w, x]
+        swap1                  // [x, w]
+        LAMBERTW0_FSC_STEP()   // [x, w']
+        swap1                  // [w', x]
+        0x00 mstore            // w'
+        0x20 mstore            // x
         0x40 0x00 return
 
-    // Debug: FSC INIT step
-    // Takes (x_fp127, w_fp127), returns (w_new, ew_new, x)
-    lambertw0_dbg_fsc_init_jump:
+    // Debug: Iacono-Boyd step in isolation
+    lambertw0_dbg_ib_jump:
         pop
-        0x04 calldataload      // [x_fp127]
-        0x24 calldataload      // [w_fp127, x_fp127]
-        swap1                  // [x_fp127, w_fp127]
+        0x04 calldataload      // [x]
+        0x24 calldataload      // [w, x]
+        swap1                  // [x, w]
+        LAMBERTW0_IB_STEP()    // [x, w']
+        swap1                  // [w', x]
+        0x00 mstore            // w'
+        0x20 mstore            // x
+        0x40 0x00 return
 
-        LAMBERTW0_FSC_STEP_INIT()  // [x, w_new, ew_new]
-
-        // Solidity reads (0x00, 0x20, 0x40) as (w_new, ew_new, x)
-        swap1                  // [w_new, x, ew_new]
-        0x00 mstore            // mem[0x00]=w_new. Stack: [x, ew_new]
-        swap1                  // [ew_new, x]
-        0x20 mstore            // mem[0x20]=ew_new. Stack: [x]
-        0x40 mstore            // mem[0x40]=x. Stack: []
-        0x60 0x00 return
-
-    // Debug: FSC REUSE step
-    // Takes (x_fp127, w_fp127, ew_fp127), returns (w_new, ew_new, x)
-    lambertw0_dbg_fsc_reuse_jump:
+    // Debug: Isolated LUT interpolation test
+    // Takes x_fp127, returns (w0, x)
+    lambertw0_dbg_lut_interp_isolated_jump:
         pop
-        0x04 calldataload      // [x_fp127]
-        0x24 calldataload      // [w_fp127, x_fp127]
-        0x44 calldataload      // [ew_fp127, w_fp127, x_fp127]
-        swap2                  // [x_fp127, w_fp127, ew_fp127]
+        0x04 calldataload        // [x]
+        LAMBERTW0_LUT_INTERP()   // [w0, x]
+        0x00 mstore              // w0
+        0x20 mstore              // x
+        0x40 0x00 return
 
-        LAMBERTW0_FSC_STEP_REUSE()  // [x, w_new, ew_new]
+    // Debug: Isolated Carmack guess test
+    // Takes (msb, x), returns (w0, x)
+    lambertw0_dbg_carmack_isolated_jump:
+        pop
+        0x04 calldataload        // [msb]
+        0x24 calldataload        // [x, msb]
+        swap1                    // [msb, x]
+        
+        // Inline the macro with diagnostics
+        dup1 0x80 swap1 sub      // [k, msb, x]
+        dup1                     // [k, k, msb, x] - save k
+        dup1 MSB()               // [log2k, k, k, msb, x]
+        dup1                     // [log2k, log2k, k, k, msb, x] - save log2k
+        swap2                    // [k, log2k, log2k, k, msb, x]
+        sub                      // [k-log2k, log2k, k, msb, x]
+        dup1                     // [k-log2k, k-log2k, log2k, k, msb, x] - save diff
+        0x80 shl                 // [w0, k-log2k, log2k, k, msb, x]
+        
+        // Return (w0, k-log2k, log2k, k, msb, x)
+        0x00 mstore              // w0
+        0x20 mstore              // k-log2k
+        0x40 mstore              // log2k
+        0x60 mstore              // k
+        0x80 mstore              // msb
+        0xa0 mstore              // x
+        0xc0 0x00 return
 
-        // Solidity reads (0x00, 0x20, 0x40) as (w_new, ew_new, x)
-        swap1                  // [w_new, x, ew_new]
-        0x00 mstore            // mem[0x00]=w_new. Stack: [x, ew_new]
-        swap1                  // [ew_new, x]
-        0x20 mstore            // mem[0x20]=ew_new. Stack: [x]
-        0x40 mstore            // mem[0x40]=x. Stack: []
-        0x60 0x00 return
 }
 
 #define function add(uint256,uint256) pure returns (uint256)
@@ -1095,12 +908,7 @@
 #define function gcdRaw(uint256,uint256) pure returns (uint256)
 #define function factorialRaw(uint256) pure returns (uint256)
 #define function lambertW0Raw(uint256) pure returns (uint256)
-#define function lambertW0Guess(uint256) pure returns (uint256)
-#define function lambertW0CheckpointS(uint256) pure returns (uint256,uint256,uint256,uint256)
-#define function lambertW0DbgLut(uint256) pure returns (uint256,uint256,uint256,uint256,uint256)
 #define function lambertW0DbgFsc(uint256,uint256) pure returns (uint256,uint256)
-#define function lambertW0DbgFscInit(uint256,uint256) pure returns (uint256,uint256,uint256)
-#define function lambertW0DbgFscReuse(uint256,uint256,uint256) pure returns (uint256,uint256,uint256)
-#define function dbgMsb(uint256) pure returns (uint256)
-#define function dbgLutEntry(uint256) pure returns (uint256)
-#define function dbgLutClamp(uint256) pure returns (uint256,uint256)
+#define function lambertW0DbgIb(uint256,uint256) pure returns (uint256,uint256)
+#define function lambertW0DbgLutInterp(uint256) pure returns (uint256,uint256)
+#define function lambertW0DbgCarmack(uint256,uint256) pure returns (uint256,uint256,uint256,uint256,uint256,uint256)

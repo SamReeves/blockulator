@@ -23,8 +23,6 @@ contract UnifiedBenchmark is Test {
     IArith vyper;
     IArithU fp127;
 
-    int256 constant F18 = 1e18;
-
     int256 constant A1 = 3_141592653589793238;
     int256 constant B1 = 2_718281828459045235;
     int256 constant A2 = 1_618033988749894848;
