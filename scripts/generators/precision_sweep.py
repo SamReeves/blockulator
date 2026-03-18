@@ -96,11 +96,12 @@ def analyze_samples(samples):
                 "error_bits": compute_percentiles(error_bit_values)
             }
             
-            # Store raw data points for box-whisker plots
+            # Store raw data points for scatter plot
             raw[lib][func] = [
                 {
                     "gas": s["gas"],
-                    "digits": s["digits"]
+                    "digits": s["digits"],
+                    "bits": s["error_bits"]
                 }
                 for s in samples_list
             ]

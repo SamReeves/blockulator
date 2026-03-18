@@ -1,28 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "forge-std/Test.sol";
+import "../base/FP127TestBase.sol";
 import "../../contracts/src/tools/FP127Math.sol";
-import "./IFP127.sol";
 
 /// @title TestFP127MathLib
 /// @notice Test that FP127Math library produces identical results to Huff implementation
-contract TestFP127MathLib is Test {
+contract TestFP127MathLib is FP127TestBase {
     IFP127 huffFP127;
     
     function setUp() public {
-        // Deploy Huff contract
-        string memory hexStr = vm.readFile("contracts/build/huff/test_fp127.runtime.bin");
-        bytes memory code = vm.parseBytes(hexStr);
-        address addr = makeAddr("fp127");
-        vm.etch(addr, code);
-        huffFP127 = IFP127(addr);
-        
-        // Configure FP127Math to use this address
-        FP127Math.setAddress(addr);
+        _deployFP127();
+        huffFP127 = fp127;
+        FP127Math.setAddress(address(fp127));
     }
     
-    function _wadToFp127(int256 wad) internal pure returns (uint256) {
+    function _wadToFp127Sol(int256 wad) internal pure returns (uint256) {
         return FP127Math.fromFixed18(uint256(wad));
     }
     
@@ -41,8 +34,8 @@ contract TestFP127MathLib is Test {
         ];
         
         for (uint i = 0; i < testValues.length - 1; i++) {
-            uint256 a = _wadToFp127(testValues[i]);
-            uint256 b = _wadToFp127(testValues[i + 1]);
+            uint256 a = _wadToFp127Sol(testValues[i]);
+            uint256 b = _wadToFp127Sol(testValues[i + 1]);
             
             uint256 huffResult = huffFP127.mulRaw(a, b);
             uint256 libResult = FP127Math.mul(a, b);
@@ -62,8 +55,8 @@ contract TestFP127MathLib is Test {
         ];
         
         for (uint i = 0; i < testValues.length - 1; i++) {
-            uint256 a = _wadToFp127(testValues[i]);
-            uint256 b = _wadToFp127(testValues[i + 1]);
+            uint256 a = _wadToFp127Sol(testValues[i]);
+            uint256 b = _wadToFp127Sol(testValues[i + 1]);
             
             uint256 huffResult = huffFP127.divRaw(a, b);
             uint256 libResult = FP127Math.div(a, b);
@@ -75,8 +68,8 @@ contract TestFP127MathLib is Test {
     }
     
     function test_add_matches_huff() public view {
-        uint256 a = _wadToFp127(3141592653589793238);
-        uint256 b = _wadToFp127(2718281828459045235);
+        uint256 a = _wadToFp127Sol(3141592653589793238);
+        uint256 b = _wadToFp127Sol(2718281828459045235);
         
         uint256 libResult = FP127Math.add(a, b);
         uint256 expectedResult = a + b; // Huff does simple add
@@ -85,8 +78,8 @@ contract TestFP127MathLib is Test {
     }
     
     function test_sub_matches_huff() public view {
-        uint256 a = _wadToFp127(5000000000000000000);
-        uint256 b = _wadToFp127(3000000000000000000);
+        uint256 a = _wadToFp127Sol(5000000000000000000);
+        uint256 b = _wadToFp127Sol(3000000000000000000);
         
         uint256 libResult = FP127Math.sub(a, b);
         uint256 expectedResult = a - b; // Huff does simple sub
@@ -127,7 +120,7 @@ contract TestFP127MathLib is Test {
         ];
         
         for (uint i = 0; i < testValues.length; i++) {
-            uint256 x = _wadToFp127(testValues[i]);
+            uint256 x = _wadToFp127Sol(testValues[i]);
             
             uint256 huffResult = huffFP127.expRaw(x);
             uint256 libResult = FP127Math.exp(x);
@@ -148,7 +141,7 @@ contract TestFP127MathLib is Test {
         ];
         
         for (uint i = 0; i < testValues.length; i++) {
-            uint256 x = _wadToFp127(testValues[i]);
+            uint256 x = _wadToFp127Sol(testValues[i]);
             
             uint256 huffResult = huffFP127.lnRaw(x);
             uint256 libResult = FP127Math.ln(x);
@@ -169,7 +162,7 @@ contract TestFP127MathLib is Test {
         ];
         
         for (uint i = 0; i < testValues.length; i++) {
-            uint256 x = _wadToFp127(testValues[i]);
+            uint256 x = _wadToFp127Sol(testValues[i]);
             
             uint256 huffResult = huffFP127.sqrtRaw(x);
             uint256 libResult = FP127Math.sqrt(x);

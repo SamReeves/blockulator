@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import "forge-std/Test.sol";
+import "../base/FP127TestBase.sol";
 import {ABDKMath64x64} from "../../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
 import {FixedPointMathLib} from "../../lib/solady/src/utils/FixedPointMathLib.sol";
 import {SD59x18} from "../../lib/prb-math/src/sd59x18/ValueType.sol";
@@ -9,67 +9,16 @@ import {wrap as prbWrap} from "../../lib/prb-math/src/sd59x18/Casting.sol";
 import {abs as prbAbs, avg as prbAvg, ceil as prbCeil, div as prbDiv, exp as prbExp, exp2 as prbExp2, floor as prbFloor, frac as prbFrac, gm as prbGm, inv as prbInv, ln as prbLn, log10 as prbLog10, log2 as prbLog2, mul as prbMul, pow as prbPow, sqrt as prbSqrt} from "../../lib/prb-math/src/sd59x18/Math.sol";
 import {add as prbAdd, sub as prbSub} from "../../lib/prb-math/src/sd59x18/Helpers.sol";
 
-interface IFP127 {
-    function mulRaw(uint256, uint256) external view returns (uint256);
-    function divRaw(uint256, uint256) external view returns (uint256);
-    function expRaw(uint256) external view returns (uint256);
-    function exp2Raw(uint256) external view returns (uint256);
-    function lnRaw(uint256) external view returns (uint256);
-    function log2Raw(uint256) external view returns (uint256);
-    function sqrtRaw(uint256) external view returns (uint256);
-    function powRaw(uint256, uint256) external view returns (uint256);
-    function abs(uint256) external view returns (uint256);
-    function neg(uint256) external view returns (uint256);
-    function inv(uint256) external view returns (uint256);
-    function min(uint256, uint256) external view returns (uint256);
-    function max(uint256, uint256) external view returns (uint256);
-    function avg(uint256, uint256) external view returns (uint256);
-    function dist(uint256, uint256) external view returns (uint256);
-    function gavg(uint256, uint256) external view returns (uint256);
-    function log10(uint256) external view returns (uint256);
-    function exp10(uint256) external view returns (uint256);
-    function absRaw(uint256) external view returns (uint256);
-    function negRaw(uint256) external view returns (uint256);
-    function invRaw(uint256) external view returns (uint256);
-    function minRaw(uint256, uint256) external view returns (uint256);
-    function maxRaw(uint256, uint256) external view returns (uint256);
-    function avgRaw(uint256, uint256) external view returns (uint256);
-    function distRaw(uint256, uint256) external view returns (uint256);
-    function gavgRaw(uint256, uint256) external view returns (uint256);
-    function log10Raw(uint256) external view returns (uint256);
-    function exp10Raw(uint256) external view returns (uint256);
-    function signRaw(uint256) external view returns (uint256);
-    function floorRaw(uint256) external view returns (uint256);
-    function ceilRaw(uint256) external view returns (uint256);
-    function fracRaw(uint256) external view returns (uint256);
-    function cbrtRaw(uint256) external view returns (uint256);
-    function lerpRaw(uint256,uint256,uint256) external view returns (uint256);
-    function hypotRaw(uint256,uint256) external view returns (uint256);
-    function roundRaw(uint256) external view returns (uint256);
-    function log2UpRaw(uint256) external view returns (uint256);
-    function gcdRaw(uint256,uint256) external view returns (uint256);
-    function factorialRaw(uint256) external view returns (uint256);
-    function lambertW0Raw(uint256) external view returns (uint256);
-}
-
 /// @title PrecisionSweep
 /// @notice Comprehensive precision distribution test across hundreds of inputs per function
 /// @dev Emits SWEEP lines for post-processing by scripts/generators/precision_sweep.py
-contract PrecisionSweep is Test {
+contract PrecisionSweep is FP127TestBase {
     using FixedPointMathLib for uint256;
     
-    IFP127 fp127;
-    
     int256 constant WAD = 1e18;
-    uint256 constant ONE_FP127 = uint256(1) << 128;
     
     function setUp() public {
-        // Deploy fp127
-        string memory hex1 = vm.readFile("contracts/build/huff/fp127.runtime.bin");
-        bytes memory code1 = vm.parseBytes(string.concat("0x", hex1));
-        address a1 = makeAddr("fp127");
-        vm.etch(a1, code1);
-        fp127 = IFP127(a1);
+        _deployFP127FromFile("contracts/build/huff/fp127.runtime.bin");
     }
     
     /// @notice Split sweep into separate tests to avoid gas limits
@@ -2041,77 +1990,80 @@ contract PrecisionSweep is Test {
     
     function _sweepLambertW0() internal {
         // 50 representative values for Lambert W0
+        // Safe range: 1 <= x <= 64 (LUT covers W(1)..W(64))
+        // x < 1 reads uninitialized memory; x > 64 has no LUT coverage
         int256[50] memory vals;
-        
-        // Domain: x >= -1/e ≈ -0.3679
-        // Near lower bound
-        vals[0] = -367879441 * WAD / 1000000000;  // -1/e
-        vals[1] = -350000000 * WAD / 1000000000;  // -0.35
-        vals[2] = -300000000 * WAD / 1000000000;  // -0.30
-        vals[3] = -250000000 * WAD / 1000000000;  // -0.25
-        vals[4] = -200000000 * WAD / 1000000000;  // -0.20
-        
-        // Small negative values
-        vals[5] = -100000000 * WAD / 1000000000;  // -0.1
-        vals[6] = -50000000 * WAD / 1000000000;   // -0.05
-        vals[7] = -10000000 * WAD / 1000000000;   // -0.01
-        vals[8] = -1000000 * WAD / 1000000000;    // -0.001
-        vals[9] = -100000 * WAD / 1000000000;     // -0.0001
-        
-        // Zero and small positive
-        vals[10] = 0;                              // W(0) = 0
-        vals[11] = 100000 * WAD / 1000000000;     // 0.0001
-        vals[12] = 1000000 * WAD / 1000000000;    // 0.001
-        vals[13] = 10000000 * WAD / 1000000000;   // 0.01
-        vals[14] = 50000000 * WAD / 1000000000;   // 0.05
-        
-        // Around 0.1 to 1
-        vals[15] = 100000000 * WAD / 1000000000;  // 0.1
-        vals[16] = 200000000 * WAD / 1000000000;  // 0.2
-        vals[17] = 300000000 * WAD / 1000000000;  // 0.3
-        vals[18] = 500000000 * WAD / 1000000000;  // 0.5
-        vals[19] = WAD;                            // 1.0, W(1) ≈ 0.5671
-        
-        // Around e
-        vals[20] = 2 * WAD;                        // 2.0
-        vals[21] = 2718281828459045235;           // e, W(e) = 1
-        vals[22] = 3 * WAD;                        // 3.0
-        vals[23] = 4 * WAD;                        // 4.0
-        vals[24] = 5 * WAD;                        // 5.0
-        
-        // Larger values
-        vals[25] = 10 * WAD;                       // 10
-        vals[26] = 20 * WAD;                       // 20
-        vals[27] = 50 * WAD;                       // 50
-        vals[28] = 100 * WAD;                      // 100
-        vals[29] = 200 * WAD;                      // 200
-        
-        // Very large values
-        vals[30] = 500 * WAD;                      // 500
-        vals[31] = 1000 * WAD;                     // 1000
-        vals[32] = 2000 * WAD;                     // 2000
-        vals[33] = 5000 * WAD;                     // 5000
-        vals[34] = 10000 * WAD;                    // 10000
-        
-        // More intermediate values
-        vals[35] = WAD / 2;                        // 0.5
-        vals[36] = WAD / 4;                        // 0.25
-        vals[37] = 3 * WAD / 4;                    // 0.75
-        vals[38] = WAD + WAD / 2;                  // 1.5
-        vals[39] = 2 * WAD + WAD / 2;              // 2.5
-        
-        // Around special values
-        vals[40] = 6 * WAD;                        // 6
-        vals[41] = 7 * WAD;                        // 7
-        vals[42] = 8 * WAD;                        // 8
-        vals[43] = 9 * WAD;                        // 9
-        vals[44] = 15 * WAD;                       // 15
-        vals[45] = 25 * WAD;                       // 25
-        vals[46] = 30 * WAD;                       // 30
-        vals[47] = 40 * WAD;                       // 40
-        vals[48] = 60 * WAD;                       // 60
-        vals[49] = 80 * WAD;                       // 80
-        
+
+        // 1 to 3
+        vals[0] = WAD;                             // 1
+        vals[1] = WAD + WAD / 2;                   // 1.5
+        vals[2] = 2 * WAD;                         // 2
+        vals[3] = 2 * WAD + WAD / 2;               // 2.5
+        vals[4] = 2718281828459045235;             // e
+
+        // 3 to 7
+        vals[5] = 3 * WAD;                         // 3
+        vals[6] = 4 * WAD;                         // 4
+        vals[7] = 5 * WAD;                         // 5
+        vals[8] = 6 * WAD;                         // 6
+        vals[9] = 7 * WAD;                         // 7
+
+        // 8 to 14
+        vals[10] = 8 * WAD;                        // 8
+        vals[11] = 9 * WAD;                        // 9
+        vals[12] = 10 * WAD;                       // 10
+        vals[13] = 11 * WAD;                       // 11
+        vals[14] = 12 * WAD;                       // 12
+
+        // 13 to 20
+        vals[15] = 13 * WAD;                       // 13
+        vals[16] = 14 * WAD;                       // 14
+        vals[17] = 15 * WAD;                       // 15
+        vals[18] = 16 * WAD;                       // 16
+        vals[19] = 17 * WAD;                       // 17
+
+        // 18 to 25
+        vals[20] = 18 * WAD;                       // 18
+        vals[21] = 19 * WAD;                       // 19
+        vals[22] = 20 * WAD;                       // 20
+        vals[23] = 22 * WAD;                       // 22
+        vals[24] = 24 * WAD;                       // 24
+
+        // 25 to 35
+        vals[25] = 25 * WAD;                       // 25
+        vals[26] = 27 * WAD;                       // 27
+        vals[27] = 29 * WAD;                       // 29
+        vals[28] = 30 * WAD;                       // 30
+        vals[29] = 32 * WAD;                       // 32
+
+        // 33 to 42
+        vals[30] = 33 * WAD;                       // 33
+        vals[31] = 35 * WAD;                       // 35
+        vals[32] = 37 * WAD;                       // 37
+        vals[33] = 38 * WAD;                       // 38
+        vals[34] = 40 * WAD;                       // 40
+
+        // 42 to 50
+        vals[35] = 42 * WAD;                       // 42
+        vals[36] = 44 * WAD;                       // 44
+        vals[37] = 45 * WAD;                       // 45
+        vals[38] = 47 * WAD;                       // 47
+        vals[39] = 48 * WAD;                       // 48
+
+        // 50 to 58
+        vals[40] = 50 * WAD;                       // 50
+        vals[41] = 52 * WAD;                       // 52
+        vals[42] = 53 * WAD;                       // 53
+        vals[43] = 55 * WAD;                       // 55
+        vals[44] = 56 * WAD;                       // 56
+
+        // 58 to 64
+        vals[45] = 58 * WAD;                       // 58
+        vals[46] = 59 * WAD;                       // 59
+        vals[47] = 60 * WAD;                       // 60
+        vals[48] = 62 * WAD;                       // 62
+        vals[49] = 64 * WAD;                       // 64
+
         for (uint256 i = 0; i < 50; i++) {
             _runSample("lambertw0", vals[i], 0);
         }
@@ -2678,7 +2630,7 @@ contract PrecisionSweep is Test {
     // CONVERSIONS
     // ============================================================================
     
-    function _wadToFp127(int256 wad) internal pure returns (uint256) {
+    function _wadToFp127(int256 wad) internal pure override returns (uint256) {
         bool negative = wad < 0;
         uint256 abs_wad = uint256(negative ? -wad : wad);
         uint256 result = (abs_wad << 128) / 1e18;

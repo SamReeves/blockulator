@@ -1015,8 +1015,10 @@ export class ArithmeticApp {
                         result = await this.contract.factorialRaw(fp127A);
                         break;
                     case 'lambertW0':
-                        if (fp127A < negativeOneOverE) {
-                            this.showStatus('Lambert W0 requires x >= -1/e', 'error');
+                        const oneFp127 = 1n << 128n;
+                        const sixtyFourFp127 = 64n << 128n;
+                        if (fp127A < oneFp127 || fp127A > sixtyFourFp127) {
+                            this.showStatus('Lambert W₀ requires 1 ≤ x ≤ 64', 'error');
                             resultEl.textContent = 'Error';
                             return;
                         }

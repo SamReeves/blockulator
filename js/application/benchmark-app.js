@@ -42,7 +42,11 @@ export class BenchmarkApp {
         await this.loadData();
         this.setupListeners();
         this.renderSummaryTable();
-        this.renderScatterChart();
+        // Defer charts to next frame so containers have layout dimensions
+        requestAnimationFrame(() => {
+            this.renderParallelCoords();
+            this.renderScatterChart();
+        });
     }
 
     // ── Data Loading ──────────────────────────────────────────────────
@@ -101,71 +105,24 @@ export class BenchmarkApp {
             <div class="bench-shell">
                 <div class="bench-header">
                     <h2 class="bench-title">Gas & Precision Benchmarks</h2>
-                    <div class="bench-legend">
-                        ${LIBS.map(lib => `
-                            <span class="bench-legend-item">
-                                <span class="bench-legend-dot" style="background:${LIB_META[lib].color}"></span>
-                                <strong>${LIB_META[lib].name}</strong>
-                                <span class="bench-legend-meta">${LIB_META[lib].format}, ${LIB_META[lib].lang}</span>
-                            </span>
-                        `).join('')}
-                    </div>
-                    <p class="bench-subtitle">Precision measured as matching decimal digits vs 100-digit mpmath oracle. Gas from Foundry traces.</p>
+                    <p class="bench-subtitle">Each dot is one test input. Precision measured as matching decimal digits vs 100-digit mpmath oracle. Upper-left is better.</p>
                 </div>
 
                 <div id="bench-loading" class="bench-loading">Loading benchmark data...</div>
 
                 <div id="bench-content" class="bench-content hidden">
-                    <!-- Scatter Chart -->
                     <section class="bench-section">
-                        <h3>Gas vs Precision Tradeoff</h3>
-                        <p class="bench-section-note">Each candlestick shows precision spread across 50 test inputs. Upper-left is better (less gas, more precision).</p>
-                        <div class="bench-scatter-container">
-                            <div class="bench-scatter-wrap">
-                                <canvas id="bench-scatter-chart"></canvas>
-                            </div>
-                            <div class="bench-scatter-legend">
-                                <h4>How to Read</h4>
-                                <div class="legend-candlestick">
-                                    <svg width="60" height="120" viewBox="0 0 60 120">
-                                        <!-- Max whisker cap -->
-                                        <line x1="20" y1="10" x2="40" y2="10" stroke="#888" stroke-width="1.5"/>
-                                        <!-- Upper whisker -->
-                                        <line x1="30" y1="10" x2="30" y2="30" stroke="#888" stroke-width="1.5"/>
-                                        <!-- IQR box -->
-                                        <rect x="22" y="30" width="16" height="40" fill="#2196F340" stroke="#2196F3" stroke-width="2"/>
-                                        <!-- Median line -->
-                                        <line x1="22" y1="50" x2="38" y2="50" stroke="#fff" stroke-width="2"/>
-                                        <!-- Lower whisker -->
-                                        <line x1="30" y1="70" x2="30" y2="90" stroke="#888" stroke-width="1.5"/>
-                                        <!-- Min whisker cap -->
-                                        <line x1="20" y1="90" x2="40" y2="90" stroke="#888" stroke-width="1.5"/>
-                                        <!-- Labels -->
-                                        <text x="45" y="13" fill="#aaa" font-size="10">Max</text>
-                                        <text x="45" y="43" fill="#aaa" font-size="10">Q3</text>
-                                        <text x="45" y="53" fill="#fff" font-size="10">Median</text>
-                                        <text x="45" y="73" fill="#aaa" font-size="10">Q1</text>
-                                        <text x="45" y="93" fill="#aaa" font-size="10">Min</text>
-                                    </svg>
-                                </div>
-                                <div class="legend-note">
-                                    <strong>Upper-left is better:</strong><br>
-                                    Lower gas cost, higher precision
-                                </div>
-                                <div class="legend-colors">
-                                    <h5>Libraries</h5>
-                                    ${LIBS.map(lib => `
-                                        <div class="legend-color-item">
-                                            <span class="legend-color-box" style="background:${LIB_META[lib].color}"></span>
-                                            <span>${LIB_META[lib].name}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
+                        <h3>Precision by Function</h3>
+                        <p class="bench-section-note">Each line is a library. Higher is better precision. Hover for details.</p>
+                        <div class="bench-parallel-wrap" id="bench-parallel"></div>
                     </section>
 
-                    <!-- Summary Table -->
+                    <section class="bench-section">
+                        <h3>Gas vs Precision vs Function</h3>
+                        <p class="bench-section-note">3D view: X = function, Y = precision (digits), Z = gas cost. Drag to rotate.</p>
+                        <div class="bench-scatter-wrap" id="bench-scatter-3d"></div>
+                    </section>
+
                     <section class="bench-section">
                         <div class="bench-section-head">
                             <h3>Summary</h3>
@@ -295,154 +252,190 @@ export class BenchmarkApp {
         return arr[lower] * (1 - weight) + arr[upper] * weight;
     }
 
-    // ── Scatter Chart ─────────────────────────────────────────────────
+    // ── Parallel Coordinates Chart (Plotly.js) ───────────────────────
 
-    renderScatterChart() {
+    renderParallelCoords() {
+        const container = document.getElementById('bench-parallel');
+        if (!container || typeof Plotly === 'undefined') return;
+
         const raw = this.distData.raw;
-        const canvas = document.getElementById('bench-scatter-chart');
 
-        if (this.charts.scatter) {
-            this.charts.scatter.destroy();
+        // Compute median digits per function per library
+        const funcMedians = {};
+        for (const func of this.functions) {
+            funcMedians[func] = {};
+            for (const lib of LIBS) {
+                const rawData = raw[lib]?.[func] || [];
+                const digits = rawData.map(d => d.digits).filter(d => d > 0).sort((a, b) => a - b);
+                if (digits.length > 0) {
+                    const mid = Math.floor(digits.length / 2);
+                    funcMedians[func][lib] = digits.length % 2 ? digits[mid] : (digits[mid - 1] + digits[mid]) / 2;
+                } else {
+                    funcMedians[func][lib] = null;
+                }
+            }
         }
 
-        const datasets = LIBS.map(lib => {
-            const points = [];
+        // Filter to functions where at least 2 libs have data
+        const validFuncs = this.functions.filter(func => {
+            const count = LIBS.filter(lib => funcMedians[func][lib] !== null).length;
+            return count >= 2;
+        });
+
+        // Build one trace per library (line across all functions)
+        const traces = LIBS.map(lib => {
+            const y = validFuncs.map(func => funcMedians[func][lib]);
+            const hasData = y.some(v => v !== null);
+            if (!hasData) return null;
+
+            return {
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: LIB_META[lib].name,
+                x: validFuncs.map(f => f.toUpperCase()),
+                y: y,
+                line: { color: LIB_META[lib].color, width: 2 },
+                marker: { size: 6, color: LIB_META[lib].color },
+                connectgaps: false,
+                hovertemplate: '%{x}: %{y:.1f} digits<extra>' + LIB_META[lib].name + '</extra>'
+            };
+        }).filter(t => t !== null);
+
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { family: 'Courier New, monospace', color: '#888' },
+            margin: { l: 50, r: 20, t: 10, b: 100 },
+            xaxis: {
+                tickangle: -45,
+                tickfont: { size: 10 },
+                gridcolor: '#1a1a1a'
+            },
+            yaxis: {
+                title: { text: 'Median Digits', font: { size: 11 } },
+                gridcolor: '#222',
+                zerolinecolor: '#333',
+                range: [0, 42]
+            },
+            legend: {
+                x: 0.5,
+                y: -0.25,
+                xanchor: 'center',
+                yanchor: 'top',
+                orientation: 'h',
+                font: { size: 11 }
+            },
+            hovermode: 'x unified'
+        };
+
+        const config = { responsive: true, displayModeBar: false };
+        Plotly.newPlot(container, traces, layout, config);
+    }
+
+    // ── 3D Scatter Chart (Plotly.js) ──────────────────────────────────
+
+    renderScatterChart() {
+        const container = document.getElementById('bench-scatter-3d');
+        if (!container || typeof Plotly === 'undefined') {
+            if (container) container.innerHTML = '<p style="color:#f66;text-align:center;padding:2rem;">Failed to load 3D library</p>';
+            return;
+        }
+
+        const raw = this.distData.raw;
+
+        // Create function index mapping
+        const funcIndex = {};
+        this.functions.forEach((f, i) => funcIndex[f] = i);
+
+        // Build one trace per library
+        // X = function index, Y = digits, Z = gas (log)
+        const traces = LIBS.map(lib => {
+            const x = [], y = [], z = [];
+            const text = [];
+
             for (const func of this.functions) {
                 const rawData = raw[lib]?.[func] || [];
-                if (rawData.length === 0) continue;
-                
-                // Compute stats from raw data
-                const gasValues = rawData.map(d => d.gas);
-                const digitValues = rawData.map(d => d.digits).sort((a, b) => a - b);
-                const gasStats = this.computeStats(gasValues);
-                
-                if (!gasStats) continue;
-                
-                const gas = this.useMedian ? gasStats.median : gasStats.mean;
-                
-                // Compute digit quartiles for candlestick
-                const min = digitValues[0];
-                const q1 = this.percentile(digitValues, 25);
-                const median = this.percentile(digitValues, 50);
-                const q3 = this.percentile(digitValues, 75);
-                const max = digitValues[digitValues.length - 1];
-                
-                // Filter out functions not supported by library (median == 0)
-                if (median <= 0) continue;
-                
-                points.push({ 
-                    x: gas, 
-                    y: median,
-                    min: min,
-                    q1: q1,
-                    q3: q3,
-                    max: max,
-                    func: func.toUpperCase() 
-                });
+                for (const d of rawData) {
+                    if (d.gas <= 0 || d.digits <= 0) continue;
+
+                    x.push(funcIndex[func]);
+                    y.push(d.digits);
+                    z.push(d.gas);
+                    text.push(`${func.toUpperCase()}<br>${d.gas.toLocaleString()} gas<br>${d.digits} digits`);
+                }
             }
+
             return {
-                label: LIB_META[lib].name,
-                data: points,
-                backgroundColor: LIB_META[lib].color + '40',
-                borderColor: LIB_META[lib].color,
-                pointRadius: 0,
-                pointHoverRadius: 12
+                type: 'scatter3d',
+                mode: 'markers',
+                name: LIB_META[lib].name,
+                x: x,
+                y: y,
+                z: z,
+                text: text,
+                hovertemplate: '<b>%{text}</b><extra>' + LIB_META[lib].name + '</extra>',
+                marker: {
+                    size: 3,
+                    color: LIB_META[lib].color,
+                    opacity: 0.7
+                }
             };
         });
 
-        // Custom plugin to draw candlesticks
-        const candlestickPlugin = {
-            id: 'candlestick',
-            afterDatasetsDraw: (chart) => {
-                const ctx = chart.ctx;
-                chart.data.datasets.forEach((dataset, datasetIndex) => {
-                    const meta = chart.getDatasetMeta(datasetIndex);
-                    if (!meta.hidden) {
-                        meta.data.forEach((element, index) => {
-                            const pt = dataset.data[index];
-                            const x = element.x;
-                            
-                            // Convert digit values to y coordinates
-                            const yScale = chart.scales.y;
-                            const yMin = yScale.getPixelForValue(pt.min);
-                            const yQ1 = yScale.getPixelForValue(pt.q1);
-                            const yMedian = yScale.getPixelForValue(pt.y);
-                            const yQ3 = yScale.getPixelForValue(pt.q3);
-                            const yMax = yScale.getPixelForValue(pt.max);
-                            
-                            const boxWidth = 8;
-                            
-                            // Draw whiskers
-                            ctx.strokeStyle = dataset.borderColor;
-                            ctx.lineWidth = 1.5;
-                            ctx.beginPath();
-                            ctx.moveTo(x, yMin);
-                            ctx.lineTo(x, yQ1);
-                            ctx.moveTo(x, yQ3);
-                            ctx.lineTo(x, yMax);
-                            ctx.stroke();
-                            
-                            // Draw min/max caps
-                            ctx.beginPath();
-                            ctx.moveTo(x - boxWidth/2, yMin);
-                            ctx.lineTo(x + boxWidth/2, yMin);
-                            ctx.moveTo(x - boxWidth/2, yMax);
-                            ctx.lineTo(x + boxWidth/2, yMax);
-                            ctx.stroke();
-                            
-                            // Draw IQR box
-                            ctx.fillStyle = dataset.backgroundColor;
-                            ctx.fillRect(x - boxWidth/2, yQ3, boxWidth, yQ1 - yQ3);
-                            ctx.strokeStyle = dataset.borderColor;
-                            ctx.lineWidth = 2;
-                            ctx.strokeRect(x - boxWidth/2, yQ3, boxWidth, yQ1 - yQ3);
-                            
-                            // Draw median line
-                            ctx.strokeStyle = '#fff';
-                            ctx.lineWidth = 2;
-                            ctx.beginPath();
-                            ctx.moveTo(x - boxWidth/2, yMedian);
-                            ctx.lineTo(x + boxWidth/2, yMedian);
-                            ctx.stroke();
-                        });
-                    }
-                });
-            }
+        // Create tick labels for function axis
+        const tickvals = this.functions.map((_, i) => i);
+        const ticktext = this.functions.map(f => f.toUpperCase());
+
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { family: 'Courier New, monospace', color: '#888' },
+            margin: { l: 0, r: 0, t: 20, b: 0 },
+            scene: {
+                xaxis: {
+                    title: { text: 'Function', font: { size: 11 } },
+                    tickvals: tickvals,
+                    ticktext: ticktext,
+                    tickfont: { size: 8 },
+                    gridcolor: '#222',
+                    backgroundcolor: 'rgba(0,0,0,0)',
+                    showspikes: false
+                },
+                yaxis: {
+                    title: { text: 'Digits', font: { size: 11 } },
+                    gridcolor: '#222',
+                    backgroundcolor: 'rgba(0,0,0,0)',
+                    showspikes: false
+                },
+                zaxis: {
+                    title: { text: 'Gas', font: { size: 11 } },
+                    type: 'log',
+                    gridcolor: '#222',
+                    backgroundcolor: 'rgba(0,0,0,0)',
+                    showspikes: false
+                },
+                camera: {
+                    eye: { x: 1.8, y: 0.8, z: 0.8 }
+                },
+                aspectratio: { x: 2, y: 1, z: 1 }
+            },
+            legend: {
+                x: 0.5,
+                y: -0.02,
+                xanchor: 'center',
+                orientation: 'h',
+                font: { size: 11 }
+            },
+            showlegend: true
         };
 
-        this.charts.scatter = new Chart(canvas.getContext('2d'), {
-            type: 'scatter',
-            data: { datasets },
-            plugins: [candlestickPlugin],
-            options: {
-                responsive: true,
-                maintainAspectRatio: true,
-                plugins: {
-                    legend: { display: true, position: 'top', labels: { color: '#ccc', font: { family: "'Courier New', monospace" } } },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => {
-                                const pt = ctx.raw;
-                                return `${ctx.dataset.label} ${pt.func}: ${Math.round(pt.x).toLocaleString()} gas, digits: ${pt.min.toFixed(0)}-${pt.y.toFixed(0)}-${pt.max.toFixed(0)}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        type: 'logarithmic',
-                        title: { display: true, text: `Gas (${this.useMedian ? 'median' : 'mean'})`, color: '#888' },
-                        ticks: { color: '#888', callback: v => v.toLocaleString() },
-                        grid: { color: '#2a2a2a' }
-                    },
-                    y: {
-                        min: 0,
-                        title: { display: true, text: 'Matching Digits (spread)', color: '#888' },
-                        ticks: { color: '#888' },
-                        grid: { color: '#2a2a2a' }
-                    }
-                }
-            }
-        });
+        const config = {
+            responsive: true,
+            displayModeBar: true,
+            modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
+            displaylogo: false
+        };
+
+        Plotly.newPlot(container, traces, layout, config);
     }
 }

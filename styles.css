@@ -5933,38 +5933,6 @@ details[open] .collapsible-arrow {
     font-weight: 700;
 }
 
-.bench-legend {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 0.75rem;
-}
-
-.bench-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #ccc;
-    font-size: 0.875rem;
-}
-
-.bench-legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 3px;
-    flex-shrink: 0;
-}
-
-.bench-legend-item strong {
-    color: #fff;
-    font-weight: 700;
-}
-
-.bench-legend-meta {
-    color: #666;
-    font-size: 0.75rem;
-}
 
 .bench-subtitle {
     color: #666;
@@ -6156,90 +6124,20 @@ details[open] .collapsible-arrow {
     font-style: italic;
 }
 
-/* ── Scatter Chart ───────────────────────────────────────────────────── */
+/* ── Parallel Coordinates Chart ──────────────────────────────────────── */
 
-.bench-scatter-container {
-    display: flex;
-    gap: 1.5rem;
+.bench-parallel-wrap {
     max-width: 1400px;
     margin: 0 auto;
-    align-items: flex-start;
+    height: 360px;
 }
+
+/* ── 3D Scatter Chart (Plotly) ───────────────────────────────────────── */
 
 .bench-scatter-wrap {
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-radius: 6px;
-    padding: 1.25rem;
-    flex: 1;
-    min-width: 0;
-}
-
-.bench-scatter-wrap canvas {
-    max-height: 550px;
-}
-
-.bench-scatter-legend {
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-radius: 6px;
-    padding: 1.25rem;
-    width: 200px;
-    flex-shrink: 0;
-}
-
-.bench-scatter-legend h4 {
-    margin: 0 0 1rem 0;
-    color: #fff;
-    font-size: 0.95rem;
-    font-weight: 700;
-}
-
-.bench-scatter-legend h5 {
-    margin: 0 0 0.5rem 0;
-    color: #aaa;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.legend-candlestick {
-    margin-bottom: 1.5rem;
-}
-
-.legend-note {
-    margin-bottom: 1.5rem;
-    padding: 0.75rem;
-    background: #0a0a0a;
-    border-radius: 4px;
-    font-size: 0.8rem;
-    line-height: 1.4;
-    color: #aaa;
-}
-
-.legend-note strong {
-    color: #fff;
-    display: block;
-    margin-bottom: 0.25rem;
-}
-
-.legend-colors {
-    margin-top: 1rem;
-}
-
-.legend-color-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    font-size: 0.85rem;
-    color: #ccc;
-}
-
-.legend-color-box {
-    width: 14px;
-    height: 14px;
-    border-radius: 2px;
-    flex-shrink: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 500px;
 }
 
 /* ── Distribution Grid ────────────────────────────────────────────────── */
@@ -6296,16 +6194,6 @@ details[open] .collapsible-arrow {
         font-size: 1.25rem;
     }
 
-    .bench-legend {
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .bench-legend-meta {
-        display: none;
-    }
-
     .bench-section-head {
         flex-direction: column;
         align-items: flex-start;
@@ -6321,16 +6209,8 @@ details[open] .collapsible-arrow {
         padding: 0.4rem;
     }
 
-    .bench-scatter-container {
-        flex-direction: column;
-    }
-
-    .bench-scatter-legend {
-        width: 100%;
-    }
-
     .bench-scatter-wrap {
-        padding: 0.75rem;
+        height: 400px;
     }
 }
 

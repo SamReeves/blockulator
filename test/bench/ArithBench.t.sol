@@ -2,8 +2,8 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
-import {ABDKMath64x64} from "../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
-import {FixedPointMathLib} from "../lib/solady/src/utils/FixedPointMathLib.sol";
+import {ABDKMath64x64} from "../../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
+import {FixedPointMathLib} from "../../lib/solady/src/utils/FixedPointMathLib.sol";
 
 interface IHuffArith {
     function add(uint256, uint256) external view returns (uint256);

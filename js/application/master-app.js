@@ -209,17 +209,17 @@ export class MasterApp {
      */
     async initBenchmarksView() {
         console.log('📊 Initializing Benchmarks view...');
-        
-        // Load Chart.js before initializing benchmarks (needed for charts)
-        await this.loadChartJs();
-        
+
+        // Load Plotly.js for 3D scatter plot and Chart.js for summary table
+        await Promise.all([this.loadPlotly(), this.loadChartJs()]);
+
         if (!this.benchmarkApp) {
             // Import and create benchmark app
             const { BenchmarkApp } = await import('./benchmark-app.js');
             this.benchmarkApp = new BenchmarkApp(this.web3Provider, this.walletComponent, this.toastComponent);
             await this.benchmarkApp.init();
         }
-        
+
         console.log('✅ Benchmarks view initialized');
     }
 
@@ -281,7 +281,6 @@ export class MasterApp {
      * Only loaded when futures view is accessed (for distribution charts)
      */
     async loadChartJs() {
-        // Check if already loaded
         if (window.Chart) {
             console.log('✅ Chart.js already loaded');
             return;
@@ -306,6 +305,39 @@ export class MasterApp {
                 reject(new Error('Failed to load Chart.js'));
             };
             
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
+     * Lazy load Plotly.js library
+     * Only loaded when benchmarks view is accessed (for 3D scatter plot)
+     */
+    async loadPlotly() {
+        if (window.Plotly) {
+            console.log('✅ Plotly.js already loaded');
+            return;
+        }
+
+        console.log('📊 Loading Plotly.js library...');
+        const startTime = performance.now();
+
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/plotly.js-gl3d-dist-min@2.32.0/plotly-gl3d.min.js';
+            script.async = true;
+
+            script.onload = () => {
+                const loadTime = (performance.now() - startTime).toFixed(2);
+                console.log(`✅ Plotly.js loaded in ${loadTime}ms`);
+                resolve();
+            };
+
+            script.onerror = () => {
+                console.error('❌ Failed to load Plotly.js');
+                reject(new Error('Failed to load Plotly.js'));
+            };
+
             document.head.appendChild(script);
         });
     }
