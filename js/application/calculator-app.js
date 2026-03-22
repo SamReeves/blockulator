@@ -50,7 +50,7 @@ export class CalculatorApp {
                 <!-- Header -->
                 <div class="vyper-header">
                     <h2 class="vyper-title">Vyper Math</h2>
-                    <p class="vyper-subtitle">30+ on-chain scientific functions in Vyper 0.4</p>
+                    <p class="vyper-subtitle">Decimal Stats functions in Vyper 0.4</p>
                 </div>
 
                 <!-- LCD Screen -->
