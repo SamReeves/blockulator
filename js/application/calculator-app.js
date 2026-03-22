@@ -2,10 +2,10 @@
  * Calculator App — TI-style scientific calculator UI
  */
 
-import { CALCULATOR_REGISTRY, CATEGORIES, getCalculatorById } from '../domain/calculators/calculator-registry.js';
-import { ContractLoader } from '../infrastructure/blockchain/contract-loader.js';
-import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js';
-import { getContractsByType, getContractMetadata } from '../infrastructure/config/contract-registry.js';
+import { CALCULATOR_REGISTRY, CATEGORIES, getCalculatorById } from '../domain/calculators/calculator-registry.js?v=2';
+import { loadContract } from '../infrastructure/blockchain/load-contract.js?v=2';
+import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js?v=2';
+import { getContractsByType, getContractMetadata } from '../infrastructure/config/contract-registry.js?v=2';
 
 // Explicit key layout — every function has a visible button.
 // 6 columns, spatial grouping replaces category headers.
@@ -41,6 +41,10 @@ export class CalculatorApp {
 
     renderHTML() {
         const container = document.getElementById('vyper-container');
+        if (!container) {
+            console.error('vyper-container not found');
+            return;
+        }
         container.innerHTML = `
             <div class="ti-calc-shell">
                 <!-- Header -->
@@ -431,9 +435,14 @@ export class CalculatorApp {
 
     async loadContracts() {
         for (const calc of CALCULATOR_REGISTRY) {
-            const contract = await ContractLoader.load(calc.id, this.web3Provider);
-            if (contract) {
-                this.contracts[calc.id] = contract;
+            try {
+                const metadata = getContractMetadata(calc.id);
+                const contract = await loadContract(metadata.abiFile, metadata.contractAddress, this.web3Provider);
+                if (contract) {
+                    this.contracts[calc.id] = contract;
+                }
+            } catch (err) {
+                console.warn(`[${calc.id}] Failed to load contract:`, err.message);
             }
         }
     }

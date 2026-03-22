@@ -5,8 +5,9 @@
  * Provides dependency injection and unified metadata access
  */
 
-import { ContractLoader } from '../../infrastructure/blockchain/contract-loader.js';
+import { loadContract } from '../../infrastructure/blockchain/load-contract.js';
 import { getContractMetadata, hasContract } from '../../infrastructure/config/contract-registry.js';
+import { getCurrentNetwork } from '../../infrastructure/config/network.js';
 import { BlockchainMath } from '../../infrastructure/utils/blockchain-math.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
@@ -46,11 +47,31 @@ export class InteractiveContract {
         
         await this.onBeforeInit();
         
-        // Load contract using infrastructure layer
-        this.contract = await ContractLoader.load(this.getContractName(), web3Provider);
-        if (!this.contract) return;
+        // Load contract using metadata
+        try {
+            let abiPath, address;
+            
+            if (this.metadata?.contract) {
+                // Game contracts: metadata comes from static class property
+                const network = getCurrentNetwork();
+                abiPath = this.metadata.contract.abi;
+                address = this.metadata.contract.addresses[network];
+            } else if (this.metadata?.abiFile) {
+                // Non-game contracts: metadata from registry
+                abiPath = this.metadata.abiFile;
+                address = this.metadata.contractAddress;
+            } else {
+                throw new Error(`No metadata available for ${this.getContractName()}`);
+            }
+            
+            this.contract = await loadContract(abiPath, address, web3Provider);
+        } catch (err) {
+            console.warn(`[${this.getContractName()}] Contract load failed:`, err.message);
+            this.contract = null;
+        }
         
-        // Execute subclass-specific initialization sequence
+        // Always render and setup, even if contract failed to load
+        // Subclasses should handle null contract gracefully
         this.render();
         this.setupListeners();
         await this.onAfterInit();

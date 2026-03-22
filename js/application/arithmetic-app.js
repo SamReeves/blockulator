@@ -3,7 +3,7 @@
  * Two-operand calculator (A op B) using the Huff-based 127.128 fixed-point arithmetic
  */
 
-import { ContractLoader } from '../infrastructure/blockchain/contract-loader.js';
+import { loadContract } from '../infrastructure/blockchain/load-contract.js';
 import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js';
 import { getContractMetadata } from '../infrastructure/config/contract-registry.js';
 import { decimalToFp127, fp127ToDecimal, isValidFp127Decimal, formatFp127Display } from '../infrastructure/math/fp127-math.js';
@@ -741,7 +741,8 @@ export class ArithmeticApp {
     }
 
     async loadContract() {
-        this.contract = await ContractLoader.load('fixedpoint127', this.web3Provider);
+        const metadata = getContractMetadata('fixedpoint127');
+        this.contract = await loadContract(metadata.abiFile, metadata.contractAddress, this.web3Provider);
         if (!this.contract) {
             console.error('Failed to load FixedPoint127 contract');
         }

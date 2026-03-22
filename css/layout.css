@@ -433,3 +433,27 @@
     gap: var(--md-sys-spacing-2);
     flex-wrap: wrap;
 }
+
+/* Badge mode selector */
+.badge-mode-selector {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.badge-mode-btn {
+    padding: 0.5rem 1.5rem;
+    border: 2px solid var(--md-sys-color-outline);
+    border-radius: 8px;
+    cursor: pointer;
+    background: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: bold;
+}
+
+.badge-mode-btn.active {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border-color: transparent;
+}

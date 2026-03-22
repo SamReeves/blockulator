@@ -27,6 +27,7 @@ export class PixelEditor {
         this.currentColor = '#000000';
         this.currentTool = 'pen';
         this.isDrawing = false;
+        this.colorPickerInput = null;
         this.undoStack = [];
         this.redoStack = [];
         this.maxUndoSteps = 50;
@@ -108,6 +109,7 @@ export class PixelEditor {
             container.appendChild(saveBtn);
         }
         
+        this.element = container;
         return container;
     }
     
@@ -130,6 +132,10 @@ export class PixelEditor {
         colorPicker.addEventListener('change', (e) => {
             this.setColor(e.target.value);
         });
+        colorPicker.addEventListener('input', (e) => {
+            this.setColor(e.target.value);
+        });
+        this.colorPickerInput = colorPicker;
         colorGroup.appendChild(colorPicker);
         toolbar.appendChild(colorGroup);
         
@@ -482,7 +488,21 @@ export class PixelEditor {
         const rgb = this.getPixelColor(x, y);
         this.currentColor = this.rgbToHex(rgb);
         
-        // Emit color change event
+        if (this.colorPickerInput) {
+            this.colorPickerInput.value = this.currentColor;
+        }
+
+        // Switch back to pen after picking
+        this.setTool('pen');
+        const toolBtns = this.element?.querySelectorAll('.tool-btn');
+        if (toolBtns) {
+            toolBtns.forEach(b => {
+                const isPen = b.title === 'Pen';
+                b.style.background = isPen ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-surface)';
+                b.classList.toggle('active', isPen);
+            });
+        }
+
         if (this.onColorPicked) {
             this.onColorPicked(this.currentColor);
         }

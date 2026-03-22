@@ -5,7 +5,8 @@
  */
 
 import { web3Provider } from '../infrastructure/blockchain/web3-provider.js';
-import { WalletConnectComponent, ToastComponent } from '../presentation/components/index.js';
+import { WalletConnectComponent } from '../presentation/components/wallet-connect.js';
+import { ToastComponent } from '../presentation/components/toast.js';
 import { initConfetti } from '../presentation/effects/confetti-animation.js';
 import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
 import { MasterRouter } from './master-router.js';
@@ -43,7 +44,6 @@ export class MasterApp {
      * Sub-apps receive shared components (wallet, toast) instead of creating their own.
      * Shared components (wallet, toast, confetti) are initialized once in MasterApp.
      * 
-     * Note: BadgeManager uses a different API by design: init(container, web3Provider)
      */
 
     /**
@@ -179,8 +179,8 @@ export class MasterApp {
         console.log('🧮 Initializing Vyper view...');
         
         if (!this.vyperApp) {
-            // Import and create vyper app
-            const { CalculatorApp } = await import('./calculator-app.js');
+            // Import and create vyper app (cache bust with version)
+            const { CalculatorApp } = await import('./calculator-app.js?v=2');
             this.vyperApp = new CalculatorApp(this.web3Provider, this.walletComponent, this.toastComponent);
             await this.vyperApp.init();
         }
@@ -252,17 +252,9 @@ export class MasterApp {
         console.log('🎨 Initializing Badges view...');
         
         if (!this.badgesModule) {
-            // Import BadgeManager
             const { BadgeManager } = await import('../domain/identity/badge-manager.js');
             this.badgesModule = new BadgeManager();
-            
-            // Initialize the module
-            const container = document.getElementById('badges-view');
-            if (container) {
-                await this.badgesModule.init(container, this.web3Provider);
-            } else {
-                console.error('❌ Badges view container not found');
-            }
+            await this.badgesModule.init(this.web3Provider);
         }
         
         console.log('✅ Badges view initialized');
