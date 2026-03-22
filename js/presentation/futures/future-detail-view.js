@@ -9,6 +9,7 @@ import { StatusCardRenderer } from '../components/status-card-renderer.js';
 import { DOMHelpers } from '../dom/dom-helpers.js';
 import { computeCdfValue } from './distribution-cdf.js';
 import { getExplorerUrl } from '../../infrastructure/config/network.js';
+import { AddressBadge } from '../components/address-badge.js';
 
 export class FutureDetailView {
     constructor(futureData, factory, web3Provider) {
@@ -69,6 +70,9 @@ export class FutureDetailView {
 
             // Attach event listeners
             this.attachEventListeners();
+
+            // Load owner badge
+            this.loadOwnerBadge();
 
             // Render chart
             this.renderChart();
@@ -229,7 +233,11 @@ export class FutureDetailView {
                         </div>
                         <div class="info-row">
                             <span class="label">Owner:</span>
-                            <span class="value"><a href="${getExplorerUrl(this.futureData.owner)}" target="_blank" rel="noopener noreferrer">${this.futureData.owner}</a> ${isMyFuture ? '(You)' : ''}</span>
+                            <span class="value">
+                                <span id="owner-badge-container" class="owner-badge-inline"></span>
+                                <a href="${getExplorerUrl(this.futureData.owner)}" target="_blank" rel="noopener noreferrer">${this.futureData.owner}</a>
+                                ${isMyFuture ? '(You)' : ''}
+                            </span>
                         </div>
                         <div class="info-row">
                             <span class="label">Distribution Type:</span>
@@ -248,6 +256,27 @@ export class FutureDetailView {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Load the owner's badge asynchronously
+     */
+    async loadOwnerBadge() {
+        const container = this.containerElement.querySelector('#owner-badge-container');
+        if (!container || !this.futureData.owner) return;
+
+        try {
+            const badge = await AddressBadge.create(this.futureData.owner, this.web3Provider, {
+                size: 24,
+                clickToExpand: true
+            });
+
+            if (badge) {
+                container.appendChild(badge);
+            }
+        } catch (err) {
+            // No badge for this owner
+        }
     }
 
     attachEventListeners() {

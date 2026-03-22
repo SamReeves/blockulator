@@ -54,10 +54,13 @@ export class SatanMolochBaal extends Game {
     }
 
     initComponents() {
+        const defaultWei = '100000000000000'; // 0.0001 ETH
         this.voteInput = this.createValueInput('vote-amount-input', {
             label: 'Amount to Burn',
-            hint: 'All goes to the null address - eternal sacrifice!'
+            hint: 'All goes to the null address - eternal sacrifice!',
+            minWei: '1'
         });
+        this.voteInput.setValue(defaultWei);
         
         this.lazySusan = new LazySusan3D('lazy-susan-container', {
             items: this.demons,

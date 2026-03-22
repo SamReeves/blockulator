@@ -126,6 +126,7 @@ export class MessageBoard extends Game {
         
         if (this.feeInput && minFee) {
             this.feeInput.setMinimum(minFeeWei);
+            this.feeInput.setValue(minFeeWei);
         }
         
         if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {

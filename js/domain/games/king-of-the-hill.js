@@ -122,6 +122,7 @@ export class KingOfTheHill extends Game {
         
         if (this.paymentInput && minPayment) {
             this.paymentInput.setMinimum(minPayment.toString());
+            this.paymentInput.setValue(minPayment.toString());
         }
         
         if (this.kingLadder) {

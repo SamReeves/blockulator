@@ -7,6 +7,7 @@
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { EulerianFuture } from '../../domain/futures/eulerian-future.js';
 import { DOMHelpers } from '../dom/dom-helpers.js';
+import { AddressBadge } from '../components/address-badge.js';
 
 export class MarketTable {
     constructor(factory, web3Provider) {
@@ -171,10 +172,36 @@ export class MarketTable {
         } else {
             this.containerElement.innerHTML = this.renderTableHTML();
             this.attachEventListeners();
+            this.loadOwnerBadges();
         }
 
         // Update stats after loading
         await this.updateStats();
+    }
+
+    /**
+     * Load owner badges asynchronously
+     */
+    async loadOwnerBadges() {
+        const badgeContainers = this.containerElement.querySelectorAll('.owner-badge-container');
+        
+        for (const container of badgeContainers) {
+            const ownerAddress = container.dataset.owner;
+            if (!ownerAddress) continue;
+            
+            try {
+                const badge = await AddressBadge.create(ownerAddress, this.web3Provider, {
+                    size: 18,
+                    clickToExpand: true
+                });
+                
+                if (badge) {
+                    container.appendChild(badge);
+                }
+            } catch (err) {
+                // Silently fail - no badge for this user
+            }
+        }
     }
 
     /**
@@ -267,7 +294,10 @@ export class MarketTable {
                 <td class="time-left">${timeLeft}</td>
                 <td class="value">${balance} ETH</td>
                 <td class="expected-value">${expected} ETH</td>
-                <td class="owner">${ownerShort}</td>
+                <td class="owner">
+                    <span class="owner-badge-container" data-owner="${future.owner}"></span>
+                    <span class="owner-address">${ownerShort}</span>
+                </td>
                 <td>${statusBadge}</td>
                 <td class="actions">
                     ${actionButtons}

@@ -51,9 +51,12 @@ export class PayItForward extends Game {
     }
 
     initComponents() {
+        const defaultWei = '100000000000000'; // 0.0001 ETH
         this.donationInput = this.createValueInput('donate-amount-input', {
-            hint: 'Donate any amount to join the chain'
+            hint: 'Donate any amount to join the chain',
+            minWei: '1'
         });
+        this.donationInput.setValue(defaultWei);
         
         this.addressFlow = new AddressFlow('address-flow-container', { mode: 'forward' });
         this.addressFlow.init();

@@ -49,9 +49,12 @@ export class TimeToMakeTheDonuts extends Game {
     }
 
     initComponents() {
+        const defaultWei = '100000000000000'; // 0.0001 ETH
         this.donationInput = this.createValueInput('donation-amount-input', {
-            hint: 'Any amount helps grow the prize pool'
+            hint: 'Any amount helps grow the prize pool',
+            minWei: '1'
         });
+        this.donationInput.setValue(defaultWei);
         
         this.countdownWheel = new CountdownWheel('countdown-wheel-container', {
             timeGetter: async () => {

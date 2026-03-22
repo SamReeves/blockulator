@@ -330,6 +330,7 @@ export class PissingContest extends Game {
             this.dom.updateInfo('min-donation', this.dom.formatWei(minDonation));
             if (this.donationInput && minDonation) {
                 this.donationInput.setMinimum(minDonation.toString());
+                this.donationInput.setValue(minDonation.toString());
             }
             
             if (!adminPanel) return;

@@ -643,3 +643,22 @@
     border-radius: var(--md-sys-shape-corner-small);
     text-align: center;
 }
+
+/* Owner badge display */
+.owner-badge-container {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.25rem;
+}
+
+.owner-badge-inline {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.35rem;
+}
+
+.owner td {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}

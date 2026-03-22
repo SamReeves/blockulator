@@ -53,9 +53,12 @@ export class LastCall extends Game {
     }
 
     initComponents() {
+        const defaultWei = '100000000000000'; // 0.0001 ETH
         this.donationInput = this.createValueInput('donation-amount-input', {
-            hint: 'Be the last donor when time expires!'
+            hint: 'Be the last donor when time expires!',
+            minWei: '1'
         });
+        this.donationInput.setValue(defaultWei);
     }
 
     getListeners() {

@@ -120,6 +120,7 @@ export class DiceGods extends Game {
         
         if (this.donationInput && minDonation) {
             this.donationInput.setMinimum(minDonation.toString());
+            this.donationInput.setValue(minDonation.toString());
         }
 
         const numberCounts = await this.contract.get_number_counts();
