@@ -30,208 +30,153 @@ export class FuturesApp {
     }
 
     async init() {
-        // Guard against double initialization
         if (this.initialized) {
             await this.refresh();
             return;
         }
 
+        console.log('[Futures] Initializing...');
+
+        // Step 1: DOM event listeners (always works, no async deps)
+        this.setupEventListeners();
+        console.log('[Futures] Event listeners bound.');
+
+        // Step 2: Load ABIs
         try {
-            // Load ABIs
             await this.loadAbis();
+            console.log('[Futures] ABIs loaded.');
+        } catch (err) {
+            console.error('[Futures] Failed to load ABIs:', err);
+            this.showStatus('Could not load futures contract ABIs. Check console for details.');
+            return;
+        }
 
-            // Load factory contract
+        // Step 3: Load factory contract
+        try {
             await this.loadFactory();
+            console.log('[Futures] Factory loaded:', this.factory.contractAddress);
+        } catch (err) {
+            console.error('[Futures] Failed to load factory:', err);
+            this.showStatus('Could not connect to the Future Factory contract.');
+            return;
+        }
 
-            // Initialize ViewRouter
-            this.viewRouter = new ViewRouter();
-            this.viewRouter.subscribe((data) => this.onRouteChange(data));
+        // Step 4: ViewRouter
+        this.viewRouter = new ViewRouter();
+        this.viewRouter.subscribe(() => this.renderCurrentView());
 
-            // Initialize components
-            await this.initializeComponents();
+        // Step 5: Components (market table + create form)
+        this.initializeComponents();
+        console.log('[Futures] Components initialized.');
 
-            // Setup event listeners
-            this.setupEventListeners();
-                
-            // Setup factory event subscriptions
-            this.setupFactoryEvents();
+        // Step 6: Contract events
+        this.setupFactoryEvents();
 
-            // Initial render (Market View)
+        // Step 7: Render
+        try {
             await this.renderCurrentView();
+        } catch (err) {
+            console.error('[Futures] Failed to render initial view:', err);
+        }
 
-            // Render contract info section
-            this.renderContractInfo();
+        // Step 8: Contract info panel
+        this.renderContractInfo();
 
-            this.initialized = true;
+        this.initialized = true;
+        console.log('[Futures] Ready.');
+    }
 
-        } catch (error) {
-            console.error('Failed to initialize futures view:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Failed to initialize futures',
-                type: 'error'
-            });
+    // ── Helpers ────────────────────────────────────────────────────────
+
+    showStatus(message) {
+        const container = document.getElementById('market-table-container');
+        if (container) {
+            container.innerHTML = `<div class="error-state"><p>${message}</p></div>`;
         }
     }
 
-    /**
-     * Render contract info section with links to contracts
-     */
-    renderContractInfo() {
-        const container = document.getElementById('futures-contract-info');
-        if (!container) return;
-
-        container.innerHTML = '';
-        container.style.display = 'grid';
-        container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
-        container.style.gap = '1.5rem';
-
-        // Get all future contracts from registry
-        const futureContracts = getContractsByType('future');
-
-        // Render each contract
-        futureContracts.forEach(contractKey => {
-            const metadata = getContractMetadata(contractKey);
-            
-            const contractCard = document.createElement('div');
-            contractCard.className = 'contract-info-card';
-            contractCard.innerHTML = `
-                <div class="contract-card-header">
-                    <h4>${metadata.emoji} ${metadata.name}</h4>
-                    <p class="contract-card-description">${metadata.description}</p>
-                </div>
-            `;
-            
-            const contractInfo = ContractInfoRenderer.createContractInfo(
-                metadata.contractAddress,
-                metadata.sourceFile,
-                metadata.abiFile
-            );
-            contractInfo.style.marginTop = '1rem';
-            contractCard.appendChild(contractInfo);
-            container.appendChild(contractCard);
-        });
-    }
-
-    /**
-     * Refresh data when returning to view
-     */
-    async refresh() {
-        await this.renderCurrentView();
-    }
+    // ── ABI Loading ───────────────────────────────────────────────────
 
     async loadAbis() {
+        const bust = `?v=${Date.now()}`;
+
+        const [factoryRes, futureRes] = await Promise.all([
+            fetch(`/contracts/build/abis/future-factory.json${bust}`),
+            fetch(`/contracts/build/abis/eulerian-future.json${bust}`)
+        ]);
+
+        if (!factoryRes.ok) throw new Error(`Factory ABI HTTP ${factoryRes.status}`);
+        if (!futureRes.ok) throw new Error(`Future ABI HTTP ${futureRes.status}`);
+
+        const factoryText = await factoryRes.text();
+        const futureText = await futureRes.text();
+
         try {
-            // Load Future Factory ABI
-            const factoryResponse = await fetch('/contracts/build/abis/future-factory.json');
-            if (!factoryResponse.ok) {
-                throw new Error('Factory ABI not found');
-            }
-            this.factoryAbi = await factoryResponse.json();
+            this.factoryAbi = JSON.parse(factoryText);
+        } catch (e) {
+            console.error('[Futures] Factory ABI parse error. First 200 chars:', factoryText.slice(0, 200));
+            throw new Error('Factory ABI is not valid JSON');
+        }
 
-            // Load Eulerian Future ABI
-            const futureResponse = await fetch('/contracts/build/abis/eulerian-future.json');
-            if (!futureResponse.ok) {
-                throw new Error('Future ABI not found');
-            }
-            this.futureAbi = await futureResponse.json();
-
-        } catch (error) {
-            console.error('Failed to load ABIs:', error);
-            throw error;
+        try {
+            this.futureAbi = JSON.parse(futureText);
+        } catch (e) {
+            console.error('[Futures] Future ABI parse error. First 200 chars:', futureText.slice(0, 200));
+            throw new Error('Future ABI is not valid JSON');
         }
     }
 
+    // ── Factory ───────────────────────────────────────────────────────
+
     async loadFactory() {
-        const factoryMetadata = getContractMetadata('future-factory');
-        const FACTORY_ADDRESS = factoryMetadata.contractAddress || '0x0000000000000000000000000000000000000000';
+        const meta = getContractMetadata('future-factory');
+        const addr = meta.contractAddress;
 
-
-        if (!FACTORY_ADDRESS || FACTORY_ADDRESS === '0x0000000000000000000000000000000000000000') {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Future Factory not deployed on this network',
-                type: 'warning'
-            });
-            throw new Error('Future Factory address not configured');
+        if (!addr || addr === '0x0000000000000000000000000000000000000000') {
+            throw new Error('Future Factory not deployed on this network');
         }
 
-        // Check if wallet is on wrong network
-        if (this.web3Provider.isConnected() && this.web3Provider.chainId !== 11155111) {
-            const networkName = this.web3Provider.getNetworkName();
-            eventBus.emit(EVENTS.TOAST, {
-                message: `⚠️ Wrong network! Please switch to Sepolia. Currently on: ${networkName}`,
-                type: 'error'
-            });
-            console.error('❌ Wrong network. Expected Sepolia (11155111), got:', this.web3Provider.chainId);
-        }
-
-        this.factory = new FutureFactory(
-            this.web3Provider,
-            FACTORY_ADDRESS,
-            this.factoryAbi
-        );
-
+        this.factory = new FutureFactory(this.web3Provider, addr, this.factoryAbi);
         await this.factory.init();
     }
 
-    async initializeComponents() {
-        // Initialize Market Table (Level 1)
-        this.marketTable = new MarketTable(
-            this.factory,
-            this.web3Provider
-        );
+    // ── Components ────────────────────────────────────────────────────
 
-        const marketTableContainer = document.getElementById('market-table-container');
-        if (marketTableContainer) {
-            this.marketTable.setContainer(marketTableContainer);
-        }
+    initializeComponents() {
+        // Market table
+        this.marketTable = new MarketTable(this.factory, this.web3Provider);
+        const tableEl = document.getElementById('market-table-container');
+        if (tableEl) this.marketTable.setContainer(tableEl);
 
-        // Initialize Create Form
+        // Create form
         this.createForm = new CreateFutureForm(this.factory, this.web3Provider);
         this.createForm.init();
-
     }
+
+    // ── Event Listeners ───────────────────────────────────────────────
 
     setupEventListeners() {
         // Wallet changes
-        eventBus.on(EVENTS.WALLET_CONNECTED, async () => {
-            await this.onWalletChanged();
-        });
+        eventBus.on(EVENTS.WALLET_CONNECTED, () => this.onWalletChanged());
+        eventBus.on(EVENTS.WALLET_DISCONNECTED, () => this.onWalletChanged());
 
-        eventBus.on(EVENTS.WALLET_DISCONNECTED, async () => {
-            await this.onWalletChanged();
-        });
-
-        // Future created
+        // Future created → hide form, refresh table
         eventBus.on(EVENTS.FUTURE_CREATED, async () => {
-            
-            // Hide create form
             const formContainer = document.getElementById('create-future-form-container');
-            if (formContainer) {
-                formContainer.classList.add('hidden');
-            }
-            
-            // Refresh market table if in market view
-            if (this.viewRouter.isViewingBoard()) {
+            if (formContainer) formContainer.classList.add('hidden');
+            if (this.viewRouter?.isViewingBoard() && this.marketTable) {
                 await this.marketTable.refresh();
-    }
+            }
         });
 
-        // Future selected
-        eventBus.on(EVENTS.FUTURE_SELECTED, async (future) => {
-            this.viewRouter.navigateToDiscussion(future); // Reuse discussion navigation
+        // Navigation events
+        eventBus.on(EVENTS.FUTURE_SELECTED, (future) => {
+            this.viewRouter?.navigateToDiscussion(future);
         });
-            
-        // Navigate to market
-        eventBus.on(EVENTS.NAVIGATE_TO_MARKET, () => {
-            this.viewRouter.navigateToBoard(); // Reuse board navigation
-        });
+        eventBus.on(EVENTS.NAVIGATE_TO_MARKET, () => this.viewRouter?.navigateToBoard());
+        eventBus.on(EVENTS.NAVIGATE_TO_BOARD, () => this.viewRouter?.navigateToBoard());
 
-        // Navigate to board (alias for market)
-        eventBus.on(EVENTS.NAVIGATE_TO_BOARD, () => {
-            this.viewRouter.navigateToBoard();
-        });
-            
-        // Create future button
+        // Create future button — toggles form visibility
         const createBtn = document.getElementById('create-future-btn');
         const formContainer = document.getElementById('create-future-form-container');
         const closeFormBtn = document.getElementById('close-create-form');
@@ -239,23 +184,19 @@ export class FuturesApp {
 
         if (createBtn && formContainer) {
             createBtn.addEventListener('click', () => {
-                // Check wallet connection
+                console.log('[Futures] Create button clicked. Wallet:', this.web3Provider.currentAddress);
                 if (!this.web3Provider.currentAddress) {
-                    eventBus.emit(EVENTS.TOAST, {
-                        message: 'Please connect your wallet first',
-                        type: 'warning'
-                    });
+                    eventBus.emit(EVENTS.TOAST, { message: 'Please connect your wallet first', type: 'warning' });
                     return;
                 }
-                
                 formContainer.classList.toggle('hidden');
             });
+        } else {
+            console.warn('[Futures] create-future-btn or form-container not found in DOM');
         }
 
         if (closeFormBtn && formContainer) {
-            closeFormBtn.addEventListener('click', () => {
-                formContainer.classList.add('hidden');
-            });
+            closeFormBtn.addEventListener('click', () => formContainer.classList.add('hidden'));
         }
 
         if (cancelBtn && formContainer) {
@@ -266,16 +207,11 @@ export class FuturesApp {
         }
 
         // Filter tabs
-        const filterTabs = document.querySelectorAll('.filter-tabs .tab');
-        filterTabs.forEach(tab => {
+        document.querySelectorAll('.filter-tabs .tab').forEach(tab => {
             tab.addEventListener('click', async (e) => {
-                // Update active state
-                filterTabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.filter-tabs .tab').forEach(t => t.classList.remove('active'));
                 e.target.classList.add('active');
-
-                // Update filter
-                const filter = e.target.dataset.filter;
-                await this.marketTable.setFilter(filter);
+                if (this.marketTable) await this.marketTable.setFilter(e.target.dataset.filter);
             });
         });
 
@@ -283,7 +219,7 @@ export class FuturesApp {
         const sortSelect = document.getElementById('market-sort-select');
         if (sortSelect) {
             sortSelect.addEventListener('change', async (e) => {
-                await this.marketTable.setSortBy(e.target.value);
+                if (this.marketTable) await this.marketTable.setSortBy(e.target.value);
             });
         }
 
@@ -301,239 +237,191 @@ export class FuturesApp {
         if (etherscanLink) {
             etherscanLink.addEventListener('click', (e) => {
                 e.preventDefault();
-                const factoryAddress = this.factory.contractAddress;
-                window.open(getExplorerUrl(factoryAddress), '_blank');
+                if (this.factory) {
+                    window.open(getExplorerUrl(this.factory.contractAddress), '_blank');
+                }
             });
         }
     }
 
+    // ── Factory Events ────────────────────────────────────────────────
+
     setupFactoryEvents() {
-        // Listen to factory contract events
+        if (!this.factory) return;
+
         this.factory.subscribeToEvents({
-            FutureCreated: async (event) => {
-                
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `📈 New future created!`,
-                    type: 'info'
-                });
-
-                // Refresh current view
-                await this.refreshCurrentView();
+            FutureCreated: () => {
+                eventBus.emit(EVENTS.TOAST, { message: 'New future created!', type: 'info' });
+                this.refreshCurrentView();
             },
-
-            FutureListed: async (event) => {
-
-            eventBus.emit(EVENTS.TOAST, {
-                    message: `📋 Future listed for sale`,
-                type: 'info'
-            });
-
-                // Refresh current view
-                await this.refreshCurrentView();
+            FutureListed: () => {
+                eventBus.emit(EVENTS.TOAST, { message: 'Future listed for sale', type: 'info' });
+                this.refreshCurrentView();
             },
-
-            FutureSold: async (event) => {
-                
-                const price = ethers.utils.formatEther(event.price);
-                eventBus.emit(EVENTS.TOAST, {
-                    message: `💰 Future sold for ${parseFloat(price).toFixed(4)} ETH`,
-                    type: 'success'
-                });
-
-                // Refresh current view
-                await this.refreshCurrentView();
+            FutureSold: (ev) => {
+                const price = ethers.utils.formatEther(ev.price);
+                eventBus.emit(EVENTS.TOAST, { message: `Future sold for ${parseFloat(price).toFixed(4)} ETH`, type: 'success' });
+                this.refreshCurrentView();
             },
-
-            FutureDelisted: async (event) => {
-            
-            eventBus.emit(EVENTS.TOAST, {
-                    message: '📤 Future removed from marketplace',
-                type: 'info'
-            });
-
-                // Refresh current view
-                await this.refreshCurrentView();
+            FutureDelisted: () => {
+                eventBus.emit(EVENTS.TOAST, { message: 'Future removed from marketplace', type: 'info' });
+                this.refreshCurrentView();
             },
-
-            FutureReplaced: async (event) => {
-
-            eventBus.emit(EVENTS.TOAST, {
-                    message: '🔄 Future replaced',
-                    type: 'info'
-            });
-
-                // Refresh current view
-                await this.refreshCurrentView();
+            FutureReplaced: () => {
+                eventBus.emit(EVENTS.TOAST, { message: 'Future replaced', type: 'info' });
+                this.refreshCurrentView();
             }
         });
     }
 
-    /**
-     * Route change handler
-     */
-    async onRouteChange(data) {
+    // ── View Rendering ────────────────────────────────────────────────
+
+    async refresh() {
         await this.renderCurrentView();
     }
 
-    /**
-     * Render current view based on router state
-     */
     async renderCurrentView() {
-        const state = this.viewRouter.getState();
+        if (!this.viewRouter) return;
 
-        // Show/hide view containers
+        const { state, discussion } = this.viewRouter.getState();
         const marketView = document.getElementById('market-view');
         const futureView = document.getElementById('future-view');
 
-        if (state.state === ViewState.BOARD_VIEW) {
-            // Show market view
+        if (state === ViewState.BOARD_VIEW) {
             if (marketView) marketView.classList.remove('hidden');
             if (futureView) futureView.classList.add('hidden');
-
-            // Render market table (this also updates stats)
-            await this.marketTable.render();
-
-        } else if (state.state === ViewState.DISCUSSION_VIEW) {
-            // Show future view
+            if (this.marketTable) await this.marketTable.render();
+        } else if (state === ViewState.DISCUSSION_VIEW) {
             if (marketView) marketView.classList.add('hidden');
             if (futureView) futureView.classList.remove('hidden');
-
-            // Render future detail view
-            await this.renderFutureView(state.discussion);
+            await this.renderFutureView(discussion);
         }
     }
 
-    /**
-     * Render future detail view (Level 2)
-     */
     async renderFutureView(future) {
         const container = document.getElementById('future-view');
         if (!container) return;
 
         try {
-            this.currentFutureView = new FutureDetailView(
-                future,
-                this.factory,
-                this.web3Provider
-            );
-
+            this.currentFutureView = new FutureDetailView(future, this.factory, this.web3Provider);
             this.currentFutureView.setContainer(container);
             await this.currentFutureView.render();
-
         } catch (error) {
-            console.error('Failed to render future view:', error);
+            console.error('[Futures] Failed to render future view:', error);
             container.innerHTML = `
                 <div class="error-state">
                     <p>Failed to load future details</p>
                     <button id="back-to-market-error">← Back to Market</button>
                 </div>
             `;
-            // Attach event handler properly instead of inline onclick
-            const backBtn = container.querySelector('#back-to-market-error');
-            if (backBtn) {
-                backBtn.addEventListener('click', () => eventBus.emit(EVENTS.NAVIGATE_TO_MARKET));
-            }
+            container.querySelector('#back-to-market-error')
+                ?.addEventListener('click', () => eventBus.emit(EVENTS.NAVIGATE_TO_MARKET));
         }
     }
 
-    /**
-     * Handle direct transfer of a future
-     */
+    async refreshCurrentView() {
+        if (!this.viewRouter) return;
+        const { state } = this.viewRouter.getState();
+        if (state === ViewState.BOARD_VIEW && this.marketTable) {
+            await this.marketTable.refresh();
+        } else if (state === ViewState.DISCUSSION_VIEW && this.currentFutureView) {
+            await this.currentFutureView.refresh();
+        }
+    }
+
+    // ── Contract Info ─────────────────────────────────────────────────
+
+    renderContractInfo() {
+        const container = document.getElementById('futures-contract-info');
+        if (!container) return;
+
+        container.innerHTML = '';
+        container.style.display = 'grid';
+        container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(350px, 1fr))';
+        container.style.gap = '1.5rem';
+
+        const futureContracts = getContractsByType('future');
+
+        futureContracts.forEach(contractKey => {
+            const metadata = getContractMetadata(contractKey);
+
+            const card = document.createElement('div');
+            card.className = 'contract-info-card';
+            card.innerHTML = `
+                <div class="contract-card-header">
+                    <h4>${metadata.emoji} ${metadata.name}</h4>
+                    <p class="contract-card-description">${metadata.description}</p>
+                </div>
+            `;
+
+            const contractInfo = ContractInfoRenderer.createContractInfo(
+                metadata.contractAddress,
+                metadata.sourceFile,
+                metadata.abiFile
+            );
+            contractInfo.style.marginTop = '1rem';
+            card.appendChild(contractInfo);
+            container.appendChild(card);
+        });
+    }
+
+    // ── Direct Transfer ───────────────────────────────────────────────
+
     async handleDirectTransfer() {
-        const futureAddress = document.getElementById('transfer-future-address').value.trim();
-        const newOwner = document.getElementById('transfer-new-owner').value.trim();
+        const futureAddress = document.getElementById('transfer-future-address')?.value.trim();
+        const newOwner = document.getElementById('transfer-new-owner')?.value.trim();
 
         if (!this.web3Provider.currentAddress) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Please connect your wallet',
-                type: 'warning'
-            });
+            eventBus.emit(EVENTS.TOAST, { message: 'Please connect your wallet', type: 'warning' });
             return;
         }
 
         if (!futureAddress || !ethers.utils.isAddress(futureAddress)) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Invalid future contract address',
-                type: 'error'
-            });
+            eventBus.emit(EVENTS.TOAST, { message: 'Invalid future contract address', type: 'error' });
             return;
         }
 
         if (!newOwner || !ethers.utils.isAddress(newOwner)) {
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Invalid new owner address',
-                type: 'error'
-            });
+            eventBus.emit(EVENTS.TOAST, { message: 'Invalid new owner address', type: 'error' });
             return;
         }
 
         try {
-            // Create EulerianFuture instance
             const { EulerianFuture } = await import('../domain/futures/eulerian-future.js');
             const future = new EulerianFuture(this.web3Provider, futureAddress, this.futureAbi);
             await future.init();
 
-            // Check if user is owner
             const currentOwner = await future.getCurrentOwner();
             if (currentOwner.toLowerCase() !== this.web3Provider.currentAddress.toLowerCase()) {
-                eventBus.emit(EVENTS.TOAST, {
-                    message: 'You are not the owner of this future',
-                    type: 'error'
-                });
+                eventBus.emit(EVENTS.TOAST, { message: 'You are not the owner of this future', type: 'error' });
                 return;
             }
 
-            // Attempt transfer
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Initiating transfer...',
-                type: 'info'
-            });
-
+            eventBus.emit(EVENTS.TOAST, { message: 'Initiating transfer...', type: 'info' });
             await future.transfer(newOwner);
+            eventBus.emit(EVENTS.TOAST, { message: 'Transfer successful!', type: 'success' });
 
-            eventBus.emit(EVENTS.TOAST, {
-                message: 'Transfer successful! Payout sent to your wallet.',
-                type: 'success'
-            });
+            document.getElementById('direct-transfer-form')?.reset();
 
-            // Clear form
-            document.getElementById('direct-transfer-form').reset();
-
-            // Refresh market if visible
-            if (this.viewRouter.isViewingBoard()) {
+            if (this.viewRouter?.isViewingBoard() && this.marketTable) {
                 await this.marketTable.refresh();
             }
-
         } catch (error) {
-            console.error('Transfer failed:', error);
-            eventBus.emit(EVENTS.TOAST, {
-                message: error.message || 'Transfer failed',
-                type: 'error'
-            });
+            console.error('[Futures] Transfer failed:', error);
+            eventBus.emit(EVENTS.TOAST, { message: error.message || 'Transfer failed', type: 'error' });
         }
     }
 
-    /**
-     * Refresh current view
-     */
-    async refreshCurrentView() {
-        const state = this.viewRouter.getState();
-
-        if (state.state === ViewState.BOARD_VIEW) {
-            // MarketTable.refresh() handles both table and stats
-            await this.marketTable.refresh();
-        } else if (state.state === ViewState.DISCUSSION_VIEW) {
-            if (this.currentFutureView) {
-                await this.currentFutureView.refresh();
-            }
-        }
-    }
+    // ── Wallet Change ─────────────────────────────────────────────────
 
     async onWalletChanged() {
-        // Reinitialize factory with new signer
-        await this.loadFactory();
-        
-        // Refresh current view
+        if (this.factory && this.factoryAbi) {
+            try {
+                await this.loadFactory();
+            } catch (err) {
+                console.warn('[Futures] Factory reload on wallet change failed:', err.message);
+            }
+        }
         await this.refreshCurrentView();
     }
 }

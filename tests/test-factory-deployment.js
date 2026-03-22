@@ -87,8 +87,7 @@ async function testDeployment() {
         console.log('   2: Exponential Decay - Early payouts favored');
         console.log('   3: Exponential Growth - Late payouts favored');
         console.log('   4: Linear Decay - Triangular (high at start)');
-        console.log('   5: Inverted Gaussian - U-shape (high at extremes)');
-        console.log('   6: Linear Growth - Triangular (low at start, high at end)');
+        console.log('   5: Linear Growth - Triangular (low at start, high at end)');
         console.log('');
         
     } catch (error) {

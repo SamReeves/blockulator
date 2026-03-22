@@ -2,12 +2,11 @@
  * Calculator Registry
  * Domain layer - Calculator-specific UI and flow configuration
  * 
- * This registry contains calculator-only configuration: input schemas, result formatting,
- * method names, hints, and display options for the calculator UI.
+ * This is the single source of truth for calculator configuration.
+ * Contains: UI schemas, input/result formatting, method names, hints, and display options.
  * 
- * Calculator IDs (e.g., 'pi-calculator') must match contract keys in 
- * js/infrastructure/config/contract-registry.js, which defines contract addresses,
- * ABI paths, and source paths. Do not duplicate basic contract metadata here.
+ * Contract addresses and ABIs are defined in contract-registry.js but accessed
+ * through the getCalculatorContractInfo() helper below.
  */
 
 export const CALCULATOR_REGISTRY = [
@@ -1114,4 +1113,40 @@ export function getAllCategories() {
         categories[calc.category].push(calc);
     });
     return categories;
+}
+
+/**
+ * Get combined calculator info (UI config + contract metadata)
+ * This is the preferred way to get calculator info as it combines both registries
+ * Uses lazy imports to avoid circular dependency issues
+ * @param {string} id - Calculator ID
+ * @returns {Promise<Object|null>} Combined calculator info or null if not found
+ */
+export async function getCalculatorContractInfo(id) {
+    const calcConfig = getCalculatorById(id);
+    if (!calcConfig) return null;
+    
+    // Lazy import to avoid circular dependencies
+    const { getContractMetadata, hasContract } = await import('../../infrastructure/config/contract-registry.js');
+    const { getCurrentNetwork } = await import('../../infrastructure/config/network.js');
+    
+    if (!hasContract(id)) return null;
+    
+    const contractMeta = getContractMetadata(id);
+    
+    return {
+        ...calcConfig,
+        contractAddress: contractMeta.contractAddress,
+        abiFile: contractMeta.abi,
+        sourceFile: contractMeta.source
+    };
+}
+
+/**
+ * Check if a calculator exists in the UI registry
+ * @param {string} id - Calculator ID
+ * @returns {boolean}
+ */
+export function isCalculator(id) {
+    return !!getCalculatorById(id);
 }

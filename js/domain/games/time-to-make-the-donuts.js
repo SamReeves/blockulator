@@ -5,136 +5,54 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 import { CountdownWheel } from '../../presentation/components/countdown-wheel.js';
+import { getTemplate } from './templates/time-to-make-the-donuts.tpl.js';
 
 export class TimeToMakeTheDonuts extends Game {
+    static metadata = {
+        id: 'time-to-make-the-donuts',
+        title: 'Make the Donuts',
+        emoji: '🍩',
+        description: 'First donor daily at midnight',
+        color: '#ec4899',
+        contract: {
+            source: 'contracts/src/games/time_to_make_the_donuts.vy',
+            abi: 'contracts/build/abis/time-to-make-the-donuts.json',
+            addresses: {
+                sepolia: '0xD222eCe3C1D844B23384F56d62E59F556e925C85',
+                mainnet: '0x0000000000000000000000000000000000000000'
+            }
+        }
+    };
+
+    static async getStatus(contract) {
+        const [currentDay, potValue, firstDonor, totalDays] = await Promise.all([
+            contract.current_day(),
+            contract.pot_value(),
+            contract.first_donor_today(),
+            contract.total_days()
+        ]);
+        return { currentDay, potValue, firstDonor, totalDays };
+    }
+
     constructor() {
         super();
         this.countdownWheel = null;
         this.donationInput = null;
     }
 
-    getContractName() {
-        return 'time-to-make-the-donuts';
+    getGameHTML() {
+        return getTemplate({
+            panelColor: this.metadata.color,
+            btnColor: this.metadata.color
+        });
     }
 
-    render() {
-        const header = this.renderer.createGameHeader(this.metadata);
-        
-        const gameContent = document.createElement('div');
-        gameContent.className = 'game-interface';
-        gameContent.appendChild(header);
-        
-        const contentInner = document.createElement('div');
-        contentInner.innerHTML = `
-            <div class="game-sections" style="--panel-color: #ec4899; --hero-color: #f59e0b; --btn-color: #ec4899;">
-                <!-- Main Consolidated Panel -->
-                <div class="contest-info-panel game-panel">
-                    <div class="flex-between" style="margin-bottom: 0.75rem;">
-                        <h3 class="game-panel-header">
-                            <span>🍩</span>
-                            <span>Make the Donuts</span>
-                        </h3>
-                        <div style="font-size: 0.85rem; font-weight: 500;">First donor after midnight UTC wins</div>
-                    </div>
-                    
-                    <div class="game-panel-grid">
-                        <!-- Left: Countdown Wheel -->
-                        <div class="min-w-0">
-                            <div id="countdown-wheel-container"></div>
-                        </div>
-                        
-                        <!-- Right: Status + Play -->
-                        <div class="min-w-0">
-                            <div class="hero-card" style="margin-bottom: 1rem;">
-                                <div class="hero-card-label">🏆 First Donor Today</div>
-                                <div id="first-donor-today" class="hero-card-content" style="min-height: 1.5rem;">
-                                    No one yet
-                                </div>
-                                <div class="hero-card-stats stat-grid-3">
-                                    <div>
-                                        <div>Prize Pool</div>
-                                        <div id="pot-value" class="value">0 wei</div>
-                                    </div>
-                                    <div>
-                                        <div>Winner Gets</div>
-                                        <div id="winner-prize" class="value">0 wei</div>
-                                    </div>
-                                    <div>
-                                        <div>Day</div>
-                                        <div id="current-day" class="value">0</div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="donation-amount-input" style="margin-bottom: 0.75rem;"></div>
-                            <button id="donate-btn" class="btn-action">
-                                🎮 Donate & Race to Win
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Game Rules - Collapsible -->
-                <details class="contest-info-panel">
-                    <summary class="collapsible-summary">
-                        <span class="collapsible-arrow">▶</span>
-                        <span>📖 How To Win</span>
-                    </summary>
-                    <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.85rem;">
-                        <div class="step-card" style="--step-color: #ec4899;">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <strong>Wait For Midnight UTC</strong>
-                                <span>Each day starts at 00:00 UTC - watch the countdown closely</span>
-                            </div>
-                        </div>
-                        <div class="step-card" style="--step-color: #f59e0b;">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <strong>Be First To Donate</strong>
-                                <span>Race to submit your donation as soon as the day changes</span>
-                            </div>
-                        </div>
-                        <div class="step-card" style="--step-color: #10b981;">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <strong>Win the Prize Pool</strong>
-                                <span>First donor wins 100% of yesterday's pot automatically!</span>
-                            </div>
-                        </div>
-                    </div>
-                </details>
-
-                <!-- Stats - Collapsible -->
-                <details class="contest-info-panel">
-                    <summary class="collapsible-summary">
-                        <span class="collapsible-arrow">▶</span>
-                        <span>📊 Stats</span>
-                    </summary>
-                    <div class="stat-box" style="margin-top: 0.75rem; font-size: 0.8rem; --stat-color: #ec4899;">
-                        <div class="stat-box-label">Total Days</div>
-                        <div id="total-days" class="stat-box-value" style="font-size: 0.9rem;">1</div>
-                    </div>
-                </details>
-            </div>
-        `;
-        
-        gameContent.appendChild(contentInner);
-        this.container.appendChild(gameContent);
-        
-        // Initialize ValueInput component
-        this.donationInput = new this.components.ValueInput('donation-amount-input', {
-            label: 'Donation Amount',
-            hint: 'Any amount helps grow the prize pool',
-            defaultUnit: 'gwei',
-            minWei: '1',
-            required: true
+    initComponents() {
+        this.donationInput = this.createValueInput('donation-amount-input', {
+            hint: 'Any amount helps grow the prize pool'
         });
-        this.donationInput.render();
         
-        // Initialize CountdownWheel component
         this.countdownWheel = new CountdownWheel('countdown-wheel-container', {
             timeGetter: async () => {
                 if (!this.contract) return 0;
@@ -145,93 +63,77 @@ export class TimeToMakeTheDonuts extends Game {
         this.countdownWheel.init();
     }
 
-    setupListeners() {
-        const donateBtn = document.getElementById('donate-btn');
-        
-        if (donateBtn) {
-            donateBtn.addEventListener('click', () => this.donate());
-        }
+    getListeners() {
+        return {
+            'donate-btn': () => this.donate()
+        };
     }
 
     async donate() {
-        if (!this.requiresWallet('participate')) return;
-        
-        const amount = this.donationInput.getWeiValue();
-        
-        if (!amount || amount.eq(0)) {
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Please enter a donation amount',
-                type: 'warning'
-            });
-            return;
-        }
-        
-        try {
-            await TransactionHandler.execute(
-                this.contract.donate({ value: amount }),
-                { game: 'time-to-make-the-donuts', amount: amount.toString() }
-            );
-            
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Donation sent. Check if you won.',
-                type: 'success'
-            });
-            
-            this.donationInput.reset();
-            await this.refreshState();
-            
-        } catch (error) {
-            console.error('Donation failed:', error);
-        }
+        await this.executeTransaction({
+            inputComponent: this.donationInput,
+            contractCall: (wei) => this.contract.donate({ value: wei }),
+            buttonId: 'donate-btn',
+            buttonLoadingText: '⏳ Donating...',
+            buttonDefaultText: '🎮 Donate & Race to Win',
+            validationMessage: 'Please enter a donation amount',
+            walletAction: 'participate',
+            onSuccess: async () => {
+                this.toast('Donation sent. Check if you won.', 'success');
+            }
+        });
     }
 
-    async refreshState() {
-        if (!this.contract) return;
+    async fetchAndRenderState() {
+        const [
+            currentDay,
+            potValue,
+            firstDonorToday,
+            totalDays,
+            potentialPrize
+        ] = await Promise.all([
+            this.contract.current_day(),
+            this.contract.pot_value(),
+            this.contract.first_donor_today(),
+            this.contract.total_days(),
+            this.contract.get_potential_prize()
+        ]);
         
-        try {
-            const [
-                currentDay,
-                potValue,
-                firstDonorToday,
-                totalDays,
-                potentialPrize
-            ] = await Promise.all([
-                this.contract.current_day(),
-                this.contract.pot_value(),
-                this.contract.first_donor_today(),
-                this.contract.total_days(),
-                this.contract.get_potential_prize()
-            ]);
+        this.dom.updateInfo('current-day', currentDay.toString());
+        this.dom.updateInfo('total-days', totalDays.toString());
+        this.dom.updateInfo('pot-value', this.dom.formatWei(potValue));
+        this.dom.updateInfo('winner-prize', this.dom.formatWei(potentialPrize[0]));
+        
+        await this.updateFirstDonorDisplay(firstDonorToday);
+    }
+
+    async updateFirstDonorDisplay(firstDonorToday) {
+        const donorEl = document.getElementById('first-donor-today');
+        if (!donorEl) return;
+        
+        const isZeroAddress = firstDonorToday === '0x0000000000000000000000000000000000000000';
+        
+        if (isZeroAddress) {
+            donorEl.innerHTML = '🎯 <strong>UNCLAIMED!</strong>';
+        } else {
+            const isYou = this.isCurrentUser(firstDonorToday);
             
-            this.dom.updateInfo('current-day', currentDay.toString());
-            this.dom.updateInfo('total-days', totalDays.toString());
-            this.dom.updateInfo('pot-value', this.dom.formatWei(potValue));
-            this.dom.updateInfo('winner-prize', this.dom.formatWei(potentialPrize[0]));
+            const donorDisplay = await this.components.AddressBadge.createWithAddress(firstDonorToday, this.web3Provider, {
+                size: 24,
+                formatAddress: true,
+                addressStyle: 'font-size: 1rem;'
+            });
             
-            const donorEl = document.getElementById('first-donor-today');
-            if (donorEl) {
-                const isZeroAddress = firstDonorToday === '0x0000000000000000000000000000000000000000';
-                
-                if (isZeroAddress) {
-                    donorEl.innerHTML = `🎯 <strong>UNCLAIMED!</strong>`;
-                } else {
-                    const currentAddress = this.web3Provider?.currentAddress;
-                    const isYou = currentAddress && firstDonorToday.toLowerCase() === currentAddress.toLowerCase();
-                    
-                    if (isYou) {
-                        donorEl.innerHTML = `<strong style="color: #ffd700;">🏆 YOU!</strong> ${this.dom.formatAddress(firstDonorToday)}`;
-                    } else {
-                        donorEl.innerHTML = this.dom.formatAddress(firstDonorToday);
-                    }
-                }
+            donorEl.innerHTML = '';
+            
+            if (isYou) {
+                const youLabel = document.createElement('strong');
+                youLabel.style.cssText = 'color: #ffd700; margin-right: 0.5rem;';
+                youLabel.textContent = '🏆 YOU!';
+                donorEl.appendChild(youLabel);
             }
             
-        } catch (error) {
-            console.error('Failed to refresh state:', error);
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Failed to load game state',
-                type: 'error'
-            });
+            donorEl.appendChild(donorDisplay);
         }
     }
 
@@ -239,36 +141,17 @@ export class TimeToMakeTheDonuts extends Game {
         if (!this.contract) return;
         
         this.contract.on('DonationReceived', (dayNumber, donor, amount, newPot, isFirstDonor) => {
-            if (!this.web3Provider?.currentAddress) {
-                this.refreshState();
-                return;
-            }
-            
-            const isYou = donor.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            
             if (isFirstDonor) {
-                if (isYou) {
-                    this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `You were first today! You donated ${this.dom.formatWei(amount)}`,
-                        type: 'success'
-                    });
-                } else {
-                    this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `${this.dom.formatAddress(donor)} was first today`,
-                        type: 'info'
-                    });
+                if (this.isCurrentUser(donor)) {
+                    this.toast(`You were first today! You donated ${this.dom.formatWei(amount)}`, 'success');
+                } else if (this.web3Provider?.currentAddress) {
+                    this.toast(`${this.dom.formatAddress(donor)} was first today`, 'info');
                 }
             } else {
-                if (isYou) {
-                    this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `You donated ${this.dom.formatWei(amount)} (too late for today!)`,
-                        type: 'info'
-                    });
-                } else {
-                    this.events.bus.emit(this.events.EVENTS.TOAST, {
-                        message: `${this.dom.formatAddress(donor)} donated (not first)`,
-                        type: 'info'
-                    });
+                if (this.isCurrentUser(donor)) {
+                    this.toast(`You donated ${this.dom.formatWei(amount)} (too late for today!)`, 'info');
+                } else if (this.web3Provider?.currentAddress) {
+                    this.toast(`${this.dom.formatAddress(donor)} donated (not first)`, 'info');
                 }
             }
             
@@ -276,25 +159,11 @@ export class TimeToMakeTheDonuts extends Game {
         });
         
         this.contract.on('WinnerPaid', (dayNumber, winner, prize, fee) => {
-            if (!this.web3Provider?.currentAddress) {
-                this.refreshState();
-                return;
-            }
-            
-            const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            
-            if (isYou) {
+            if (this.isCurrentUser(winner)) {
                 this.events.bus.emit(this.events.EVENTS.WINNER_DETERMINED, { player: winner, prize });
-                this.events.bus.emit(this.events.EVENTS.CONFETTI);
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `You won ${this.dom.formatWei(prize)} by being first today!`,
-                    type: 'success'
-                });
-            } else {
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `Winner: ${this.dom.formatAddress(winner)} won ${this.dom.formatWei(prize)}`,
-                    type: 'info'
-                });
+                this.celebrate(`You won ${this.dom.formatWei(prize)} by being first today!`);
+            } else if (this.web3Provider?.currentAddress) {
+                this.toast(`Winner: ${this.dom.formatAddress(winner)} won ${this.dom.formatWei(prize)}`, 'info');
             }
             
             this.refreshState();
@@ -308,6 +177,3 @@ export class TimeToMakeTheDonuts extends Game {
         super.destroy();
     }
 }
-
-
-

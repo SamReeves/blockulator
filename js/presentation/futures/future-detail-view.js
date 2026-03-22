@@ -127,16 +127,6 @@ export class FutureDetailView {
         const elapsed = Math.max(0, lifetime - timeRemaining);
         const progress = lifetime > 0 ? Math.min(100, ((elapsed / lifetime) * 100)).toFixed(1) : '0.0';
         
-            lifetime: lifetime,
-            timeRemaining: timeRemaining,
-            elapsed: elapsed,
-            elapsedPercent: ((elapsed / lifetime) * 100).toFixed(4) + '%',
-            progress: progress + '%',
-            creationTime: this.futureData.creationTime,
-            expiryTime: this.futureData.expiryTime,
-            currentTime: Math.floor(Date.now() / 1000)
-        });
-        
         const isMyFuture = this.web3Provider.currentAddress?.toLowerCase() === this.futureData.owner.toLowerCase();
 
         let actionButtons = '';
@@ -400,14 +390,6 @@ export class FutureDetailView {
         // Calculate time remaining from current timestamp
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const timeRemaining = Math.max(0, expiryTimeNum - currentTimestamp);
-        
-            lifetime: lifetime,
-            timeRemaining: timeRemaining,
-            distributionType: this.futureData.distributionType,
-            balance: this.futureData.balance,
-            creationTime: this.futureData.creationTime,
-            expiryTime: this.futureData.expiryTime
-        });
 
         if (!lifetime || lifetime <= 0) {
             console.error('Invalid lifetime for chart:', lifetime);
@@ -440,15 +422,6 @@ export class FutureDetailView {
         const creationTime = creationTimeNum;
         const expiryTime = expiryTimeNum;
         
-        // Debug: Log the actual values
-            creationTime,
-            expiryTime,
-            lifetime,
-            creationDate: new Date(creationTime * 1000).toLocaleString(),
-            expiryDate: new Date(expiryTime * 1000).toLocaleString(),
-            lifetimeHours: lifetime / 3600
-        });
-
         for (let i = 0; i <= points; i++) {
             const t = (i / points) * lifetime;
             

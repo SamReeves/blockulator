@@ -7,6 +7,7 @@
 import { BadgeViewer } from './badge-viewer.js';
 import { getContractMetadata } from '../../infrastructure/config/contract-registry.js';
 import { DOMHelpers } from '../dom/dom-helpers.js';
+import { ADDRESS_ZERO } from '../../shared/constants.js';
 
 export class AddressBadge {
     static factoryContract = null;
@@ -34,7 +35,7 @@ export class AddressBadge {
             
             // Check if badge system is deployed
             if (!factoryAddress || 
-                factoryAddress === '0x0000000000000000000000000000000000000000') {
+                factoryAddress === ADDRESS_ZERO) {
                 return null;
             }
 
@@ -52,7 +53,7 @@ export class AddressBadge {
             if (!this.badgeCache.has(cacheKey)) {
                 // Get badge address
                 const badgeAddress = await this.factoryContract.get_badge(address);
-                const hasBadge = badgeAddress !== '0x0000000000000000000000000000000000000000';
+                const hasBadge = badgeAddress !== ADDRESS_ZERO;
                 
                 if (!hasBadge) {
                     this.badgeCache.set(cacheKey, null);

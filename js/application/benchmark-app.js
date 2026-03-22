@@ -118,9 +118,9 @@ export class BenchmarkApp {
                     </section>
 
                     <section class="bench-section">
-                        <h3>Gas vs Precision vs Function</h3>
-                        <p class="bench-section-note">3D view: X = function, Y = precision (digits), Z = gas cost. Drag to rotate.</p>
-                        <div class="bench-scatter-wrap" id="bench-scatter-3d"></div>
+                        <h3>Gas vs Precision</h3>
+                        <p class="bench-section-note">Each dot is one test case. Upper-left (low gas, high precision) is better.</p>
+                        <div class="bench-scatter-wrap" id="bench-scatter"></div>
                     </section>
 
                     <section class="bench-section">
@@ -340,139 +340,17 @@ export class BenchmarkApp {
         Plotly.newPlot(container, traces, layout, config);
     }
 
-    // ── WebGL Detection ─────────────────────────────────────────────
-
-    hasWebGL() {
-        try {
-            const canvas = document.createElement('canvas');
-            return !!(window.WebGLRenderingContext && 
-                (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
-        } catch (e) {
-            return false;
-        }
-    }
-
-    // ── 3D/2D Scatter Chart (Plotly.js) ───────────────────────────────
+    // ── Scatter Chart (Plotly.js) ────────────────────────────────────
 
     renderScatterChart() {
-        const container = document.getElementById('bench-scatter-3d');
+        const container = document.getElementById('bench-scatter');
         if (!container || typeof Plotly === 'undefined') {
             if (container) container.innerHTML = '<p style="color:#f66;text-align:center;padding:2rem;">Failed to load charting library</p>';
             return;
         }
 
-        // Check for WebGL support and render appropriate chart
-        if (this.hasWebGL()) {
-            this.render3DScatter(container);
-        } else {
-            this.render2DFallback(container);
-        }
-    }
-
-    render3DScatter(container) {
         const raw = this.distData.raw;
 
-        // Create function index mapping
-        const funcIndex = {};
-        this.functions.forEach((f, i) => funcIndex[f] = i);
-
-        // Build one trace per library
-        // X = function index, Y = digits, Z = gas (log)
-        const traces = LIBS.map(lib => {
-            const x = [], y = [], z = [];
-            const text = [];
-
-            for (const func of this.functions) {
-                const rawData = raw[lib]?.[func] || [];
-                for (const d of rawData) {
-                    if (d.gas <= 0 || d.digits <= 0) continue;
-
-                    x.push(funcIndex[func]);
-                    y.push(d.digits);
-                    z.push(d.gas);
-                    text.push(`${func.toUpperCase()}<br>${d.gas.toLocaleString()} gas<br>${d.digits} digits`);
-                }
-            }
-
-            return {
-                type: 'scatter3d',
-                mode: 'markers',
-                name: LIB_META[lib].name,
-                x: x,
-                y: y,
-                z: z,
-                text: text,
-                hovertemplate: '<b>%{text}</b><extra>' + LIB_META[lib].name + '</extra>',
-                marker: {
-                    size: 3,
-                    color: LIB_META[lib].color,
-                    opacity: 0.7,
-                    line: { width: 0 }
-                }
-            };
-        });
-
-        // Create tick labels for function axis
-        const tickvals = this.functions.map((_, i) => i);
-        const ticktext = this.functions.map(f => f.toUpperCase());
-
-        const layout = {
-            paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(0,0,0,0)',
-            font: { family: 'Courier New, monospace', color: '#888' },
-            margin: { l: 0, r: 0, t: 20, b: 0 },
-            scene: {
-                xaxis: {
-                    title: { text: 'Function', font: { size: 11 } },
-                    tickvals: tickvals,
-                    ticktext: ticktext,
-                    tickfont: { size: 8 },
-                    gridcolor: '#222',
-                    backgroundcolor: 'rgba(0,0,0,0)',
-                    showspikes: false
-                },
-                yaxis: {
-                    title: { text: 'Digits', font: { size: 11 } },
-                    gridcolor: '#222',
-                    backgroundcolor: 'rgba(0,0,0,0)',
-                    showspikes: false
-                },
-                zaxis: {
-                    title: { text: 'Gas', font: { size: 11 } },
-                    type: 'log',
-                    gridcolor: '#222',
-                    backgroundcolor: 'rgba(0,0,0,0)',
-                    showspikes: false
-                },
-                camera: {
-                    eye: { x: 1.8, y: 0.8, z: 0.8 }
-                },
-                aspectratio: { x: 2, y: 1, z: 1 }
-            },
-            legend: {
-                x: 0.5,
-                y: -0.02,
-                xanchor: 'center',
-                orientation: 'h',
-                font: { size: 11 }
-            },
-            showlegend: true
-        };
-
-        const config = {
-            responsive: true,
-            displayModeBar: true,
-            modeBarButtonsToRemove: ['toImage', 'sendDataToCloud'],
-            displaylogo: false
-        };
-
-        Plotly.newPlot(container, traces, layout, config);
-    }
-
-    render2DFallback(container) {
-        const raw = this.distData.raw;
-
-        // 2D fallback: X = Gas (log), Y = Digits, Color = Library, with jitter by function
         const traces = LIBS.map(lib => {
             const x = [], y = [], text = [], sizes = [];
 
@@ -530,16 +408,7 @@ export class BenchmarkApp {
                 font: { size: 11 }
             },
             showlegend: true,
-            hovermode: 'closest',
-            annotations: [{
-                x: 0.5,
-                y: 1.05,
-                xref: 'paper',
-                yref: 'paper',
-                text: '2D view (WebGL not available)',
-                showarrow: false,
-                font: { size: 10, color: '#666' }
-            }]
+            hovermode: 'closest'
         };
 
         const config = {

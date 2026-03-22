@@ -1,0 +1,119 @@
+/* ============================================
+   MODALS & OVERLAYS
+   ============================================ */
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 2rem;
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-large);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    max-width: 90vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.source-modal-content {
+    width: 900px;
+    max-width: 90vw;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--md-sys-color-outline);
+    background: var(--md-sys-color-surface-container);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--md-sys-color-on-surface);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface-variant);
+    padding: 0.25rem 0.5rem;
+    transition: all 0.2s ease;
+    border-radius: var(--md-sys-shape-corner-small);
+}
+
+.modal-close:hover {
+    background: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface);
+}
+
+.modal-file-info {
+    padding: 0.75rem 2rem;
+    background: var(--md-sys-color-surface-container-high);
+    border-bottom: 1px solid var(--md-sys-color-outline);
+}
+
+.file-path {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: var(--md-sys-color-primary);
+}
+
+.modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+    background: var(--md-sys-color-surface-container-lowest);
+}
+
+.source-code {
+    margin: 0;
+    padding: 2rem;
+    background: var(--md-sys-color-surface-container-lowest);
+    overflow-x: auto;
+}
+
+.source-code code {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--md-sys-color-on-surface);
+    white-space: pre;
+    display: block;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid var(--md-sys-color-outline);
+    background: var(--md-sys-color-surface-container);
+}
+
+.modal-footer button {
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--md-sys-shape-corner-full);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}

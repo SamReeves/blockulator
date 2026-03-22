@@ -141,11 +141,10 @@ export class MasterApp {
         this.masterRouter.registerView('games', () => this.initGamesView());
         this.masterRouter.registerView('fp127', () => this.initFp127View());
         this.masterRouter.registerView('benchmarks', () => this.initBenchmarksView());
-        this.masterRouter.registerView('games', () => this.initGamesView());
         this.masterRouter.registerView('vyper', () => this.initVyperView());
+        this.masterRouter.registerView('futures', () => this.initFuturesView());
         this.masterRouter.registerView('badges', () => this.initBadgesView());
         this.masterRouter.registerView('about', () => this.initAboutView());
-        // Note: futures view removed from navigation but code preserved
         
         // Register sub-route handlers
         this.masterRouter.registerSubRouteHandler('games', (subRoute) => {

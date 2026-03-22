@@ -1,0 +1,225 @@
+/* ============================================
+   ABOUT PAGE
+   ============================================ */
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    font-family: 'Courier New', 'Consolas', monospace;
+}
+
+/* Hero */
+.about-hero {
+    text-align: center;
+    padding: 3rem 1.5rem 2.5rem;
+    margin-bottom: 2.5rem;
+    background: #0d1f0d;
+    border: 2px solid #1a3a1a;
+    border-radius: 0.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.about-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00ff88, transparent);
+}
+
+.about-hero h1 {
+    font-size: 3rem;
+    margin: 0 0 0.5rem 0;
+    color: #00ff88;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+}
+
+.hero-tagline {
+    font-size: 1.3rem;
+    color: #6dd5c4;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.hero-subtitle {
+    font-size: 0.95rem;
+    color: #4a7a4a;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Sections */
+.about-section {
+    margin-bottom: 2.5rem;
+}
+
+.about-section h2 {
+    font-size: 1.25rem;
+    color: #00ff88;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #1a3a1a;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.about-section p {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #aaa;
+    margin-bottom: 1rem;
+}
+
+.about-section code {
+    background: #1a1a1a;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9em;
+    color: #6dd5c4;
+    border: 1px solid #333;
+}
+
+.about-link {
+    color: #6dd5c4;
+    text-decoration: none;
+    border-bottom: 1px solid #2a4a4a;
+    transition: all 0.15s;
+}
+
+.about-link:hover {
+    color: #00ff88;
+    border-bottom-color: #00ff88;
+}
+
+/* Advantage Cards */
+.fp127-advantages {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.advantage-item {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-left: 3px solid #00ff88;
+    border-radius: 0.5rem;
+    padding: 1.25rem 1.5rem;
+}
+
+.advantage-item h3 {
+    color: #6dd5c4;
+    font-size: 1rem;
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.advantage-item p {
+    color: #999;
+    font-size: 0.875rem;
+    line-height: 1.7;
+    margin: 0;
+}
+
+/* Comparison Table */
+.comparison-table-wrap {
+    overflow-x: auto;
+    margin-top: 0.5rem;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+.comparison-table th {
+    text-align: left;
+    color: #888;
+    font-weight: 600;
+    padding: 0.625rem 1rem;
+    border-bottom: 2px solid #333;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+}
+
+.comparison-table td {
+    padding: 0.625rem 1rem;
+    border-bottom: 1px solid #1a1a1a;
+    color: #999;
+}
+
+.comparison-table tbody tr:hover {
+    background: #111;
+}
+
+.comparison-highlight td {
+    color: #6dd5c4;
+    background: #0d1f0d;
+    font-weight: 600;
+}
+
+.comparison-highlight td:first-child strong {
+    color: #00ff88;
+}
+
+/* Also Grid */
+.about-also {
+    margin-top: 1rem;
+}
+
+.also-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.also-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.875rem 1rem;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.also-item:hover {
+    border-color: #4a7a4a;
+    background: #161616;
+}
+
+.also-item strong {
+    color: #ccc;
+    font-size: 0.875rem;
+}
+
+.also-item span {
+    color: #666;
+    font-size: 0.75rem;
+}
+
+/* Tech footer */
+.about-tech {
+    margin-bottom: 0;
+}
+
+.about-tech p {
+    color: #555;
+    font-size: 0.8rem;
+    text-align: center;
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid #1a1a1a;
+}

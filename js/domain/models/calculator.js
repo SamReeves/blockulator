@@ -267,21 +267,6 @@ export class Calculator extends InteractiveContract {
     }
 
     /**
-     * Helper: Get contract metadata for rendering
-     */
-    getMetadata() {
-        return {
-            contractName: this.getContractName(),
-            addressKey: this.getAddressKey(),
-            sourceKey: this.getSourceKey(),
-            abiKey: this.getAbiKey(),
-            symbol: this.symbol,
-            name: this.name,
-            constantValue: this.constantValue
-        };
-    }
-
-    /**
      * Setup standard calculator event listeners
      * Binds calculate button and enter key on input
      * 

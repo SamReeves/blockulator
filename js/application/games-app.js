@@ -4,18 +4,16 @@
  * Manages game modules and their navigation with URL routing
  */
 
-import { ModuleRegistry } from './module-registry.js';
-import { MODULE_MANIFEST } from './module-manifest.js';
+import { gameRegistry } from '../core/GameRegistry.js';
 import { gameStatusService } from './game-status-service.js';
 import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
-import { StatusCardRenderer } from '../presentation/components/status-card-renderer.js';
+import { GameStatusCard } from '../presentation/components/GameStatusCard.js';
 
 export class GamesApp {
     constructor(web3Provider, walletComponent, toastComponent) {
         this.web3Provider = web3Provider;
         this.walletComponent = walletComponent;
         this.toastComponent = toastComponent;
-        this.moduleRegistry = new ModuleRegistry();
         this.currentGame = null;
         
         console.log('🎮 GamesApp created');
@@ -27,45 +25,16 @@ export class GamesApp {
     async init() {
         console.log('🎮 Initializing Games app...');
         
-        // Register all games
-        this.registerGames();
-        
-        // Setup navigation handlers
         this.setupNavigation();
-        
-        // Load game statuses for overview
         await this.loadGameStatuses();
         
-        console.log(`✅ Games app initialized`);
-    }
-
-    /**
-     * Register all game modules from MODULE_MANIFEST
-     */
-    registerGames() {
-        console.log('🎮 Registering games from manifest...');
-        
-        // Get all game modules from manifest
-        const gameModules = Object.entries(MODULE_MANIFEST)
-            .filter(([_, config]) => config.category === 'game');
-        
-        // Register each game (ModuleRegistry loads them dynamically when needed)
-        for (const [moduleName, config] of gameModules) {
-            try {
-                this.moduleRegistry.register(moduleName, 'game');
-            } catch (error) {
-                console.error(`Failed to register game ${moduleName}:`, error);
-            }
-        }
-        
-        console.log(`✅ Registered ${gameModules.length} games`);
+        console.log(`✅ Games app initialized with ${gameRegistry.getAll().length} games`);
     }
 
     /**
      * Setup navigation handlers
      */
     setupNavigation() {
-        // Refresh button
         const refreshBtn = document.getElementById('refresh-games');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
@@ -74,7 +43,6 @@ export class GamesApp {
             });
         }
 
-        // Back button
         const backButton = document.getElementById('back-to-games');
         if (backButton) {
             backButton.addEventListener('click', () => {
@@ -90,17 +58,15 @@ export class GamesApp {
         const listContainer = document.getElementById('games-list');
         if (!listContainer) return;
 
-        // Show loading state
         listContainer.innerHTML = '<div class="loading-state">Loading game statuses...</div>';
 
         try {
             const statuses = await gameStatusService.getAllGameStatuses();
             
-            // Render status cards
             listContainer.innerHTML = '';
             
-            statuses.forEach((gameData, gameName) => {
-                const card = this.createStatusCard(gameName, gameData);
+            statuses.forEach((statusData, gameId) => {
+                const card = GameStatusCard.render(statusData, (id) => this.navigateToGame(id));
                 listContainer.appendChild(card);
             });
 
@@ -116,43 +82,12 @@ export class GamesApp {
     }
 
     /**
-     * Create a status card for a game (using reusable renderer with custom styling)
-     */
-    createStatusCard(gameName, gameData) {
-        const card = StatusCardRenderer.createCard({
-            id: gameName,
-            icon: gameData.emoji,
-            title: gameData.title,
-            description: gameData.description,
-            status: gameData.status || 'Loading...',
-            details: gameData.details,
-            onClick: (id) => this.navigateToGame(id),
-            clickable: true
-        });
-        
-        // Add game-specific data attribute for gradient styling
-        card.dataset.game = gameName;
-        
-        // Add large faded emoji background on the right
-        const emojiBackground = document.createElement('div');
-        emojiBackground.className = 'status-card-bg-emoji';
-        emojiBackground.textContent = gameData.emoji;
-        card.appendChild(emojiBackground);
-        
-        return card;
-    }
-
-    /**
      * Navigate to a specific game (with URL update)
      */
-    navigateToGame(gameName) {
-        console.log(`🎮 Navigating to game: ${gameName}`);
-        
-        // Update URL
-        window.location.hash = `#/games/${gameName}`;
-        
-        // Show game view
-        this.showGameView(gameName);
+    navigateToGame(gameId) {
+        console.log(`🎮 Navigating to game: ${gameId}`);
+        window.location.hash = `#/games/${gameId}`;
+        this.showGameView(gameId);
     }
 
     /**
@@ -160,18 +95,14 @@ export class GamesApp {
      */
     navigateToGamesList() {
         console.log('🎮 Navigating back to games list');
-        
-        // Update URL
         window.location.hash = '#/games';
-        
-        // Show list view
         this.showListView();
     }
 
     /**
      * Show game detail view
      */
-    async showGameView(gameName) {
+    async showGameView(gameId) {
         const listContainer = document.getElementById('games-list-container');
         const detailContainer = document.getElementById('game-detail');
         const gameContainer = document.getElementById('game-container');
@@ -181,12 +112,10 @@ export class GamesApp {
             return;
         }
 
-        // Hide list, show detail
         listContainer.style.display = 'none';
         detailContainer.classList.remove('hidden');
         detailContainer.style.display = 'block';
 
-        // Cleanup previous game
         if (this.currentGame) {
             if (this.currentGame.destroy) {
                 this.currentGame.destroy();
@@ -194,23 +123,24 @@ export class GamesApp {
             this.currentGame = null;
         }
 
-        // Clear container
         gameContainer.innerHTML = '';
 
-        // Load game module
         try {
-            this.currentGame = await this.moduleRegistry.load(
-                gameName,
-                gameContainer,
-                this.web3Provider
-            );
+            const GameClass = gameRegistry.get(gameId);
+            if (!GameClass) {
+                throw new Error(`Unknown game: ${gameId}`);
+            }
+
+            const instance = new GameClass();
+            await instance.init(gameContainer, this.web3Provider);
+            this.currentGame = instance;
             
-            eventBus.emit(EVENTS.GAME_LOADED, { name: gameName });
-            console.log(`✅ Game loaded: ${gameName}`);
+            eventBus.emit(EVENTS.GAME_LOADED, { name: gameId });
+            console.log(`✅ Game loaded: ${gameId}`);
         } catch (error) {
-            console.error(`Failed to load game ${gameName}:`, error);
+            console.error(`Failed to load game ${gameId}:`, error);
             eventBus.emit(EVENTS.TOAST, {
-                message: `Failed to load ${gameName}`,
+                message: `Failed to load ${gameId}`,
                 type: 'error'
             });
             this.navigateToGamesList();
@@ -227,7 +157,6 @@ export class GamesApp {
 
         if (!listContainer || !detailContainer) return;
 
-        // Cleanup current game
         if (this.currentGame) {
             if (this.currentGame.destroy) {
                 this.currentGame.destroy();
@@ -235,7 +164,6 @@ export class GamesApp {
             this.currentGame = null;
         }
 
-        // Show list, hide detail
         listContainer.style.display = 'block';
         detailContainer.classList.add('hidden');
         detailContainer.style.display = 'none';
@@ -250,10 +178,8 @@ export class GamesApp {
      */
     async handleSubRoute(subRoute) {
         if (subRoute) {
-            // Navigate to specific game
             await this.showGameView(subRoute);
         } else {
-            // Show games list
             this.showListView();
         }
     }

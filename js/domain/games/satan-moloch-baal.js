@@ -5,10 +5,36 @@
  */
 
 import { Game } from '../models/game.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
 import { LazySusan3D } from '../../presentation/components/lazy-susan-3d.js';
+import { getTemplate } from './templates/satan-moloch-baal.tpl.js';
 
 export class SatanMolochBaal extends Game {
+    static metadata = {
+        id: 'satan-moloch-baal',
+        title: 'Satan, Moloch, Baal',
+        emoji: '🔥',
+        description: 'Sacrifice ETH to your chosen demon',
+        color: '#ef4444',
+        contract: {
+            source: 'contracts/src/games/satan_moloch_baal.vy',
+            abi: 'contracts/build/abis/satan-moloch-baal.json',
+            addresses: {
+                sepolia: '0x55Ec2808F3c2B55c02E065e1693c61a4A56967A2',
+                mainnet: '0x0000000000000000000000000000000000000000'
+            }
+        }
+    };
+
+    static async getStatus(contract) {
+        const standings = await contract.get_current_standings();
+        return {
+            satanTotal: standings[0],
+            molochTotal: standings[1],
+            baalTotal: standings[2],
+            voidBurned: standings[3] || 0
+        };
+    }
+
     constructor() {
         super();
         this.voteInput = null;
@@ -20,164 +46,30 @@ export class SatanMolochBaal extends Game {
         ];
     }
 
-    getContractName() {
-        return 'satan-moloch-baal';
+    getGameHTML() {
+        return getTemplate({
+            panelColor: this.metadata.color,
+            demons: this.demons
+        });
     }
 
-    render() {
-        // Clear container first to prevent duplicates
-        this.container.innerHTML = '';
-        
-        // Header with contract info
-        const header = this.renderer.createGameHeader(this.metadata);
-        
-        const gameContent = document.createElement('div');
-        gameContent.className = 'game-interface';
-        gameContent.appendChild(header);
-        
-        const contentInner = document.createElement('div');
-        contentInner.innerHTML = `
-            <div class="game-panel-grid" style="margin-top: 1rem; --panel-color: #ef4444;">
-                <!-- Left Column: Lazy Susan & Voting -->
-                <div class="contest-info-panel game-panel">
-                    <h3 class="game-panel-header">
-                        <span>🔥</span>
-                        <span>Choose Your Demon</span>
-                    </h3>
-                    
-                    <!-- 3D Lazy Susan -->
-                    <div id="lazy-susan-container" style="margin: 1rem 0;"></div>
-                    
-                    <!-- Vote Amount Input -->
-                    <div id="vote-amount-input" style="margin-top: 1.5rem;"></div>
-                    
-                    <div class="strategy-callout" style="text-align: center; margin-top: 1rem; font-size: 0.875rem;">
-                        <strong>⚠️ All ETH is burned to address(0) forever!</strong>
-                    </div>
-                </div>
-
-                <!-- Right Column: Stats & Info -->
-                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-                    <!-- Demon Standings -->
-                    <div class="contest-info-panel">
-                        <h3 class="flex-between" style="margin-bottom: 1rem;">
-                            <span class="flex-center-gap">
-                                <span>👹</span>
-                                <span>Demon Standings</span>
-                            </span>
-                            <span style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">🔥 <span id="total-burned">0 wei</span></span>
-                        </h3>
-                        
-                        <div id="demon-standings" style="display: grid; gap: 0.75rem;"></div>
-                    </div>
-
-                    <!-- Your Stats -->
-                    <div class="contest-info-panel game-panel" style="--panel-color: #10b981;">
-                        <h3 class="game-panel-header" style="margin-bottom: 1rem;">
-                            <span>📈</span>
-                            <span>Your Sacrifices</span>
-                        </h3>
-                        <div id="user-stats" class="stat-grid"></div>
-                    </div>
-
-                    <!-- How It Works -->
-                    <details class="contest-info-panel" style="cursor: pointer;">
-                        <summary class="collapsible-summary">
-                            <span class="collapsible-arrow">▶</span>
-                            <span>📖 The Ritual</span>
-                        </summary>
-                        <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6; display: grid; gap: 0.5rem;">
-                            <div class="step-card" style="--step-color: #ef4444;">
-                                <strong>1. Choose Demon</strong> - Rotate to select, then vote
-                            </div>
-                            <div class="step-card" style="--step-color: #f59e0b;">
-                                <strong>2. Burn ETH</strong> - Sent to address(0), destroyed forever
-                            </div>
-                            <div class="step-card" style="--step-color: #8b5cf6;">
-                                <strong>3. Become Top Devotee</strong> - Highest donor per demon
-                            </div>
-                            <div class="strategy-callout" style="border: 2px solid #ef4444;">
-                                <strong>⚠️ Pure Sacrifice:</strong> NO refunds, NO prizes. ETH is permanently destroyed!
-                            </div>
-                        </div>
-                    </details>
-                </div>
-            </div>
-        `;
-        
-        gameContent.appendChild(contentInner);
-        this.container.appendChild(gameContent);
-        
-        // Initialize ValueInput component
-        this.voteInput = new this.components.ValueInput('vote-amount-input', {
+    initComponents() {
+        this.voteInput = this.createValueInput('vote-amount-input', {
             label: 'Amount to Burn',
-            hint: 'All goes to the null address - eternal sacrifice!',
-            defaultUnit: 'gwei',
-            minWei: '1',
-            required: true
+            hint: 'All goes to the null address - eternal sacrifice!'
         });
-        this.voteInput.render();
         
-        // Initialize LazySusan3D component
         this.lazySusan = new LazySusan3D('lazy-susan-container', {
             items: this.demons,
             onSelect: (index, demon) => {
-                // When user confirms selection (clicks VOTE NOW button), vote
                 this.vote(demon.key);
             }
         });
         this.lazySusan.init();
-        
-        // Populate initial structure
-        this.renderDemonStandings();
-        this.renderUserStats();
-    }
-    
-    renderDemonStandings() {
-        const container = document.getElementById('demon-standings');
-        if (!container) return;
-        
-        container.innerHTML = this.demons.map(demon => `
-            <div style="padding: 1rem; background: linear-gradient(135deg, ${demon.color}19 0%, ${demon.color}0d 100%); border-radius: 8px; border-left: 4px solid ${demon.color};">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="font-size: 1.5rem;">${demon.emoji}</span>
-                        <span style="font-weight: bold; color: ${demon.color};">${demon.name}</span>
-                    </div>
-                    <div id="${demon.key}-votes" style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">0 votes</div>
-                </div>
-                <div id="${demon.key}-total" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem;">0 wei</div>
-                <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">
-                    <span>👑</span> <span id="${demon.key}-top-devotee">None</span>
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    renderUserStats() {
-        const container = document.getElementById('user-stats');
-        if (!container) return;
-        
-        const stats = [
-            ...this.demons.map(demon => ({
-                key: `user-${demon.key}-burned`,
-                label: `${demon.emoji} ${demon.name}`,
-                color: demon.color
-            })),
-            { key: 'user-total-burned', label: '🔥 Total', color: '#10b981' }
-        ];
-        
-        container.innerHTML = stats.map(stat => `
-            <div style="padding: 0.75rem; background: ${stat.color}19; border-radius: 8px; border-left: 3px solid ${stat.color};">
-                <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">${stat.label}</div>
-                <div id="${stat.key}" style="font-size: 1rem; font-weight: bold;">0 wei</div>
-            </div>
-        `).join('');
     }
 
-    setupListeners() {
-        // Lazy susan handles demon selection via callback
-        // No additional listeners needed
+    getListeners() {
+        return {};
     }
 
     async vote(demonKey) {
@@ -185,10 +77,7 @@ export class SatanMolochBaal extends Game {
         
         const weiAmount = this.voteInput.getWeiValue();
         if (!weiAmount || weiAmount.eq(0)) {
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Please enter a valid amount to burn',
-                type: 'warning'
-            });
+            this.toast('Please enter a valid amount to burn', 'warning');
             return;
         }
         
@@ -196,15 +85,12 @@ export class SatanMolochBaal extends Game {
         if (!demon) return;
         
         try {
-            await TransactionHandler.execute(
+            await this.transactionHandler.execute(
                 this.contract[`vote_${demonKey}`]({ value: weiAmount }),
                 { game: 'satan-moloch-baal', demon: demonKey, wei: weiAmount.toString() }
             );
             
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: `Burned ${this.dom.formatWei(weiAmount)} for ${demon.name}`,
-                type: 'success'
-            });
+            this.toast(`Burned ${this.dom.formatWei(weiAmount)} for ${demon.name}`, 'success');
             
             this.voteInput.reset();
             this.lazySusan?.reset();
@@ -215,59 +101,53 @@ export class SatanMolochBaal extends Game {
         }
     }
 
-    async refreshState() {
-        if (!this.contract) return;
+    async fetchAndRenderState() {
+        const [standings, voteCounts, bestWorshippers] = await Promise.all([
+            this.contract.get_current_standings(),
+            this.contract.get_vote_counts(),
+            this.contract.get_all_best_worshippers()
+        ]);
+        
+        const total = standings.reduce((sum, val) => sum.add(val), standings[0].mul(0));
+        this.dom.updateInfo('total-burned', this.dom.formatWei(total));
 
-        try {
-            // Get all data in parallel
-            const [standings, voteCounts, bestWorshippers] = await Promise.all([
-                this.contract.get_current_standings(),
-                this.contract.get_vote_counts(),
-                this.contract.get_all_best_worshippers()
+        await Promise.all(this.demons.map(async (demon, i) => {
+            const voteCount = voteCounts[i];
+            this.dom.updateInfo(`${demon.key}-total`, this.dom.formatWei(standings[i]));
+            this.dom.updateInfo(`${demon.key}-votes`, `${voteCount} vote${voteCount.toNumber() === 1 ? '' : 's'}`);
+            
+            const topDevoteeAddr = bestWorshippers[i * 2];
+            const topDevoteeEl = document.getElementById(`${demon.key}-top-devotee`);
+            if (topDevoteeEl) {
+                if (topDevoteeAddr === '0x0000000000000000000000000000000000000000') {
+                    topDevoteeEl.textContent = 'None';
+                } else {
+                    const devoteeDisplay = await this.components.AddressBadge.createWithAddress(topDevoteeAddr, this.web3Provider, {
+                        size: 16,
+                        formatAddress: true,
+                        addressStyle: 'font-size: 0.75rem;'
+                    });
+                    topDevoteeEl.innerHTML = '';
+                    topDevoteeEl.appendChild(devoteeDisplay);
+                }
+            }
+        }));
+
+        if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
+            const [userBurnedPerDemon, userStats] = await Promise.all([
+                this.contract.get_user_burned_per_demon(this.web3Provider.currentAddress),
+                this.contract.get_user_stats(this.web3Provider.currentAddress)
             ]);
             
-            // Calculate total burned
-            const total = standings.reduce((sum, val) => sum.add(val), standings[0].mul(0));
-            this.dom.updateInfo('total-burned', this.dom.formatWei(total));
-
-            // Update each demon's stats
             this.demons.forEach((demon, i) => {
-                const voteCount = voteCounts[i];
-                this.dom.updateInfo(`${demon.key}-total`, this.dom.formatWei(standings[i]));
-                this.dom.updateInfo(`${demon.key}-votes`, `${voteCount} vote${voteCount.toNumber() === 1 ? '' : 's'}`);
-                
-                const topDevoteeAddr = bestWorshippers[i * 2];
-                const topDevoteeDisplay = topDevoteeAddr === '0x0000000000000000000000000000000000000000'
-                    ? 'None'
-                    : this.dom.formatAddress(topDevoteeAddr);
-                this.dom.updateInfo(`${demon.key}-top-devotee`, topDevoteeDisplay);
+                this.dom.updateInfo(`user-${demon.key}-burned`, this.dom.formatWei(userBurnedPerDemon[i]));
             });
-
-            // User-specific stats
-            if (this.web3Provider.isConnected() && this.web3Provider.currentAddress) {
-                const [userBurnedPerDemon, userStats] = await Promise.all([
-                    this.contract.get_user_burned_per_demon(this.web3Provider.currentAddress),
-                    this.contract.get_user_stats(this.web3Provider.currentAddress)
-                ]);
-                
-                this.demons.forEach((demon, i) => {
-                    this.dom.updateInfo(`user-${demon.key}-burned`, this.dom.formatWei(userBurnedPerDemon[i]));
-                });
-                this.dom.updateInfo('user-total-burned', this.dom.formatWei(userStats[3]));
-            } else {
-                // Read-only mode
-                this.demons.forEach(demon => {
-                    this.dom.updateInfo(`user-${demon.key}-burned`, '👀');
-                });
-                this.dom.updateInfo('user-total-burned', 'Connect wallet');
-            }
-
-        } catch (error) {
-            console.error('Failed to refresh state:', error);
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Failed to load game state.',
-                type: 'error'
+            this.dom.updateInfo('user-total-burned', this.dom.formatWei(userStats[3]));
+        } else {
+            this.demons.forEach(demon => {
+                this.dom.updateInfo(`user-${demon.key}-burned`, '👀');
             });
+            this.dom.updateInfo('user-total-burned', 'Connect wallet');
         }
     }
 
@@ -280,12 +160,8 @@ export class SatanMolochBaal extends Game {
             const demon = this.demons[demonIndex];
             const demonDisplay = `${demon.emoji} ${demon.name}`;
             
-            if (this.web3Provider.isConnected() && 
-                voter.toLowerCase() === this.web3Provider.currentAddress?.toLowerCase()) {
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `Your sacrifice to ${demonDisplay} is complete`,
-                    type: 'success'
-                });
+            if (this.isCurrentUser(voter)) {
+                this.toast(`Your sacrifice to ${demonDisplay} is complete`, 'success');
             }
         });
 
@@ -294,33 +170,20 @@ export class SatanMolochBaal extends Game {
             
             const demon = this.demons[demonIndex];
             const demonDisplay = `${demon.emoji} ${demon.name}`;
-            const isYou = this.web3Provider.isConnected() && 
-                worshipper.toLowerCase() === this.web3Provider.currentAddress?.toLowerCase();
             
-            if (isYou) {
-                this.events.bus.emit(this.events.EVENTS.CONFETTI);
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `You are the top devotee of ${demonDisplay}!`,
-                    type: 'success'
-                });
+            if (this.isCurrentUser(worshipper)) {
+                this.celebrate(`You are the top devotee of ${demonDisplay}!`);
             } else if (this.web3Provider.isConnected()) {
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `${demonDisplay} has a new top devotee`,
-                    type: 'info'
-                });
+                this.toast(`${demonDisplay} has a new top devotee`, 'info');
             }
         });
     }
     
     destroy() {
-        // Clean up lazy susan
         if (this.lazySusan) {
             this.lazySusan.destroy();
             this.lazySusan = null;
         }
-        
-        // Call parent destroy
         super.destroy();
     }
 }
-

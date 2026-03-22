@@ -176,15 +176,85 @@ export const DOMHelpers = {
 
     /**
      * Format duration in seconds to readable string
+     * Handles minutes, hours, days, months, and years
      */
     formatDuration(seconds) {
-        if (seconds === 0) return 'Now ✅';
+        if (seconds === 0) return 'Now';
         if (seconds < 60) return `${seconds}s`;
-        if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+        if (seconds < 3600) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return s > 0 ? `${m}m ${s}s` : `${m}m`;
+        }
+        if (seconds < 86400) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return m > 0 ? `${h}h ${m}m` : `${h}h`;
+        }
+        if (seconds < 2592000) { // < 30 days
+            const d = Math.floor(seconds / 86400);
+            const h = Math.floor((seconds % 86400) / 3600);
+            return h > 0 ? `${d}d ${h}h` : `${d}d`;
+        }
+        if (seconds < 31557600) { // < 1 year (365.25 days)
+            const months = Math.floor(seconds / 2592000);
+            const days = Math.floor((seconds % 2592000) / 86400);
+            return days > 0 ? `${months}mo ${days}d` : `${months}mo`;
+        }
+        // Years
+        const years = Math.floor(seconds / 31557600);
+        const months = Math.floor((seconds % 31557600) / 2592000);
+        return months > 0 ? `${years}y ${months}mo` : `${years}y`;
+    },
+
+    /**
+     * Format expiry date/time in compressed format
+     * Shows: "Mar 25 '26 14:30" or "Today 14:30" or "Tomorrow 09:15"
+     */
+    formatExpiryDate(expiryTimestamp) {
+        const expiry = new Date(expiryTimestamp * 1000);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const tomorrow = new Date(today.getTime() + 86400000);
+        const expiryDay = new Date(expiry.getFullYear(), expiry.getMonth(), expiry.getDate());
         
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        return `${hours}h ${minutes}m`;
+        const timeStr = expiry.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false 
+        });
+        
+        if (expiryDay.getTime() === today.getTime()) {
+            return `Today ${timeStr}`;
+        }
+        if (expiryDay.getTime() === tomorrow.getTime()) {
+            return `Tomorrow ${timeStr}`;
+        }
+        
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                           'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const month = monthNames[expiry.getMonth()];
+        const day = expiry.getDate();
+        const year = expiry.getFullYear();
+        const currentYear = now.getFullYear();
+        
+        if (year === currentYear) {
+            return `${month} ${day} ${timeStr}`;
+        }
+        // Show 2-digit year for other years
+        const shortYear = String(year).slice(-2);
+        return `${month} ${day} '${shortYear} ${timeStr}`;
+    },
+
+    /**
+     * Format lifetime with both duration and exact expiry
+     * Returns: "2d 4h → Mar 25 14:30"
+     */
+    formatLifetimeWithExpiry(seconds) {
+        const duration = this.formatDuration(seconds);
+        const expiryTimestamp = Math.floor(Date.now() / 1000) + seconds;
+        const expiry = this.formatExpiryDate(expiryTimestamp);
+        return { duration, expiry, full: `${duration} → ${expiry}` };
     }
 };
 

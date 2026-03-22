@@ -5,7 +5,7 @@
 @title Linear Future - Triangular Payout Distribution
 @author Sam Reeves
 @notice Tradeable future with linear growth or decay payout distribution
-@dev Thin contract supporting both growth (type 6) and decay (type 4) with no external dependencies
+@dev Thin contract supporting both growth (type 5) and decay (type 4) with no external dependencies
 """
 
 # State variables
@@ -16,7 +16,7 @@ lifetime: public(uint256)
 expired: public(bool)
 factory: public(immutable(address))
 locked: public(bool)
-is_growth: public(bool)  # True for growth (type 6), False for decay (type 4)
+is_growth: public(bool)  # True for growth (type 5), False for decay (type 4)
 
 # Tracking state
 last_t: public(uint256)
@@ -28,7 +28,7 @@ def __init__(_lifetime: uint256, _is_growth: bool, _owner: address, _factory: ad
     """
     @notice Initialize linear future
     @param _lifetime Duration in seconds
-    @param _is_growth True for linear growth (type 6), False for linear decay (type 4)
+    @param _is_growth True for linear growth (type 5), False for linear decay (type 4)
     @param _owner The address that will own this future
     @param _factory The factory contract address
     """
@@ -97,7 +97,7 @@ def transfer(new_owner: address):
     new_cache: decimal = 0.0
     
     if self.is_growth:
-        # LINEAR GROWTH: Payout increases linearly (type 6)
+        # LINEAR GROWTH: Payout increases linearly (type 5)
         # CDF: F(t) = (t/T)^2
         weight, new_cache = self._linear_growth_weight(self.last_t, t_current)
     else:
@@ -176,7 +176,7 @@ def get_current_state() -> (uint256, decimal, uint8):
     @notice Get current state for valuation
     @return Tuple of (last_t, last_cache, distribution_type)
     """
-    dist_type: uint8 = 6 if self.is_growth else 4
+    dist_type: uint8 = 5 if self.is_growth else 4
     return (self.last_t, self.last_cache, dist_type)
 
 @external
@@ -197,8 +197,8 @@ def get_balance() -> uint256:
 @external
 @view
 def distribution_type() -> uint8:
-    """Return distribution type (4 = Linear Decay, 6 = Linear Growth)"""
+    """Return distribution type (4 = Linear Decay, 5 = Linear Growth)"""
     if self.is_growth:
-        return 6
+        return 5
     else:
         return 4

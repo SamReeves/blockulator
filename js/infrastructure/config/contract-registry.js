@@ -1,10 +1,10 @@
 /**
- * Unified Contract Registry
- * Infrastructure layer - Single source of truth for all contract metadata
+ * Contract Registry
+ * Infrastructure layer - Contract metadata for non-game contracts
  * 
- * This registry defines WHAT contracts exist and WHERE they live on-chain.
- * Contains: addresses, ABI paths, source paths, and minimal display metadata
- * (name, emoji, description) for all contract types (games, calculators, futures, identity).
+ * NOTE: Game contracts are now defined in their respective game classes
+ * (js/domain/games/*.js) as static metadata. This registry contains only
+ * calculators, futures, identity, and other non-game contracts.
  * 
  * For calculator-specific UI configuration (input schemas, result formatting, method names),
  * see js/domain/calculators/calculator-registry.js, which references IDs from this file.
@@ -13,128 +13,10 @@
 import { getCurrentNetwork } from './network.js';
 
 /**
- * Contract Registry - All contract metadata in one place
+ * Contract Registry - Non-game contract metadata
  * Each entry contains: type, display info, addresses, source, and ABI path
  */
 export const CONTRACT_REGISTRY = {
-    // ========== GAMES ==========
-    'pissing-contest': {
-        type: 'game',
-        name: 'Pissing Contest',
-        emoji: '💦',
-        description: 'Biggest donation takes the pot',
-        addresses: {
-            sepolia: '0x09CB63309F854788C76D9b6750598b2d86EADC8b',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/pissing_contest.vy',
-        abi: 'contracts/build/abis/pissing-contest.json'
-    },
-    
-    'message-board': {
-        type: 'game',
-        name: 'Message Board',
-        emoji: '💬',
-        description: 'Permanent on-chain messages',
-        addresses: {
-            sepolia: '0xE93Ac949Fe806d8b1cA93EB14e5f4d799cAc0d55',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/message_board.vy',
-        abi: 'contracts/build/abis/message-board.json'
-    },
-    
-    'pay-it-forward': {
-        type: 'game',
-        name: 'Pay It Forward',
-        emoji: '⏩',
-        description: 'Get previous player\'s donation',
-        addresses: {
-            sepolia: '0x338C316e1FE9535e3569597D63267A8a1AD78855',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/pay_it_forward.vy',
-        abi: 'contracts/build/abis/pay-it-forward.json'
-    },
-    
-    'pay-it-backward': {
-        type: 'game',
-        name: 'Pay It Backward',
-        emoji: '⏪',
-        description: 'Reward the previous donor',
-        addresses: {
-            sepolia: '0x478A53b021639CFbAbe45d222B240ffE409FEE3f',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/pay_it_backward.vy',
-        abi: 'contracts/build/abis/pay-it-backward.json'
-    },
-    
-    'king-of-the-hill': {
-        type: 'game',
-        name: 'King of the Hill',
-        emoji: '👑',
-        description: 'Dethrone the king; stakes grow with each challenge',
-        addresses: {
-            sepolia: '0x0DEEBef3228B5d0cD4158Dc367A5C4b31B6414A6',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/king_of_the_hill.vy',
-        abi: 'contracts/build/abis/king-of-the-hill.json'
-    },
-    
-    'last-call': {
-        type: 'game',
-        name: 'Last Call',
-        emoji: '⏰',
-        description: 'Last donor before the timer expires wins',
-        addresses: {
-            sepolia: '0xE0e1E3778d75E757fd4718FdF44bD4e0F5E73baa',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/last_call.vy',
-        abi: 'contracts/build/abis/last-call.json'
-    },
-    
-    'time-to-make-the-donuts': {
-        type: 'game',
-        name: 'Time to Make the Donuts',
-        emoji: '🍩',
-        description: 'First donor each day after midnight UTC wins',
-        addresses: {
-            sepolia: '0xD222eCe3C1D844B23384F56d62E59F556e925C85',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/time_to_make_the_donuts.vy',
-        abi: 'contracts/build/abis/time-to-make-the-donuts.json'
-    },
-    
-    'dice-gods': {
-        type: 'game',
-        name: 'Dice Gods',
-        emoji: '🎲',
-        description: 'Last digit of your donation is your guess (1-6)',
-        addresses: {
-            sepolia: '0x61d97822209D3B375c7B214597f1077F4879fD84',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/dice_gods.vy',
-        abi: 'contracts/build/abis/dice-gods.json'
-    },
-    
-    'satan-moloch-baal': {
-        type: 'game',
-        name: 'Satan, Moloch, Baal',
-        emoji: '🔥',
-        description: 'Sacrifice ETH to your chosen demon',
-        addresses: {
-            sepolia: '0x55Ec2808F3c2B55c02E065e1693c61a4A56967A2',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/games/satan_moloch_baal.vy',
-        abi: 'contracts/build/abis/satan-moloch-baal.json'
-    },
-    
     // ========== CALCULATORS ==========
     'exp': {
         type: 'calculator',
@@ -144,7 +26,7 @@ export const CONTRACT_REGISTRY = {
         category: 'exponential',
         description: 'Calculate e^x on-chain',
         addresses: {
-            sepolia: '0x214E417CeA3A20c7e9e583b30bc03253DCcC5a1C',
+            sepolia: '0x66C5F46f5f650Ce3E3700866b518ff343Cc5Fb2E',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/exp.vy',
@@ -159,7 +41,7 @@ export const CONTRACT_REGISTRY = {
         category: 'basic',
         description: 'Calculate factorial on-chain',
         addresses: {
-            sepolia: '0x987B55f5025361F7D438e47f27973B5129F9Bb48',
+            sepolia: '0x7E919e513828E212964AbfEa15c3665328C3D594',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/factorial.vy',
@@ -174,7 +56,7 @@ export const CONTRACT_REGISTRY = {
         category: 'probability',
         description: 'Standard normal cumulative distribution function',
         addresses: {
-            sepolia: '0x412f9e6d1B231f4Cb96BbD67fcCEF9435Fb37FD2',
+            sepolia: '0x82A934fF93FBBb02BDcE23e05B0eA82157A73fb3',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/norm_cdf.vy',
@@ -189,7 +71,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Natural log of factorial',
         addresses: {
-            sepolia: '0x21F8a75C0D60A5504A9FF7773F1e451bA4c8f479',
+            sepolia: '0x1Dc37426c2B777401266129fD8433cE749DFb775',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/ln_factorial.vy',
@@ -204,7 +86,7 @@ export const CONTRACT_REGISTRY = {
         category: 'trigonometric',
         description: 'Calculate arctangent on-chain',
         addresses: {
-            sepolia: '0xE1974FF18f7f387bcb02f996D8ddC04be078b293',
+            sepolia: '0x3B17Ad5B4BFA9Cf80885406FC03c19A5E00ED769',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/atan.vy',
@@ -219,7 +101,7 @@ export const CONTRACT_REGISTRY = {
         category: 'hyperbolic',
         description: 'Calculate hyperbolic sine',
         addresses: {
-            sepolia: '0xa5E15aFCb50b8B4241d41f9B8847Df277A6941Ad',
+            sepolia: '0x6cf5f371275297aE5945121fD935Cf2480079540',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/sinh.vy',
@@ -234,7 +116,7 @@ export const CONTRACT_REGISTRY = {
         category: 'hyperbolic',
         description: 'Calculate hyperbolic cosine',
         addresses: {
-            sepolia: '0x117d0a451fa16AADBE344A80d944e9Ba35317295',
+            sepolia: '0x4B9Db96269661d277E3C6FF6A91143aF6afa7B14',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/cosh.vy',
@@ -249,7 +131,7 @@ export const CONTRACT_REGISTRY = {
         category: 'constants',
         description: 'Mathematical constant e',
         addresses: {
-            sepolia: '0xE87ee976517CfA35945BFc51A697cCa9df4adc3a',
+            sepolia: '0x6476ec7E6AbB0bdb8778554f36Ce72fb1f1af89e',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/constants/e.vy',
@@ -264,7 +146,7 @@ export const CONTRACT_REGISTRY = {
         category: 'constants',
         description: 'Mathematical constant pi',
         addresses: {
-            sepolia: '0x9859707734328ca8DEB52ADA5d770ff11A5C4CFB',
+            sepolia: '0x6f7fCc6aB794AeE63a1E04B4810654Eec8D5a22D',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/constants/pi.vy',
@@ -279,7 +161,7 @@ export const CONTRACT_REGISTRY = {
         category: 'constants',
         description: 'Mathematical constant tau (2π)',
         addresses: {
-            sepolia: '0x7e2111cbE6a364f4de2210D2809b49eF6b159A09',
+            sepolia: '0xaeD45577152c0fA4ec52Ef6ce72232e0a1c76fEA',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/constants/tau.vy',
@@ -294,7 +176,7 @@ export const CONTRACT_REGISTRY = {
         category: 'trigonometric',
         description: 'Calculate sine on-chain',
         addresses: {
-            sepolia: '0x54133558fac25a8BE06818450A949E1788f8d36d',
+            sepolia: '0x6B6163c8540BfeBab10D390E4CC13B31062A30bb',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/trig/sin.vy',
@@ -309,7 +191,7 @@ export const CONTRACT_REGISTRY = {
         category: 'trigonometric',
         description: 'Calculate cosine on-chain',
         addresses: {
-            sepolia: '0xd105DEc01140cD654c3f529a734EFf4197661eAE',
+            sepolia: '0x382EE11b77567a08C9799d4d08D9E1F44Bf34a38',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/trig/cos.vy',
@@ -324,7 +206,7 @@ export const CONTRACT_REGISTRY = {
         category: 'hyperbolic',
         description: 'Calculate hyperbolic tangent',
         addresses: {
-            sepolia: '0x0033D56AAa908d789f4de02e58304B46FFC4Fd34',
+            sepolia: '0xb26b9E2a65bae3D67c3b11dd193DB4F59CcaB68b',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/trig/tanh.vy',
@@ -444,7 +326,7 @@ export const CONTRACT_REGISTRY = {
         category: 'statistics',
         description: 'Standardized distance from mean',
         addresses: {
-            sepolia: '0x1090C2d12230B45077e19eF9725d94a0f78B39ea',
+            sepolia: '0x35778015b92a3408783ac38a3F3D3edD568A72B5',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/zscore.vy',
@@ -459,7 +341,7 @@ export const CONTRACT_REGISTRY = {
         category: 'statistics',
         description: 'Gaussian tail probability (Lin 1990)',
         addresses: {
-            sepolia: '0xD2B7D1031E6a9e54B7329Fa71de667BfD6CeDE51',
+            sepolia: '0xF6D58e7686cEEB619EDBf94522b895Fcc57eEfF5',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/gaussian_tail.vy',
@@ -474,7 +356,7 @@ export const CONTRACT_REGISTRY = {
         category: 'combinatorics',
         description: 'n choose k - combinations calculator',
         addresses: {
-            sepolia: '0x4D024D9D815a50e0F6B0fA9D4D87D0CBAB716eC2',
+            sepolia: '0xA72776807874Fc2EaD6a1AcC0ee624A59956Bd8a',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/binomial_coeff.vy',
@@ -489,7 +371,7 @@ export const CONTRACT_REGISTRY = {
         category: 'statistics',
         description: 'Normal probability density function',
         addresses: {
-            sepolia: '0xcF60383e6b9a385a644675956C6c1c49f7234e5F',
+            sepolia: '0x4C0cBb1C12774d281E2980dB044323B2D424BB47',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/norm_pdf.vy',
@@ -504,7 +386,7 @@ export const CONTRACT_REGISTRY = {
         category: 'number-theory',
         description: 'Greatest common divisor and least common multiple',
         addresses: {
-            sepolia: '0xc2779e341D2B47ef3cE12Fd4171847DAd4cee152',
+            sepolia: '0x182e59b0a7A3bA2F1Fb53e5390e9f01dcCAEFEb6',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/gcd.vy',
@@ -534,7 +416,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🏭',
         description: 'Eulerian futures marketplace',
         addresses: {
-            sepolia: '0x23D6C1D2e9050f0DA6e8Df5812c886b755ba3dA2',
+            sepolia: '0xE58f00B5BFc332572986561A6446706F919b8AFa',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/market/future_factory.vy',
@@ -547,7 +429,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '📏',
         description: 'Constant payout rate, linear accumulation',
         addresses: {
-            sepolia: '0xC630C3876cB4b84e6d7b3DD859Cc6078d2fCb1CB',
+            sepolia: '0x6b6843660A7306EBe708a4822fd76A0082a162FE',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/market/uniform_future.vy',
@@ -560,7 +442,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🔔',
         description: 'Bell curve distribution, peak at midpoint',
         addresses: {
-            sepolia: '0x452754b1b5b7421371537245192C682B409adB5d',
+            sepolia: '0x65948d354Bc30c38a0064AD7ceD7d1DB28C8b6A9',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/market/gaussian_future.vy',
@@ -573,7 +455,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '📉',
         description: 'Front-loaded or back-loaded payouts',
         addresses: {
-            sepolia: '0xA0662156296480a8d69a24a52F829701183aA915',
+            sepolia: '0x2bdBAD0A6Dc7dBAa5CDDc9129eFF58619B90c6F7',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/market/exponential_future.vy',
@@ -586,24 +468,11 @@ export const CONTRACT_REGISTRY = {
         emoji: '🔺',
         description: 'Triangular distribution, linear growth or decay',
         addresses: {
-            sepolia: '0x5dE0BC82DcEbA8F1152198f4c810Dd44b9235698',
+            sepolia: '0xb7Af3317932D9D4236E64b383D4153FC745C497F',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/market/linear_future.vy',
         abi: 'contracts/build/abis/linear-future.json'
-    },
-    
-    'inverted-gaussian-future-blueprint': {
-        type: 'future',
-        name: 'Inverted Gaussian Future Blueprint',
-        emoji: '🆄',
-        description: 'U-shaped curve, high at extremes',
-        addresses: {
-            sepolia: '0xA79a88290Ec19F6Cad38C40C5ff4c9fAf9ecE6F0',
-            mainnet: '0x0000000000000000000000000000000000000000'
-        },
-        source: 'contracts/src/market/inverted_gaussian_future.vy',
-        abi: 'contracts/build/abis/inverted-gaussian-future.json'
     },
     
     // ========== IDENTITY ==========
@@ -613,7 +482,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🏭',
         description: 'Badge creation factory',
         addresses: {
-            sepolia: '0x5802f9121018aabC887b9686bA2eB1EFABB70BB7',
+            sepolia: '0x4472b48071e49d3bd593c102b66A0c0CF529B4df',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/identity/badge_factory.vy',
@@ -626,7 +495,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🎖️',
         description: 'Badge contract blueprint',
         addresses: {
-            sepolia: '0x906E93e3901C87e0E3158B8eE8D4bF56d887C1D0',
+            sepolia: '0xb18505c49Ad113202fbFe921BEF6b117f7a18C96',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/identity/badge.vy',
@@ -640,7 +509,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🏭',
         description: 'Content creation factory',
         addresses: {
-            sepolia: '0x010EFFB50047820Fe8cEADD04877B427c92008B2',
+            sepolia: '0x4175ed783f344DBA9AE8267880127B0f847F0E35',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/content/content_factory_v4.vy',
@@ -653,7 +522,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🖼️',
         description: 'Image content blueprint',
         addresses: {
-            sepolia: '0x609798Eb02e4Fb49B3e8eCf41432A2e64F22050a',
+            sepolia: '0x477c6b74Bf82D6312B35Acd3f93Ee917e7589954',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/content/image_content_v3.vy',
@@ -666,7 +535,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '📝',
         description: 'Text content blueprint',
         addresses: {
-            sepolia: '0x3088506F35f48D43c5946993D11D5e67624EDd83',
+            sepolia: '0x06115469c1ecaeDAc722F9C833A6d5866A9EB2Bd',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/content/text_content_v4.vy',
@@ -730,7 +599,7 @@ export function hasContract(contractName) {
 }
 
 // Export lists of contracts by type for convenience
-export const GAMES = getContractsByType('game');
+// Note: GAMES is no longer exported - use gameRegistry.getIds() instead
 export const CALCULATORS = getContractsByType('calculator');
 export const FUTURES = getContractsByType('future');
 export const IDENTITY = getContractsByType('identity');

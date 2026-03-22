@@ -6,139 +6,67 @@
 
 import { Game } from '../models/game.js';
 import { DiceThreeD } from '../../presentation/components/dice-3d.js';
-import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
+import { getTemplate } from './templates/dice-gods.tpl.js';
 
 export class DiceGods extends Game {
+    static metadata = {
+        id: 'dice-gods',
+        title: 'Dice Gods',
+        emoji: '🎲',
+        description: 'Pick the least popular number',
+        color: '#8b5cf6',
+        contract: {
+            source: 'contracts/src/games/dice_gods.vy',
+            abi: 'contracts/build/abis/dice-gods.json',
+            addresses: {
+                sepolia: '0x61d97822209D3B375c7B214597f1077F4879fD84',
+                mainnet: '0x0000000000000000000000000000000000000000'
+            }
+        }
+    };
+
+    static async getStatus(contract) {
+        const roundInfo = await contract.get_current_round_info();
+        return {
+            roundNumber: roundInfo[0],
+            playCount: roundInfo[1],
+            totalPot: roundInfo[2],
+            isActive: roundInfo[3]
+        };
+    }
+
     constructor() {
         super();
         this.selectedNumber = null;
         this.donationInput = null;
         this.dice3D = null;
         
-        // Constants for dice display
         this.DICE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
         this.DICE_EMOJIS = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
     }
 
-    getContractName() {
-        return 'dice-gods';
-    }
-
-    render() {
-        const header = this.renderer.createGameHeader(this.metadata);
-        
-        const gameContent = document.createElement('div');
-        gameContent.className = 'game-interface';
-        gameContent.appendChild(header);
-        
-        const contentInner = document.createElement('div');
-        contentInner.innerHTML = `
-            <div class="game-sections" style="--panel-color: #8b5cf6; --btn-color: #10b981;">
-                <!-- Main Game Panel -->
-                <div class="contest-info-panel game-panel">
-                    <div class="game-panel-grid">
-                        <!-- Left: Die Animation -->
-                        <div class="min-w-0">
-                            <div id="dice-3d-container"></div>
-                        </div>
-                        
-                        <!-- Right: Play Controls -->
-                        <div class="min-w-0">
-                            <div class="strategy-callout" style="margin-bottom: 1rem;">
-                                <strong>How to play:</strong> The last digit of your donation (1-6) is your number. Pick the LEAST popular to win!
-                            </div>
-                            
-                            <div id="play-amount-input" style="margin-bottom: 1rem;"></div>
-                            <button id="play-button" class="btn-action">
-                                Play
-                            </button>
-                            
-                            <div class="stat-grid-4" style="margin-top: 1rem; font-size: 0.75rem;">
-                                <div class="stat-box">
-                                    <div class="stat-box-label">Round</div>
-                                    <div id="round-number" class="stat-box-value">-</div>
-                                </div>
-                                <div class="stat-box">
-                                    <div class="stat-box-label">Plays</div>
-                                    <div id="plays-count" class="stat-box-value">-</div>
-                                </div>
-                                <div class="stat-box" style="--stat-color: #10b981;">
-                                    <div class="stat-box-label">Pool</div>
-                                    <div id="prize-pool" class="stat-box-value">-</div>
-                                </div>
-                                <div class="stat-box" style="--stat-color: #f59e0b;">
-                                    <div class="stat-box-label">Min</div>
-                                    <div id="min-donation" class="stat-box-value">-</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Current Round -->
-                <div id="vote-distribution-panel"></div>
-            </div>
-        `;
-        
-        gameContent.appendChild(contentInner);
-        this.container.appendChild(gameContent);
-        
-        // Initialize ValueInput component
-        this.donationInput = new this.components.ValueInput('play-amount-input', {
-            label: 'Donation Amount',
-            hint: 'Last digit (1-6) is your number',
-            defaultUnit: 'gwei',
-            minWei: '1', // Will be updated from contract
-            required: true
+    getGameHTML() {
+        return getTemplate({
+            panelColor: this.metadata.color,
+            btnColor: '#10b981'
         });
-        this.donationInput.render();
-        
-        this.renderDice3D();
-        this.renderCompactRoundPanel();
-        this.renderVoteDistribution();
     }
 
-    renderDice3D() {
-        // Initialize the 3D die component (visual only)
+    initComponents() {
+        this.donationInput = this.createValueInput('play-amount-input', {
+            hint: 'Last digit (1-6) is your number'
+        });
+        
         this.dice3D = new DiceThreeD('dice-3d-container', {
-            onSelect: () => {} // No action needed
+            onSelect: () => {}
         });
         this.dice3D.init();
     }
 
-    renderCompactRoundPanel() {
-        // Stats are now rendered inline in the main template
-    }
-
-    renderVoteDistribution() {
-        const container = document.getElementById('vote-distribution-panel');
-        if (!container) return;
-        
-        container.innerHTML = `
-            <details class="contest-info-panel">
-                <summary class="collapsible-summary">
-                    <span class="collapsible-arrow">▶</span>
-                    <span>📊 Current Round - Number Votes</span>
-                </summary>
-                <div style="margin-top: 1rem;">
-                    <div class="distribution-bars" id="distribution-bars" style="margin-bottom: 1rem;">
-                        <div style="text-align: center; padding: 1rem; color: var(--md-sys-color-on-surface-variant);">
-                            No plays yet...
-                        </div>
-                    </div>
-                    <div id="current-plays-list" style="max-height: 300px; overflow-y: auto;"></div>
-                </div>
-            </details>
-        `;
-    }
-
-
-    setupListeners() {
-        const playButton = document.getElementById('play-button');
-        
-        if (playButton) {
-            playButton.addEventListener('click', () => this.play());
-        }
+    getListeners() {
+        return {
+            'play-button': () => this.play()
+        };
     }
 
     async play() {
@@ -147,38 +75,26 @@ export class DiceGods extends Game {
         const weiAmount = this.donationInput.getWeiValue();
         
         if (!weiAmount || weiAmount.eq(0)) {
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Please enter a donation amount',
-                type: 'warning'
-            });
+            this.toast('Please enter a donation amount', 'warning');
             return;
         }
         
-        // Extract last digit of the wei amount as the number (1-6)
         const weiString = weiAmount.toString();
         const lastDigit = parseInt(weiString[weiString.length - 1]);
         let selectedNumber = lastDigit === 0 ? 6 : (lastDigit > 6 ? lastDigit % 6 || 6 : lastDigit);
         
-        // Show the die face for this number
         if (this.dice3D) {
             this.dice3D.selectFace(selectedNumber);
         }
         
         try {
-            await TransactionHandler.execute(
+            await this.transactionHandler.execute(
                 this.contract.play(selectedNumber, { value: weiAmount }),
-                { 
-                    game: 'dice-gods', 
-                    number: selectedNumber,
-                    wei: weiAmount.toString() 
-                }
+                { game: 'dice-gods', number: selectedNumber, wei: weiAmount.toString() },
+                (isLoading) => this.setButtonState('play-button', isLoading, '⏳ Playing...', 'Play')
             );
             
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: `Played number ${selectedNumber}`,
-                type: 'success'
-            });
-            
+            this.toast(`Played number ${selectedNumber}`, 'success');
             this.donationInput.reset();
             await this.refreshState();
             
@@ -187,42 +103,30 @@ export class DiceGods extends Game {
         }
     }
 
-    async refreshState() {
-        if (!this.contract) return;
+    async fetchAndRenderState() {
+        const [roundInfo, minDonation] = await Promise.all([
+            this.contract.get_current_round_info(),
+            this.contract.minimum_donation()
+        ]);
+        
+        const roundNumber = roundInfo[0];
+        const playCount = typeof roundInfo[1] === 'number' ? roundInfo[1] : roundInfo[1].toNumber();
+        const totalPot = roundInfo[2];
 
-        try {
-            const [roundInfo, minDonation] = await Promise.all([
-                this.contract.get_current_round_info(),
-                this.contract.minimum_donation()
-            ]);
-            
-            const roundNumber = roundInfo[0];
-            const playCount = typeof roundInfo[1] === 'number' ? roundInfo[1] : roundInfo[1].toNumber();
-            const totalPot = roundInfo[2];
-
-            this.dom.updateInfo('round-number', `#${roundNumber.toString()}`);
-            this.dom.updateInfo('plays-count', `${playCount} / 10`);
-            this.dom.updateInfo('prize-pool', this.dom.formatWei(totalPot));
-            this.dom.updateInfo('min-donation', this.dom.formatWei(minDonation));
-            
-            // Update the ValueInput minimum
-            if (this.donationInput && minDonation) {
-                this.donationInput.setMinimum(minDonation.toString());
-            }
-
-            const numberCounts = await this.contract.get_number_counts();
-            this.updateDistributionBars(numberCounts);
-            
-            const currentPlays = await this.contract.get_plays();
-            this.updateCurrentPlaysList(currentPlays);
-
-        } catch (error) {
-            console.error('Failed to refresh state:', error);
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: 'Failed to load game state',
-                type: 'error'
-            });
+        this.dom.updateInfo('round-number', `#${roundNumber.toString()}`);
+        this.dom.updateInfo('plays-count', `${playCount} / 10`);
+        this.dom.updateInfo('prize-pool', this.dom.formatWei(totalPot));
+        this.dom.updateInfo('min-donation', this.dom.formatWei(minDonation));
+        
+        if (this.donationInput && minDonation) {
+            this.donationInput.setMinimum(minDonation.toString());
         }
+
+        const numberCounts = await this.contract.get_number_counts();
+        this.updateDistributionBars(numberCounts);
+        
+        const currentPlays = await this.contract.get_plays();
+        this.updateCurrentPlaysList(currentPlays);
     }
 
     updateDistributionBars(numberCounts) {
@@ -268,12 +172,11 @@ export class DiceGods extends Game {
             return;
         }
         
-        listContainer.innerHTML = plays.map((play, index) => {
+        listContainer.innerHTML = plays.map((play) => {
             const playIndex = typeof play.play_index === 'number' ? play.play_index : play.play_index.toNumber();
             const number = typeof play.number === 'number' ? play.number : play.number.toNumber();
-            const weight = 11 - playIndex; // Position weight: first play gets 10x, last gets 1x
-            const isCurrentUser = this.web3Provider?.currentAddress && 
-                                  play.player.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
+            const weight = 11 - playIndex;
+            const isCurrentUser = this.isCurrentUser(play.player);
             
             return `
                 <div style="padding: 0.75rem; background: ${isCurrentUser ? 'rgba(59, 130, 246, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isCurrentUser ? '#3b82f6' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem;">
@@ -309,49 +212,28 @@ export class DiceGods extends Game {
         this.contract.on('PlayMade', async (roundNumber, player, number, amount, playNumber) => {
             await this.refreshState();
             
-            const isYou = player.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            if (isYou) {
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `Your play recorded: Number ${number}`,
-                    type: 'success'
-                });
+            if (this.isCurrentUser(player)) {
+                this.toast(`Your play recorded: Number ${number}`, 'success');
             } else {
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `Someone played number ${number}`,
-                    type: 'info'
-                });
+                this.toast(`Someone played number ${number}`, 'info');
             }
         });
 
         this.contract.on('WinnerPaid', async (roundNumber, winner, number, amount) => {
-            const isYou = winner.toLowerCase() === this.web3Provider.currentAddress.toLowerCase();
-            
-            if (isYou) {
-                this.events.bus.emit(this.events.EVENTS.CONFETTI);
-                this.events.bus.emit(this.events.EVENTS.TOAST, {
-                    message: `You won ${this.dom.formatWei(amount)} with number ${number}!`,
-                    type: 'success'
-                });
+            if (this.isCurrentUser(winner)) {
+                this.celebrate(`You won ${this.dom.formatWei(amount)} with number ${number}!`);
             }
         });
 
         this.contract.on('RoundEnded', async (roundNumber, winningNumbers, winnerCount, totalPot) => {
             const numbersStr = winningNumbers.join(', ');
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: `Round ended! Winning number(s): ${numbersStr}`,
-                type: 'info'
-            });
-            
+            this.toast(`Round ended! Winning number(s): ${numbersStr}`, 'info');
             await this.refreshState();
         });
 
         this.contract.on('RoundStarted', async (roundNumber) => {
-            this.events.bus.emit(this.events.EVENTS.TOAST, {
-                message: `Round ${roundNumber} started`,
-                type: 'info'
-            });
+            this.toast(`Round ${roundNumber} started`, 'info');
             await this.refreshState();
         });
     }
 }
-

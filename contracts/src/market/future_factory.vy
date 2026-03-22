@@ -14,14 +14,13 @@ ARCHITECTURE (mirroring board.vy):
 - Expired futures get replaced when new ones are created
 - Marketplace functions for listing/buying
 
-SUPPORTED DISTRIBUTIONS (7 types):
+SUPPORTED DISTRIBUTIONS (6 types):
 - Type 0: Uniform - Constant rate
 - Type 1: Gaussian - Bell curve (peak at midpoint)
 - Type 2: Exp Decay - Early payouts favored
 - Type 3: Exp Growth - Late payouts favored
 - Type 4: Linear Decay - Triangular (high at start)
-- Type 5: Inverted Gaussian - U-shape (high at extremes)
-- Type 6: Linear Growth - Triangular (low at start, high at end)
+- Type 5: Linear Growth - Triangular (low at start, high at end)
 
 KEY DIFFERENCES FROM BOARD.VY:
 - Futures expire by TIME, not inactivity
@@ -155,8 +154,7 @@ gaussian_blueprint: public(immutable(address))          # Type 1
 exp_decay_blueprint: public(immutable(address))         # Type 2
 exp_growth_blueprint: public(immutable(address))        # Type 3
 linear_decay_blueprint: public(immutable(address))      # Type 4
-inverted_gaussian_blueprint: public(immutable(address)) # Type 5
-linear_growth_blueprint: public(immutable(address))     # Type 6
+linear_growth_blueprint: public(immutable(address))     # Type 5
 
 # Calculator addresses
 exp_calculator: public(immutable(address))
@@ -173,7 +171,6 @@ def __init__(
     _exp_decay_bp: address,
     _exp_growth_bp: address,
     _linear_decay_bp: address,
-    _inverted_gaussian_bp: address,
     _linear_growth_bp: address,
     _exp_calc: address,
     _gaussian_calc: address,
@@ -186,8 +183,7 @@ def __init__(
     @param _exp_decay_bp Blueprint for exponential decay (type 2)
     @param _exp_growth_bp Blueprint for exponential growth (type 3)
     @param _linear_decay_bp Blueprint for linear decay (type 4)
-    @param _inverted_gaussian_bp Blueprint for inverted Gaussian (type 5)
-    @param _linear_growth_bp Blueprint for linear growth (type 6)
+    @param _linear_growth_bp Blueprint for linear growth (type 5)
     @param _exp_calc Address of exp calculator contract
     @param _gaussian_calc Address of gaussian_tail calculator contract
     @param _owner Factory owner address
@@ -197,7 +193,6 @@ def __init__(
     assert _exp_decay_bp != empty(address), "Invalid exp decay blueprint"
     assert _exp_growth_bp != empty(address), "Invalid exp growth blueprint"
     assert _linear_decay_bp != empty(address), "Invalid linear decay blueprint"
-    assert _inverted_gaussian_bp != empty(address), "Invalid inverted gaussian blueprint"
     assert _linear_growth_bp != empty(address), "Invalid linear growth blueprint"
     assert _exp_calc != empty(address), "Invalid exp calculator"
     assert _gaussian_calc != empty(address), "Invalid gaussian calculator"
@@ -209,7 +204,6 @@ def __init__(
     exp_decay_blueprint = _exp_decay_bp
     exp_growth_blueprint = _exp_growth_bp
     linear_decay_blueprint = _linear_decay_bp
-    inverted_gaussian_blueprint = _inverted_gaussian_bp
     linear_growth_blueprint = _linear_growth_bp
     exp_calculator = _exp_calc
     gaussian_tail_calculator = _gaussian_calc
@@ -230,13 +224,13 @@ def create_future(lifetime: uint256, distribution_type: uint8) -> address:
     
     PARAMETERS:
     - lifetime: Duration in seconds
-    - distribution_type: 0=Uniform, 1=Gaussian, 2=ExpDecay, 3=ExpGrowth, 4=LinearDecay, 5=InvertedGaussian, 6=LinearGrowth
+    - distribution_type: 0=Uniform, 1=Gaussian, 2=ExpDecay, 3=ExpGrowth, 4=LinearDecay, 5=LinearGrowth
     """
     # Validate inputs
     assert msg.value >= MIN_INITIAL_VALUE, "Value too low"
     assert lifetime >= MIN_LIFETIME, "Lifetime too short"
     assert lifetime <= MAX_LIFETIME, "Lifetime too long"
-    assert distribution_type <= 6, "Invalid distribution type"
+    assert distribution_type <= 5, "Invalid distribution type"
     
     # Anti-spam cooldown
     last_created: uint256 = self.last_creation_time[msg.sender]
@@ -304,18 +298,7 @@ def create_future(lifetime: uint256, distribution_type: uint8) -> address:
             code_offset=3
         )
     elif distribution_type == 5:
-        # INVERTED GAUSSIAN: Needs gaussian_tail calculator
-        new_future = create_from_blueprint(
-            inverted_gaussian_blueprint,
-            lifetime,
-            msg.sender,
-            self,
-            gaussian_tail_calculator,
-            value=msg.value,
-            code_offset=3
-        )
-    else:
-        # LINEAR GROWTH: No calculator, is_growth=True
+        # LINEAR GROWTH (type 5): No calculator, is_growth=True
         new_future = create_from_blueprint(
             linear_growth_blueprint,
             lifetime,
@@ -612,45 +595,8 @@ def _get_expected_value_internal(future_addr: address) -> uint256:
         remaining_time: uint256 = lifetime - last_t
         remaining_mass = convert(remaining_time, decimal) * convert(remaining_time, decimal) / (2.0 * convert(lifetime, decimal) * convert(lifetime, decimal))
     
-    elif dist_type == 5:
-        # INVERTED GAUSSIAN: U-shaped curve
-        # Uses similar logic to Gaussian but inverted
-        mean: uint256 = 0
-        stddev: uint256 = 0
-        lambda_param: decimal = 0.0
-        mean, stddev, lambda_param = staticcall IFuture(future_addr).get_distribution_params()
-        
-        # Use external gaussian_tail calculator
-        z_end: decimal = staticcall IGaussianTail(gaussian_tail_calculator).z_score(
-            convert(lifetime, decimal), 
-            convert(mean, decimal), 
-            convert(stddev, decimal)
-        )
-        tail_end: decimal = staticcall IGaussianTail(gaussian_tail_calculator).calculate(z_end)
-        
-        phase: uint8 = self._determine_phase(last_t, lifetime, mean)
-        
-        # Inverted Gaussian: complement of normal Gaussian weight
-        gaussian_remaining: decimal = self._weight_gaussian(last_cache, tail_end, phase)
-        
-        # For inverted, we reverse: high at extremes means complement behavior
-        # The total mass that's "inverted" depends on position
-        if phase == 0:
-            # Before mean: invert tail values
-            remaining_mass = tail_end - last_cache
-        elif phase == 1:
-            # Crossing mean: sum of outer areas
-            remaining_mass = (1.0 - last_cache) + tail_end
-        else:
-            # After mean: invert tail values
-            remaining_mass = last_cache - tail_end
-        
-        # Clamp to valid range
-        if remaining_mass < 0.0:
-            remaining_mass = 0.0
-    
     else:
-        # LINEAR GROWTH (type 6): last_cache is proportion elapsed
+        # LINEAR GROWTH (type 5): last_cache is proportion elapsed
         # Remaining area under growth curve: (T^2 - t_last^2) / (2T^2)
         remaining_mass = (convert(lifetime, decimal) * convert(lifetime, decimal) - convert(last_t, decimal) * convert(last_t, decimal)) / (2.0 * convert(lifetime, decimal) * convert(lifetime, decimal))
     
@@ -670,7 +616,7 @@ def _get_expected_value_internal(future_addr: address) -> uint256:
 def get_expected_value(future_addr: address) -> uint256:
     """
     Public wrapper for expected value calculation
-    Compute expected remaining value (supports all 7 distribution types)
+    Compute expected remaining value (supports all 6 distribution types)
     """
     return self._get_expected_value_internal(future_addr)
 

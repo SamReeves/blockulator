@@ -304,20 +304,19 @@ async function testFuturesFactory(wallet, wallet2, provider, expContract, gtCont
     const bpExpDecay  = await deployBlueprint(wallet, 'exponential-future', 'exp-decay');
     const bpExpGrowth = await deployBlueprint(wallet, 'exponential-future', 'exp-growth');
     const bpLinDecay  = await deployBlueprint(wallet, 'linear-future', 'linear-decay');
-    const bpInvGauss  = await deployBlueprint(wallet, 'inverted-gaussian-future', 'inv-gaussian');
     const bpLinGrowth = await deployBlueprint(wallet, 'linear-future', 'linear-growth');
 
-    if (!bpUniform || !bpGaussian || !bpExpDecay || !bpExpGrowth || !bpLinDecay || !bpInvGauss || !bpLinGrowth) {
+    if (!bpUniform || !bpGaussian || !bpExpDecay || !bpExpGrowth || !bpLinDecay || !bpLinGrowth) {
         console.log('  SKIP - missing blueprint bytecodes');
         return;
     }
-    console.log('  All 7 blueprints deployed');
+    console.log('  All 6 blueprints deployed');
 
     console.log('  Deploying factory...');
     const factory = await deploy(
         wallet, 'future-factory', 'future-factory',
         bpUniform, bpGaussian, bpExpDecay, bpExpGrowth,
-        bpLinDecay, bpInvGauss, bpLinGrowth,
+        bpLinDecay, bpLinGrowth,
         exp.address, gt.address, wallet.address
     );
     if (!factory) return;
@@ -329,10 +328,10 @@ async function testFuturesFactory(wallet, wallet2, provider, expContract, gtCont
 
     const distNames = [
         'Uniform (0)', 'Gaussian (1)', 'Exp Decay (2)', 'Exp Growth (3)',
-        'Linear Decay (4)', 'Inv Gaussian (5)', 'Linear Growth (6)'
+        'Linear Decay (4)', 'Linear Growth (5)'
     ];
 
-    for (let dtype = 0; dtype <= 6; dtype++) {
+    for (let dtype = 0; dtype <= 5; dtype++) {
         try {
             // Skip cooldown between creates
             if (dtype > 0) {

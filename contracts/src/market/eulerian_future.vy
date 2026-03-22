@@ -5,7 +5,7 @@
 @title Eulerian Future - Multi-Distribution Time-Based Future
 @author Sam Reeves
 @license MIT
-@notice Tradeable future supporting 7 distribution types: Uniform, Gaussian, Exponential, Linear, Inverted
+@notice Tradeable future supporting 6 distribution types: Uniform, Gaussian, Exponential, Linear
 @dev All distributions use the same high-precision E_TAB table for calculations
 """
 
@@ -34,7 +34,7 @@ expired: public(bool)
 factory: public(immutable(address))  # Factory that deployed this future
 locked: public(bool)  # True when listed on marketplace, prevents direct transfers
 
-# Distribution type: 0=Uniform, 1=Gaussian, 2=ExpDecay, 3=ExpGrowth, 4=LinearDecay, 5=InvertedGaussian, 6=LinearGrowth
+# Distribution type: 0=Uniform, 1=Gaussian, 2=ExpDecay, 3=ExpGrowth, 4=LinearDecay, 5=LinearGrowth
 distribution_type: public(uint8)
 
 # Distribution-specific parameters
@@ -52,13 +52,13 @@ def __init__(_lifetime: uint256, _distribution_type: uint8, _owner: address, _fa
     """
     @notice Initialize Eulerian future with distribution type
     @param _lifetime Duration in seconds (minimum 60 = 1 minute)
-    @param _distribution_type 0=Uniform, 1=Gaussian, 2=ExpDecay, 3=ExpGrowth, 4=LinearDecay, 5=InvertedGaussian, 6=LinearGrowth
+    @param _distribution_type 0=Uniform, 1=Gaussian, 2=ExpDecay, 3=ExpGrowth, 4=LinearDecay, 5=LinearGrowth
     @param _owner The address that will own this future
     @param _factory The factory contract address (for marketplace locking)
     """
     assert _lifetime >= 60, "Lifetime must be at least 60 seconds (1 minute)"
     assert msg.value > 0, "Must send ETH to deploy"
-    assert _distribution_type <= 6, "Invalid distribution type (must be 0-6)"
+    assert _distribution_type <= 5, "Invalid distribution type (must be 0-5)"
     assert _owner != empty(address), "Owner cannot be zero address"
     assert _factory != empty(address), "Factory cannot be zero address"
 
@@ -110,16 +110,8 @@ def __init__(_lifetime: uint256, _distribution_type: uint8, _owner: address, _fa
         self.lambda_param = 0.0
         self.last_cache = 0.0  # Proportion elapsed
         
-    elif _distribution_type == 5:
-        # INVERTED GAUSSIAN: U-shaped curve (high at extremes, low in middle)
-        # Uses same math as Gaussian but inverted
-        self.mean = _lifetime // 2
-        self.stddev = convert(convert(_lifetime, decimal) / 3.464101615, uint256)
-        self.lambda_param = 0.0
-        self.last_cache = 1.0  # Start at left tail
-        
     else:
-        # LINEAR GROWTH: Triangular distribution with peak at end
+        # LINEAR GROWTH (type 5): Triangular distribution with peak at end
         # Payout increases linearly: low at t=0, high at t=lifetime
         self.mean = 0
         self.stddev = 0
@@ -197,11 +189,8 @@ def transfer(new_owner: address):
     elif self.distribution_type == 4:
         # LINEAR DECAY
         weight, new_cache = self._linear_decay_weight(self.last_t, t_current)
-    elif self.distribution_type == 5:
-        # INVERTED GAUSSIAN
-        weight, new_cache = self._inverted_gaussian_weight(self.last_t, t_current)
     else:
-        # LINEAR GROWTH
+        # LINEAR GROWTH (type 5)
         weight, new_cache = self._linear_growth_weight(self.last_t, t_current)
     
     # Calculate payment
@@ -341,59 +330,6 @@ def _linear_decay_weight(t_last: uint256, t_current: uint256) -> (decimal, decim
     proportion: decimal = convert(t_current, decimal) / convert(self.lifetime, decimal)
     
     return (weight, proportion)
-
-@internal
-@view
-def _inverted_gaussian_weight(t_last: uint256, t_current: uint256) -> (decimal, decimal):
-    """
-    @notice Calculate Inverted Gaussian weight (U-shaped curve)
-    @return Tuple of (weight, new_tail_cache)
-    @dev Uses Gaussian math but inverts the result: high probability at extremes, low in middle
-         P_inv(t) = 1 - P_gaussian(t)
-         This creates a U-shaped distribution
-    """
-    # Determine phase
-    phase: uint8 = 0
-    if t_last > self.mean:
-        phase += 1
-    if t_current > self.mean:
-        phase += 1
-    
-    # Calculate current position on distribution
-    z_current: decimal = self._z_score(t_current, self.mean, self.stddev)
-    y_current: decimal = self._y_constant(z_current)
-    exp_y_current: decimal = self._e_power(y_current)
-    tail_current: decimal = self._tail(exp_y_current)
-    
-    # For inverted Gaussian, we want the complement of the Gaussian weight
-    # Instead of taking mass between tails, we take mass from the "sides"
-    # This is: (1 - left_tail) + (1 - right_tail) - 1 = 1 - left_tail - right_tail + left_tail*right_tail
-    # Simplified: we invert the phase logic
-    weight: decimal = 0.0
-    
-    if phase == 0:
-        # Both times before mean: inverted means we want the outer area
-        # Original: left - right
-        # Inverted: (1-left) - (1-right) = right - left
-        weight = tail_current - self.last_cache
-    elif phase == 1:
-        # Left before mean, right after mean: this is the valley
-        # Original: left - (1-right) 
-        # Inverted: (1-left) + right = 1 - left + right
-        weight = (1.0 - self.last_cache) + tail_current
-    else:
-        # Both times after mean: inverted means we want outer area
-        # Original: (1-left) - (1-right) = right - left
-        # Inverted: left - right
-        weight = self.last_cache - tail_current
-    
-    # Clamp weight to valid range
-    if weight < 0.0:
-        weight = 0.0
-    if weight > 1.0:
-        weight = 1.0
-    
-    return (weight, tail_current)
 
 @internal
 @view

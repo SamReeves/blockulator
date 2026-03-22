@@ -42,7 +42,7 @@ export class FutureFactory {
         const contractWithSigner = this.contract.connect(signer);
         const valueBN = ethers.BigNumber.from(value);
 
-        // Estimate gas with buffer for complex distributions (e.g., Gaussian, Inverted Gaussian)
+        // Estimate gas with buffer for complex distributions (e.g., Gaussian)
         let gasLimit;
         try {
             const gasEstimate = await contractWithSigner.estimateGas.create_future(

@@ -111,7 +111,6 @@ compile "$SRC/market/uniform_future.vy"            "uniform-future"           tr
 compile "$SRC/market/linear_future.vy"             "linear-future"            true
 compile "$SRC/market/exponential_future.vy"        "exponential-future"       true
 compile "$SRC/market/gaussian_future.vy"           "gaussian-future"          true
-compile "$SRC/market/inverted_gaussian_future.vy"  "inverted-gaussian-future" true
 compile "$SRC/market/future_factory.vy"            "future-factory"
 
 echo ""

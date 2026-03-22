@@ -219,7 +219,6 @@ async function deployTier3(wallet) {
     const bpExpGrowth = bpExpDecay; // Same contract, reused for growth
     const bpLinDecay = await deployBlueprint(wallet, 'linear-future', 'Linear Future');
     const bpLinGrowth = bpLinDecay; // Same contract, reused for growth
-    const bpInvGauss = await deployBlueprint(wallet, 'inverted-gaussian-future', 'Inverted Gaussian Future');
     
     // Identity blueprint
     const bpBadge = await deployBlueprint(wallet, 'badge', 'Badge');
@@ -230,7 +229,7 @@ async function deployTier3(wallet) {
     
     return { 
         bpUniform, bpGaussian, bpExpDecay, bpExpGrowth, 
-        bpLinDecay, bpLinGrowth, bpInvGauss,
+        bpLinDecay, bpLinGrowth,
         bpBadge, bpImage, bpText 
     };
 }
@@ -251,7 +250,6 @@ async function deployTier4(wallet, tier1, tier2, tier3) {
             tier3.bpExpDecay,
             tier3.bpExpGrowth,
             tier3.bpLinDecay,
-            tier3.bpInvGauss,
             tier3.bpLinGrowth,
             tier1.exp.address,
             tier2.gaussianTail.address,
@@ -375,7 +373,6 @@ function updateContractRegistry() {
         'gaussian-future-blueprint': 'gaussian-future-blueprint',
         'exponential-future-blueprint': 'exponential-future-blueprint',
         'linear-future-blueprint': 'linear-future-blueprint',
-        'inverted-gaussian-future-blueprint': 'inverted-gaussian-future-blueprint',
         'future-factory': 'future-factory',
         'badge-blueprint': 'badge-blueprint',
         'badge-factory': 'badge-factory',

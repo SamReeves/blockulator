@@ -59,7 +59,7 @@ export class ExpectedValueCalculator {
             const percentElapsed = Math.min(100, (timeElapsed / lifetime * 100));
             const percentRemaining = 100 - percentElapsed;
 
-            const distributionNames = ['Uniform', 'Gaussian', 'Exp Decay', 'Exp Growth', 'Linear Decay', 'Inverted', 'Linear Growth'];
+            const distributionNames = ['Uniform', 'Gaussian', 'Exp Decay', 'Exp Growth', 'Linear Decay', 'Linear Growth'];
             const distName = distributionNames[this.futureInfo.distributionType] || 'Unknown';
 
             // Format time remaining
@@ -198,13 +198,7 @@ export class ExpectedValueCalculator {
                 tip: percentElapsed < 30 ? '🔥 Maximum value at start! Consider claiming early.' :
                      'Value declining steadily. Earlier is better.'
             },
-            5: { // Inverted Gaussian
-                description: 'U-shaped curve',
-                tip: percentElapsed < 30 ? '🎯 High value at start! Good time to claim.' :
-                     percentElapsed < 70 ? 'In the valley. Value is lower mid-life. Wait for end or claim now.' :
-                     '🎯 Value rising again! Consider claiming near expiry.'
-            },
-            6: { // Linear Growth
+            5: { // Linear Growth
                 description: 'Triangular (high end)',
                 tip: percentElapsed < 70 ? '⏳ Value increases linearly. Wait for higher payout.' :
                      '🎯 Approaching maximum value! Consider claiming soon.'

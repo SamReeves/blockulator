@@ -193,8 +193,7 @@ export class EulerianFuture {
             'Exp Decay',        // 2
             'Exp Growth',       // 3
             'Linear Decay',     // 4
-            'Inverted Gaussian',// 5
-            'Linear Growth'     // 6
+            'Linear Growth'     // 5
         ];
         return types[type] || 'Unknown';
     }
@@ -209,8 +208,7 @@ export class EulerianFuture {
             2: 'Early payout favored. Front-loaded with rapid value extraction.',
             3: 'Late payout favored. Back-loaded with appreciation over time.',
             4: 'Linear decay rate. Triangular distribution, high payouts at start.',
-            5: 'U-shaped curve. High payouts at both extremes, low in middle.',
-            6: 'Linear growth rate. Triangular distribution, high payouts at end.'
+            5: 'Linear growth rate. Triangular distribution, high payouts at end.'
         };
         return descriptions[type] || 'Unknown distribution type';
     }
@@ -225,8 +223,7 @@ export class EulerianFuture {
             '📉',  // 2: Exp Decay
             '📈',  // 3: Exp Growth
             '🔻',  // 4: Linear Decay
-            '🆄',  // 5: Inverted Gaussian (U-shape)
-            '🔺'   // 6: Linear Growth
+            '🔺'   // 5: Linear Growth
         ];
         return emojis[type] || '❓';
     }

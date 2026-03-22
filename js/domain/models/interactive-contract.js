@@ -6,7 +6,7 @@
  */
 
 import { ContractLoader } from '../../infrastructure/blockchain/contract-loader.js';
-import { getContractMetadata } from '../../infrastructure/config/contract-registry.js';
+import { getContractMetadata, hasContract } from '../../infrastructure/config/contract-registry.js';
 import { BlockchainMath } from '../../infrastructure/utils/blockchain-math.js';
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { TransactionHandler } from '../../infrastructure/blockchain/transaction-handler.js';
@@ -18,16 +18,7 @@ export class InteractiveContract {
         this.contract = null;
         this.container = null;
         this.web3Provider = null;
-        
-        // Get metadata from unified registry
-        // Subclass must implement getContractName() before calling super()
-        try {
-            const contractName = this.getContractName();
-            this.metadata = getContractMetadata(contractName);
-        } catch (error) {
-            // Metadata will be set during init if not available in constructor
-            this.metadata = null;
-        }
+        this.metadata = this.constructor.metadata || null;
         
         // Dependency injection - all subclasses get these utilities
         this.math = BlockchainMath;
@@ -45,10 +36,12 @@ export class InteractiveContract {
         this.container = container;
         this.web3Provider = web3Provider;
         
-        // Ensure metadata is loaded (in case constructor couldn't get it)
+        // For non-game contracts (calculators, badges) without static metadata
         if (!this.metadata) {
             const contractName = this.getContractName();
-            this.metadata = getContractMetadata(contractName);
+            if (hasContract(contractName)) {
+                this.metadata = getContractMetadata(contractName);
+            }
         }
         
         await this.onBeforeInit();
@@ -92,11 +85,12 @@ export class InteractiveContract {
     }
 
     /**
-     * Abstract method: Setup event listeners
-     * Subclasses must implement their specific listeners
+     * Hook: Setup DOM event listeners
+     * Override in subclass if needed
+     * Game subclasses use getListeners() + bindListeners() instead
      */
     setupListeners() {
-        throw new Error('Subclass must implement setupListeners()');
+        // No-op by default
     }
 
     /**
@@ -123,28 +117,6 @@ export class InteractiveContract {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Convert contract name to SCREAMING_SNAKE_CASE for lookups
-     * Used for address, source, and ABI key generation
-     */
-    getAddressKey() {
-        return this.getContractName().toUpperCase().replace(/-/g, '_');
-    }
-
-    /**
-     * Get source file key (same as address key)
-     */
-    getSourceKey() {
-        return this.getAddressKey();
-    }
-
-    /**
-     * Get ABI file key (same as address key)
-     */
-    getAbiKey() {
-        return this.getAddressKey();
     }
 
     /**
