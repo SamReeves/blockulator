@@ -7,7 +7,7 @@
  * User can switch via the network badge in the header
  */
 
-import { eventBus } from '../events/event-bus.js';
+import { eventBus, EVENTS } from '../events/event-bus.js';
 
 const NETWORKS = {
     sepolia: {

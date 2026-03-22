@@ -221,7 +221,7 @@ export const CONTRACT_REGISTRY = {
         category: 'exponential',
         description: 'Calculate powers of 10',
         addresses: {
-            sepolia: '0x4cdb4e0b80fA70848679e3FDb6dC4D57B0646841',
+            sepolia: '0x28DA1109e081bc83cEE8A5f921448c3cD7Ac6d02',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/pow10.vy',
@@ -236,7 +236,7 @@ export const CONTRACT_REGISTRY = {
         category: 'exponential',
         description: 'Calculate powers of 2',
         addresses: {
-            sepolia: '0x762D5A7a2a35a4eBb4412345532177c726B44E04',
+            sepolia: '0x3916736Ba352B08d1cb7ef57c1d7336924D5E1CD',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/pow2.vy',
@@ -251,7 +251,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Calculate natural logarithm',
         addresses: {
-            sepolia: '0xd133A5E0a7e8eDF1FDEA4cd06AC1F1D8325eB768',
+            sepolia: '0xfc4883676333533F053368e27A4038664b9063C2',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/ln.vy',
@@ -266,7 +266,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Calculate logarithm base 2',
         addresses: {
-            sepolia: '0xbBf23C4340CB4D10e608a6d62C907EC2FdEDb517',
+            sepolia: '0xD628C5420ccdd92DF1dFBf33E854435cA8Fa7350',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/log2.vy',
@@ -281,7 +281,7 @@ export const CONTRACT_REGISTRY = {
         category: 'logarithmic',
         description: 'Calculate logarithm base 10',
         addresses: {
-            sepolia: '0x29359A46A4FAec3452dbDEa8715FD78cd06Cb9aa',
+            sepolia: '0x9c44F99C8236FBeb9544406e373CBBABcD42f234',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/log10.vy',
@@ -296,7 +296,7 @@ export const CONTRACT_REGISTRY = {
         category: 'basic',
         description: 'Calculate square root',
         addresses: {
-            sepolia: '0x5989EB39217eb102aaba8dF1a7c53995EbfAA85b',
+            sepolia: '0x9e5Fa1afa9047fA095dee3870324480207278024',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/sqrt.vy',
@@ -311,7 +311,7 @@ export const CONTRACT_REGISTRY = {
         category: 'probability',
         description: 'Gaussian error function',
         addresses: {
-            sepolia: '0x090285f2952ac6dCC8b6B40d90CD417B8789c1Df',
+            sepolia: '0x1f5d453df2c9EBE129A3419A3131ee5c9E39Dc6F',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/tools/math/erf.vy',
@@ -482,7 +482,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🏭',
         description: 'Badge creation factory',
         addresses: {
-            sepolia: '0x4472b48071e49d3bd593c102b66A0c0CF529B4df',
+            sepolia: '0x5802f9121018aabC887b9686bA2eB1EFABB70BB7',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/identity/badge_factory.vy',
@@ -495,7 +495,7 @@ export const CONTRACT_REGISTRY = {
         emoji: '🎖️',
         description: 'Badge contract blueprint',
         addresses: {
-            sepolia: '0xb18505c49Ad113202fbFe921BEF6b117f7a18C96',
+            sepolia: '0x906E93e3901C87e0E3158B8eE8D4bF56d887C1D0',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
         source: 'contracts/src/identity/badge.vy',
