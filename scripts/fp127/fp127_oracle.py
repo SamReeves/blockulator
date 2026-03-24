@@ -28,6 +28,7 @@ Functions:
 """
 
 from mpmath import mp, mpf, log, exp as mp_exp, sqrt as mp_sqrt, power, floor, ceil, cbrt, lambertw, factorial as mp_factorial
+from math import gcd as math_gcd
 import sys
 from math import gcd as math_gcd
 
@@ -310,6 +311,203 @@ def from_wad(wad_str):
     return mpf(wad_int) / mpf(10**18)
 
 
+def to_wad_int(val):
+    """Convert mpf to WAD integer (signed, 256-bit two's complement)."""
+    scaled = int(val * mpf(10**18))
+    if scaled < 0:
+        scaled = (1 << 256) + scaled
+    return scaled % (1 << 256)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# WAD-NATIVE FUNCTIONS (for direct comparison across all libraries)
+# Input/output in WAD format (1e18 scale, signed int256)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def compute_wad_mul(a_str, b_str):
+    """Compute a * b in WAD format."""
+    a = from_wad(a_str)
+    b = from_wad(b_str)
+    result = a * b
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_div(a_str, b_str):
+    """Compute a / b in WAD format."""
+    a = from_wad(a_str)
+    b = from_wad(b_str)
+    if b == 0:
+        return abi_encode_uint256(0)
+    result = a / b
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_exp(x_str):
+    """Compute e^x where x is WAD."""
+    x = from_wad(x_str)
+    result = mp_exp(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_ln(x_str):
+    """Compute ln(x) where x is WAD."""
+    x = from_wad(x_str)
+    if x <= 0:
+        return abi_encode_uint256(0)
+    result = log(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_sqrt(x_str):
+    """Compute sqrt(x) where x is WAD."""
+    x = from_wad(x_str)
+    if x < 0:
+        return abi_encode_uint256(0)
+    result = mp_sqrt(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_exp2(x_str):
+    """Compute 2^x where x is WAD."""
+    x = from_wad(x_str)
+    result = power(mpf(2), x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_log2(x_str):
+    """Compute log2(x) where x is WAD."""
+    x = from_wad(x_str)
+    if x <= 0:
+        return abi_encode_uint256(0)
+    result = log(x) / LN2
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_cbrt(x_str):
+    """Compute cbrt(x) where x is WAD."""
+    x = from_wad(x_str)
+    if x < 0:
+        result = -cbrt(-x)
+    else:
+        result = cbrt(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_pow(base_str, exp_str):
+    """Compute base^exp where both are WAD."""
+    base = from_wad(base_str)
+    exp_val = from_wad(exp_str)
+    if base <= 0:
+        return abi_encode_uint256(0)
+    result = power(base, exp_val)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_inv(x_str):
+    """Compute 1/x where x is WAD."""
+    x = from_wad(x_str)
+    if x == 0:
+        return abi_encode_uint256(0)
+    result = mpf(1) / x
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_gavg(a_str, b_str):
+    """Compute sqrt(a*b) where both are WAD."""
+    a = from_wad(a_str)
+    b = from_wad(b_str)
+    if a < 0 or b < 0:
+        return abi_encode_uint256(0)
+    result = mp_sqrt(a * b)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_log10(x_str):
+    """Compute log10(x) where x is WAD."""
+    x = from_wad(x_str)
+    if x <= 0:
+        return abi_encode_uint256(0)
+    result = log(x, 10)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_exp10(x_str):
+    """Compute 10^x where x is WAD."""
+    x = from_wad(x_str)
+    result = power(mpf(10), x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_hypot(a_str, b_str):
+    """Compute sqrt(a^2 + b^2) where both are WAD."""
+    a = from_wad(a_str)
+    b = from_wad(b_str)
+    result = mp_sqrt(a*a + b*b)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_floor(x_str):
+    """Compute floor(x) where x is WAD."""
+    x = from_wad(x_str)
+    result = floor(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_ceil(x_str):
+    """Compute ceil(x) where x is WAD."""
+    x = from_wad(x_str)
+    result = ceil(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_frac(x_str):
+    """Compute frac(x) = x - floor(x) where x is WAD."""
+    x = from_wad(x_str)
+    result = x - floor(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_round(x_str):
+    """Compute round(x) where x is WAD."""
+    x = from_wad(x_str)
+    result = floor(x + mpf(0.5))
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_gcd(a_str, b_str):
+    """Compute gcd(a, b) where both are WAD (operates on integer parts)."""
+    a = from_wad(a_str)
+    b = from_wad(b_str)
+    a_int = int(floor(abs(a)))
+    b_int = int(floor(abs(b)))
+    result = mpf(math_gcd(a_int, b_int))
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_factorial(n_str):
+    """Compute n! where n is WAD (uses integer part)."""
+    n = from_wad(n_str)
+    n_int = int(floor(n))
+    if n_int < 0 or n_int > 33:
+        return abi_encode_uint256(0)
+    result = mpf(mp_factorial(n_int))
+    return abi_encode_uint256(to_wad_int(result))
+
+
+def compute_wad_lambertw0(x_str):
+    """Compute Lambert W0(x) where x is WAD."""
+    x = from_wad(x_str)
+    if x < -1/mp_exp(1):
+        return abi_encode_uint256(0)
+    result = lambertw(x, 0)
+    return abi_encode_uint256(to_wad_int(mpf(result.real)))
+
+
+def _compute_wad_sqrt_internal(x_str):
+    result = mp_sqrt(x)
+    return abi_encode_uint256(to_wad_int(result))
+
+
 def wad_to_fp127_exact(wad_int):
     """
     Convert WAD integer to FP127 integer using exact Solidity arithmetic.
@@ -499,18 +697,21 @@ def _compute_func(func_name, a, b=None):
 def compute_multi_format(func_name, a_str, b_str=None):
     """
     Compute operation and return results in multiple formats.
-    Returns: (fp127, wad, abdk) as JSON array.
-    Each library gets its own ground truth computed from its exact input format.
+    Returns: (fp127_wad, wad, abdk_wad) - all in WAD format for direct comparison.
+    Each library gets its own ground truth computed from its exact input format,
+    then converted back to WAD.
     """
     # Parse WAD inputs
     wad_int_a = int(a_str, 10)
     wad_int_b = int(b_str, 10) if b_str else None
     
-    # --- FP127 path: use FP127-exact conversion ---
+    # --- FP127 path: use FP127-exact conversion, return as WAD ---
+    # Simulates: WAD input -> FP127 -> operation -> FP127 result -> WAD output
     a_fp127 = fp127_int_to_mpf(wad_to_fp127_exact(wad_int_a))
     b_fp127 = fp127_int_to_mpf(wad_to_fp127_exact(wad_int_b)) if wad_int_b is not None else None
     result_fp127 = _compute_func(func_name, a_fp127, b_fp127)
-    fp127_val = to_fp127_int(result_fp127)
+    # Convert FP127 result back to WAD (simulating toFixed18)
+    fp127_wad_val = to_wad_int(result_fp127)
     
     # --- WAD path: use exact WAD decimal (no truncation) ---
     a_wad = from_wad(a_str)
@@ -518,14 +719,16 @@ def compute_multi_format(func_name, a_str, b_str=None):
     result_wad = _compute_func(func_name, a_wad, b_wad)
     wad_val = to_wad_int(result_wad)
     
-    # --- ABDK path: use ABDK-exact conversion ---
+    # --- ABDK path: use ABDK-exact conversion, return as WAD ---
+    # Simulates: WAD input -> ABDK -> operation -> ABDK result -> WAD output
     a_abdk = abdk_int_to_mpf(wad_to_abdk_exact(wad_int_a))
     b_abdk = abdk_int_to_mpf(wad_to_abdk_exact(wad_int_b)) if wad_int_b is not None else None
     result_abdk = _compute_func(func_name, a_abdk, b_abdk)
-    abdk_val = to_abdk_int(result_abdk)
+    # Convert ABDK result back to WAD
+    abdk_wad_val = to_wad_int(result_abdk)
     
-    # Return as hex tuple (3 uint256 values)
-    return f"0x{fp127_val:064x}{wad_val:064x}{abdk_val:064x}"
+    # Return as hex tuple (3 uint256 values, all in WAD format)
+    return f"0x{fp127_wad_val:064x}{wad_val:064x}{abdk_wad_val:064x}"
 
 
 def main():
@@ -579,6 +782,59 @@ def main():
         elif func.startswith("multi_"):
             # Multi-format output: multi_mul, multi_div, etc.
             op_name = func[6:]  # Strip "multi_" prefix
+            b_str = sys.argv[3] if len(sys.argv) > 3 else None
+            result = compute_multi_format(op_name, sys.argv[2], b_str)
+        elif func.startswith("wad_"):
+            # WAD-format functions for benchmark comparison
+            op = func[4:]  # Strip "wad_" prefix
+            if op == "mul":
+                result = compute_wad_mul(sys.argv[2], sys.argv[3])
+            elif op == "div":
+                result = compute_wad_div(sys.argv[2], sys.argv[3])
+            elif op == "exp":
+                result = compute_wad_exp(sys.argv[2])
+            elif op == "exp2":
+                result = compute_wad_exp2(sys.argv[2])
+            elif op == "ln":
+                result = compute_wad_ln(sys.argv[2])
+            elif op == "log2":
+                result = compute_wad_log2(sys.argv[2])
+            elif op == "sqrt":
+                result = compute_wad_sqrt(sys.argv[2])
+            elif op == "cbrt":
+                result = compute_wad_cbrt(sys.argv[2])
+            elif op == "pow":
+                result = compute_wad_pow(sys.argv[2], sys.argv[3])
+            elif op == "inv":
+                result = compute_wad_inv(sys.argv[2])
+            elif op == "gavg":
+                result = compute_wad_gavg(sys.argv[2], sys.argv[3])
+            elif op == "log10":
+                result = compute_wad_log10(sys.argv[2])
+            elif op == "exp10":
+                result = compute_wad_exp10(sys.argv[2])
+            elif op == "hypot":
+                result = compute_wad_hypot(sys.argv[2], sys.argv[3])
+            elif op == "floor":
+                result = compute_wad_floor(sys.argv[2])
+            elif op == "ceil":
+                result = compute_wad_ceil(sys.argv[2])
+            elif op == "frac":
+                result = compute_wad_frac(sys.argv[2])
+            elif op == "round":
+                result = compute_wad_round(sys.argv[2])
+            elif op == "gcd":
+                result = compute_wad_gcd(sys.argv[2], sys.argv[3])
+            elif op == "factorial":
+                result = compute_wad_factorial(sys.argv[2])
+            elif op == "lambertw0":
+                result = compute_wad_lambertw0(sys.argv[2])
+            else:
+                print(f"Unknown wad function: {func}", file=sys.stderr)
+                sys.exit(1)
+        elif func.startswith("bench_"):
+            # Unified benchmark oracle: returns (fp127_expected, wad_expected, abdk_expected)
+            op_name = func[6:]  # Strip "bench_" prefix
             b_str = sys.argv[3] if len(sys.argv) > 3 else None
             result = compute_multi_format(op_name, sys.argv[2], b_str)
         else:

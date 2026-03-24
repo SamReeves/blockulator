@@ -24,15 +24,15 @@ MARKERS = {"fp127": "o", "vyper": "s", "abdk": "^", "solady": "v"}
 
 
 def run_benchmark():
-    # Try NativePrecisionBench first (new format), fall back to ArithBench (old format)
+    # Try FuzzBench first (fuzz testing), then ArithBench
     r = subprocess.run(
-        ["forge", "test", "--match-contract", "NativePrecisionBench", "-vv"],
+        ["forge", "test", "--match-contract", "FuzzBench", "-vv"],
         capture_output=True, text=True, cwd="."
     )
     output = r.stdout + r.stderr
     
-    # If no native bench output, try old ArithBench
-    if "NATIVE_BENCH|" not in output:
+    # If no fuzz output, try ArithBench
+    if "FUZZ_BENCH|" not in output and "BENCH|" not in output:
         r = subprocess.run(
             ["forge", "test", "--match-contract", "ArithBench", "-vv"],
             capture_output=True, text=True, cwd="."
@@ -40,6 +40,33 @@ def run_benchmark():
         output = r.stdout + r.stderr
     
     return output
+
+
+def parse_fuzz(output):
+    """Parse FUZZ_BENCH| lines from fuzz testing.
+    Format: FUZZ_BENCH|op|fp127_gas|fp127_err|vyper_gas|vyper_err|abdk_gas|abdk_err|solady_gas|solady_err
+    """
+    cases = []
+    for line in output.split("\n"):
+        line = line.strip()
+        if not line.startswith("FUZZ_BENCH|"):
+            continue
+        parts = line.split("|")
+        if len(parts) != 10:
+            continue
+        _, op, *vals = parts
+        entry = {"op": op}
+        lib_fields = [("fp127", 0, 1), ("vyper", 2, 3), ("abdk", 4, 5), ("solady", 6, 7)]
+        for lib, gi, ei in lib_fields:
+            g, e = vals[gi], vals[ei]
+            if g == "NA":
+                entry[f"{lib}_gas"] = None
+                entry[f"{lib}_err"] = None
+            else:
+                entry[f"{lib}_gas"] = int(g)
+                entry[f"{lib}_err"] = int(e)
+        cases.append(entry)
+    return cases
 
 
 def parse(output):
@@ -265,12 +292,235 @@ def generate_markdown_summary(cases, trans_cases, output_path="docs/benchmarks/R
     return output_path
 
 
+def plot_fuzz_scatter(cases):
+    """Generate high-density scatter plots from fuzz testing data."""
+    
+    # Count total points
+    total_points = sum(1 for c in cases for lib in LIBS if c.get(f"{lib}_gas") is not None)
+    print(f"Total data points: {total_points}")
+    
+    # Adaptive styling for high density
+    alpha = max(0.05, min(0.3, 100 / max(total_points, 1)))
+    point_size = max(5, min(30, 1000 / max(total_points, 1)))
+    
+    # Group by operation
+    ops = set(c["op"] for c in cases)
+    arith_ops = [op for op in ["mul", "div", "add", "sub"] if op in ops]
+    trans_ops = [op for op in ["exp", "ln", "sqrt"] if op in ops]
+    
+    # ─── Plot 1: Arithmetic Operations Scatter ─────────────────────────
+    if arith_ops:
+        fig, ax = plt.subplots(figsize=(16, 10))
+        
+        for lib in LIBS:
+            gas_vals = []
+            err_vals = []
+            for c in cases:
+                if c["op"] in arith_ops and c.get(f"{lib}_gas") is not None:
+                    gas_vals.append(c[f"{lib}_gas"])
+                    err_vals.append(max(c[f"{lib}_err"], 0.1))  # Floor at 0.1 for log scale
+            
+            if gas_vals:
+                ax.scatter(gas_vals, err_vals, s=point_size, alpha=alpha,
+                          label=f"{LABELS[lib]} ({len(gas_vals)})",
+                          color=COLORS[lib], marker=MARKERS[lib],
+                          edgecolors='none')
+        
+        ax.set_xlabel('Gas Cost', fontsize=13)
+        ax.set_ylabel('Error (wei, log scale)', fontsize=13)
+        ax.set_yscale('log')
+        ax.set_title(f'Fuzz Testing: Gas vs Precision (Arithmetic)\n{len([c for c in cases if c["op"] in arith_ops])} test cases × 4 backends', 
+                     fontsize=14, fontweight='bold')
+        ax.legend(fontsize=11, loc='upper right')
+        ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig('docs/benchmarks/fuzz_arith_scatter.png', dpi=150, bbox_inches='tight')
+        print(f"Saved: docs/benchmarks/fuzz_arith_scatter.png")
+        plt.close()
+    
+    # ─── Plot 2: Transcendental Operations Scatter ─────────────────────
+    if trans_ops:
+        fig, ax = plt.subplots(figsize=(16, 10))
+        trans_libs = ["fp127", "abdk", "solady"]  # Vyper doesn't have transcendentals
+        
+        for lib in trans_libs:
+            gas_vals = []
+            err_vals = []
+            for c in cases:
+                if c["op"] in trans_ops and c.get(f"{lib}_gas") is not None:
+                    gas_vals.append(c[f"{lib}_gas"])
+                    err_vals.append(max(c[f"{lib}_err"], 0.1))
+            
+            if gas_vals:
+                ax.scatter(gas_vals, err_vals, s=point_size, alpha=alpha,
+                          label=f"{LABELS[lib]} ({len(gas_vals)})",
+                          color=COLORS[lib], marker=MARKERS[lib],
+                          edgecolors='none')
+        
+        ax.set_xlabel('Gas Cost', fontsize=13)
+        ax.set_ylabel('Error (wei, log scale)', fontsize=13)
+        ax.set_yscale('log')
+        ax.set_title(f'Fuzz Testing: Gas vs Precision (Transcendental)\n{len([c for c in cases if c["op"] in trans_ops])} test cases × 3 backends', 
+                     fontsize=14, fontweight='bold')
+        ax.legend(fontsize=11, loc='upper right')
+        ax.grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig('docs/benchmarks/fuzz_trans_scatter.png', dpi=150, bbox_inches='tight')
+        print(f"Saved: docs/benchmarks/fuzz_trans_scatter.png")
+        plt.close()
+    
+    # ─── Plot 3: Combined All Operations ───────────────────────────────
+    fig, ax = plt.subplots(figsize=(18, 12))
+    
+    for lib in LIBS:
+        gas_vals = []
+        err_vals = []
+        for c in cases:
+            if c.get(f"{lib}_gas") is not None:
+                gas_vals.append(c[f"{lib}_gas"])
+                err_vals.append(max(c[f"{lib}_err"], 0.1))
+        
+        if gas_vals:
+            ax.scatter(gas_vals, err_vals, s=point_size, alpha=alpha,
+                      label=f"{LABELS[lib]} ({len(gas_vals)})",
+                      color=COLORS[lib], marker=MARKERS[lib],
+                      edgecolors='none')
+    
+    ax.set_xlabel('Gas Cost', fontsize=14)
+    ax.set_ylabel('Error (wei, log scale)', fontsize=14)
+    ax.set_yscale('log')
+    ax.set_title(f'Fuzz Testing: All Operations\n{len(cases)} test cases × 4 backends = {total_points} data points', 
+                 fontsize=15, fontweight='bold')
+    ax.legend(fontsize=12, loc='upper right')
+    ax.grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig('docs/benchmarks/fuzz_combined_scatter.png', dpi=150, bbox_inches='tight')
+    print(f"Saved: docs/benchmarks/fuzz_combined_scatter.png")
+    plt.close()
+    
+    # ─── Plot 4: Per-operation box plots ───────────────────────────────
+    all_ops = arith_ops + trans_ops
+    if all_ops:
+        fig, axes = plt.subplots(1, 2, figsize=(18, 8))
+        
+        # Gas by operation
+        ax = axes[0]
+        positions = []
+        labels = []
+        colors_list = []
+        data = []
+        pos = 0
+        for op in all_ops:
+            for lib in LIBS:
+                gas_vals = [c[f"{lib}_gas"] for c in cases 
+                           if c["op"] == op and c.get(f"{lib}_gas") is not None]
+                if gas_vals:
+                    data.append(gas_vals)
+                    positions.append(pos)
+                    labels.append(f"{op}\n{lib[:3]}")
+                    colors_list.append(COLORS[lib])
+                    pos += 1
+            pos += 0.5  # Gap between operations
+        
+        bp = ax.boxplot(data, positions=positions, widths=0.6, patch_artist=True)
+        for patch, color in zip(bp['boxes'], colors_list):
+            patch.set_facecolor(color)
+            patch.set_alpha(0.7)
+        ax.set_xticks(positions)
+        ax.set_xticklabels(labels, fontsize=7, rotation=45, ha='right')
+        ax.set_ylabel('Gas Cost', fontsize=12)
+        ax.set_title('Gas Distribution by Operation and Library', fontsize=13, fontweight='bold')
+        ax.grid(axis='y', alpha=0.3)
+        
+        # Error by operation
+        ax = axes[1]
+        positions = []
+        labels = []
+        colors_list = []
+        data = []
+        pos = 0
+        for op in all_ops:
+            for lib in LIBS:
+                err_vals = [max(c[f"{lib}_err"], 0.1) for c in cases 
+                           if c["op"] == op and c.get(f"{lib}_gas") is not None]
+                if err_vals:
+                    data.append(err_vals)
+                    positions.append(pos)
+                    labels.append(f"{op}\n{lib[:3]}")
+                    colors_list.append(COLORS[lib])
+                    pos += 1
+            pos += 0.5
+        
+        bp = ax.boxplot(data, positions=positions, widths=0.6, patch_artist=True)
+        for patch, color in zip(bp['boxes'], colors_list):
+            patch.set_facecolor(color)
+            patch.set_alpha(0.7)
+        ax.set_xticks(positions)
+        ax.set_xticklabels(labels, fontsize=7, rotation=45, ha='right')
+        ax.set_ylabel('Error (wei, log scale)', fontsize=12)
+        ax.set_yscale('log')
+        ax.set_title('Error Distribution by Operation and Library', fontsize=13, fontweight='bold')
+        ax.grid(axis='y', alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig('docs/benchmarks/fuzz_boxplots.png', dpi=150, bbox_inches='tight')
+        print(f"Saved: docs/benchmarks/fuzz_boxplots.png")
+        plt.close()
+    
+    # ─── Summary Statistics ────────────────────────────────────────────
+    print("\n" + "=" * 80)
+    print("FUZZ TESTING SUMMARY")
+    print("=" * 80)
+    
+    for op in all_ops:
+        op_cases = [c for c in cases if c["op"] == op]
+        print(f"\n{op.upper()} ({len(op_cases)} cases):")
+        for lib in LIBS:
+            gas_vals = [c[f"{lib}_gas"] for c in op_cases if c.get(f"{lib}_gas") is not None]
+            err_vals = [c[f"{lib}_err"] for c in op_cases if c.get(f"{lib}_gas") is not None]
+            if gas_vals:
+                print(f"  {lib:8s}: gas={avg(gas_vals):>6.0f} (±{stddev(gas_vals):>5.1f}), "
+                      f"err_avg={avg(err_vals):>10.1f}, err_max={max(err_vals):>12.0f}")
+
+
+def stddev(lst):
+    """Compute standard deviation."""
+    if len(lst) < 2:
+        return 0.0
+    m = sum(lst) / len(lst)
+    return math.sqrt(sum((x - m) ** 2 for x in lst) / (len(lst) - 1))
+
+
 def main():
+    # Check for --fuzz-file argument
+    if len(sys.argv) > 1 and sys.argv[1] == "--fuzz-file":
+        fuzz_file = sys.argv[2] if len(sys.argv) > 2 else "docs/benchmarks/fuzz_data.txt"
+        print(f"Reading fuzz data from {fuzz_file}...")
+        with open(fuzz_file, 'r') as f:
+            output = f.read()
+        fuzz_cases = parse_fuzz(output)
+        if fuzz_cases:
+            print(f"Parsed {len(fuzz_cases)} fuzz cases")
+            plot_fuzz_scatter(fuzz_cases)
+            return
+        print("No FUZZ_BENCH lines found in file.")
+        sys.exit(1)
+    
     if len(sys.argv) > 1 and sys.argv[1] == "--stdin":
         output = sys.stdin.read()
     else:
         print("Running forge benchmark...")
         output = run_benchmark()
+
+    # Check for fuzz benchmark data first
+    fuzz_cases = parse_fuzz(output)
+    if fuzz_cases:
+        print(f"Parsed {len(fuzz_cases)} fuzz cases")
+        plot_fuzz_scatter(fuzz_cases)
+        return
 
     # Try to parse native format first (with digits), fall back to old format (with raw error)
     cases, trans_cases = parse_native(output)
@@ -279,7 +529,7 @@ def main():
         trans_cases = parse_trans(output)
     
     if not cases and not trans_cases:
-        print("No BENCH, NATIVE_BENCH, or TRANS lines found.")
+        print("No BENCH, NATIVE_BENCH, FUZZ_BENCH, or TRANS lines found.")
         sys.exit(1)
 
     # Determine format type
@@ -400,7 +650,12 @@ def main():
     print(f"\nSaved: docs/benchmarks/bench_gas_precision.png")
 
     # ─── Plot 2: Scatter — Gas vs Precision ──────────────────────────────
-    fig, ax = plt.subplots(figsize=(13, 8))
+    fig, ax = plt.subplots(figsize=(14, 9))
+    
+    # Adaptive alpha based on point count for crowded plots
+    total_points = sum(1 for c in cases for lib in LIBS if c[f"{lib}_gas"] is not None)
+    alpha = max(0.25, min(0.7, 50 / max(total_points, 1)))
+    point_size = max(30, min(70, 2000 / max(total_points, 1)))
 
     for lib in LIBS:
         if metric_key == "digits":
@@ -411,16 +666,17 @@ def main():
                    for c in cases if c[f"{lib}_gas"] is not None]
         if pts:
             ax.scatter([p[0] for p in pts], [p[1] for p in pts],
-                       s=70, alpha=0.7, label=LABELS[lib], color=COLORS[lib],
-                       marker=MARKERS[lib], edgecolors='black', linewidths=0.4)
+                       s=point_size, alpha=alpha, label=f"{LABELS[lib]} ({len(pts)})", 
+                       color=COLORS[lib], marker=MARKERS[lib], 
+                       edgecolors='black', linewidths=0.3)
 
     ax.set_xlabel('Gas Cost', fontsize=12)
     if metric_key == "digits":
         ax.set_ylabel('Matching Decimal Digits', fontsize=12)
-        ax.set_title(f'Gas vs Precision ({len(cases)} cases, 4 backends)\nNative bit depth comparison', fontsize=13, fontweight='bold')
+        ax.set_title(f'Gas vs Precision ({len(cases)} cases × 4 backends = {total_points} points)\nNative bit depth comparison', fontsize=13, fontweight='bold')
     else:
         ax.set_ylabel('Error (wei, log scale)', fontsize=12)
-        ax.set_title(f'Gas vs Precision ({len(cases)} cases, 4 backends)\n1 wei = 1e-18', fontsize=13, fontweight='bold')
+        ax.set_title(f'Gas vs Precision ({len(cases)} cases × 4 backends = {total_points} points)\n1 wei = 1e-18', fontsize=13, fontweight='bold')
         ax.set_yscale('log')
     ax.legend(fontsize=10, loc='upper right')
     ax.grid(True, alpha=0.3)
@@ -553,6 +809,81 @@ def main():
         plt.tight_layout()
         plt.savefig('docs/benchmarks/bench_transcendental.png', dpi=150, bbox_inches='tight')
         print(f"Saved: docs/benchmarks/bench_transcendental.png")
+        
+        # ─── Plot 3b: Transcendental Scatter — Gas vs Precision ─────────────
+        fig, ax = plt.subplots(figsize=(14, 9))
+        
+        # Adaptive alpha based on point count for crowded plots
+        total_trans_points = sum(1 for c in trans_cases for lib in trans_libs if c.get(f"{lib}_gas") is not None)
+        trans_alpha = max(0.25, min(0.7, 50 / max(total_trans_points, 1)))
+        trans_point_size = max(40, min(80, 2000 / max(total_trans_points, 1)))
+
+        for lib in trans_libs:
+            if trans_metric_key == "digits":
+                pts = [(c[f"{lib}_gas"], max(c.get(f"{lib}_digits", 1), 1))
+                       for c in trans_cases if c.get(f"{lib}_gas") is not None]
+            else:
+                pts = [(c[f"{lib}_gas"], min(max(c.get(f"{lib}_err", 0.1), 0.1), 1e18))
+                       for c in trans_cases if c.get(f"{lib}_gas") is not None]
+            if pts:
+                ax.scatter([p[0] for p in pts], [p[1] for p in pts],
+                           s=trans_point_size, alpha=trans_alpha, 
+                           label=f"{trans_labels[lib]} ({len(pts)})", 
+                           color=trans_colors[lib], marker=MARKERS[lib],
+                           edgecolors='black', linewidths=0.3)
+
+        ax.set_xlabel('Gas Cost', fontsize=12)
+        if trans_metric_key == "digits":
+            ax.set_ylabel('Matching Decimal Digits', fontsize=12)
+            ax.set_title(f'Transcendental: Gas vs Precision ({len(trans_cases)} cases × {len(trans_libs)} backends = {total_trans_points} points)', fontsize=13, fontweight='bold')
+        else:
+            ax.set_ylabel('Error (wei, log scale)', fontsize=12)
+            ax.set_title(f'Transcendental: Gas vs Precision ({len(trans_cases)} cases × {len(trans_libs)} backends = {total_trans_points} points)', fontsize=13, fontweight='bold')
+            ax.set_yscale('log')
+        ax.legend(fontsize=10, loc='upper right')
+        ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        plt.savefig('docs/benchmarks/bench_trans_scatter.png', dpi=150, bbox_inches='tight')
+        print(f"Saved: docs/benchmarks/bench_trans_scatter.png")
+
+    # ─── Combined Scatter (All Operations) ───────────────────────────────
+    if cases or trans_cases:
+        fig, ax = plt.subplots(figsize=(16, 10))
+        
+        all_cases = cases + trans_cases
+        all_total = sum(1 for c in all_cases for lib in LIBS if c.get(f"{lib}_gas") is not None)
+        combined_alpha = max(0.2, min(0.6, 80 / max(all_total, 1)))
+        combined_size = max(25, min(60, 3000 / max(all_total, 1)))
+        
+        for lib in LIBS:
+            if metric_key == "digits":
+                pts = [(c[f"{lib}_gas"], max(c.get(f"{lib}_digits", 1), 1))
+                       for c in all_cases if c.get(f"{lib}_gas") is not None]
+            else:
+                pts = [(c[f"{lib}_gas"], min(max(c.get(f"{lib}_err", 0.1), 0.1), 1e18))
+                       for c in all_cases if c.get(f"{lib}_gas") is not None]
+            if pts:
+                ax.scatter([p[0] for p in pts], [p[1] for p in pts],
+                           s=combined_size, alpha=combined_alpha,
+                           label=f"{LABELS[lib]} ({len(pts)})",
+                           color=COLORS[lib], marker=MARKERS[lib],
+                           edgecolors='black', linewidths=0.2)
+
+        ax.set_xlabel('Gas Cost', fontsize=13)
+        if metric_key == "digits":
+            ax.set_ylabel('Matching Decimal Digits', fontsize=13)
+            ax.set_title(f'All Operations: Gas vs Precision\n{len(all_cases)} test cases × 4 backends = {all_total} data points', fontsize=14, fontweight='bold')
+        else:
+            ax.set_ylabel('Error (wei, log scale)', fontsize=13)
+            ax.set_title(f'All Operations: Gas vs Precision\n{len(all_cases)} test cases × 4 backends = {all_total} data points', fontsize=14, fontweight='bold')
+            ax.set_yscale('log')
+        ax.legend(fontsize=11, loc='upper right')
+        ax.grid(True, alpha=0.3)
+
+        plt.tight_layout()
+        plt.savefig('docs/benchmarks/bench_combined_scatter.png', dpi=150, bbox_inches='tight')
+        print(f"Saved: docs/benchmarks/bench_combined_scatter.png")
 
     # ─── Generate Markdown Summary ──────────────────────────────────────
     md_path = generate_markdown_summary(cases, trans_cases)

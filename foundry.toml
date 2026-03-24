@@ -20,8 +20,9 @@ gas_limit = "18446744073709551615"
 
 fs_permissions = [
   { access = "read", path = "contracts/build" },
-  { access = "read", path = "scripts" }
+  { access = "read", path = "scripts" },
+  { access = "read-write", path = "docs/benchmarks" }
 ]
 
 [profile.default.fuzz]
-runs = 256
+runs = 1000
