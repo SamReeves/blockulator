@@ -4,21 +4,26 @@
  * All data derived from precision_distribution.json raw sweep data.
  */
 
+import { blendHex, CHART_THEME, LIBRARY_TRACE_COLORS, rgbaFromHex, SDR_PALETTE } from '../theme/sdr-palette.js';
+
 const LIBS = ['fp127', 'abdk', 'solady', 'prb'];
 
 // Preferred display order for functions (new functions will be appended)
 const PREFERRED_FUNCTION_ORDER = ['mul', 'div', 'add', 'sub', 'exp', 'exp2', 'ln', 'log2', 'sqrt', 'pow', 'abs', 'inv', 'min', 'max', 'avg', 'dist', 'gavg', 'log10', 'exp10', 'sign', 'floor', 'ceil', 'frac', 'cbrt', 'lerp', 'hypot', 'round', 'log2up', 'gcd', 'factorial', 'lambertw0'];
 
 const LIB_META = {
-    fp127:  { name: 'FP127',    format: '127.128 fixed-point', lang: 'Huff',            color: '#2196F3' },
-    abdk:   { name: 'ABDK',     format: '64.64 fixed-point',   lang: 'Solidity',        color: '#FF9800' },
-    solady: { name: 'Solady',   format: 'WAD 18-decimal',      lang: 'Solidity (asm)',   color: '#9C27B0' },
-    prb:    { name: 'PRBMath',  format: 'WAD 18-decimal',      lang: 'Solidity',         color: '#4CAF50' }
+    fp127:  { name: 'FP127',    format: '127.128 fixed-point', lang: 'Huff',            color: LIBRARY_TRACE_COLORS.fp127 },
+    abdk:   { name: 'ABDK',     format: '64.64 fixed-point',   lang: 'Solidity',        color: LIBRARY_TRACE_COLORS.abdk },
+    solady: { name: 'Solady',   format: 'WAD 18-decimal',      lang: 'Solidity (asm)',   color: LIBRARY_TRACE_COLORS.solady },
+    prb:    { name: 'PRBMath',  format: 'WAD 18-decimal',      lang: 'Solidity',         color: LIBRARY_TRACE_COLORS.prb }
 };
 
 const INTEGER_ONLY_FUNCTIONS = new Set([
     'sign', 'floor', 'ceil', 'round', 'log2up', 'gcd', 'factorial'
 ]);
+
+/** Plotly legend / fallback — ink pulled slightly toward card so traces are not loud on black. */
+const BENCH_PLOTLY_COLORWAY = LIBS.map((lib) => blendHex(LIB_META[lib].color, SDR_PALETTE.bgCard, 0.2));
 
 const LIB_UNSUPPORTED = {
     fp127:  new Set(),
@@ -166,13 +171,6 @@ export class BenchmarkApp {
         };
     }
 
-    hexToRgba(hex, alpha) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return `rgba(${r},${g},${b},${alpha})`;
-    }
-
     renderSummaryTable() {
         const raw = this.distData.raw;
         const statLabel = this.useMedian ? 'Median' : 'Mean';
@@ -229,19 +227,23 @@ export class BenchmarkApp {
                 const unsupported = LIB_UNSUPPORTED[lib]?.has(func);
                 const g = rowData[lib].gas;
                 const d = rowData[lib].digits;
-                const gasClass = g != null && g === bestGas ? 'best' : '';
-                const digClass = d != null && d === bestDigits ? 'best' : '';
-                const tint = this.hexToRgba(LIB_META[lib].color, 0.08);
+                const gasBest = g != null && g === bestGas;
+                const digBest = d != null && d === bestDigits;
+                const gasClass = gasBest ? 'best' : '';
+                const digClass = digBest ? 'best' : '';
+                const tint = rgbaFromHex(blendHex(LIB_META[lib].color, SDR_PALETTE.bgCard, 0.14), 0.11);
+                const gasFg = gasBest ? `color:${LIB_META[lib].color};` : '';
+                const digFg = digBest ? `color:${LIB_META[lib].color};` : '';
 
                 if (unsupported) {
                     html += `<td class="col-gas" style="background:${tint}"><span class="unsupported">✗</span></td>`;
                     html += `<td class="col-digits" style="background:${tint}"><span class="unsupported">✗</span></td>`;
                 } else {
-                    html += `<td class="col-gas ${gasClass}" style="background:${tint}">${g != null ? Math.round(g).toLocaleString() : '<span class="na">—</span>'}</td>`;
+                    html += `<td class="col-gas ${gasClass}" style="background:${tint};${gasFg}">${g != null ? Math.round(g).toLocaleString() : '<span class="na">—</span>'}</td>`;
                     const digitDisplay = isIntOnly
                         ? '<span class="int-only">int</span>'
                         : (d != null ? d.toFixed(1) : '<span class="na">—</span>');
-                    html += `<td class="col-digits ${digClass}" style="background:${tint}">${digitDisplay}</td>`;
+                    html += `<td class="col-digits ${digClass}" style="background:${tint};${digFg}">${digitDisplay}</td>`;
                 }
             }
             html += '</tr>';
@@ -296,34 +298,52 @@ export class BenchmarkApp {
             const hasData = y.some(v => v !== null);
             if (!hasData) return null;
 
+            const c = blendHex(LIB_META[lib].color, SDR_PALETTE.bgCard, 0.22);
             return {
                 type: 'scatter',
                 mode: 'lines+markers',
                 name: LIB_META[lib].name,
                 x: validFuncs.map(f => f.toUpperCase()),
                 y: y,
-                line: { color: LIB_META[lib].color, width: 2 },
-                marker: { size: 6, color: LIB_META[lib].color },
+                opacity: 0.92,
+                line: { color: c, width: 1.35, shape: 'linear' },
+                marker: {
+                    size: 5,
+                    color: c,
+                    line: { color: rgbaFromHex(c, 0.22), width: 0.5 },
+                },
                 connectgaps: false,
-                hovertemplate: '%{x}: %{y:.1f} digits<extra>' + LIB_META[lib].name + '</extra>'
+                hovertemplate: '%{x}: %{y:.1f} digits<extra>' + LIB_META[lib].name + '</extra>',
             };
         }).filter(t => t !== null);
 
         const layout = {
-            paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(0,0,0,0)',
-            font: { family: 'Courier New, monospace', color: '#888' },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            colorway: BENCH_PLOTLY_COLORWAY,
+            font: { family: 'Roboto Mono, ui-monospace, monospace', color: CHART_THEME.fontColor },
             margin: { l: 50, r: 20, t: 10, b: 100 },
+            hoverlabel: {
+                bgcolor: SDR_PALETTE.bgCard,
+                bordercolor: SDR_PALETTE.border,
+                font: { family: 'Roboto Mono, monospace', color: SDR_PALETTE.text, size: 12 },
+            },
             xaxis: {
                 tickangle: -45,
-                tickfont: { size: 10 },
-                gridcolor: '#1a1a1a'
+                tickfont: { size: 10, color: CHART_THEME.fontColor },
+                gridcolor: CHART_THEME.gridColor,
+                zeroline: false,
+                showline: true,
+                linecolor: CHART_THEME.zeroLine,
             },
             yaxis: {
-                title: { text: 'Median Digits', font: { size: 11 } },
-                gridcolor: '#222',
-                zerolinecolor: '#333',
-                range: [0, 42]
+                title: { text: 'Median Digits', font: { size: 11, color: CHART_THEME.fontColor } },
+                tickfont: { color: CHART_THEME.fontColor },
+                gridcolor: CHART_THEME.gridColorMinor,
+                zeroline: true,
+                zerolinecolor: CHART_THEME.zeroLine,
+                zerolinewidth: 1,
+                range: [0, 42],
             },
             legend: {
                 x: 0.5,
@@ -331,9 +351,11 @@ export class BenchmarkApp {
                 xanchor: 'center',
                 yanchor: 'top',
                 orientation: 'h',
-                font: { size: 11 }
+                font: { size: 11, color: CHART_THEME.fontColor },
+                bgcolor: 'transparent',
+                borderwidth: 0,
             },
-            hovermode: 'x unified'
+            hovermode: 'x unified',
         };
 
         const config = { responsive: true, displayModeBar: false };
@@ -345,14 +367,14 @@ export class BenchmarkApp {
     renderScatterChart() {
         const container = document.getElementById('bench-scatter');
         if (!container || typeof Plotly === 'undefined') {
-            if (container) container.innerHTML = '<p style="color:#f66;text-align:center;padding:2rem;">Failed to load charting library</p>';
+            if (container) container.innerHTML = `<p style="color:${SDR_PALETTE.error};text-align:center;padding:2rem;">Failed to load charting library</p>`;
             return;
         }
 
         const raw = this.distData.raw;
 
         const traces = LIBS.map(lib => {
-            const x = [], y = [], text = [], sizes = [];
+            const x = [], y = [], text = [];
 
             for (const func of this.functions) {
                 const rawData = raw[lib]?.[func] || [];
@@ -362,10 +384,10 @@ export class BenchmarkApp {
                     x.push(d.gas);
                     y.push(d.digits);
                     text.push(`${func.toUpperCase()}: ${d.gas.toLocaleString()} gas, ${d.digits} digits`);
-                    sizes.push(6);
                 }
             }
 
+            const c = blendHex(LIB_META[lib].color, SDR_PALETTE.bgCard, 0.24);
             return {
                 type: 'scatter',
                 mode: 'markers',
@@ -374,41 +396,56 @@ export class BenchmarkApp {
                 y: y,
                 text: text,
                 hovertemplate: '%{text}<extra>' + LIB_META[lib].name + '</extra>',
+                opacity: 0.55,
                 marker: {
-                    size: sizes,
-                    color: LIB_META[lib].color,
-                    opacity: 0.6,
-                    line: { width: 0 }
-                }
+                    size: 4,
+                    color: c,
+                    opacity: 0.65,
+                    line: { color: rgbaFromHex(c, 0.16), width: 0.5 },
+                },
             };
         });
 
         const layout = {
-            paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(0,0,0,0)',
-            font: { family: 'Courier New, monospace', color: '#888' },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            colorway: BENCH_PLOTLY_COLORWAY,
+            font: { family: 'Roboto Mono, ui-monospace, monospace', color: CHART_THEME.fontColor },
             margin: { l: 60, r: 20, t: 30, b: 60 },
+            hoverlabel: {
+                bgcolor: SDR_PALETTE.bgCard,
+                bordercolor: SDR_PALETTE.border,
+                font: { family: 'Roboto Mono, monospace', color: SDR_PALETTE.text, size: 12 },
+            },
             xaxis: {
-                title: { text: 'Gas (log scale)', font: { size: 11 } },
+                title: { text: 'Gas (log scale)', font: { size: 11, color: CHART_THEME.fontColor } },
                 type: 'log',
-                gridcolor: '#222',
-                zerolinecolor: '#333'
+                tickfont: { color: CHART_THEME.fontColor },
+                gridcolor: CHART_THEME.gridColorMinor,
+                zeroline: false,
+                showline: true,
+                linecolor: CHART_THEME.zeroLine,
             },
             yaxis: {
-                title: { text: 'Precision (digits)', font: { size: 11 } },
-                gridcolor: '#222',
-                zerolinecolor: '#333',
-                range: [0, 42]
+                title: { text: 'Precision (digits)', font: { size: 11, color: CHART_THEME.fontColor } },
+                tickfont: { color: CHART_THEME.fontColor },
+                gridcolor: CHART_THEME.gridColorMinor,
+                zeroline: true,
+                zerolinecolor: CHART_THEME.zeroLine,
+                zerolinewidth: 1,
+                range: [0, 42],
             },
             legend: {
                 x: 0.5,
                 y: -0.15,
                 xanchor: 'center',
                 orientation: 'h',
-                font: { size: 11 }
+                font: { size: 11, color: CHART_THEME.fontColor },
+                bgcolor: 'transparent',
+                borderwidth: 0,
             },
             showlegend: true,
-            hovermode: 'closest'
+            hovermode: 'closest',
         };
 
         const config = {

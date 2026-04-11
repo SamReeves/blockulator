@@ -3,6 +3,8 @@
  * A draggable 3D die that snaps to show the selected face
  */
 
+import { PARTICLE_BASES_HEX, SDR_PALETTE } from '../../theme/sdr-palette.js';
+
 export class DiceThreeD {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -24,15 +26,8 @@ export class DiceThreeD {
             6: { x: 0, y: 180 }      // Back face
         };
         
-        // Face colors matching dice-gods theme
-        this.faceColors = {
-            1: '#ef4444',
-            2: '#f59e0b', 
-            3: '#10b981',
-            4: '#3b82f6',
-            5: '#8b5cf6',
-            6: '#ec4899'
-        };
+        const [c1, c2, c3, c4] = PARTICLE_BASES_HEX;
+        this.faceColors = { 1: c1, 2: c2, 3: c3, 4: c4, 5: SDR_PALETTE.primary, 6: SDR_PALETTE.link };
         
         this.dieElement = null;
         this.sceneElement = null;
@@ -73,7 +68,7 @@ export class DiceThreeD {
         const dots = this.createDotPattern(number);
         
         return `
-            <div class="die-face ${className}" data-number="${number}" style="background: linear-gradient(135deg, ${color}dd 0%, ${color}aa 100%);">
+            <div class="die-face ${className}" data-number="${number}" style="background: ${color}; border: 1px solid ${SDR_PALETTE.border};">
                 <div class="die-face-content">
                     ${dots}
                 </div>

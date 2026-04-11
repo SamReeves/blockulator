@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { AddressFlow } from '../../presentation/components/address-flow.js';
 import { getTemplate } from './templates/pay-it-forward.tpl.js';
+import { gamePanelColor } from '../../theme/sdr-palette.js';
 
 export class PayItForward extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class PayItForward extends Game {
         title: 'Pay It Forward',
         emoji: '⏩',
         description: 'Get previous player\'s donation',
-        color: '#10b981',
+        color: gamePanelColor('pay-it-forward'),
         contract: {
             source: 'contracts/src/games/pay_it_forward.vy',
             abi: 'contracts/build/abis/pay-it-forward.json',

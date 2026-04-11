@@ -33,12 +33,38 @@
     // Check if x < 0 (revert for negative base)
     dup2 IS_NEGATIVE() pow_x_negative jumpi
     
+    // Dispatch shortcuts - Y-based
+    dup1 [ONE_FP127] eq sc_pow_y1 jumpi        // y=1: return x
+    dup1 [SC_IN_INT_2] eq sc_pow_y2 jumpi      // y=2: x*x
+    dup1 [SC_IN_INT_3] eq sc_pow_y3 jumpi      // y=3: x*x*x
+    dup1 [SC_IN_INT_4] eq sc_pow_y4 jumpi      // y=4: (x*x)*(x*x)
+    dup1 [HALF_FP127] eq sc_pow_yh jumpi       // y=0.5: sqrt(x)
+    dup1 [SC_IN_FRAC_1_4] eq sc_pow_yq jumpi   // y=0.25: sqrt(sqrt(x))
+    dup1 [SC_IN_NEG_1] eq sc_pow_yn1 jumpi     // y=-1: 1/x
+    
+    // Dispatch shortcuts - X-based
+    dup2 [SC_IN_INT_2] eq sc_pow_x2 jumpi      // x=2: exp2(y)
+    dup2 [SC_IN_INT_10] eq sc_pow_x10 jumpi    // x=10: exp10(y)
+    
     // Main path: x^y = 2^(y * log2(x))
     swap1                      // [x, y]
     FP127_LOG2()               // [log2(x), y]
     FP127_MUL()                // [y * log2(x)]
     FP127_EXP2()               // [2^(y * log2(x)) = x^y]
     pow_done jump
+    
+    // Shortcut landing pads - Y-based
+    sc_pow_y1: pop pow_done jump                                    // return x
+    sc_pow_y2: pop dup1 FP127_MUL() pow_done jump                   // x*x
+    sc_pow_y3: pop dup1 dup1 FP127_MUL() FP127_MUL() pow_done jump  // x*x*x
+    sc_pow_y4: pop dup1 FP127_MUL() dup1 FP127_MUL() pow_done jump  // (x*x)*(x*x)
+    sc_pow_yh: pop FP127_SQRT() pow_done jump                       // sqrt(x)
+    sc_pow_yq: pop FP127_SQRT() FP127_SQRT() pow_done jump          // sqrt(sqrt(x))
+    sc_pow_yn1: pop FP127_INV() pow_done jump                       // 1/x
+    
+    // Shortcut landing pads - X-based
+    sc_pow_x2: swap1 pop FP127_EXP2() pow_done jump                 // 2^y
+    sc_pow_x10: swap1 pop FP127_EXP10() pow_done jump               // 10^y
     
     pow_y_zero:
     // y == 0: return 1

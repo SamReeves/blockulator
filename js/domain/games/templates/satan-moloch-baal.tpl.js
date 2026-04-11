@@ -3,17 +3,19 @@
  * HTML template for the Satan Moloch Baal game UI
  */
 
+import { rgbaFromHex, SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 const DEFAULT_DEMONS = [
-    { emoji: '😈', name: 'SATAN', subtitle: 'The Adversary', color: '#ef4444', key: 'satan' },
-    { emoji: '🐂', name: 'MOLOCH', subtitle: 'The Bull God', color: '#f59e0b', key: 'moloch' },
-    { emoji: '⚡', name: 'BAAL', subtitle: 'Lord of Storms', color: '#8b5cf6', key: 'baal' }
+    { emoji: '😈', name: 'SATAN', subtitle: 'The Adversary', color: SDR_PALETTE.particleRed, key: 'satan' },
+    { emoji: '🐂', name: 'MOLOCH', subtitle: 'The Bull God', color: SDR_PALETTE.particleGold, key: 'moloch' },
+    { emoji: '⚡', name: 'BAAL', subtitle: 'Lord of Storms', color: SDR_PALETTE.particleSapphire, key: 'baal' },
 ];
 
 export function getTemplate(config = {}) {
-    const { panelColor = '#ef4444', demons = DEFAULT_DEMONS } = config;
-    
+    const { panelColor = SDR_PALETTE.particleRed, demons = DEFAULT_DEMONS } = config;
+
     const demonStandingsHTML = demons.map(demon => `
-        <div style="padding: 1rem; background: linear-gradient(135deg, ${demon.color}19 0%, ${demon.color}0d 100%); border-radius: 8px; border-left: 4px solid ${demon.color};">
+        <div style="padding: 1rem; background: ${rgbaFromHex(demon.color, 0.12)}; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; border-left: 1px solid ${demon.color};">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <span style="font-size: 1.5rem;">${demon.emoji}</span>
@@ -34,9 +36,9 @@ export function getTemplate(config = {}) {
             label: `${demon.emoji} ${demon.name}`,
             color: demon.color
         })),
-        { key: 'user-total-burned', label: '🔥 Total', color: '#10b981' }
+        { key: 'user-total-burned', label: '🔥 Total', color: SDR_PALETTE.particleRed },
     ].map(stat => `
-        <div style="padding: 0.75rem; background: ${stat.color}19; border-radius: 8px; border-left: 3px solid ${stat.color};">
+        <div style="padding: 0.75rem; background: ${rgbaFromHex(stat.color, 0.12)}; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; border-left: 1px solid ${stat.color};">
             <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">${stat.label}</div>
             <div id="${stat.key}" style="font-size: 1rem; font-weight: bold;">0 wei</div>
         </div>
@@ -74,7 +76,7 @@ export function getTemplate(config = {}) {
                     </div>
                 </div>
 
-                <div class="contest-info-panel game-panel" style="--panel-color: #10b981;">
+                <div class="contest-info-panel game-panel" style="--panel-color: ${SDR_PALETTE.particleEmerald};">
                     <h3 class="game-panel-header" style="margin-bottom: 1rem;">
                         <span>📈</span>
                         <span>Your Sacrifices</span>
@@ -90,13 +92,13 @@ export function getTemplate(config = {}) {
                         <span>📖 The Ritual</span>
                     </summary>
                     <div style="margin-top: 0.75rem; font-size: 0.875rem; line-height: 1.6; display: grid; gap: 0.5rem;">
-                        <div class="step-card" style="--step-color: #ef4444;">
+                        <div class="step-card" style="--step-color: ${SDR_PALETTE.particleRed};">
                             <strong>1. Choose Demon</strong> - Rotate to select, then vote
                         </div>
-                        <div class="step-card" style="--step-color: #f59e0b;">
+                        <div class="step-card" style="--step-color: ${SDR_PALETTE.particleGold};">
                             <strong>2. Burn ETH</strong> - Sent to address(0), destroyed forever
                         </div>
-                        <div class="step-card" style="--step-color: #8b5cf6;">
+                        <div class="step-card" style="--step-color: ${SDR_PALETTE.particleSapphire};">
                             <strong>3. Become Top Devotee</strong> - Highest donor per demon
                         </div>
                     </div>

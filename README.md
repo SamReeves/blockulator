@@ -30,12 +30,17 @@ A mobile-first web application for blockchain-based games and on-chain scientifi
   - Sub-routes: `https://site.com/#/games/pissing-contest`
 - **No server configuration required** - All routes handled client-side with JavaScript
 
+**Styling:** `index.html` loads `css/main.css`, which pulls in `css/variables.css` (SDR-aligned tokens) and the rest of the split stylesheets. The DigitalOcean static site build copies the `css/` tree into `dist/`. Root `styles.css` is a legacy monolith and is not used by the SPA or the deploy bundle.
+
+Literal hex and `rgb()` / `rgba()` in application code must live only in `css/variables.css` and the mirrored `js/theme/sdr-palette.js`; everything else uses `var(--sdr-*)` / MD aliases or imports from that palette module (`npm test` runs `scripts/check-sdr-colors.mjs`).
+
 ### Project Structure
 
 ```
 blockulator/
 ├── index.html              # Single page application (SPA)
-├── styles.css              # Mobile-first responsive styles
+├── css/                    # Canonical theme (`main.css` imports variables, layout, games, …)
+├── styles.css              # Legacy monolith (not loaded by `index.html`; do not extend for new UI)
 ├── games/
 │   └── index.html          # Games listing (routes to SPA)
 ├── js/

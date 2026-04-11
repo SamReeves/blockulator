@@ -3,8 +3,10 @@
  * HTML template for the Message Board game UI
  */
 
+import { gamePanelColor, SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 export function getTemplate(config = {}) {
-    const { panelColor = '#3b82f6', btnColor = '#3b82f6' } = config;
+    const { panelColor = gamePanelColor('message-board'), btnColor = gamePanelColor('message-board') } = config;
     
     return `
         <div class="game-sections" style="--panel-color: ${panelColor}; --btn-color: ${btnColor};">
@@ -26,7 +28,7 @@ export function getTemplate(config = {}) {
                             placeholder="Write something permanent..."
                             maxlength="280"
                             rows="3"
-                            style="width: 100%; padding: 0.75rem; background: var(--md-sys-color-surface); border: 2px solid ${panelColor}; border-radius: 6px; color: var(--md-sys-color-on-surface); font-size: 0.9rem; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"
+                            style="width: 100%; padding: 0.75rem; background: var(--md-sys-color-surface); border: 1px solid ${panelColor}; border-radius: 0; color: var(--md-sys-color-on-surface); font-size: 0.9rem; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"
                         ></textarea>
                         <div style="font-size: 0.7rem; opacity: 0.6; text-align: right; margin-bottom: 0.75rem;">
                             <span id="char-count">0</span>/280
@@ -39,11 +41,11 @@ export function getTemplate(config = {}) {
                         </button>
                         
                         <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.7rem;">
-                            <div class="stat-box" style="--stat-color: #10b981;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleEmerald};">
                                 <div class="stat-box-label">Min Fee</div>
                                 <div id="min-fee" class="stat-box-value" style="font-size: 0.75rem;">0 wei</div>
                             </div>
-                            <div class="stat-box" style="--stat-color: #8b5cf6;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleSapphire};">
                                 <div class="stat-box-label">Can Post</div>
                                 <div id="wait-time" class="stat-box-value" style="font-size: 0.75rem;">Now</div>
                             </div>

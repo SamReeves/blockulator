@@ -3,6 +3,8 @@
  * Shared template building utilities for game components
  */
 
+import { SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 /**
  * Create a hero card HTML block
  * @param {Object} config - Card configuration
@@ -101,7 +103,7 @@ export function createCollapsibleSection({ icon, title, content, open = false })
  * @param {string} config.color - Step accent color
  * @returns {string} HTML string
  */
-export function createStepCard({ number, title, description, color = '#3b82f6' }) {
+export function createStepCard({ number, title, description, color = SDR_PALETTE.particleSapphire }) {
     return `
         <div class="step-card" style="--step-color: ${color};">
             <div class="step-number">${number}</div>

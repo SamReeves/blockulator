@@ -8,9 +8,9 @@
     justify-content: space-between;
     align-items: center;
     padding: var(--md-sys-spacing-6) var(--md-sys-spacing-8);
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(8, 145, 178, 0.1) 100%);
+    background: var(--md-sys-color-surface-variant);
     border-radius: var(--md-sys-shape-corner-large);
-    border: 1px solid rgba(37, 99, 235, 0.2);
+    border: 1px solid var(--md-sys-color-outline);
     margin-bottom: var(--md-sys-spacing-6);
 }
 
@@ -34,12 +34,13 @@
 
 /* Hero Header */
 .hero-header {
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    color: white;
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
     padding: var(--md-sys-spacing-8);
     border-radius: var(--md-sys-shape-corner-large);
     position: relative;
     overflow: hidden;
+    border: 1px solid var(--md-sys-color-outline);
 }
 
 .hero-bg-icon {
@@ -56,7 +57,7 @@
 }
 
 .hero-title {
-    color: white;
+    color: var(--md-sys-color-on-surface);
     font-size: 2rem;
     margin-bottom: var(--md-sys-spacing-3);
     font-weight: 700;
@@ -79,7 +80,7 @@
 .type-emoji {
     font-size: 1.75rem;
     flex-shrink: 0;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--sdr-bg-darker) 30%, transparent));
 }
 
 .type-name {
@@ -133,7 +134,7 @@
     align-items: flex-start;
     margin-bottom: var(--md-sys-spacing-4);
     padding-bottom: var(--md-sys-spacing-4);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    border-bottom: 1px solid var(--md-sys-color-outline);
 }
 
 /* Progress Section */
@@ -159,7 +160,7 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--md-sys-color-primary), var(--md-sys-color-secondary));
+    background: var(--sdr-primary);
     transition: width var(--md-sys-motion-duration-medium);
 }
 
@@ -189,7 +190,7 @@
 .contract-info {
     margin-top: var(--md-sys-spacing-4);
     padding-top: var(--md-sys-spacing-4);
-    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    border-top: 1px solid var(--md-sys-color-outline);
 }
 
 .info-row {
@@ -213,7 +214,7 @@
 .action-section {
     margin-top: var(--md-sys-spacing-4);
     padding-top: var(--md-sys-spacing-4);
-    border-top: 1px solid rgba(148, 163, 184, 0.2);
+    border-top: 1px solid var(--md-sys-color-outline);
     display: flex;
     gap: var(--md-sys-spacing-3);
 }
@@ -258,7 +259,7 @@
     width: 100%;
     padding: var(--md-sys-spacing-3);
     background: var(--md-sys-color-surface);
-    border: 2px solid var(--md-sys-color-outline);
+    border: var(--sdr-line);
     border-radius: var(--md-sys-shape-corner-small);
     color: var(--md-sys-color-on-surface);
     font-size: 1rem;
@@ -461,8 +462,9 @@
 .step-number {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
-    border-radius: 50%;
+    background: var(--sdr-primary);
+    border-radius: var(--md-sys-shape-corner-none);
+    border: var(--sdr-line);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -530,7 +532,7 @@
     font-size: 1.1rem;
     color: var(--md-sys-color-on-surface);
     margin: 0 0 var(--md-sys-spacing-3) 0;
-    border-bottom: 2px solid var(--md-sys-color-primary);
+    border-bottom: 1px solid var(--sdr-hairline-strong);
     padding-bottom: var(--md-sys-spacing-2);
 }
 
@@ -612,7 +614,7 @@
     background: var(--md-sys-color-primary);
     color: var(--md-sys-color-on-primary);
     border-color: var(--md-sys-color-primary);
-    transform: translateY(-2px);
+    transform: none;
 }
 
 /* Contract Info Card */

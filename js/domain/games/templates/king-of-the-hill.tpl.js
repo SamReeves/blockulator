@@ -3,8 +3,10 @@
  * HTML template for the King of the Hill game UI
  */
 
+import { gamePanelColor, SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 export function getTemplate(config = {}) {
-    const { panelColor = '#8b5cf6', btnColor = '#764ba2' } = config;
+    const { panelColor = gamePanelColor('king-of-the-hill'), btnColor = SDR_PALETTE.primary } = config;
     
     return `
         <div class="game-sections" style="--panel-color: ${panelColor}; --btn-color: ${btnColor};">
@@ -35,11 +37,11 @@ export function getTemplate(config = {}) {
                         </button>
                         
                         <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.75rem;">
-                            <div class="stat-box" style="--stat-color: #10b981;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleEmerald};">
                                 <div class="stat-box-label">Crowns</div>
                                 <div id="your-crowns" class="stat-box-value">—</div>
                             </div>
-                            <div class="stat-box" style="--stat-color: #f59e0b;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleGold};">
                                 <div class="stat-box-label">Total Reign</div>
                                 <div id="your-reign" class="stat-box-value">—</div>
                             </div>

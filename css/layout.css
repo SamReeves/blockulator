@@ -10,12 +10,13 @@
 /* Global Error Banner */
 .app-error-banner {
     background: var(--md-sys-color-error);
-    color: white;
+    color: var(--sdr-text-white);
     padding: var(--md-sys-spacing-3) var(--md-sys-spacing-4);
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: none;
+    border-bottom: var(--sdr-line);
 }
 
 .app-error-content {
@@ -28,9 +29,9 @@
 }
 
 .app-error-dismiss {
-    background: rgba(255, 255, 255, 0.2);
+    background: color-mix(in srgb, var(--sdr-text-white) 20%, transparent);
     border: none;
-    color: white;
+    color: var(--sdr-text-white);
     font-size: 1.25rem;
     width: 32px;
     height: 32px;
@@ -41,12 +42,12 @@
 }
 
 .app-error-dismiss:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: color-mix(in srgb, var(--sdr-text-white) 30%, transparent);
 }
 
 /* Header */
 .app-header {
-    background: rgba(30, 41, 59, 0.95);
+    background: color-mix(in srgb, var(--sdr-bg-dark) 92%, transparent);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: var(--md-sys-spacing-1) var(--md-sys-spacing-4);
@@ -110,13 +111,14 @@
 }
 
 .nav-link:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--md-sys-color-on-surface);
+    background: color-mix(in srgb, var(--sdr-text-white) 6%, transparent);
+    color: var(--sdr-text-white);
 }
 
 .nav-link-active {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    background: var(--md-sys-color-surface-container);
+    color: var(--sdr-text-white);
+    border: 1px solid var(--md-sys-color-outline);
 }
 
 /* Header Right */
@@ -169,9 +171,9 @@
 }
 
 .copy-btn {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 4px;
+    background: var(--sdr-bg-card);
+    border: var(--sdr-line);
+    border-radius: 0;
     padding: 2px 6px;
     cursor: pointer;
     font-size: 0.75rem;
@@ -180,12 +182,12 @@
 }
 
 .copy-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.05);
+    background: color-mix(in srgb, var(--sdr-text-white) 10%, transparent);
+    transform: none;
 }
 
 .copy-btn.copied {
-    background: rgba(76, 175, 80, 0.2);
+    background: color-mix(in srgb, var(--md-sys-color-success) 20%, transparent);
     border-color: var(--md-sys-color-success);
     color: var(--md-sys-color-success);
 }
@@ -213,13 +215,13 @@
 
 .testnet-badge:hover {
     background: var(--md-sys-color-warning-container);
-    transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: none;
+    box-shadow: none;
 }
 
 .testnet-badge.mainnet {
     background: var(--md-sys-color-success);
-    color: white;
+    color: var(--sdr-text-white);
 }
 
 .testnet-badge.mainnet:hover {
@@ -233,7 +235,7 @@
 
 .readonly-badge {
     background: var(--md-sys-color-error);
-    color: white;
+    color: var(--sdr-text-white);
     cursor: default;
 }
 
@@ -242,9 +244,9 @@
     position: fixed;
     z-index: 10000;
     background: var(--md-sys-color-surface);
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-medium);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-small);
+    box-shadow: none;
     min-width: 200px;
     overflow: hidden;
     animation: dropdownFadeIn 0.2s ease;
@@ -257,11 +259,9 @@
 @keyframes dropdownFadeIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
@@ -359,7 +359,7 @@
 
 .footer-button:hover {
     color: var(--md-sys-color-warning);
-    transform: scale(1.05);
+    transform: none;
 }
 
 .footer-separator {
@@ -378,6 +378,16 @@
     color: var(--md-sys-color-on-surface-variant);
     font-size: 0.9rem;
     margin: 0;
+}
+
+.global-footer a {
+    color: var(--sdr-link);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.global-footer a:hover {
+    color: var(--sdr-text-white);
 }
 
 /* Section Layout */
@@ -444,8 +454,8 @@
 
 .badge-mode-btn {
     padding: 0.5rem 1.5rem;
-    border: 2px solid var(--md-sys-color-outline);
-    border-radius: 8px;
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-small);
     cursor: pointer;
     background: var(--md-sys-color-surface-variant);
     color: var(--md-sys-color-on-surface-variant);

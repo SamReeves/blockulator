@@ -4,12 +4,13 @@
  * Following the same architectural pattern as DiceThreeD
  */
 
+import { particleHexAt, rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
+
 export class BarGraph3D {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
         this.data = []; // Array of { address, value, label, badge }
         this.maxBars = options.maxBars || 10;
-        this.colorScheme = options.colorScheme || 'gradient';
         this.onBarClick = options.onBarClick || (() => {});
         this.onBarHover = options.onBarHover || (() => {});
         
@@ -39,6 +40,7 @@ export class BarGraph3D {
     }
     
     getHTML() {
+        const sceneBg = rgbaFromHex(SDR_PALETTE.bgDarker, 0.02);
         return `
             <div class="bar-graph-scene" style="
                 width: 100%;
@@ -47,7 +49,7 @@ export class BarGraph3D {
                 display: flex;
                 align-items: flex-end;
                 padding: 1rem;
-                background: rgba(0, 0, 0, 0.02);
+                background: ${sceneBg};
                 border-radius: 8px;
             ">
                 <div class="bars-container" style="
@@ -168,10 +170,10 @@ export class BarGraph3D {
             align-items: center;
             padding: 0.75rem 0.5rem;
             box-sizing: border-box;
-            background: linear-gradient(180deg, ${color} 0%, ${color}dd 100%);
-            border: 2px solid ${color};
-            border-radius: 8px 8px 0 0;
-            box-shadow: 0 2px 8px ${color}44;
+            background: ${color};
+            border: 1px solid ${SDR_PALETTE.border};
+            border-radius: 0;
+            box-shadow: none;
         `;
         
         // Medal at very top
@@ -186,6 +188,8 @@ export class BarGraph3D {
             bar.appendChild(medalSpan);
         }
         
+        const labelShadow = rgbaFromHex(SDR_PALETTE.bgDarker, 0.5);
+
         // Value below medal
         const valueDiv = document.createElement('div');
         valueDiv.className = 'bar-value';
@@ -193,8 +197,8 @@ export class BarGraph3D {
         valueDiv.style.cssText = `
             font-size: 0.85rem;
             font-weight: bold;
-            color: white;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            color: ${SDR_PALETTE.textWhite};
+            text-shadow: 0 1px 2px ${labelShadow};
             text-align: center;
             line-height: 1.2;
             margin-bottom: 0.5rem;
@@ -237,13 +241,13 @@ export class BarGraph3D {
         labelDiv.textContent = data.label || `${data.address.slice(0, 4)}...${data.address.slice(-2)}`;
         labelDiv.style.cssText = `
             font-size: 0.7rem;
-            color: rgba(255,255,255,0.95);
+            color: ${rgbaFromHex(SDR_PALETTE.textWhite, 0.95)};
             text-align: center;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             max-width: 100%;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 2px ${labelShadow};
             font-family: monospace;
         `;
         bottomSection.appendChild(labelDiv);
@@ -255,24 +259,9 @@ export class BarGraph3D {
     
     getBarColor(index, isCurrentUser) {
         if (isCurrentUser) {
-            return '#10b981'; // Green for current user
+            return SDR_PALETTE.particleEmerald;
         }
-        
-        // Color palette matching dice gods
-        const colors = [
-            '#ef4444', // red
-            '#f59e0b', // amber
-            '#3b82f6', // blue
-            '#8b5cf6', // violet
-            '#ec4899', // pink
-            '#14b8a6', // teal
-            '#f97316', // orange
-            '#06b6d4', // cyan
-            '#a855f7', // purple
-            '#84cc16'  // lime
-        ];
-        
-        return colors[index % colors.length];
+        return particleHexAt(index);
     }
     
     formatValue(value) {

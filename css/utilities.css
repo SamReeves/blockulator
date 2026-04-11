@@ -1,6 +1,41 @@
 /* ============================================
    UTILITY CLASSES
    ============================================ */
+
+/* SDR chrome — flat panels, section labels, links (About-aligned) */
+.sdr-panel {
+    background: var(--sdr-panel);
+    border: var(--sdr-line);
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.sdr-panel--padded {
+    padding: var(--md-sys-spacing-4);
+}
+
+.sdr-section-label {
+    font-size: var(--sdr-label-size);
+    font-weight: 600;
+    letter-spacing: var(--sdr-label-tracking);
+    text-transform: uppercase;
+    color: var(--sdr-label-color);
+    margin: 0 0 0.75rem 0;
+}
+
+.sdr-link,
+.about-link {
+    color: var(--sdr-link);
+    text-decoration: none;
+    border: none;
+    transition: color 0.2s ease;
+}
+
+.sdr-link:hover,
+.about-link:hover {
+    color: var(--sdr-text-white);
+}
+
 .hidden { display: none !important; }
 
 .loading::after {
@@ -9,7 +44,7 @@
     width: 1em;
     height: 1em;
     margin-left: 0.5em;
-    border: 2px solid var(--md-sys-color-outline);
+    border: var(--sdr-line);
     border-top-color: var(--md-sys-color-primary);
     border-radius: 50%;
     animation: spin 0.6s linear infinite;

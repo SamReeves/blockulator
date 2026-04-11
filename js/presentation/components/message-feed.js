@@ -4,6 +4,7 @@
  */
 
 import { DOMHelpers } from '../dom/dom-helpers.js';
+import { rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class MessageFeed {
     constructor(containerId, options = {}) {
@@ -27,8 +28,9 @@ export class MessageFeed {
     getHTML() {
         return `
             <div class="message-feed-container" style="
-                background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
-                border-radius: 8px;
+                background: ${SDR_PALETTE.bgCard};
+                border: 1px solid ${SDR_PALETTE.border};
+                border-radius: 0;
                 padding: 0.75rem;
                 max-height: 500px;
                 overflow-y: auto;
@@ -99,17 +101,22 @@ export class MessageFeed {
     
     renderMessage(msg, isYou, isRecent) {
         const animation = isRecent ? 'animation: messageSlideIn 0.5s ease-out;' : '';
-        const youBadge = isYou ? '<span style="background: #10b981; color: white; padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; margin-left: 0.5rem;">YOU</span>' : '';
-        
+        const youBadge = isYou ? `<span style="background: ${SDR_PALETTE.particleEmerald}; color: ${SDR_PALETTE.textWhite}; padding: 0.15rem 0.4rem; border-radius: 0; font-size: 0.65rem; font-weight: 600; margin-left: 0.5rem; border: 1px solid ${SDR_PALETTE.border};">YOU</span>` : '';
+        const otherTint = rgbaFromHex(SDR_PALETTE.particleSapphire, 0.08);
+        const otherTintHi = rgbaFromHex(SDR_PALETTE.particleSapphire, 0.14);
+        const youBg = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.12);
+        const youBgHi = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.2);
+        const borderOther = SDR_PALETTE.particleSapphire;
+
         return `
             <div class="message-item" style="
-                background: ${isYou ? 'rgba(16, 185, 129, 0.08)' : 'rgba(59, 130, 246, 0.05)'};
-                border-left: 3px solid ${isYou ? '#10b981' : '#3b82f6'};
-                border-radius: 6px;
+                background: ${isYou ? youBg : otherTint};
+                border-left: 1px solid ${isYou ? SDR_PALETTE.particleEmerald : borderOther};
+                border-radius: 0;
                 padding: 0.75rem;
                 transition: all 0.3s;
                 ${animation}
-            " onmouseenter="this.style.background='${isYou ? 'rgba(16, 185, 129, 0.12)' : 'rgba(59, 130, 246, 0.08)'}'" onmouseleave="this.style.background='${isYou ? 'rgba(16, 185, 129, 0.08)' : 'rgba(59, 130, 246, 0.05)'}'">
+            " onmouseenter="this.style.background='${isYou ? youBgHi : otherTintHi}'" onmouseleave="this.style.background='${isYou ? youBg : otherTint}'">
                 <!-- Header -->
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -117,18 +124,19 @@ export class MessageFeed {
                             width: 32px;
                             height: 32px;
                             border-radius: 50%;
-                            background: linear-gradient(135deg, ${isYou ? '#10b981' : '#3b82f6'} 0%, ${isYou ? '#059669' : '#2563eb'} 100%);
+                            background: ${isYou ? SDR_PALETTE.particleEmerald : SDR_PALETTE.particleSapphire};
                             display: flex;
                             align-items: center;
                             justify-content: center;
-                            color: white;
+                            color: ${SDR_PALETTE.textWhite};
                             font-weight: bold;
                             font-size: 0.75rem;
+                            border: 1px solid ${SDR_PALETTE.border};
                         ">
                             ${this.getInitials(msg.poster)}
                         </div>
                         <div>
-                            <div style="font-family: monospace; font-size: 0.75rem; color: ${isYou ? '#10b981' : '#3b82f6'}; font-weight: 600; display: flex; align-items: center;">
+                            <div style="font-family: monospace; font-size: 0.75rem; color: ${isYou ? SDR_PALETTE.particleEmerald : SDR_PALETTE.particleSapphire}; font-weight: 600; display: flex; align-items: center;">
                                 ${DOMHelpers.formatAddress(msg.poster)}
                                 ${youBadge}
                             </div>
@@ -215,17 +223,17 @@ if (typeof document !== 'undefined') {
         }
         
         .message-feed-container::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
+            background: color-mix(in srgb, var(--sdr-text-white) 5%, transparent);
             border-radius: 4px;
         }
         
         .message-feed-container::-webkit-scrollbar-thumb {
-            background: rgba(59, 130, 246, 0.3);
+            background: color-mix(in srgb, var(--sdr-particle-sapphire) 30%, transparent);
             border-radius: 4px;
         }
         
         .message-feed-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(59, 130, 246, 0.5);
+            background: color-mix(in srgb, var(--sdr-particle-sapphire) 50%, transparent);
         }
     `;
     document.head.appendChild(style);

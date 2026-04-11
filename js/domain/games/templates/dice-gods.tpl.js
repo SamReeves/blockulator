@@ -3,8 +3,10 @@
  * HTML template for the Dice Gods game UI
  */
 
+import { gamePanelColor, SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 export function getTemplate(config = {}) {
-    const { panelColor = '#8b5cf6', btnColor = '#10b981' } = config;
+    const { panelColor = gamePanelColor('dice-gods'), btnColor = SDR_PALETTE.particleEmerald } = config;
     
     return `
         <div class="game-sections" style="--panel-color: ${panelColor}; --btn-color: ${btnColor};">
@@ -33,11 +35,11 @@ export function getTemplate(config = {}) {
                                 <div class="stat-box-label">Plays</div>
                                 <div id="plays-count" class="stat-box-value">-</div>
                             </div>
-                            <div class="stat-box" style="--stat-color: #10b981;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleEmerald};">
                                 <div class="stat-box-label">Pool</div>
                                 <div id="prize-pool" class="stat-box-value">-</div>
                             </div>
-                            <div class="stat-box" style="--stat-color: #f59e0b;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleGold};">
                                 <div class="stat-box-label">Min</div>
                                 <div id="min-donation" class="stat-box-value">-</div>
                             </div>

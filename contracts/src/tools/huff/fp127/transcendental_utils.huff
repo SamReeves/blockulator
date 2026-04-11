@@ -81,11 +81,24 @@
 #define macro FP127_CBRT() = takes(1) returns(1) {
     dup1 iszero cbrt_zero jumpi
     dup1 IS_NEGATIVE() cbrt_negative jumpi
+    
+    // Perfect cube shortcuts (positive)
+    dup1 [SC_IN_INT_8] eq cbrt_8 jumpi     // cbrt(8) = 2
+    dup1 [SC_IN_INT_27] eq cbrt_27 jumpi   // cbrt(27) = 3
+    dup1 [SC_IN_INT_64] eq cbrt_64 jumpi   // cbrt(64) = 4
+    
     [ONE_THIRD_FP127] FP127_POW()
     cbrt_done jump
+    
     cbrt_negative:
     FP127_ABS() [ONE_THIRD_FP127] FP127_POW() NEGATE()
     cbrt_done jump
+    
+    // Perfect cube landing pads
+    cbrt_8: pop [SC_IN_INT_2] cbrt_done jump
+    cbrt_27: pop [SC_IN_INT_3] cbrt_done jump
+    cbrt_64: pop [SC_IN_INT_4] cbrt_done jump
+    
     cbrt_zero:
     cbrt_done:
 }

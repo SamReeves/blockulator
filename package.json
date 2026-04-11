@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "mkdir -p dist && cp index.html blockulator.png blockulator_favicon.png dist/ && cp -r js dist/js && cp -r contracts dist/contracts && cp -r css dist/css",
-    "test": "node tests/test-module-imports.js && node tests/test-all-contracts.js",
+    "test": "node scripts/check-sdr-colors.mjs && node tests/test-module-imports.js && node tests/test-all-contracts.js",
     "test:server": "cd tests && ./test-server.sh"
   },
   "dependencies": {

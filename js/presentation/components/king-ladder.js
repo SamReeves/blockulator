@@ -4,6 +4,7 @@
  */
 
 import { DOMHelpers } from '../dom/dom-helpers.js';
+import { rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class KingLadder {
     constructor(containerId, options = {}) {
@@ -27,18 +28,20 @@ export class KingLadder {
     getHTML() {
         return `
             <div class="king-ladder-container" style="
-                background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-                border-radius: 8px;
+                background: ${SDR_PALETTE.bgCard};
+                border: 1px solid ${SDR_PALETTE.border};
+                border-radius: 0;
                 padding: 0.75rem;
                 min-height: 300px;
                 position: relative;
             ">
                 <!-- Current King at top -->
                 <div id="current-king-display" style="
-                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    color: white;
+                    background: ${SDR_PALETTE.bgDark};
+                    color: ${SDR_PALETTE.textWhite};
                     padding: 0.75rem;
-                    border-radius: 6px;
+                    border-radius: 0;
+                    border: 1px solid ${SDR_PALETTE.border};
                     margin-bottom: 0.75rem;
                     text-align: center;
                 ">
@@ -91,7 +94,7 @@ export class KingLadder {
         if (isZero) {
             addressDisplay.innerHTML = '<span style="opacity: 0.7;">Vacant</span>';
         } else {
-            const youBadge = isYou ? ' <span style="background: #ffd700; color: #000; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.65rem; font-weight: 700;">YOU</span>' : '';
+            const youBadge = isYou ? ` <span style="background: ${SDR_PALETTE.particleGold}; color: ${SDR_PALETTE.bgDarker}; padding: 0.1rem 0.3rem; border-radius: 0; font-size: 0.65rem; font-weight: 700; border: 1px solid ${SDR_PALETTE.border};">YOU</span>` : '';
             addressDisplay.innerHTML = DOMHelpers.formatAddress(address) + youBadge;
         }
         
@@ -135,39 +138,44 @@ export class KingLadder {
             const isYou = this.currentAddress && 
                          king.toLowerCase() === this.currentAddress.toLowerCase();
             const position = index + 1;
-            
+            const youBg = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.12);
+            const youBgHi = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.18);
+            const otherBg = rgbaFromHex(SDR_PALETTE.primaryDark, 0.35);
+            const otherBgHi = rgbaFromHex(SDR_PALETTE.primary, 0.25);
+
             return `
                 <div class="ladder-rung" style="
                     display: flex;
                     align-items: center;
                     gap: 0.75rem;
                     padding: 0.5rem;
-                    background: ${isYou ? 'rgba(16, 185, 129, 0.1)' : 'rgba(118, 75, 162, 0.05)'};
-                    border-left: 3px solid ${isYou ? '#10b981' : '#764ba2'};
-                    border-radius: 4px;
+                    background: ${isYou ? youBg : otherBg};
+                    border-left: 1px solid ${isYou ? SDR_PALETTE.particleEmerald : SDR_PALETTE.particleSapphire};
+                    border-radius: 0;
                     transition: all 0.2s;
-                " onmouseenter="this.style.background='${isYou ? 'rgba(16, 185, 129, 0.15)' : 'rgba(118, 75, 162, 0.1)'}'" onmouseleave="this.style.background='${isYou ? 'rgba(16, 185, 129, 0.1)' : 'rgba(118, 75, 162, 0.05)'}'">
+                " onmouseenter="this.style.background='${isYou ? youBgHi : otherBgHi}'" onmouseleave="this.style.background='${isYou ? youBg : otherBg}'">
                     <!-- Position badge -->
                     <div style="
                         min-width: 28px;
                         height: 28px;
                         border-radius: 50%;
-                        background: ${isYou ? 'linear-gradient(135deg, #10b981 0%, #059669 100%)' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
-                        color: white;
+                        background: ${isYou ? SDR_PALETTE.particleEmerald : SDR_PALETTE.particleSapphire};
+                        color: ${SDR_PALETTE.textWhite};
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         font-size: 0.75rem;
                         font-weight: bold;
+                        border: 1px solid ${SDR_PALETTE.border};
                     ">
                         ${position === 1 ? '🥈' : position === 2 ? '🥉' : position}
                     </div>
                     
                     <!-- Address -->
                     <div style="flex: 1; min-width: 0;">
-                        <div style="font-family: monospace; font-size: 0.75rem; font-weight: 500; color: ${isYou ? '#10b981' : 'inherit'};">
+                        <div style="font-family: monospace; font-size: 0.75rem; font-weight: 500; color: ${isYou ? SDR_PALETTE.particleEmerald : 'inherit'};">
                             ${DOMHelpers.formatAddress(king)}
-                            ${isYou ? '<span style="color: #10b981; font-weight: 700; margin-left: 0.25rem;">←</span>' : ''}
+                            ${isYou ? `<span style="color: ${SDR_PALETTE.particleEmerald}; font-weight: 700; margin-left: 0.25rem;">←</span>` : ''}
                         </div>
                     </div>
                 </div>

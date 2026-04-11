@@ -4,6 +4,8 @@
  * Presentation layer - pure rendering component
  */
 
+import { rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
+
 export class BadgeViewer {
     /**
      * Create a badge viewer element
@@ -100,10 +102,10 @@ export class BadgeViewer {
             justify-content: center;
             width: ${size}px;
             height: ${size}px;
-            background: linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%);
-            border-radius: 8px;
-            border: 2px dashed #ccc;
-            color: #999;
+            background: ${SDR_PALETTE.bgCard};
+            border-radius: 0;
+            border: 1px dashed ${SDR_PALETTE.border};
+            color: ${SDR_PALETTE.textMuted};
             font-size: ${Math.max(10, size / 10)}px;
             text-align: center;
             padding: 8px;
@@ -132,7 +134,7 @@ export class BadgeViewer {
         `;
 
         const ctx = gridCanvas.getContext('2d');
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        ctx.strokeStyle = rgbaFromHex(SDR_PALETTE.border, 0.22);
         ctx.lineWidth = 1;
 
         // Draw vertical lines (every 4 pixels for 32x32)
@@ -161,13 +163,15 @@ export class BadgeViewer {
     static showFullSizeModal(pixelData) {
         // Create modal overlay
         const modal = document.createElement('div');
+        const overlayBg = rgbaFromHex(SDR_PALETTE.bgDarker, 0.8);
+        const liftShadow = `0 20px 60px ${rgbaFromHex(SDR_PALETTE.bgDarker, 0.5)}`;
         modal.style.cssText = `
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: ${overlayBg};
             display: flex;
             align-items: center;
             justify-content: center;
@@ -177,7 +181,7 @@ export class BadgeViewer {
 
         // Create large badge viewer
         const viewer = this.create(pixelData, { size: 512, showGrid: false });
-        viewer.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.5)';
+        viewer.style.boxShadow = liftShadow;
         viewer.style.borderRadius = '12px';
         viewer.style.overflow = 'hidden';
 
@@ -222,7 +226,7 @@ export class BadgeViewer {
 
     /**
      * Convert hex color string to pixel data (solid color)
-     * @param {string} hexColor - Hex color string (e.g., "#FF0000")
+     * @param {string} hexColor - Hex color string (e.g. six-digit RRGGBB with leading #)
      * @returns {Uint8Array} 3,072 bytes with solid color
      */
     static createSolidColor(hexColor) {

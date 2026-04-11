@@ -4,6 +4,7 @@
  */
 
 import { DOMHelpers } from '../dom/dom-helpers.js';
+import { rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class AddressFlow {
     constructor(containerId, options = {}) {
@@ -29,10 +30,13 @@ export class AddressFlow {
     getHTML() {
         const title = this.mode === 'forward' ? 'Forward Chain' : 'Backward Chain';
         const arrow = this.mode === 'forward' ? '→' : '←';
-        const color = this.mode === 'forward' ? '#10b981' : '#8b5cf6';
-        
+        const color = this.mode === 'forward' ? SDR_PALETTE.particleEmerald : SDR_PALETTE.link;
+        const surface = rgbaFromHex(SDR_PALETTE.bgCard, 0.95);
+        const highlightBg = rgbaFromHex(color, 0.12);
+        const highlightBorder = rgbaFromHex(color, 0.35);
+
         return `
-            <div class="address-flow-container" style="position: relative; background: linear-gradient(135deg, ${color}15 0%, ${color}08 100%); border-radius: 8px; padding: 0.75rem; min-height: 200px;">
+            <div class="address-flow-container" style="position: relative; background: ${surface}; border: 1px solid ${SDR_PALETTE.border}; border-radius: 0; padding: 0.75rem; min-height: 200px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
                     <div style="font-size: 0.75rem; font-weight: 600; color: ${color}; text-transform: uppercase; letter-spacing: 1px;">
                         ${arrow} ${title}
@@ -48,7 +52,7 @@ export class AddressFlow {
                 </div>
                 
                 <!-- Current pending/last donor highlight -->
-                <div id="current-highlight" style="margin-top: 0.75rem; padding: 0.75rem; background: ${color}20; border: 2px solid ${color}40; border-radius: 6px; display: none;">
+                <div id="current-highlight" style="margin-top: 0.75rem; padding: 0.75rem; background: ${highlightBg}; border: 1px solid ${highlightBorder}; border-radius: 0; display: none;">
                     <div style="font-size: 0.7rem; opacity: 0.8; margin-bottom: 0.25rem;">
                         ${this.mode === 'forward' ? '⏳ Pending' : '🎯 Last Donor'}
                     </div>
@@ -137,19 +141,20 @@ export class AddressFlow {
             return;
         }
         
-        const color = this.mode === 'forward' ? '#10b981' : '#8b5cf6';
-        
+        const color = this.mode === 'forward' ? SDR_PALETTE.particleEmerald : SDR_PALETTE.link;
+
         listEl.innerHTML = this.addresses.map((item, index) => {
             const opacity = 1 - (index * 0.15);
             const isRecent = (Date.now() - item.timestamp) < 3000;
             const animation = isRecent ? 'animation: slideInFade 0.5s ease-out;' : '';
-            
+            const rowBg = rgbaFromHex(color, 0.1 * opacity);
+
             return `
                 <div class="address-flow-item" style="
                     padding: 0.5rem;
-                    background: rgba(${this.mode === 'forward' ? '16, 185, 129' : '139, 92, 246'}, ${0.1 * opacity});
-                    border-left: 3px solid ${color};
-                    border-radius: 4px;
+                    background: ${rowBg};
+                    border-left: 1px solid ${color};
+                    border-radius: 0;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;

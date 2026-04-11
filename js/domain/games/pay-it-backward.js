@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { AddressFlow } from '../../presentation/components/address-flow.js';
 import { getTemplate } from './templates/pay-it-backward.tpl.js';
+import { gamePanelColor } from '../../theme/sdr-palette.js';
 
 export class PayItBackward extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class PayItBackward extends Game {
         title: 'Pay It Backward',
         emoji: '⏪',
         description: 'Reward the previous donor',
-        color: '#8b5cf6',
+        color: gamePanelColor('pay-it-backward'),
         contract: {
             source: 'contracts/src/games/pay_it_backward.vy',
             abi: 'contracts/build/abis/pay-it-backward.json',

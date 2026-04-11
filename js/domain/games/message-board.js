@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { MessageFeed } from '../../presentation/components/message-feed.js';
 import { getTemplate } from './templates/message-board.tpl.js';
+import { gamePanelColor } from '../../theme/sdr-palette.js';
 
 export class MessageBoard extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class MessageBoard extends Game {
         title: 'Message Board',
         emoji: '💬',
         description: 'Permanent on-chain messages',
-        color: '#3b82f6',
+        color: gamePanelColor('message-board'),
         contract: {
             source: 'contracts/src/games/message_board.vy',
             abi: 'contracts/build/abis/message-board.json',

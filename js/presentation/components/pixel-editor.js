@@ -3,6 +3,8 @@
  * MS Paint-style pixel art editor for on-chain image creation
  */
 
+import { rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
+
 export class PixelEditor {
     constructor(options = {}) {
         // Support both old API (containerSelector string) and new API (options object)
@@ -24,7 +26,7 @@ export class PixelEditor {
             this.initialData = options.initialData || null;
         }
         
-        this.currentColor = '#000000';
+        this.currentColor = SDR_PALETTE.bgDarker;
         this.currentTool = 'pen';
         this.isDrawing = false;
         this.colorPickerInput = null;
@@ -278,7 +280,7 @@ export class PixelEditor {
         this.redraw();
     }
     
-    clear(color = '#FFFFFF') {
+    clear(color = SDR_PALETTE.pixelPaper) {
         this.ctx.fillStyle = color;
         this.ctx.fillRect(0, 0, this.width, this.height);
         this.redraw();
@@ -307,7 +309,7 @@ export class PixelEditor {
     }
     
     drawGrid() {
-        this.displayCtx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+        this.displayCtx.strokeStyle = rgbaFromHex(SDR_PALETTE.border, 0.22);
         this.displayCtx.lineWidth = 1;
         
         // Vertical lines
@@ -378,7 +380,7 @@ export class PixelEditor {
         } else if (this.currentTool === 'eyedropper') {
             this.pickColor(x, y);
         } else if (this.currentTool === 'eraser') {
-            this.drawPixel(x, y, '#FFFFFF');
+            this.drawPixel(x, y, SDR_PALETTE.pixelPaper);
         }
         
         this.lastX = x;
@@ -396,7 +398,7 @@ export class PixelEditor {
             this.lastX = x;
             this.lastY = y;
         } else if (this.currentTool === 'eraser') {
-            this.drawLine(this.lastX, this.lastY, x, y, '#FFFFFF');
+            this.drawLine(this.lastX, this.lastY, x, y, SDR_PALETTE.pixelPaper);
             this.lastX = x;
             this.lastY = y;
         }

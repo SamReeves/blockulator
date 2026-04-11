@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { CountdownWheel } from '../../presentation/components/countdown-wheel.js';
 import { getTemplate } from './templates/time-to-make-the-donuts.tpl.js';
+import { gamePanelColor, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class TimeToMakeTheDonuts extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class TimeToMakeTheDonuts extends Game {
         title: 'Make the Donuts',
         emoji: '🍩',
         description: 'First donor daily at midnight',
-        color: '#ec4899',
+        color: gamePanelColor('time-to-make-the-donuts'),
         contract: {
             source: 'contracts/src/games/time_to_make_the_donuts.vy',
             abi: 'contracts/build/abis/time-to-make-the-donuts.json',
@@ -131,7 +132,7 @@ export class TimeToMakeTheDonuts extends Game {
             
             if (isYou) {
                 const youLabel = document.createElement('strong');
-                youLabel.style.cssText = 'color: #ffd700; margin-right: 0.5rem;';
+                youLabel.style.cssText = `color: ${SDR_PALETTE.particleGold}; margin-right: 0.5rem;`;
                 youLabel.textContent = '🏆 YOU!';
                 donorEl.appendChild(youLabel);
             }

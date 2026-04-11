@@ -10,6 +10,7 @@ import { DOMHelpers } from '../dom/dom-helpers.js';
 import { computeCdfValue } from './distribution-cdf.js';
 import { getExplorerUrl } from '../../infrastructure/config/network.js';
 import { AddressBadge } from '../components/address-badge.js';
+import { CHART_THEME, rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class FutureDetailView {
     constructor(futureData, factory, web3Provider) {
@@ -506,7 +507,7 @@ export class FutureDetailView {
                 ctx.moveTo(xPos, y.top);
                 ctx.lineTo(xPos, y.bottom);
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = 'red';
+                ctx.strokeStyle = SDR_PALETTE.particleRed;
                 ctx.setLineDash([5, 5]);
                 ctx.stroke();
                 ctx.restore();
@@ -514,7 +515,7 @@ export class FutureDetailView {
                 // Add label
                 ctx.save();
                 ctx.font = 'bold 12px sans-serif';
-                ctx.fillStyle = 'red';
+                ctx.fillStyle = SDR_PALETTE.particleRed;
                 ctx.textAlign = 'center';
                 ctx.fillText('Now', xPos, y.top - 5);
                 ctx.restore();
@@ -528,8 +529,8 @@ export class FutureDetailView {
                 datasets: [{
                     label: 'Cumulative Payout',
                     data: values,
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: SDR_PALETTE.particleSapphire,
+                    backgroundColor: rgbaFromHex(SDR_PALETTE.particleSapphire, 0.18),
                     tension: 0.4,
                     fill: true,
                     borderWidth: 2,
@@ -540,35 +541,45 @@ export class FutureDetailView {
                 responsive: true,
                 maintainAspectRatio: true,
                 aspectRatio: 2,
+                color: CHART_THEME.fontColor,
                 scales: {
                     y: {
                         beginAtZero: true,
                         max: initialValueEth * 1.05,
                         title: {
                             display: true,
-                            text: 'Cumulative Payout (ETH)'
+                            text: 'Cumulative Payout (ETH)',
+                            color: CHART_THEME.fontColor,
                         },
                         ticks: {
+                            color: CHART_THEME.fontColor,
                             callback: function(value) {
                                 return value.toFixed(4) + ' ETH';
                             }
-                        }
+                        },
+                        grid: { color: CHART_THEME.gridColorMinor },
+                        border: { color: CHART_THEME.zeroLine },
                     },
                     x: {
                         title: {
                             display: true,
-                            text: 'Timeline (Creation → End)'
+                            text: 'Timeline (Creation → End)',
+                            color: CHART_THEME.fontColor,
                         },
                         ticks: {
+                            color: CHART_THEME.fontColor,
                             autoSkip: false,
                             maxRotation: 45,
                             minRotation: 45
-                        }
+                        },
+                        grid: { color: CHART_THEME.gridColorMinor },
+                        border: { color: CHART_THEME.zeroLine },
                     }
                 },
                 plugins: {
                     legend: {
-                        display: true
+                        display: true,
+                        labels: { color: CHART_THEME.fontColor },
                     },
                     tooltip: {
                                 enabled: true,

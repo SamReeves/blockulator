@@ -4,6 +4,10 @@
  * Perfect for Satan, Moloch, and Baal!
  */
 
+import { SDR_PALETTE } from '../../theme/sdr-palette.js';
+
+const PENT_STROKE = SDR_PALETTE.particleRed;
+
 export class LazySusan3D {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -53,28 +57,16 @@ export class LazySusan3D {
                     <!-- Pentagram Base -->
                     <div class="lazy-susan-pentagram">
                         <svg viewBox="0 0 200 200" width="180" height="180">
-                            <defs>
-                                <filter id="pentagram-glow">
-                                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                                    <feMerge>
-                                        <feMergeNode in="coloredBlur"/>
-                                        <feMergeNode in="SourceGraphic"/>
-                                    </feMerge>
-                                </filter>
-                            </defs>
-                            <!-- Pentagram star -->
-                            <path d="M 100 20 L 115 75 L 175 75 L 125 110 L 145 165 L 100 130 L 55 165 L 75 110 L 25 75 L 85 75 Z" 
-                                  fill="none" 
-                                  stroke="#ef4444" 
-                                  stroke-width="3" 
-                                  filter="url(#pentagram-glow)"
-                                  opacity="0.8"/>
-                            <!-- Inner circle -->
-                            <circle cx="100" cy="100" r="35" 
-                                    fill="none" 
-                                    stroke="#dc2626" 
-                                    stroke-width="2" 
-                                    opacity="0.6"/>
+                            <path d="M 100 20 L 115 75 L 175 75 L 125 110 L 145 165 L 100 130 L 55 165 L 75 110 L 25 75 L 85 75 Z"
+                                  fill="none"
+                                  stroke="${PENT_STROKE}"
+                                  stroke-width="2"
+                                  opacity="0.85"/>
+                            <circle cx="100" cy="100" r="35"
+                                    fill="none"
+                                    stroke="${PENT_STROKE}"
+                                    stroke-width="1"
+                                    opacity="0.55"/>
                         </svg>
                     </div>
                     
@@ -113,7 +105,7 @@ export class LazySusan3D {
                     --item-color: ${color};
                     transform: rotateY(${angle}deg) translateZ(150px);
                  ">
-                <div class="lazy-susan-item-content" style="background: linear-gradient(135deg, ${color}dd 0%, ${color}aa 100%);">
+                <div class="lazy-susan-item-content" style="background: ${color}; border: 1px solid ${SDR_PALETTE.border};">
                     <div class="lazy-susan-emoji">${item.emoji}</div>
                     <div class="lazy-susan-name">${item.name}</div>
                     ${item.subtitle ? `<div class="lazy-susan-subtitle">${item.subtitle}</div>` : ''}
@@ -218,7 +210,8 @@ export class LazySusan3D {
         // Update button color
         const selectBtn = document.getElementById('lazy-susan-select');
         if (selectBtn) {
-            selectBtn.style.background = `linear-gradient(135deg, ${currentItem.color}dd 0%, ${currentItem.color}aa 100%)`;
+            selectBtn.style.background = currentItem.color;
+            selectBtn.style.border = `1px solid ${SDR_PALETTE.border}`;
         }
     }
     

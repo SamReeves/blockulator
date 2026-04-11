@@ -5,24 +5,26 @@
 /* Primary Button */
 .btn-primary {
     padding: var(--md-sys-spacing-3) var(--md-sys-spacing-6);
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
+    background-color: var(--sdr-primary);
+    color: var(--sdr-text-white);
     border: none;
     border-radius: var(--md-sys-shape-corner-small);
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
     transition: all var(--md-sys-motion-duration-short);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow: none;
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    background-color: var(--sdr-primary-dark);
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-primary:active {
-    transform: translateY(0);
+    transform: none;
+    opacity: 0.92;
 }
 
 /* Secondary Button */
@@ -30,7 +32,7 @@
     padding: var(--md-sys-spacing-3) var(--md-sys-spacing-6);
     background: var(--md-sys-color-surface-variant);
     color: var(--md-sys-color-on-surface);
-    border: 2px solid var(--md-sys-color-outline);
+    border: var(--sdr-line);
     border-radius: var(--md-sys-shape-corner-small);
     font-size: 1rem;
     font-weight: 600;
@@ -88,8 +90,8 @@
 
 .btn-submit:hover {
     background: var(--md-sys-color-primary-container);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    transform: none;
+    box-shadow: none;
 }
 
 .btn-submit:disabled {
@@ -102,7 +104,7 @@
 .btn-back {
     padding: var(--md-sys-spacing-2) var(--md-sys-spacing-4);
     background: var(--md-sys-color-surface);
-    border: 2px solid var(--md-sys-color-outline);
+    border: var(--sdr-line);
     border-radius: var(--md-sys-shape-corner-small);
     color: var(--md-sys-color-on-surface);
     font-size: 0.875rem;
@@ -113,8 +115,8 @@
 
 .btn-back:hover {
     background: var(--md-sys-color-surface-container);
-    border-color: var(--md-sys-color-primary);
-    transform: translateX(-2px);
+    border-color: var(--sdr-accent);
+    transform: none;
 }
 
 /* Play Button */
@@ -196,9 +198,9 @@
 /* Splash Button */
 .btn-splash {
     padding: var(--md-sys-spacing-2) var(--md-sys-spacing-3);
-    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-    color: white;
-    border: none;
+    background-color: var(--sdr-bg-card);
+    color: var(--sdr-text);
+    border: 1px solid var(--sdr-border);
     border-radius: var(--md-sys-shape-corner-small);
     font-size: 0.875rem;
     font-weight: 500;
@@ -208,8 +210,9 @@
 }
 
 .btn-splash:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+    border-color: var(--sdr-accent);
+    color: var(--sdr-text-white);
+    box-shadow: none;
 }
 
 /* Discussion Open Button */
@@ -227,7 +230,7 @@
 
 .btn-open-discussion:hover {
     background: var(--md-sys-color-primary-container);
-    transform: translateX(2px);
+    transform: none;
 }
 
 /* Copy Buttons (inline) */
@@ -250,13 +253,13 @@
 .btn-copy-inline:hover {
     background: var(--md-sys-color-primary);
     color: var(--md-sys-color-on-primary);
-    transform: scale(1.1);
+    transform: none;
 }
 
 .btn-etherscan-inline:hover {
     background: var(--md-sys-color-secondary);
-    color: white;
-    transform: scale(1.1);
+    color: var(--sdr-text-white);
+    transform: none;
 }
 
 /* Expand/Collapse Message */
@@ -307,7 +310,8 @@
 }
 
 .btn-copy:hover {
-    transform: scale(1.2);
+    transform: none;
+    opacity: 0.85;
 }
 
 /* Game-specific Action Buttons */
@@ -315,53 +319,51 @@
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    background: linear-gradient(
-        135deg,
-        var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 0%,
-        color-mix(in srgb, var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 90%, black) 100%
-    );
-    border: none;
-    color: white;
-    border-radius: 8px;
-    font-weight: bold;
+    background: color-mix(in srgb, var(--btn-color, var(--panel-color, var(--sdr-primary))) 35%, var(--sdr-bg-card));
+    border: var(--sdr-line);
+    color: var(--sdr-text-white);
+    border-radius: var(--md-sys-shape-corner-small);
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 30%, transparent);
-    transition: all 0.2s ease;
+    box-shadow: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .btn-action:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--btn-color, var(--panel-color, var(--md-sys-color-primary))) 40%, transparent);
+    transform: none;
+    border-color: var(--sdr-accent);
+    background: color-mix(in srgb, var(--btn-color, var(--panel-color, var(--sdr-primary))) 45%, var(--sdr-bg-card));
+    box-shadow: none;
 }
 
 .btn-action:active {
-    transform: translateY(0);
+    transform: none;
+    opacity: 0.9;
 }
 
 .btn-action-secondary {
     width: 100%;
     padding: 0.75rem;
     font-size: 1rem;
-    background: linear-gradient(
-        135deg,
-        var(--btn-color, var(--md-sys-color-secondary)) 0%,
-        color-mix(in srgb, var(--btn-color, var(--md-sys-color-secondary)) 90%, black) 100%
-    );
-    border: none;
-    color: white;
-    border-radius: 8px;
-    font-weight: bold;
+    background: var(--sdr-bg-card);
+    border: var(--sdr-line);
+    color: var(--sdr-text);
+    border-radius: var(--md-sys-shape-corner-small);
+    font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 4px 12px color-mix(in srgb, var(--btn-color, var(--md-sys-color-secondary)) 30%, transparent);
-    transition: all 0.2s ease;
+    box-shadow: none;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
     margin-top: 0.75rem;
 }
 
 .btn-action-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px color-mix(in srgb, var(--btn-color, var(--md-sys-color-secondary)) 40%, transparent);
+    transform: none;
+    border-color: var(--sdr-accent);
+    background: var(--bg-hover);
+    box-shadow: none;
 }
 
 .btn-action-secondary:active {
-    transform: translateY(0);
+    transform: none;
+    opacity: 0.9;
 }

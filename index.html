@@ -407,9 +407,7 @@
                     <section class="about-section">
                         <h2>The Problem</h2>
                         <p>
-                            On-chain math libraries today force you to choose between precision, gas, and coverage.
-                            WAD libraries give you 18 decimal digits. ABDK's 64.64 format gives you 19.
-                            Most are missing common functions. None of them use the full 256-bit word the EVM gives you.
+                            Dominant Ethereum community math libraries drop precision in dangerous ways.
                         </p>
                     </section>
 
@@ -420,10 +418,7 @@
                             <div class="advantage-item">
                                 <h3>Full-Word Precision</h3>
                                 <p>
-                                    128 bits for the fraction, 127 for the integer magnitude, one sign 
-                                    bit — packed into a single <code>int256</code>. No wasted bits.  The 128 fractional bits 
-                                    give you ~38 decimal digits of precision, compared to 18 (Solady, PRBMath) 
-                                    or 19 (ABDK).
+                                    We iterate until the full 256-bit word is full of correct information.  The other guys just worry about the multiplication ceiling on uint128.
                                 </p>
                             </div>
                             <div class="advantage-item">
@@ -486,6 +481,29 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <p class="about-chart-caption">Approximate decimal digits of precision (same scale for each library).</p>
+                        <div class="about-precision-chart" role="group" aria-label="Precision by library">
+                            <div class="about-chart-row">
+                                <span class="about-chart-label">FP127</span>
+                                <div class="about-chart-track"><div class="about-chart-fill about-chart-fill--fp127"></div></div>
+                                <span class="about-chart-value">~38</span>
+                            </div>
+                            <div class="about-chart-row">
+                                <span class="about-chart-label">ABDK</span>
+                                <div class="about-chart-track"><div class="about-chart-fill about-chart-fill--abdk"></div></div>
+                                <span class="about-chart-value">~19</span>
+                            </div>
+                            <div class="about-chart-row">
+                                <span class="about-chart-label">Solady</span>
+                                <div class="about-chart-track"><div class="about-chart-fill about-chart-fill--solady"></div></div>
+                                <span class="about-chart-value">~18</span>
+                            </div>
+                            <div class="about-chart-row">
+                                <span class="about-chart-label">PRBMath</span>
+                                <div class="about-chart-track"><div class="about-chart-fill about-chart-fill--prbmath"></div></div>
+                                <span class="about-chart-value">~18</span>
+                            </div>
                         </div>
                     </section>
 

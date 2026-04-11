@@ -1,225 +1,331 @@
 /* ============================================
-   ABOUT PAGE
+   ABOUT — minimal chrome (Secure Data Research)
+   Tokens: css/variables.css (--sdr-*, --sdr-hairline-*, --sdr-particle-*)
    ============================================ */
 
 .about-content {
-    max-width: 800px;
+    max-width: min(100%, calc(38rem * 1.618));
     margin: 0 auto;
-    padding: 2rem 1.5rem;
-    font-family: 'Courier New', 'Consolas', monospace;
+    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem) 3rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+        sans-serif;
+    color: var(--sdr-text);
+    background: transparent;
 }
 
-/* Hero */
+/* Hero — type only, like SDR hero (no panel) */
 .about-hero {
     text-align: center;
-    padding: 3rem 1.5rem 2.5rem;
-    margin-bottom: 2.5rem;
-    background: #0d1f0d;
-    border: 2px solid #1a3a1a;
-    border-radius: 0.75rem;
-    position: relative;
-    overflow: hidden;
+    padding: clamp(1.5rem, 5vw, 3rem) 0 clamp(2rem, 6vw, 3.5rem);
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+    background: none;
+    border: none;
 }
 
 .about-hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, #00ff88, transparent);
+    display: none;
 }
 
 .about-hero h1 {
-    font-size: 3rem;
-    margin: 0 0 0.5rem 0;
-    color: #00ff88;
+    font-size: clamp(2rem, 6vw, 3rem);
+    margin: 0 0 0.35em 0;
+    color: var(--sdr-text-white);
     font-weight: 700;
-    letter-spacing: 4px;
-    text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
 }
 
 .hero-tagline {
-    font-size: 1.3rem;
-    color: #6dd5c4;
-    margin: 0 0 1rem 0;
-    font-weight: 600;
-    letter-spacing: 1px;
+    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: var(--sdr-text-muted);
+    margin: 0 0 0.75rem 0;
+    font-weight: 500;
+    line-height: 1.35;
 }
 
 .hero-subtitle {
-    font-size: 0.95rem;
-    color: #4a7a4a;
-    margin: 0;
-    line-height: 1.6;
+    font-size: clamp(0.875rem, 2vw, 0.95rem);
+    color: var(--sdr-link);
+    margin: 0 auto;
+    max-width: 36rem;
+    line-height: 1.65;
+    font-weight: 400;
 }
 
-/* Sections */
+/* Sections — headings as structure, no ruled boxes */
 .about-section {
-    margin-bottom: 2.5rem;
+    margin-bottom: clamp(2rem, 5vw, 2.75rem);
 }
 
 .about-section h2 {
-    font-size: 1.25rem;
-    color: #00ff88;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid #1a3a1a;
-    letter-spacing: 1px;
-    font-weight: 700;
+    font-size: var(--sdr-label-size);
+    font-weight: 600;
+    letter-spacing: var(--sdr-label-tracking);
+    text-transform: uppercase;
+    color: var(--sdr-label-color);
+    margin: 0 0 1rem 0;
+    padding: 0;
+    border: none;
 }
 
 .about-section p {
-    font-size: 0.95rem;
-    line-height: 1.8;
-    color: #aaa;
-    margin-bottom: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.75;
+    color: var(--sdr-link);
+    margin: 0 0 1rem 0;
+    max-width: 40rem;
+}
+
+.about-section p:last-child {
+    margin-bottom: 0;
 }
 
 .about-section code {
-    background: #1a1a1a;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 0.9em;
-    color: #6dd5c4;
-    border: 1px solid #333;
+    background: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    font-size: 0.92em;
+    color: var(--sdr-text-muted);
+    font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
+    font-weight: 500;
 }
 
-.about-link {
-    color: #6dd5c4;
-    text-decoration: none;
-    border-bottom: 1px solid #2a4a4a;
-    transition: all 0.15s;
-}
+/* Links: .about-link grouped with .sdr-link in utilities.css */
 
-.about-link:hover {
-    color: #00ff88;
-    border-bottom-color: #00ff88;
-}
-
-/* Advantage Cards */
+/* Advantages — stacked prose, no cards */
 .fp127-advantages {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: clamp(1.5rem, 4vw, 2rem);
+    max-width: 40rem;
 }
 
 .advantage-item {
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-left: 3px solid #00ff88;
-    border-radius: 0.5rem;
-    padding: 1.25rem 1.5rem;
+    background: none;
+    border: none;
+    border-radius: 0;
+    padding: 0;
 }
 
 .advantage-item h3 {
-    color: #6dd5c4;
+    color: var(--sdr-text-white);
     font-size: 1rem;
-    margin: 0 0 0.5rem 0;
-    font-weight: 700;
-    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin: 0 0 0.4rem 0;
+    letter-spacing: -0.01em;
 }
 
 .advantage-item p {
-    color: #999;
-    font-size: 0.875rem;
+    color: var(--sdr-link);
+    font-size: 0.9rem;
     line-height: 1.7;
     margin: 0;
+    max-width: none;
 }
 
-/* Comparison Table */
+/* Table — hairline row rhythm only, no frame */
 .comparison-table-wrap {
     overflow-x: auto;
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
+    border: none;
+    background: none;
 }
 
 .comparison-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
+    border: none;
 }
 
 .comparison-table th {
     text-align: left;
-    color: #888;
+    color: var(--sdr-label-color);
     font-weight: 600;
-    padding: 0.625rem 1rem;
-    border-bottom: 2px solid #333;
-    letter-spacing: 0.5px;
-    font-size: 0.75rem;
+    padding: 0.5rem 0 0.65rem 0;
+    font-size: max(0.6875rem, 0.75rem);
     text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border: none;
+    border-bottom: 1px solid var(--sdr-hairline-strong);
 }
 
 .comparison-table td {
-    padding: 0.625rem 1rem;
-    border-bottom: 1px solid #1a1a1a;
-    color: #999;
+    padding: 0.55rem 0;
+    border: none;
+    border-bottom: 1px solid var(--sdr-hairline-soft);
+    color: var(--sdr-link);
+    vertical-align: top;
+}
+
+.comparison-table tbody tr:last-child td {
+    border-bottom: none;
 }
 
 .comparison-table tbody tr:hover {
-    background: #111;
+    background: transparent;
+}
+
+.comparison-table tbody tr:hover td {
+    color: var(--sdr-text-muted);
 }
 
 .comparison-highlight td {
-    color: #6dd5c4;
-    background: #0d1f0d;
-    font-weight: 600;
+    color: var(--sdr-text-muted);
+    background: transparent;
+    font-weight: 500;
 }
 
 .comparison-highlight td:first-child strong {
-    color: #00ff88;
+    color: var(--sdr-text-white);
+    font-weight: 600;
 }
 
-/* Also Grid */
-.about-also {
-    margin-top: 1rem;
+/* Library precision chart — particle base corners (global tokens) */
+.about-chart-caption {
+    margin: 1.5rem 0 0.75rem 0;
+    font-size: max(0.6875rem, 0.75rem);
+    color: var(--sdr-label-color);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    max-width: 40rem;
 }
 
-.also-grid {
+.about-precision-chart {
+    max-width: 40rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.about-chart-row {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    margin-top: 0.5rem;
+    grid-template-columns: 5.25rem minmax(0, 1fr) 2.75rem;
+    gap: 0.5rem 0.65rem;
+    align-items: center;
+    margin-bottom: 0.55rem;
 }
 
-.also-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.875rem 1rem;
-    background: #111;
-    border: 1px solid #2a2a2a;
-    border-radius: 0.375rem;
-    text-decoration: none;
-    transition: all 0.15s;
-}
-
-.also-item:hover {
-    border-color: #4a7a4a;
-    background: #161616;
-}
-
-.also-item strong {
-    color: #ccc;
-    font-size: 0.875rem;
-}
-
-.also-item span {
-    color: #666;
-    font-size: 0.75rem;
-}
-
-/* Tech footer */
-.about-tech {
+.about-chart-row:last-child {
     margin-bottom: 0;
 }
 
-.about-tech p {
-    color: #555;
+.about-chart-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--sdr-text);
+    text-align: right;
+}
+
+.about-chart-track {
+    height: 10px;
+    background: var(--sdr-chart-track);
+    border-radius: 0;
+    overflow: hidden;
+}
+
+.about-chart-fill {
+    display: block;
+    height: 100%;
+    min-width: 3px;
+    transition: width 0.35s ease;
+    box-shadow: none;
+}
+
+.about-chart-fill--fp127 {
+    width: 100%;
+    background-color: var(--sdr-particle-emerald);
+}
+
+.about-chart-fill--abdk {
+    width: calc(100% * 19 / 38);
+    background-color: var(--sdr-particle-sapphire);
+}
+
+.about-chart-fill--solady {
+    width: calc(100% * 18 / 38);
+    background-color: var(--sdr-particle-gold);
+}
+
+.about-chart-fill--prbmath {
+    width: calc(100% * 18 / 38);
+    background-color: var(--sdr-particle-red);
+}
+
+.about-chart-value {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--sdr-text-muted);
+    text-align: right;
+}
+
+/* Also on — link list, no tiles */
+.about-also {
+    margin-top: 0;
+}
+
+.also-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 0.25rem;
+    max-width: 28rem;
+}
+
+.also-item {
+    display: block;
+    padding: 0.65rem 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    text-decoration: none;
+    border-bottom: 1px solid var(--sdr-hairline-soft);
+    transition: color 0.2s ease;
+}
+
+.also-item:last-child {
+    border-bottom: none;
+}
+
+.also-item:hover {
+    background: none;
+    border-color: transparent;
+}
+
+.also-item:hover strong,
+.also-item:hover span {
+    color: var(--sdr-text-white);
+}
+
+.also-item strong {
+    display: block;
+    color: var(--sdr-text);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.15rem;
+}
+
+.also-item span {
+    display: block;
+    color: var(--sdr-label-color);
     font-size: 0.8rem;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+/* Footer line of copy — no box */
+.about-tech {
+    margin-bottom: 0;
+    padding-top: clamp(1.5rem, 4vw, 2rem);
+}
+
+.about-tech p {
+    color: var(--sdr-label-color);
+    font-size: max(0.6875rem, 0.75rem);
     text-align: center;
     margin: 0;
-    padding-top: 1rem;
-    border-top: 1px solid #1a1a1a;
+    padding: 0;
+    border: none;
+    line-height: 1.5;
+    max-width: none;
 }

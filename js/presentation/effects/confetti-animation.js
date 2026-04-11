@@ -4,6 +4,7 @@
  */
 
 import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
+import { PARTICLE_BASES_HEX, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 class ConfettiParticle {
     constructor(canvas) {
@@ -19,8 +20,7 @@ class ConfettiParticle {
         this.speedX = (Math.random() - 0.5) * 1; // Slower horizontal drift
         this.opacity = 1;
         
-        // Simple color palette
-        const colors = ['#FFD700', '#FF1493', '#00CED1', '#32CD32', '#FF4500', '#9370DB'];
+        const colors = [...PARTICLE_BASES_HEX, SDR_PALETTE.textMuted, SDR_PALETTE.primary];
         this.color = colors[Math.floor(Math.random() * colors.length)];
     }
 

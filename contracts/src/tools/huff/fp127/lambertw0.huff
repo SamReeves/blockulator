@@ -245,11 +245,25 @@
 
     // W(0) = 0
     dup1 iszero lambertw0_zero jumpi
+    
+    // Shortcut guards for integer inputs 1-10 (use existing LUT values)
+    dup1 [ONE_FP127] eq sc_lw0_1 jumpi
+    dup1 [SC_IN_INT_2] eq sc_lw0_2 jumpi
+    dup1 [SC_IN_INT_3] eq sc_lw0_3 jumpi
+    dup1 [SC_IN_INT_4] eq sc_lw0_4 jumpi
+    dup1 [SC_IN_INT_5] eq sc_lw0_5 jumpi
 
     // ========== Single Path: LUT + Iteration ==========
     // All valid inputs go through LUT interpolation + FSC + IB
     LAMBERTW0_LUT_PATH()
     lambertw0_done jump
+    
+    // Shortcut landing pads
+    sc_lw0_1: pop [LAMBERTW0_W1] lambertw0_done jump
+    sc_lw0_2: pop [LAMBERTW0_W2] lambertw0_done jump
+    sc_lw0_3: pop [LAMBERTW0_W3] lambertw0_done jump
+    sc_lw0_4: pop [LAMBERTW0_W4] lambertw0_done jump
+    sc_lw0_5: pop [LAMBERTW0_W5] lambertw0_done jump
 
     lambertw0_zero:
     lambertw0_done jump

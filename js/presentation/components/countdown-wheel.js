@@ -3,6 +3,8 @@
  * A circular progress indicator showing time until next day
  */
 
+import { rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
+
 export class CountdownWheel {
     constructor(containerId, options = {}) {
         this.containerId = containerId;
@@ -31,46 +33,38 @@ export class CountdownWheel {
                 <!-- SVG Circle Progress -->
                 <svg width="180" height="180" viewBox="0 0 180 180" style="transform: rotate(-90deg);">
                     <!-- Background circle -->
-                    <circle 
-                        cx="90" 
-                        cy="90" 
-                        r="75" 
-                        fill="none" 
-                        stroke="rgba(236, 72, 153, 0.1)" 
+                    <circle
+                        cx="90"
+                        cy="90"
+                        r="75"
+                        fill="none"
+                        stroke="${rgbaFromHex(SDR_PALETTE.particleGold, 0.15)}"
                         stroke-width="8"
                     />
-                    <!-- Progress circle -->
-                    <circle 
+                    <circle
                         id="countdown-progress-circle"
-                        cx="90" 
-                        cy="90" 
-                        r="75" 
-                        fill="none" 
-                        stroke="url(#countdown-gradient)" 
+                        cx="90"
+                        cy="90"
+                        r="75"
+                        fill="none"
+                        stroke="${SDR_PALETTE.particleGold}"
                         stroke-width="8"
                         stroke-linecap="round"
                         stroke-dasharray="471.24"
                         stroke-dashoffset="471.24"
                         style="transition: stroke-dashoffset 1s linear;"
                     />
-                    <!-- Gradient definition -->
-                    <defs>
-                        <linearGradient id="countdown-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#ec4899;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#db2777;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
                 </svg>
                 
                 <!-- Center content -->
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
-                    <div id="countdown-wheel-time" style="font-size: 1.8rem; font-weight: bold; font-family: monospace; margin-bottom: 0.25rem; color: #ec4899;">
+                    <div id="countdown-wheel-time" style="font-size: 1.8rem; font-weight: bold; font-family: monospace; margin-bottom: 0.25rem; color: ${SDR_PALETTE.particleGold};">
                         --:--:--
                     </div>
                     <div id="countdown-wheel-status" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; color: var(--md-sys-color-on-surface);">
                         Until Next Day
                     </div>
-                    <div id="countdown-wheel-alert" style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: bold; color: #ef4444; display: none;">
+                    <div id="countdown-wheel-alert" style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: bold; color: ${SDR_PALETTE.particleRed}; display: none;">
                         🚨 NEW DAY!
                     </div>
                 </div>
@@ -105,13 +99,13 @@ export class CountdownWheel {
                 
                 // Color based on urgency
                 if (this.currentSeconds < 60) {
-                    timeEl.style.color = '#ef4444';
+                    timeEl.style.color = SDR_PALETTE.particleRed;
                     if (statusEl) statusEl.textContent = '⚡ STARTING NOW!';
                 } else if (this.currentSeconds < 300) {
-                    timeEl.style.color = '#f59e0b';
+                    timeEl.style.color = SDR_PALETTE.particleGold;
                     if (statusEl) statusEl.textContent = 'Get Ready!';
                 } else {
-                    timeEl.style.color = '#ec4899';
+                    timeEl.style.color = SDR_PALETTE.particleSapphire;
                     if (statusEl) statusEl.textContent = 'Until Next Day';
                 }
             }

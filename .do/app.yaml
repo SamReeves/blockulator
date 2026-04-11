@@ -4,5 +4,5 @@ static_sites:
     github:
       branch: testnet
       deploy_on_push: true
-    build_command: mkdir -p dist && cp index.html styles.css blockulator.png blockulator_favicon.png dist/ && cp -r js contracts docs dist/
+    build_command: mkdir -p dist && cp index.html blockulator.png blockulator_favicon.png dist/ && cp -r js contracts docs css dist/
     output_dir: dist

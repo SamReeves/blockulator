@@ -3,8 +3,10 @@
  * HTML template for the Pay It Backward game UI
  */
 
+import { gamePanelColor, SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 export function getTemplate(config = {}) {
-    const { panelColor = '#8b5cf6', btnColor = '#8b5cf6' } = config;
+    const { panelColor = gamePanelColor('pay-it-backward'), btnColor = gamePanelColor('pay-it-backward') } = config;
     
     return `
         <div class="game-sections" style="--panel-color: ${panelColor}; --hero-color: ${panelColor}; --btn-color: ${btnColor};">
@@ -58,21 +60,21 @@ export function getTemplate(config = {}) {
                     <span>🔄 How Pay It Backward Works</span>
                 </summary>
                 <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.85rem;">
-                    <div class="step-card" style="--step-color: #8b5cf6;">
+                    <div class="step-card" style="--step-color: ${SDR_PALETTE.particleSapphire};">
                         <div class="step-number">1</div>
                         <div class="step-content">
                             <strong>First Donor</strong>
                             <span>Pays owner (bootstrap), becomes last donor</span>
                         </div>
                     </div>
-                    <div class="step-card" style="--step-color: #ec4899;">
+                    <div class="step-card" style="--step-color: ${SDR_PALETTE.particleRed};">
                         <div class="step-number">2</div>
                         <div class="step-content">
                             <strong>Second Donor</strong>
                             <span>Pays first donor IMMEDIATELY, becomes new last donor</span>
                         </div>
                     </div>
-                    <div class="step-card" style="--step-color: #10b981;">
+                    <div class="step-card" style="--step-color: ${SDR_PALETTE.particleEmerald};">
                         <div class="step-number">∞</div>
                         <div class="step-content">
                             <strong>Chain Continues</strong>

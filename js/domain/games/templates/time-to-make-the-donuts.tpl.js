@@ -3,11 +3,13 @@
  * HTML template for the Time to Make the Donuts game UI
  */
 
+import { gamePanelColor, SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 export function getTemplate(config = {}) {
-    const { panelColor = '#ec4899', btnColor = '#ec4899' } = config;
-    
+    const { panelColor = gamePanelColor('time-to-make-the-donuts'), btnColor = gamePanelColor('time-to-make-the-donuts') } = config;
+
     return `
-        <div class="game-sections" style="--panel-color: ${panelColor}; --hero-color: #f59e0b; --btn-color: ${btnColor};">
+        <div class="game-sections" style="--panel-color: ${panelColor}; --hero-color: ${SDR_PALETTE.particleGold}; --btn-color: ${btnColor};">
             <div class="contest-info-panel game-panel">
                 <div class="flex-between" style="margin-bottom: 0.75rem;">
                     <h3 class="game-panel-header">
@@ -58,21 +60,21 @@ export function getTemplate(config = {}) {
                     <span>📖 How To Win</span>
                 </summary>
                 <div style="display: grid; gap: 0.75rem; margin-top: 0.75rem; font-size: 0.85rem;">
-                    <div class="step-card" style="--step-color: #ec4899;">
+                    <div class="step-card" style="--step-color: ${SDR_PALETTE.particleGold};">
                         <div class="step-number">1</div>
                         <div class="step-content">
                             <strong>Wait For Midnight UTC</strong>
                             <span>Each day starts at 00:00 UTC - watch the countdown closely</span>
                         </div>
                     </div>
-                    <div class="step-card" style="--step-color: #f59e0b;">
+                    <div class="step-card" style="--step-color: ${SDR_PALETTE.particleSapphire};">
                         <div class="step-number">2</div>
                         <div class="step-content">
                             <strong>Be First To Donate</strong>
                             <span>Race to submit your donation as soon as the day changes</span>
                         </div>
                     </div>
-                    <div class="step-card" style="--step-color: #10b981;">
+                    <div class="step-card" style="--step-color: ${SDR_PALETTE.particleEmerald};">
                         <div class="step-number">3</div>
                         <div class="step-content">
                             <strong>Win the Prize Pool</strong>
@@ -87,7 +89,7 @@ export function getTemplate(config = {}) {
                     <span class="collapsible-arrow">▶</span>
                     <span>📊 Stats</span>
                 </summary>
-                <div class="stat-box" style="margin-top: 0.75rem; font-size: 0.8rem; --stat-color: #ec4899;">
+                <div class="stat-box" style="margin-top: 0.75rem; font-size: 0.8rem; --stat-color: ${SDR_PALETTE.particleGold};">
                     <div class="stat-box-label">Total Days</div>
                     <div id="total-days" class="stat-box-value" style="font-size: 0.9rem;">1</div>
                 </div>

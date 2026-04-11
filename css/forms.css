@@ -5,7 +5,7 @@
 /* Form Panel (sliding panel for create forms) */
 .form-panel {
     background: var(--md-sys-color-surface-container);
-    border: 2px solid var(--md-sys-color-primary);
+    border: 1px solid var(--md-sys-color-outline);
     border-radius: var(--md-sys-shape-corner-medium);
     padding: var(--md-sys-spacing-6);
     margin-bottom: var(--md-sys-spacing-6);
@@ -128,11 +128,12 @@
 
 .form-info {
     padding: var(--md-sys-spacing-3);
-    background: rgba(99, 102, 241, 0.1);
+    background: color-mix(in srgb, var(--sdr-text-white) 4%, transparent);
     border-radius: var(--md-sys-shape-corner-small);
     margin-bottom: var(--md-sys-spacing-4);
     font-size: 0.875rem;
     line-height: 1.6;
+    border: 1px solid var(--md-sys-color-outline);
 }
 
 .form-info .warning {
@@ -294,9 +295,10 @@
 .input-group input:focus,
 .input-group textarea:focus,
 .input-group select:focus {
-    outline: none;
-    border-color: var(--md-sys-color-primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    outline: 1px solid var(--sdr-accent);
+    outline-offset: 1px;
+    border-color: var(--sdr-accent);
+    box-shadow: none;
 }
 
 /* Generic input classes */
@@ -322,7 +324,7 @@
     width: 100%;
     padding: var(--md-sys-spacing-3);
     background: var(--md-sys-color-surface);
-    border: 2px solid var(--md-sys-color-outline);
+    border: var(--sdr-line);
     border-radius: var(--md-sys-shape-corner-small);
     color: var(--md-sys-color-on-surface);
     font-size: 1rem;
@@ -352,9 +354,9 @@
 .advanced-config {
     margin-bottom: var(--md-sys-spacing-4);
     padding: var(--md-sys-spacing-4);
-    background: rgba(99, 102, 241, 0.05);
+    background: color-mix(in srgb, var(--sdr-text-white) 3%, transparent);
     border-radius: var(--md-sys-shape-corner-medium);
-    border: 2px solid rgba(99, 102, 241, 0.2);
+    border: 1px solid var(--md-sys-color-outline);
     cursor: pointer;
 }
 
@@ -378,7 +380,7 @@
 .advanced-config-content {
     margin-top: var(--md-sys-spacing-3);
     padding-top: var(--md-sys-spacing-3);
-    border-top: 1px solid rgba(99, 102, 241, 0.2);
+    border-top: 1px solid var(--md-sys-color-outline);
 }
 
 .config-grid {

@@ -6,6 +6,7 @@
 
 import { Game } from '../models/game.js';
 import { getTemplate } from './templates/last-call.tpl.js';
+import { gamePanelColor, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class LastCall extends Game {
     static metadata = {
@@ -13,7 +14,7 @@ export class LastCall extends Game {
         title: 'Last Call',
         emoji: '⏰',
         description: 'Last donor wins after timer',
-        color: '#ef4444',
+        color: gamePanelColor('last-call'),
         contract: {
             source: 'contracts/src/games/last_call.vy',
             abi: 'contracts/build/abis/last-call.json',
@@ -48,7 +49,7 @@ export class LastCall extends Game {
     getGameHTML() {
         return getTemplate({
             panelColor: this.metadata.color,
-            btnColor: '#10b981'
+            btnColor: SDR_PALETTE.particleEmerald
         });
     }
 
@@ -150,7 +151,7 @@ export class LastCall extends Game {
             winnerEl.innerHTML = '';
             if (isYou) {
                 const youLabel = document.createElement('div');
-                youLabel.style.cssText = 'color: #10b981; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;';
+                youLabel.style.cssText = `color: ${SDR_PALETTE.particleEmerald}; font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;`;
                 youLabel.textContent = '🎉 YOU ARE WINNING! 🎉';
                 winnerEl.appendChild(youLabel);
             }
@@ -180,11 +181,11 @@ export class LastCall extends Game {
             
             if (seconds === 0) {
                 timeEl.textContent = 'ENDED!';
-                timeEl.style.color = '#ef4444';
+                timeEl.style.color = SDR_PALETTE.particleRed;
                 if (labelEl) labelEl.textContent = 'Round Complete';
             } else if (!roundStarted) {
                 timeEl.textContent = 'Waiting';
-                timeEl.style.color = '#ec4899';
+                timeEl.style.color = SDR_PALETTE.particleSapphire;
                 if (labelEl) labelEl.textContent = 'For First Donation';
             } else {
                 const days = Math.floor(seconds / 86400);
@@ -201,11 +202,11 @@ export class LastCall extends Game {
                 }
                 
                 if (seconds < 3600) {
-                    timeEl.style.color = '#ef4444';
+                    timeEl.style.color = SDR_PALETTE.particleRed;
                 } else if (seconds < 86400) {
-                    timeEl.style.color = '#f59e0b';
+                    timeEl.style.color = SDR_PALETTE.particleGold;
                 } else {
-                    timeEl.style.color = '#ec4899';
+                    timeEl.style.color = SDR_PALETTE.particleSapphire;
                 }
                 
                 if (labelEl) labelEl.textContent = 'Until Round Ends';

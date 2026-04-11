@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { KingLadder } from '../../presentation/components/king-ladder.js';
 import { getTemplate } from './templates/king-of-the-hill.tpl.js';
+import { gamePanelColor, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class KingOfTheHill extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class KingOfTheHill extends Game {
         title: 'King of the Hill',
         emoji: '👑',
         description: 'Dethrone king, stakes grow',
-        color: '#8b5cf6',
+        color: gamePanelColor('king-of-the-hill'),
         contract: {
             source: 'contracts/src/games/king_of_the_hill.vy',
             abi: 'contracts/build/abis/king-of-the-hill.json',
@@ -44,7 +45,7 @@ export class KingOfTheHill extends Game {
     getGameHTML() {
         return getTemplate({
             panelColor: this.metadata.color,
-            btnColor: '#764ba2'
+            btnColor: SDR_PALETTE.particleSapphire
         });
     }
 

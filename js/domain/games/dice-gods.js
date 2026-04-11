@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { DiceThreeD } from '../../presentation/components/dice-3d.js';
 import { getTemplate } from './templates/dice-gods.tpl.js';
+import { gamePanelColor, PARTICLE_BASES_HEX, rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class DiceGods extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class DiceGods extends Game {
         title: 'Dice Gods',
         emoji: '🎲',
         description: 'Pick the least popular number',
-        color: '#8b5cf6',
+        color: gamePanelColor('dice-gods'),
         contract: {
             source: 'contracts/src/games/dice_gods.vy',
             abi: 'contracts/build/abis/dice-gods.json',
@@ -41,14 +42,15 @@ export class DiceGods extends Game {
         this.donationInput = null;
         this.dice3D = null;
         
-        this.DICE_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+        /* Four particle bases + SDR neutrals for six faces (matches DiceThreeD). */
+        this.DICE_COLORS = [...PARTICLE_BASES_HEX, SDR_PALETTE.primary, SDR_PALETTE.link];
         this.DICE_EMOJIS = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
     }
 
     getGameHTML() {
         return getTemplate({
             panelColor: this.metadata.color,
-            btnColor: '#10b981'
+            btnColor: SDR_PALETTE.particleEmerald
         });
     }
 
@@ -178,9 +180,11 @@ export class DiceGods extends Game {
             const number = typeof play.number === 'number' ? play.number : play.number.toNumber();
             const weight = 11 - playIndex;
             const isCurrentUser = this.isCurrentUser(play.player);
-            
+            const hiBg = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.12);
+            const loBg = rgbaFromHex(SDR_PALETTE.primaryDark, 0.2);
+
             return `
-                <div style="padding: 0.75rem; background: ${isCurrentUser ? 'rgba(59, 130, 246, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isCurrentUser ? '#3b82f6' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem;">
+                <div style="padding: 0.75rem; background: ${isCurrentUser ? hiBg : loBg}; border-radius: 0; border-left: 1px solid ${isCurrentUser ? SDR_PALETTE.particleEmerald : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 1.5rem;">${this.DICE_EMOJIS[number - 1]}</span>

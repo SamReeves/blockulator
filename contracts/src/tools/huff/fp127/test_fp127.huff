@@ -3,6 +3,7 @@
 /// @dev Exposes add, sub, mul, div, exp, ln, sqrt and conversion functions for testing
 
 #include "constants.huff"
+#include "shortcut_constants.huff"
 #include "primitives.huff"
 #include "arithmetic.huff"
 #include "log2.huff"

@@ -226,6 +226,65 @@ contract TranscendentalTest is FP127TestBase {
     }
 
     // ============================================================================
+    // SHORTCUT DISPATCH TESTS
+    // ============================================================================
+
+    function test_pow_cubing() public view {
+        uint256 result = fp127.pow(3e18, 3e18);
+        assertApproxEqAbs(result, 27e18, 1e12, "3^3 should be 27");
+    }
+
+    function test_pow_fourth_power() public view {
+        uint256 result = fp127.pow(2e18, 4e18);
+        assertApproxEqAbs(result, 16e18, 1e12, "2^4 should be 16");
+    }
+
+    function test_pow_negative_exponent() public view {
+        uint256 result = fp127.pow(2e18, uint256(int256(-1e18)));
+        assertApproxEqAbs(result, 0.5e18, 1e12, "2^(-1) should be 0.5");
+    }
+
+    function test_pow_quarter_exponent() public view {
+        uint256 result = fp127.pow(16e18, 0.25e18);
+        assertApproxEqAbs(result, 2e18, 1e12, "16^0.25 should be 2");
+    }
+
+    function test_pow_x_equals_2() public view {
+        uint256 result = fp127.pow(2e18, 5e18);
+        assertApproxEqAbs(result, 32e18, 1e12, "2^5 should be 32 via exp2 dispatch");
+    }
+
+    function test_pow_x_equals_10() public view {
+        uint256 result = fp127.pow(10e18, 2e18);
+        assertApproxEqAbs(result, 100e18, 1e12, "10^2 should be 100 via exp10 dispatch");
+    }
+
+    function test_log2_power_of_2() public view {
+        uint256 result = fp127.log2(8e18);
+        assertApproxEqAbs(result, 3e18, 1e12, "log2(8) should be 3");
+    }
+
+    function test_log2_power_of_2_large() public view {
+        uint256 result = fp127.log2(1024e18);
+        assertApproxEqAbs(result, 10e18, 1e12, "log2(1024) should be 10");
+    }
+
+    function test_cbrt_perfect_cube_8() public view {
+        uint256 result = fp127.cbrt(8e18);
+        assertApproxEqAbs(result, 2e18, 1e12, "cbrt(8) should be 2");
+    }
+
+    function test_cbrt_perfect_cube_27() public view {
+        uint256 result = fp127.cbrt(27e18);
+        assertApproxEqAbs(result, 3e18, 1e12, "cbrt(27) should be 3");
+    }
+
+    function test_cbrt_perfect_cube_64() public view {
+        uint256 result = fp127.cbrt(64e18);
+        assertApproxEqAbs(result, 4e18, 1e12, "cbrt(64) should be 4");
+    }
+
+    // ============================================================================
     // ROUNDTRIP TESTS
     // ============================================================================
 

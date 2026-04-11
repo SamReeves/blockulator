@@ -4,6 +4,7 @@
  */
 
 import { DOMHelpers } from '../dom/dom-helpers.js';
+import { rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class ThroneDisplay {
     constructor(containerId, options = {}) {
@@ -34,10 +35,11 @@ export class ThroneDisplay {
         return `
             <div class="throne-container" style="
                 position: relative;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border-radius: 12px;
+                background: ${SDR_PALETTE.bgCard};
+                border: 1px solid ${SDR_PALETTE.border};
+                border-radius: 0;
                 padding: 1.5rem;
-                color: white;
+                color: ${SDR_PALETTE.textWhite};
                 overflow: hidden;
                 min-height: 250px;
             ">
@@ -61,9 +63,9 @@ export class ThroneDisplay {
                     <div id="throne-king-info" style="
                         text-align: center;
                         padding: 1rem;
-                        background: rgba(255, 255, 255, 0.15);
-                        border-radius: 8px;
-                        backdrop-filter: blur(10px);
+                        background: ${rgbaFromHex(SDR_PALETTE.textMuted, 0.12)};
+                        border-radius: 0;
+                        border: 1px solid ${SDR_PALETTE.border};
                         margin-bottom: 1rem;
                     ">
                         <div style="font-size: 0.9rem; font-weight: bold; font-family: monospace; word-break: break-all;">
@@ -73,7 +75,7 @@ export class ThroneDisplay {
                     
                     <!-- Stats grid -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 0.75rem; border-radius: 6px; text-align: center;">
+                        <div style="background: ${rgbaFromHex(SDR_PALETTE.primaryDark, 0.35)}; padding: 0.75rem; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; text-align: center;">
                             <div style="font-size: 0.7rem; opacity: 0.8; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 1px;">
                                 Prize Pool
                             </div>
@@ -81,7 +83,7 @@ export class ThroneDisplay {
                                 0 wei
                             </div>
                         </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 0.75rem; border-radius: 6px; text-align: center;">
+                        <div style="background: ${rgbaFromHex(SDR_PALETTE.primaryDark, 0.35)}; padding: 0.75rem; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; text-align: center;">
                             <div style="font-size: 0.7rem; opacity: 0.8; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 1px;">
                                 Reign Time
                             </div>
@@ -103,16 +105,17 @@ export class ThroneDisplay {
                         </div>
                         <div style="
                             height: 8px;
-                            background: rgba(255, 255, 255, 0.2);
-                            border-radius: 4px;
+                            background: ${rgbaFromHex(SDR_PALETTE.link, 0.25)};
+                            border-radius: 0;
                             overflow: hidden;
+                            border: 1px solid ${SDR_PALETTE.border};
                         ">
                             <div id="throne-power-bar" style="
                                 height: 100%;
                                 width: 100%;
-                                background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+                                background: ${SDR_PALETTE.particleEmerald};
                                 transition: width 0.5s ease-out;
-                                box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+                                box-shadow: none;
                             "></div>
                         </div>
                         <div style="font-size: 0.65rem; opacity: 0.7; margin-top: 0.25rem; text-align: center;">
@@ -162,9 +165,10 @@ export class ThroneDisplay {
                 </div>
             `;
             crownEl.style.filter = 'grayscale(100%) opacity(0.5)';
+            crownEl.style.animation = 'none';
         } else {
-            const youBadge = this.isYouKing ? 
-                '<div style="background: #ffd700; color: #000; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; display: inline-block; animation: pulse 2s infinite;">YOU ARE KING!</div>' : 
+            const youBadge = this.isYouKing ?
+                `<div style="background: ${SDR_PALETTE.particleGold}; color: ${SDR_PALETTE.bgDarker}; padding: 0.25rem 0.75rem; border-radius: 0; font-size: 0.8rem; font-weight: 700; margin-top: 0.5rem; display: inline-block; border: 1px solid ${SDR_PALETTE.border}; animation: pulse 2s infinite;">YOU ARE KING!</div>` :
                 '';
             
             infoEl.innerHTML = `
@@ -174,10 +178,8 @@ export class ThroneDisplay {
                 ${youBadge}
             `;
             
-            crownEl.style.filter = this.isYouKing ? 'none' : 'hue-rotate(180deg)';
-            if (this.isYouKing) {
-                crownEl.style.animation = 'throneGlow 2s infinite';
-            }
+            crownEl.style.filter = this.isYouKing ? 'none' : 'grayscale(1) opacity(0.65)';
+            crownEl.style.animation = this.isYouKing ? 'throneGlow 2s infinite' : 'none';
         }
         
         // Update prize and reign
@@ -206,14 +208,14 @@ export class ThroneDisplay {
         
         // Change color based on power
         if (power > 70) {
-            barEl.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)';
-            barEl.style.boxShadow = '0 0 10px rgba(16, 185, 129, 0.5)';
+            barEl.style.background = SDR_PALETTE.particleEmerald;
+            barEl.style.boxShadow = 'none';
         } else if (power > 30) {
-            barEl.style.background = 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)';
-            barEl.style.boxShadow = '0 0 10px rgba(245, 158, 11, 0.5)';
+            barEl.style.background = SDR_PALETTE.particleGold;
+            barEl.style.boxShadow = 'none';
         } else {
-            barEl.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
-            barEl.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.5)';
+            barEl.style.background = SDR_PALETTE.particleRed;
+            barEl.style.boxShadow = 'none';
         }
     }
     
@@ -243,12 +245,14 @@ if (typeof document !== 'undefined') {
     style.textContent = `
         @keyframes throneGlow {
             0%, 100% {
-                filter: drop-shadow(0 0 10px #ffd700);
+                filter: none;
                 transform: scale(1);
+                opacity: 1;
             }
             50% {
-                filter: drop-shadow(0 0 20px #ffd700);
-                transform: scale(1.1);
+                filter: none;
+                transform: scale(1.05);
+                opacity: 0.92;
             }
         }
         

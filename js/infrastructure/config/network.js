@@ -39,8 +39,17 @@ const NETWORKS = {
     }
 };
 
+function readStoredNetwork() {
+    try {
+        if (typeof localStorage === 'undefined') return 'sepolia';
+        return localStorage.getItem('preferred_network') || 'sepolia';
+    } catch {
+        return 'sepolia';
+    }
+}
+
 // Current network - defaults to testnet, persisted in localStorage
-let CURRENT_NETWORK = localStorage.getItem('preferred_network') || 'sepolia';
+let CURRENT_NETWORK = readStoredNetwork();
 
 // Validate stored network
 if (!NETWORKS[CURRENT_NETWORK]) {
@@ -87,7 +96,13 @@ export function switchNetwork(network) {
     console.log(`🔄 Switching network from ${CURRENT_NETWORK} to ${network}...`);
     
     CURRENT_NETWORK = network;
-    localStorage.setItem('preferred_network', network);
+    try {
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('preferred_network', network);
+        }
+    } catch {
+        /* ignore (e.g. private mode / non-browser) */
+    }
     
     // Emit event - all components should listen and reinitialize
     eventBus.emit(EVENTS.NETWORK_CHANGED, {

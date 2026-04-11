@@ -7,6 +7,7 @@ import { eventBus, EVENTS } from '../../infrastructure/events/event-bus.js';
 import { ValueInput } from '../components/value-input.js';
 import { DOMHelpers } from '../dom/dom-helpers.js';
 import { computeCdfValue } from './distribution-cdf.js';
+import { distributionPreviewChartColors } from '../../theme/sdr-palette.js';
 
 const DISTRIBUTIONS = {
     0: 'Uniform: Constant payout rate. Linear accumulation - extract 50% at midpoint, 100% at end. Predictable.',
@@ -17,14 +18,7 @@ const DISTRIBUTIONS = {
     5: 'Linear Growth: Decelerating accumulation. Extract only ~25% by midpoint. Favors later holders.'
 };
 
-const CHART_COLORS = [
-    { border: 'rgb(54, 162, 235)',  bg: 'rgba(54, 162, 235, 0.2)',  name: 'Uniform - Constant Rate' },
-    { border: 'rgb(75, 192, 192)',  bg: 'rgba(75, 192, 192, 0.2)',  name: 'Gaussian - Bell Curve' },
-    { border: 'rgb(255, 99, 132)',  bg: 'rgba(255, 99, 132, 0.2)',  name: 'Exponential Decay' },
-    { border: 'rgb(75, 192, 75)',   bg: 'rgba(75, 192, 75, 0.2)',   name: 'Exponential Growth' },
-    { border: 'rgb(255, 159, 64)',  bg: 'rgba(255, 159, 64, 0.2)',  name: 'Linear Decay' },
-    { border: 'rgb(255, 205, 86)',  bg: 'rgba(255, 205, 86, 0.2)',  name: 'Linear Growth' }
-];
+const CHART_COLORS = distributionPreviewChartColors();
 
 const MIN_LIFETIME = 300;          // 5 minutes
 const MAX_LIFETIME = 31557600000;  // 1000 years

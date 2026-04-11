@@ -210,8 +210,7 @@ export class MasterApp {
     async initBenchmarksView() {
         console.log('📊 Initializing Benchmarks view...');
 
-        // Load Plotly.js for 3D scatter plot and Chart.js for summary table
-        await Promise.all([this.loadPlotly(), this.loadChartJs()]);
+        await this.loadPlotly();
 
         if (!this.benchmarkApp) {
             // Import and create benchmark app
@@ -302,8 +301,7 @@ export class MasterApp {
     }
 
     /**
-     * Lazy load Plotly.js library
-     * Only loaded when benchmarks view is accessed (for 3D scatter plot)
+     * Lazy load Plotly.js (2D line + scatter on benchmarks view)
      */
     async loadPlotly() {
         if (window.Plotly) {
@@ -316,7 +314,8 @@ export class MasterApp {
 
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = 'https://cdn.jsdelivr.net/npm/plotly.js-gl3d-dist-min@2.32.0/plotly-gl3d.min.js';
+            // 2D scatter + lines only; dist-min avoids gl3d bundle defaults and matches chart styling.
+            script.src = 'https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.32.0/plotly.min.js';
             script.async = true;
 
             script.onload = () => {

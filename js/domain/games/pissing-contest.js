@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { BarGraph3D } from '../../presentation/components/bar-graph-3d.js';
 import { getTemplate } from './templates/pissing-contest.tpl.js';
+import { gamePanelColor, rgbaFromHex, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class PissingContest extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class PissingContest extends Game {
         title: 'Pissing Contest',
         emoji: '💦',
         description: 'Biggest donation takes the pot',
-        color: '#3b82f6',
+        color: gamePanelColor('pissing-contest'),
         contract: {
             source: 'contracts/src/games/pissing_contest.vy',
             abi: 'contracts/build/abis/pissing-contest.json',
@@ -44,7 +45,7 @@ export class PissingContest extends Game {
     getGameHTML() {
         return getTemplate({
             panelColor: this.metadata.color,
-            btnColor: '#10b981'
+            btnColor: SDR_PALETTE.particleEmerald
         });
     }
 
@@ -222,7 +223,9 @@ export class PissingContest extends Game {
                 const isRecent = index === 0;
                 
                 const entry = document.createElement('div');
-                entry.style.cssText = `padding: 0.75rem; background: ${isRecent ? 'rgba(245, 158, 11, 0.1)' : 'rgba(139, 92, 246, 0.05)'}; border-radius: 6px; border-left: 3px solid ${isRecent ? '#f59e0b' : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem; font-size: 0.875rem;`;
+                const hi = rgbaFromHex(SDR_PALETTE.particleGold, 0.12);
+                const lo = rgbaFromHex(SDR_PALETTE.particleSapphire, 0.08);
+                entry.style.cssText = `padding: 0.75rem; background: ${isRecent ? hi : lo}; border-radius: 0; border-left: 1px solid ${isRecent ? SDR_PALETTE.particleGold : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem; font-size: 0.875rem;`;
                 
                 const flexContainer = document.createElement('div');
                 flexContainer.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;';

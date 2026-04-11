@@ -7,6 +7,7 @@
 import { Game } from '../models/game.js';
 import { LazySusan3D } from '../../presentation/components/lazy-susan-3d.js';
 import { getTemplate } from './templates/satan-moloch-baal.tpl.js';
+import { gamePanelColor, SDR_PALETTE } from '../../theme/sdr-palette.js';
 
 export class SatanMolochBaal extends Game {
     static metadata = {
@@ -14,7 +15,7 @@ export class SatanMolochBaal extends Game {
         title: 'Satan, Moloch, Baal',
         emoji: '🔥',
         description: 'Sacrifice ETH to your chosen demon',
-        color: '#ef4444',
+        color: gamePanelColor('satan-moloch-baal'),
         contract: {
             source: 'contracts/src/games/satan_moloch_baal.vy',
             abi: 'contracts/build/abis/satan-moloch-baal.json',
@@ -40,9 +41,9 @@ export class SatanMolochBaal extends Game {
         this.voteInput = null;
         this.lazySusan = null;
         this.demons = [
-            { emoji: '😈', name: 'SATAN', subtitle: 'The Adversary', color: '#ef4444', key: 'satan' },
-            { emoji: '🐂', name: 'MOLOCH', subtitle: 'The Bull God', color: '#f59e0b', key: 'moloch' },
-            { emoji: '⚡', name: 'BAAL', subtitle: 'Lord of Storms', color: '#8b5cf6', key: 'baal' }
+            { emoji: '😈', name: 'SATAN', subtitle: 'The Adversary', color: SDR_PALETTE.particleRed, key: 'satan' },
+            { emoji: '🐂', name: 'MOLOCH', subtitle: 'The Bull God', color: SDR_PALETTE.particleGold, key: 'moloch' },
+            { emoji: '⚡', name: 'BAAL', subtitle: 'Lord of Storms', color: SDR_PALETTE.particleSapphire, key: 'baal' },
         ];
     }
 

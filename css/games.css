@@ -41,8 +41,8 @@
 .dice-button {
     aspect-ratio: 1;
     background: var(--md-sys-color-surface-variant);
-    border: 2px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-medium);
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-none);
     font-size: 2rem;
     cursor: pointer;
     transition: all var(--md-sys-motion-duration-short);
@@ -52,27 +52,30 @@
 }
 
 .dice-button:hover {
-    border-color: var(--md-sys-color-primary);
+    border-color: var(--sdr-accent);
     background: var(--md-sys-color-surface-container);
-    transform: scale(1.05);
+    transform: none;
 }
 
 .dice-button.selected {
-    border-color: var(--md-sys-color-primary);
-    background: rgba(37, 99, 235, 0.15);
-    box-shadow: 0 0 12px rgba(37, 99, 235, 0.3);
+    border-color: var(--sdr-accent);
+    background: color-mix(in srgb, var(--sdr-text-white) 4%, transparent);
+    box-shadow: none;
 }
 
 /* Game Card Base */
 .game-card, .tool-card {
     padding: var(--md-sys-spacing-4);
-    border-radius: var(--md-sys-shape-corner-medium);
-    border: 2px solid transparent;
+    border-radius: var(--md-sys-shape-corner-none);
+    border: var(--sdr-line);
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-emphasized);
+    transition: border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+        background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
     position: relative;
     overflow: hidden;
-    color: white;
+    color: var(--md-sys-color-on-surface);
+    background: var(--sdr-panel);
+    box-shadow: none;
 }
 
 .game-card::before, .tool-card::before {
@@ -82,21 +85,22 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at top right, rgba(255,255,255,0.15) 0%, transparent 60%);
+    background: color-mix(in srgb, var(--sdr-text-muted) 8%, transparent);
     opacity: 0;
     transition: opacity 0.4s ease, transform 0.4s ease;
     pointer-events: none;
 }
 
 .game-card:hover, .tool-card:hover {
-    border-color: var(--md-sys-color-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    border-color: var(--sdr-accent);
+    background: var(--md-sys-color-outline-variant);
+    transform: none;
+    box-shadow: none;
 }
 
 .game-card:hover::before, .tool-card:hover::before {
-    opacity: 0.15;
-    transform: scale(1.1);
+    opacity: 0.08;
+    transform: none;
 }
 
 .game-card h3, .tool-card h3 {
@@ -111,52 +115,6 @@
     margin: 0;
 }
 
-/* Individual gradients for each game */
-.game-card[data-game="pissing-contest"] {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    border-color: #3b82f6;
-}
-
-.game-card[data-game="pay-it-forward"] {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border-color: #10b981;
-}
-
-.game-card[data-game="pay-it-backward"] {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    border-color: #f59e0b;
-}
-
-.game-card[data-game="message-board"] {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border-color: #3b82f6;
-}
-
-.game-card[data-game="king-of-the-hill"] {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-}
-
-.game-card[data-game="last-call"] {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    border-color: #ef4444;
-}
-
-.game-card[data-game="time-to-make-the-donuts"] {
-    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-    border-color: #ec4899;
-}
-
-.game-card[data-game="dice-gods"] {
-    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-    border-color: #a855f7;
-}
-
-.game-card[data-game="satan-moloch-baal"] {
-    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
-    border-color: #ef4444;
-}
-
 /* Temporary component classes */
 .game-interface, .game-controls, .game-sections,
 .info-panel, .contest-info-panel, .info-grid,
@@ -164,8 +122,10 @@
 .play-history, .simulation-panel, .voting-interface,
 .vote-distribution-panel, .calculator-controls {
     background: var(--md-sys-color-surface-variant);
-    border-radius: var(--md-sys-shape-corner-medium);
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-none);
     padding: var(--md-sys-spacing-4);
+    box-shadow: none;
 }
 
 .game-sections {
@@ -177,14 +137,16 @@
 }
 
 .contest-info-panel {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: none;
+    border: var(--sdr-line);
+    transition: border-color 0.2s ease;
     overflow: visible !important;
 }
 
 .contest-info-panel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: none;
+    border-color: var(--sdr-accent);
+    box-shadow: none;
 }
 
 /* Game Panel Components */
@@ -196,14 +158,11 @@
 }
 
 .game-panel {
-    border: 2px solid var(--panel-color, var(--md-sys-color-primary));
-    background: linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--panel-color, var(--md-sys-color-primary)) 10%, transparent) 0%,
-        color-mix(in srgb, var(--panel-color, var(--md-sys-color-primary)) 5%, transparent) 100%
-    );
+    border: var(--sdr-line);
+    border-left: 1px solid var(--panel-color, var(--sdr-accent));
+    background: var(--sdr-bg-dark);
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: var(--md-sys-shape-corner-none);
 }
 
 .game-panel-header {
@@ -236,8 +195,9 @@
 /* Stat Box Components */
 .stat-box {
     padding: 0.5rem;
-    background: color-mix(in srgb, var(--stat-color, var(--panel-color, var(--md-sys-color-primary))) 10%, transparent);
-    border-radius: 6px;
+    background: var(--sdr-bg-darker);
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-none);
     font-size: 0.75rem;
 }
 
@@ -254,14 +214,12 @@
 
 /* Hero Card (Current Leader/Winner Display) */
 .hero-card {
-    color: white;
+    color: var(--md-sys-color-on-surface);
     padding: 1rem;
-    border-radius: 8px;
-    background: linear-gradient(
-        135deg,
-        var(--hero-color, var(--panel-color, var(--md-sys-color-primary))) 0%,
-        color-mix(in srgb, var(--hero-color, var(--panel-color, var(--md-sys-color-primary))) 90%, black) 100%
-    );
+    border-radius: var(--md-sys-shape-corner-none);
+    border: var(--sdr-line);
+    border-left: 1px solid var(--hero-color, var(--panel-color, var(--sdr-accent)));
+    background: var(--sdr-panel);
 }
 
 .hero-card-label {
@@ -324,9 +282,10 @@ details[open] .collapsible-arrow {
     display: flex;
     gap: 0.75rem;
     padding: 0.75rem;
-    border-radius: 6px;
-    border-left: 3px solid var(--step-color, var(--panel-color, var(--md-sys-color-primary)));
-    background: color-mix(in srgb, var(--step-color, var(--panel-color, var(--md-sys-color-primary))) 5%, transparent);
+    border-radius: var(--md-sys-shape-corner-none);
+    border: var(--sdr-line);
+    border-left: 1px solid var(--step-color, var(--panel-color, var(--sdr-accent)));
+    background: var(--sdr-bg-dark);
 }
 
 .step-content strong {
@@ -343,9 +302,10 @@ details[open] .collapsible-arrow {
 /* Strategy Callout */
 .strategy-callout {
     padding: 0.75rem;
-    background: color-mix(in srgb, var(--panel-color, var(--md-sys-color-primary)) 10%, transparent);
-    border-radius: 8px;
-    border-left: 3px solid var(--panel-color, var(--md-sys-color-primary));
+    background: var(--sdr-bg-dark);
+    border-radius: var(--md-sys-shape-corner-none);
+    border: var(--sdr-line);
+    border-left: 1px solid var(--panel-color, var(--sdr-accent));
     font-size: 0.85rem;
     margin-top: 1rem;
 }
@@ -363,19 +323,16 @@ details[open] .collapsible-arrow {
 
 /* Admin Panel Utilities */
 .admin-panel {
-    border: 2px solid #ef4444;
-    background: linear-gradient(
-        135deg,
-        rgba(239, 68, 68, 0.1) 0%,
-        rgba(220, 38, 38, 0.1) 100%
-    );
+    border: 1px solid color-mix(in srgb, var(--sdr-particle-red) 55%, transparent);
+    background: color-mix(in srgb, var(--sdr-particle-red) 8%, transparent);
+    border-radius: var(--md-sys-shape-corner-none);
 }
 
 .admin-panel-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #ef4444;
+    color: var(--sdr-particle-red);
     margin: 0;
     font-size: 0.95rem;
 }
@@ -401,7 +358,7 @@ details[open] .collapsible-arrow {
 .countdown-time {
     font-size: 2rem;
     font-weight: bold;
-    color: var(--countdown-color, #ec4899);
+    color: var(--countdown-color, var(--sdr-particle-red));
     font-family: monospace;
 }
 
@@ -421,16 +378,17 @@ details[open] .collapsible-arrow {
 
 .demon-card {
     background: var(--md-sys-color-surface-container);
-    border: 2px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-medium);
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-none);
     padding: var(--md-sys-spacing-6);
     text-align: center;
-    transition: all var(--md-sys-motion-duration-medium);
+    transition: border-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    box-shadow: none;
 }
 
 .demon-card.leading {
     border-color: var(--md-sys-color-warning);
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    box-shadow: none;
 }
 
 .demon-name {
@@ -454,88 +412,18 @@ details[open] .collapsible-arrow {
 .btn-demon {
     padding: var(--md-sys-spacing-6);
     background: var(--md-sys-color-surface-variant);
-    border: 2px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-medium);
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-none);
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-medium);
+    transition: border-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
     font-size: 1rem;
     font-weight: 600;
 }
 
 .btn-demon:hover {
     border-color: var(--md-sys-color-error);
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
-}
-
-/* Game card hover effects */
-.game-card:hover, .tool-card:hover {
-    border-color: var(--md-sys-color-primary);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-}
-
-.game-card:hover::before, .tool-card:hover::before {
-    opacity: 0.15;
-    transform: scale(1.1);
-}
-
-.game-card h3, .tool-card h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin-bottom: var(--md-sys-spacing-1);
-}
-
-.game-card p, .tool-card p {
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: 0.875rem;
-    margin: 0;
-}
-
-/* Individual game card gradients */
-.game-card[data-game="pissing-contest"] {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-    border-color: #3b82f6;
-}
-
-.game-card[data-game="pay-it-forward"] {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    border-color: #10b981;
-}
-
-.game-card[data-game="pay-it-backward"] {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    border-color: #f59e0b;
-}
-
-.game-card[data-game="message-board"] {
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border-color: #3b82f6;
-}
-
-.game-card[data-game="king-of-the-hill"] {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
-}
-
-.game-card[data-game="last-call"] {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    border-color: #ef4444;
-}
-
-.game-card[data-game="time-to-make-the-donuts"] {
-    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-    border-color: #ec4899;
-}
-
-.game-card[data-game="dice-gods"] {
-    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-    border-color: #a855f7;
-}
-
-.game-card[data-game="satan-moloch-baal"] {
-    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
-    border-color: #ef4444;
+    transform: none;
+    box-shadow: none;
 }
 
 /* ============================================
@@ -556,10 +444,10 @@ details[open] .collapsible-arrow {
 
 .status-card {
     background: var(--md-sys-color-surface-container);
-    border: 2px solid var(--md-sys-color-outline);
-    border-radius: 12px;
+    border: var(--sdr-line);
+    border-radius: var(--md-sys-shape-corner-none);
     padding: 1rem 1.25rem;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -585,38 +473,20 @@ details[open] .collapsible-arrow {
 }
 
 .status-card-clickable:focus {
-    outline: 2px solid var(--md-sys-color-primary);
-    outline-offset: 2px;
-}
-
-.status-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg,
-        var(--md-sys-color-primary) 0%,
-        transparent 100%);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    z-index: 0;
+    outline: 1px solid var(--sdr-accent);
+    outline-offset: 1px;
 }
 
 .status-card-clickable:hover {
-    border-color: var(--md-sys-color-primary);
-    transform: translateX(4px);
-    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
-}
-
-.status-card-clickable:hover::before {
-    opacity: 0.1;
+    border-color: var(--sdr-accent);
+    background: var(--sdr-bg-card);
+    transform: none;
+    box-shadow: none;
 }
 
 .status-card-clickable:hover .status-card-bg-emoji {
-    opacity: 0.12;
-    transform: translateY(-50%) scale(1.05);
+    opacity: 0.1;
+    transform: translateY(-50%);
 }
 
 .status-card-header {
@@ -682,77 +552,4 @@ details[open] .collapsible-arrow {
 .status-details {
     color: var(--md-sys-color-on-surface-variant);
     font-weight: 400;
-}
-
-/* Game-specific status card gradients */
-.status-card[data-game="pissing-contest"] {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
-    border-color: rgba(59, 130, 246, 0.5);
-}
-.status-card[data-game="pissing-contest"]::before {
-    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-}
-
-.status-card[data-game="pay-it-forward"] {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
-    border-color: rgba(16, 185, 129, 0.5);
-}
-.status-card[data-game="pay-it-forward"]::before {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-}
-
-.status-card[data-game="pay-it-backward"] {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.15) 100%);
-    border-color: rgba(139, 92, 246, 0.5);
-}
-.status-card[data-game="pay-it-backward"]::before {
-    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-}
-
-.status-card[data-game="message-board"] {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(8, 145, 178, 0.15) 100%);
-    border-color: rgba(14, 165, 233, 0.5);
-}
-.status-card[data-game="message-board"]::before {
-    background: linear-gradient(135deg, #0ea5e9 0%, #0891b2 100%);
-}
-
-.status-card[data-game="king-of-the-hill"] {
-    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
-    border-color: rgba(251, 191, 36, 0.5);
-}
-.status-card[data-game="king-of-the-hill"]::before {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-}
-
-.status-card[data-game="last-call"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.15) 100%);
-    border-color: rgba(239, 68, 68, 0.5);
-}
-.status-card[data-game="last-call"]::before {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-}
-
-.status-card[data-game="time-to-make-the-donuts"] {
-    background: linear-gradient(135deg, rgba(236, 72, 153, 0.15) 0%, rgba(219, 39, 119, 0.15) 100%);
-    border-color: rgba(236, 72, 153, 0.5);
-}
-.status-card[data-game="time-to-make-the-donuts"]::before {
-    background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-}
-
-.status-card[data-game="dice-gods"] {
-    background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
-    border-color: rgba(168, 85, 247, 0.5);
-}
-.status-card[data-game="dice-gods"]::before {
-    background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-}
-
-.status-card[data-game="satan-moloch-baal"] {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(153, 27, 27, 0.15) 100%);
-    border-color: rgba(239, 68, 68, 0.5);
-}
-.status-card[data-game="satan-moloch-baal"]::before {
-    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
 }

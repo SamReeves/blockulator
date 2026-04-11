@@ -140,6 +140,12 @@
     dup1 IS_NEGATIVE() log2_zero jumpi
     dup1 [ONE_FP127] eq log2_one jumpi
     
+    // Fast path: check if x is a power of 2 (x & (x-1) == 0)
+    // For powers of 2, log2 is exact: just (msb - 128) << 128
+    dup1 dup1 0x01 swap1 sub   // [x-1, x, x]
+    and                        // [x & (x-1), x]
+    iszero log2_pow2 jumpi     // Jump if power of 2
+    
     // Find MSB
     dup1                       // [x, x]
     MSB()                      // [msb, x]
@@ -177,6 +183,13 @@
     
     log2_zero:
     pop 0x00
+    log2_end jump
+    
+    log2_pow2:
+    // x is a power of 2: log2(x) = msb - 128 (exact)
+    MSB()                      // [msb]
+    [FP127_SHIFT] swap1 sub    // [msb - 128]
+    [FP127_SHIFT] shl          // [(msb - 128) << 128] = result in FP127
     
     log2_end:
 }

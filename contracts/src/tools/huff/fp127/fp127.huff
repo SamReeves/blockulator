@@ -3,6 +3,7 @@
 /// @dev Exposes both Fixed18 (WAD) and Raw interfaces for maximum flexibility
 
 #include "constants.huff"
+#include "shortcut_constants.huff"
 #include "primitives.huff"
 #include "arithmetic.huff"
 #include "log2.huff"

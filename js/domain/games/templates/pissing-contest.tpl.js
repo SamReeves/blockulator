@@ -3,8 +3,10 @@
  * HTML template for the Pissing Contest game UI
  */
 
+import { gamePanelColor, SDR_PALETTE } from '../../../theme/sdr-palette.js';
+
 export function getTemplate(config = {}) {
-    const { panelColor = '#3b82f6', btnColor = '#10b981' } = config;
+    const { panelColor = gamePanelColor('pissing-contest'), btnColor = SDR_PALETTE.particleEmerald } = config;
     
     return `
         <div class="game-sections" style="--panel-color: ${panelColor}; --hero-color: ${panelColor}; --btn-color: ${btnColor};">
@@ -34,15 +36,15 @@ export function getTemplate(config = {}) {
                         </button>
                         
                         <div class="stat-grid-3" style="margin-top: 0.75rem;">
-                            <div class="stat-box" style="--stat-color: #10b981;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleEmerald};">
                                 <div class="stat-box-label">Your Donation</div>
                                 <div id="your-donation" class="stat-box-value">0 wei</div>
                             </div>
-                            <div class="stat-box" style="--stat-color: #fbbf24;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleGold};">
                                 <div class="stat-box-label">Status</div>
                                 <div id="your-status" class="stat-box-value">Not playing</div>
                             </div>
-                            <div class="stat-box" style="--stat-color: #f59e0b;">
+                            <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleGold};">
                                 <div class="stat-box-label">Minimum</div>
                                 <div id="min-donation" class="stat-box-value">-</div>
                             </div>
@@ -64,7 +66,7 @@ export function getTemplate(config = {}) {
                     <span>⚙️</span>
                     <span>Admin</span>
                 </h3>
-                <div class="stat-grid-3" style="margin: 0.75rem 0; font-size: 0.75rem; --stat-color: #ef4444;">
+                <div class="stat-grid-3" style="margin: 0.75rem 0; font-size: 0.75rem; --stat-color: ${SDR_PALETTE.particleRed};">
                     <div class="stat-box">
                         <div class="stat-box-label">Status</div>
                         <div id="contract-paused" class="stat-box-value">No</div>
@@ -90,19 +92,19 @@ export function getTemplate(config = {}) {
                     <span>📈 Your Stats</span>
                 </summary>
                 <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.8rem;">
-                    <div class="stat-box" style="--stat-color: #ec4899;">
+                    <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleSapphire};">
                         <div class="stat-box-label">Lifetime Donated</div>
                         <div id="lifetime-donated" class="stat-box-value">0 wei</div>
                     </div>
-                    <div class="stat-box" style="--stat-color: #ec4899;">
+                    <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleSapphire};">
                         <div class="stat-box-label">Lifetime Won</div>
                         <div id="lifetime-won" class="stat-box-value">0 wei</div>
                     </div>
-                    <div class="stat-box" style="--stat-color: #fbbf24;">
+                    <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleGold};">
                         <div class="stat-box-label">Rounds Won</div>
                         <div id="rounds-won" class="stat-box-value">0</div>
                     </div>
-                    <div class="stat-box" style="--stat-color: #fbbf24;">
+                    <div class="stat-box" style="--stat-color: ${SDR_PALETTE.particleGold};">
                         <div class="stat-box-label">Rounds Played</div>
                         <div id="rounds-participated" class="stat-box-value">0</div>
                     </div>
@@ -126,7 +128,7 @@ export function getTemplate(config = {}) {
                     <span class="collapsible-arrow">▶</span>
                     <span>🌍 Global Stats</span>
                 </summary>
-                <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.8rem; --stat-color: #10b981;">
+                <div class="stat-grid" style="margin-top: 0.75rem; font-size: 0.8rem; --stat-color: ${SDR_PALETTE.particleEmerald};">
                     <div class="stat-box">
                         <div class="stat-box-label">Total Rounds</div>
                         <div id="total-rounds" class="stat-box-value">0</div>
@@ -136,7 +138,7 @@ export function getTemplate(config = {}) {
                         <div id="total-donated" class="stat-box-value">0 wei</div>
                     </div>
                 </div>
-                <div class="stat-box" style="margin-top: 0.5rem; font-size: 0.8rem; --stat-color: #10b981;">
+                <div class="stat-box" style="margin-top: 0.5rem; font-size: 0.8rem; --stat-color: ${SDR_PALETTE.particleEmerald};">
                     <div class="stat-box-label">All-Time Record</div>
                     <div id="highest-donation" class="stat-box-value" style="margin-bottom: 0.25rem;">0 wei</div>
                     <div style="font-size: 0.75rem; opacity: 0.8;">
