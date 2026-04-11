@@ -8,14 +8,14 @@
 .vote-distribution-panel, .calculator-controls {
     background: var(--sdr-panel);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-none);
-    padding: var(--md-sys-spacing-4);
+    border-radius: 0;
+    padding: var(--sdr-space-2);
     box-shadow: none;
 }
 
 /* Histogram Visualizations */
 .histogram-container {
-    margin-top: var(--md-sys-spacing-4);
+    margin-top: var(--sdr-space-2);
 }
 
 .histogram-chart {
@@ -23,9 +23,9 @@
     align-items: flex-end;
     gap: 4px;
     height: 200px;
-    padding: var(--md-sys-spacing-4);
-    background: var(--md-sys-color-surface-variant);
-    border-radius: var(--md-sys-shape-corner-medium);
+    padding: var(--sdr-space-2);
+    background: var(--sdr-bg-dark);
+    border-radius: 0;
 }
 
 .histogram-bar-container {
@@ -38,50 +38,50 @@
 
 .histogram-bar {
     width: 100%;
-    background: var(--md-sys-color-primary);
+    background: var(--sdr-primary);
     border-radius: 0;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .histogram-bar-container:hover .histogram-bar {
-    background: var(--md-sys-color-primary-container);
+    background: var(--sdr-secondary);
 }
 
 .bar-count {
     font-size: 0.75rem;
-    color: var(--md-sys-color-outline);
+    color: var(--sdr-border);
 }
 
 .bar-label {
     font-size: 0.7rem;
-    color: var(--md-sys-color-outline);
+    color: var(--sdr-border);
 }
 
 /* Median Visual */
 .median-visual {
-    margin-top: var(--md-sys-spacing-4);
+    margin-top: var(--sdr-space-2);
 }
 
 .visual-section {
     display: flex;
-    gap: var(--md-sys-spacing-3);
-    margin-bottom: var(--md-sys-spacing-2);
+    gap: var(--sdr-space-1);
+    margin-bottom: 0.5rem;
 }
 
 .winning-section {
-    background: color-mix(in srgb, var(--md-sys-color-success) 8%, transparent);
-    padding: var(--md-sys-spacing-3);
-    border-radius: var(--md-sys-shape-corner-small);
+    background: color-mix(in srgb, var(--sdr-success) 8%, transparent);
+    padding: var(--sdr-space-1);
+    border-radius: 0;
     flex: 1;
-    border: 1px solid color-mix(in srgb, var(--md-sys-color-success) 25%, transparent);
+    border: 1px solid color-mix(in srgb, var(--sdr-success) 25%, transparent);
 }
 
 .losing-section {
-    background: color-mix(in srgb, var(--md-sys-color-error) 8%, transparent);
-    padding: var(--md-sys-spacing-3);
-    border-radius: var(--md-sys-shape-corner-small);
+    background: color-mix(in srgb, var(--sdr-error) 8%, transparent);
+    padding: var(--sdr-space-1);
+    border-radius: 0;
     flex: 1;
-    border: 1px solid color-mix(in srgb, var(--md-sys-color-error) 25%, transparent);
+    border: 1px solid color-mix(in srgb, var(--sdr-error) 25%, transparent);
 }
 
 .section-label {
@@ -92,21 +92,21 @@
 
 .median-line {
     height: 1px;
-    background: var(--md-sys-color-warning);
-    margin: var(--md-sys-spacing-3) 0;
+    background: var(--sdr-warning);
+    margin: var(--sdr-space-1) 0;
 }
 
 /* Number Line Visualization */
 .number-line {
-    margin-top: var(--md-sys-spacing-4);
+    margin-top: var(--sdr-space-2);
 }
 
 .number-line-track {
     position: relative;
     height: 40px;
-    background: var(--md-sys-color-surface-variant);
-    border-radius: var(--md-sys-shape-corner-small);
-    margin: var(--md-sys-spacing-4) 0;
+    background: var(--sdr-bg-dark);
+    border-radius: 0;
+    margin: var(--sdr-space-2) 0;
 }
 
 .number-line-marker {

@@ -1,42 +1,78 @@
 /**
- * SDR-aligned design tokens (JS).
- * Mirrors `css/variables.css` :root; keep hex values identical.
- * When securedataresearch packages branding, swap this module for their export.
+ * Blockulator palette — SDR design tokens + particle palette.
+ * Vendor copies under vendor/sdr/lib/ (run scripts/sync-sdr.sh to refresh from upstream).
  */
 
-export const SDR_PALETTE = {
-    bgDarker: '#000000',
-    bgDark: '#0a0a0a',
-    bgCard: '#171717',
-    border: '#262626',
-    text: '#e5e5e5',
-    textMuted: '#a3a3a3',
-    textWhite: '#f5f5f5',
-    primary: '#737373',
-    primaryDark: '#525252',
-    accent: '#a3a3a3',
-    link: '#a8a8a8',
+import { colors } from '../../vendor/sdr/lib/tokens.js';
+import { palette } from '../../vendor/sdr/lib/particles/palette.js';
+
+const EXTRA = {
     outlineVariant: '#1a1a1a',
-    /** Positive UI — banked Pantone 341 C (same hue as particleEmerald; not neon) */
-    success: '#00694e',
     error: '#ef4444',
     warning: '#f59e0b',
-    /** `_palette[0]` Pantone 341 C */
-    particleEmerald: '#00694e',
-    /** `_palette[8]` Pantone 185 C */
-    particleRed: '#e4002b',
-    /** `_palette[11]` */
-    particleGold: '#a09860',
-    /** `_palette[15]` */
-    particleSapphire: '#4070a0',
     chartTrack: 'rgba(255, 255, 255, 0.14)',
-    /** Sprite clear / eraser — mirrors --sdr-pixel-paper */
     pixelPaper: '#ffffff',
 };
 
 /**
+ * @param {string} hex - "#RRGGBB"
+ * @param {number} alpha - 0..1
+ * @returns {string} rgba(...)
+ */
+export function rgbaFromHex(hex, alpha) {
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
+
+/**
+ * Lerp two #RRGGBB colors (t = 0 → fg, t = 1 → bg). For calmer chart ink on dark fields.
+ */
+export function blendHex(fg, bg, t) {
+    const h = (x) => x.replace('#', '');
+    const pa = h(fg);
+    const pb = h(bg);
+    const ar = parseInt(pa.slice(0, 2), 16);
+    const ag = parseInt(pa.slice(2, 4), 16);
+    const ab = parseInt(pa.slice(4, 6), 16);
+    const br = parseInt(pb.slice(0, 2), 16);
+    const bg_ = parseInt(pb.slice(2, 4), 16);
+    const bb = parseInt(pb.slice(4, 6), 16);
+    const u = Math.min(1, Math.max(0, t));
+    const r = Math.round(ar + (br - ar) * u);
+    const g = Math.round(ag + (bg_ - ag) * u);
+    const b = Math.round(ab + (bb - ab) * u);
+    return `#${[r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')}`;
+}
+
+export const SDR_PALETTE = {
+    bgDarker: colors.bgDarker,
+    bgDark: colors.bgDark,
+    bgCard: colors.bgCard,
+    border: colors.border,
+    text: colors.textDark,
+    textMuted: colors.textLight,
+    textWhite: colors.textWhite,
+    primary: colors.primary,
+    secondary: colors.secondary,
+    accent: colors.accent,
+    link: colors.link,
+    outlineVariant: EXTRA.outlineVariant,
+    success: palette[0],
+    error: EXTRA.error,
+    warning: EXTRA.warning,
+    particleEmerald: palette[0],
+    particleRed: palette[8],
+    particleGold: palette[11],
+    particleSapphire: palette[15],
+    chartTrack: EXTRA.chartTrack,
+    pixelPaper: EXTRA.pixelPaper,
+};
+
+/**
  * Ordered particle bases (same sequence as frame.js indices 0, 8, 11, 15).
- * Use for cycling series colors (bars, dice faces, distribution previews).
  */
 export const PARTICLE_BASES_HEX = [
     SDR_PALETTE.particleEmerald,
@@ -55,7 +91,6 @@ export function particleHexAt(index) {
 
 /**
  * Library trace colors — identical mapping to About precision chart.
- * FP127 → emerald, ABDK → sapphire, Solady → gold, PRBMath → red.
  */
 export const LIBRARY_TRACE_COLORS = {
     fp127: SDR_PALETTE.particleEmerald,
@@ -68,8 +103,7 @@ export const LIBRARY_TRACE_COLORS = {
 export const CHART_THEME = {
     fontColor: SDR_PALETTE.textMuted,
     gridColor: SDR_PALETTE.outlineVariant,
-    /** Major grid / log ticks — hairline on black, not full #262626 */
-    gridColorMinor: 'rgba(163, 163, 163, 0.14)',
+    gridColorMinor: rgbaFromHex(SDR_PALETTE.textMuted, 0.14),
     zeroLine: SDR_PALETTE.border,
 };
 
@@ -95,43 +129,6 @@ export const GAME_PANEL_COLOR_HEX = {
  */
 export function gamePanelColor(gameId) {
     return GAME_PANEL_COLOR_HEX[gameId] ?? SDR_PALETTE.particleSapphire;
-}
-
-/**
- * @param {string} hex - "#RRGGBB"
- * @param {number} alpha - 0..1
- * @returns {string} rgba(...)
- */
-export function rgbaFromHex(hex, alpha) {
-    const h = hex.replace('#', '');
-    const r = parseInt(h.slice(0, 2), 16);
-    const g = parseInt(h.slice(2, 4), 16);
-    const b = parseInt(h.slice(4, 6), 16);
-    return `rgba(${r},${g},${b},${alpha})`;
-}
-
-/**
- * Lerp two #RRGGBB colors (t = 0 → fg, t = 1 → bg). For calmer chart ink on dark fields.
- * @param {string} fg
- * @param {string} bg
- * @param {number} t
- * @returns {string}
- */
-export function blendHex(fg, bg, t) {
-    const h = (x) => x.replace('#', '');
-    const pa = h(fg);
-    const pb = h(bg);
-    const ar = parseInt(pa.slice(0, 2), 16);
-    const ag = parseInt(pa.slice(2, 4), 16);
-    const ab = parseInt(pa.slice(4, 6), 16);
-    const br = parseInt(pb.slice(0, 2), 16);
-    const bg_ = parseInt(pb.slice(2, 4), 16);
-    const bb = parseInt(pb.slice(4, 6), 16);
-    const u = Math.min(1, Math.max(0, t));
-    const r = Math.round(ar + (br - ar) * u);
-    const g = Math.round(ag + (bg_ - ag) * u);
-    const b = Math.round(ab + (bb - ab) * u);
-    return `#${[r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')}`;
 }
 
 const DISTRIBUTION_CHART_NAMES = [

@@ -37,7 +37,7 @@ export class MessageFeed {
                 position: relative;
             ">
                 <div id="message-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
-                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.7;">
+                    <div style="text-align: center; padding: 2rem; color: var(--sdr-text-light); opacity: 0.7;">
                         💬 Loading messages...
                     </div>
                 </div>
@@ -81,7 +81,7 @@ export class MessageFeed {
         
         if (this.messages.length === 0) {
             listEl.innerHTML = `
-                <div style="text-align: center; padding: 3rem 1rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.7;">
+                <div style="text-align: center; padding: 3rem 1rem; color: var(--sdr-text-light); opacity: 0.7;">
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">💬</div>
                     <div style="font-size: 0.9rem;">No messages yet</div>
                     <div style="font-size: 0.8rem; margin-top: 0.25rem;">Be the first to post!</div>
@@ -140,12 +140,12 @@ export class MessageFeed {
                                 ${DOMHelpers.formatAddress(msg.poster)}
                                 ${youBadge}
                             </div>
-                            <div style="font-size: 0.65rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.8;">
+                            <div style="font-size: 0.65rem; color: var(--sdr-text-light); opacity: 0.8;">
                                 ${this.formatTimestamp(msg.timestamp)}
                             </div>
                         </div>
                     </div>
-                    <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.7;">
+                    <div style="font-size: 0.7rem; color: var(--sdr-text-light); opacity: 0.7;">
                         ${this.formatAmount(msg.amount)}
                     </div>
                 </div>
@@ -154,7 +154,7 @@ export class MessageFeed {
                 <div style="
                     font-size: 0.9rem;
                     line-height: 1.5;
-                    color: var(--md-sys-color-on-surface);
+                    color: var(--sdr-text-dark);
                     word-wrap: break-word;
                     padding-left: 2.5rem;
                 ">

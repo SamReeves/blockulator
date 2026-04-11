@@ -73,7 +73,7 @@ export class BarGraph3D {
                 margin-top: 0.5rem;
                 padding: 0 1rem;
                 font-size: 0.75rem;
-                color: var(--md-sys-color-on-surface-variant);
+                color: var(--sdr-text-light);
             ">
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                     <span style="font-weight: 600;">Range:</span>
@@ -111,7 +111,7 @@ export class BarGraph3D {
                     left: 50%;
                     transform: translate(-50%, -50%);
                     text-align: center;
-                    color: var(--md-sys-color-on-surface-variant);
+                    color: var(--sdr-text-light);
                     font-size: 1rem;
                 ">
                     <div style="font-size: 3rem; opacity: 0.3; margin-bottom: 0.5rem;">📊</div>

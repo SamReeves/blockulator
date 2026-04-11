@@ -1,0 +1,46 @@
+/**
+ * SDR Design System — CSS Custom Properties
+ * https://sdr.dev/lib/tokens.css
+ */
+
+:root {
+  /* Golden ratio */
+  --sdr-phi: 1.6180339887;
+  --sdr-phi-inv: 0.6180339887;
+
+  /* Colors */
+  --sdr-primary: #737373;
+  --sdr-secondary: #525252;
+  --sdr-accent: #a3a3a3;
+  --sdr-bg-darker: #000000;
+  --sdr-bg-dark: #0a0a0a;
+  --sdr-bg-light: #171717;
+  --sdr-bg-card: #171717;
+  --sdr-text-dark: #e5e5e5;
+  --sdr-text-light: #a3a3a3;
+  --sdr-text-white: #f5f5f5;
+  --sdr-border: #262626;
+  --sdr-link: #a8a8a8;
+  --sdr-link-visited: #a8a8a8;
+
+  /* Shadows */
+  --sdr-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+  --sdr-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.7);
+
+  /* Spacing (phi-based) */
+  --sdr-space-1: 0.618rem;
+  --sdr-space-2: 1rem;
+  --sdr-space-3: 1.618rem;
+  --sdr-space-4: 2.618rem;
+
+  /* Typography */
+  --sdr-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --sdr-text-ui-sm: 0.6875rem;
+  --sdr-text-ui-md: 0.8125rem;
+  --sdr-text-ui-lg: 1.314rem;
+  --sdr-text-ui-xl: 1.962rem;
+
+  /* Motion */
+  --sdr-panel-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --sdr-panel-fade-duration: 0.5s;
+}

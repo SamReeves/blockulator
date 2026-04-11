@@ -117,7 +117,7 @@ export function getTemplate(config = {}) {
                     <span>🏆 Recent Winners</span>
                 </summary>
                 <div id="winners-history" style="max-height: 250px; overflow-y: auto; margin-top: 0.75rem;">
-                    <div style="text-align: center; padding: 1.5rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.85rem;">
+                    <div style="text-align: center; padding: 1.5rem; color: var(--sdr-text-light); font-size: 0.85rem;">
                         Loading history...
                     </div>
                 </div>

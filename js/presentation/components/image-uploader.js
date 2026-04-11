@@ -22,7 +22,7 @@ export class ImageUploader {
             flex-direction: column;
             gap: 1rem;
             padding: 1rem;
-            background: var(--md-sys-color-surface);
+            background: var(--sdr-bg-darker);
             border-radius: 12px;
         `;
 
@@ -30,22 +30,22 @@ export class ImageUploader {
         const uploadArea = document.createElement('div');
         uploadArea.className = 'upload-area';
         uploadArea.style.cssText = `
-            border: 3px dashed var(--md-sys-color-outline);
+            border: 3px dashed var(--sdr-border);
             border-radius: 12px;
             padding: 3rem 2rem;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s;
-            background: var(--md-sys-color-surface-variant);
+            background: var(--sdr-bg-dark);
         `;
 
         uploadArea.innerHTML = `
             <div style="font-size: 3rem; margin-bottom: 1rem;">🖼️</div>
             <h3 style="margin: 0 0 0.5rem 0;">Upload Image</h3>
-            <p style="color: var(--md-sys-color-on-surface-variant); margin: 0 0 1rem 0;">
+            <p style="color: var(--sdr-text-light); margin: 0 0 1rem 0;">
                 Click to select or drag & drop
             </p>
-            <p style="color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem; margin: 0;">
+            <p style="color: var(--sdr-text-light); font-size: 0.875rem; margin: 0;">
                 Will be resized to 32×32 pixels • Max 5MB
             </p>
         `;
@@ -69,13 +69,13 @@ export class ImageUploader {
         previewArea.innerHTML = `
             <div style="text-align: center;">
                 <h4 style="margin: 0 0 1rem 0;">Preview (32×32)</h4>
-                <div id="preview-canvas-container" style="display: inline-block; padding: 1rem; background: var(--md-sys-color-surface-variant); border-radius: 8px;"></div>
+                <div id="preview-canvas-container" style="display: inline-block; padding: 1rem; background: var(--sdr-bg-dark); border-radius: 8px;"></div>
             </div>
             <div style="display: flex; gap: 0.5rem;">
-                <button id="use-image-btn" class="btn-primary" style="padding: 0.75rem 2rem; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                <button id="use-image-btn" class="btn-primary" style="padding: 0.75rem 2rem; background: var(--sdr-primary); color: var(--sdr-text-white); border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
                     ✓ Use This Image
                 </button>
-                <button id="cancel-upload-btn" style="padding: 0.75rem 2rem; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface-variant); border: 2px solid var(--md-sys-color-outline); border-radius: 8px; cursor: pointer;">
+                <button id="cancel-upload-btn" style="padding: 0.75rem 2rem; background: var(--sdr-bg-dark); color: var(--sdr-text-light); border: 2px solid var(--sdr-border); border-radius: 8px; cursor: pointer;">
                     Cancel
                 </button>
             </div>
@@ -89,19 +89,19 @@ export class ImageUploader {
         // Drag and drop
         uploadArea.addEventListener('dragover', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = 'var(--md-sys-color-primary)';
-            uploadArea.style.background = 'var(--md-sys-color-primary-container)';
+            uploadArea.style.borderColor = 'var(--sdr-primary)';
+            uploadArea.style.background = 'var(--sdr-secondary)';
         });
 
         uploadArea.addEventListener('dragleave', () => {
-            uploadArea.style.borderColor = 'var(--md-sys-color-outline)';
-            uploadArea.style.background = 'var(--md-sys-color-surface-variant)';
+            uploadArea.style.borderColor = 'var(--sdr-border)';
+            uploadArea.style.background = 'var(--sdr-bg-dark)';
         });
 
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadArea.style.borderColor = 'var(--md-sys-color-outline)';
-            uploadArea.style.background = 'var(--md-sys-color-surface-variant)';
+            uploadArea.style.borderColor = 'var(--sdr-border)';
+            uploadArea.style.background = 'var(--sdr-bg-dark)';
             
             const files = e.dataTransfer.files;
             if (files.length > 0) {
@@ -236,7 +236,7 @@ export class ImageUploader {
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
-            border: 2px solid var(--md-sys-color-outline);
+            border: 2px solid var(--sdr-border);
             border-radius: 4px;
         `;
         

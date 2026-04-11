@@ -75,7 +75,7 @@ export class ThroneDisplay {
                     
                     <!-- Stats grid -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                        <div style="background: ${rgbaFromHex(SDR_PALETTE.primaryDark, 0.35)}; padding: 0.75rem; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; text-align: center;">
+                        <div style="background: ${rgbaFromHex(SDR_PALETTE.secondary, 0.35)}; padding: 0.75rem; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; text-align: center;">
                             <div style="font-size: 0.7rem; opacity: 0.8; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 1px;">
                                 Prize Pool
                             </div>
@@ -83,7 +83,7 @@ export class ThroneDisplay {
                                 0 wei
                             </div>
                         </div>
-                        <div style="background: ${rgbaFromHex(SDR_PALETTE.primaryDark, 0.35)}; padding: 0.75rem; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; text-align: center;">
+                        <div style="background: ${rgbaFromHex(SDR_PALETTE.secondary, 0.35)}; padding: 0.75rem; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; text-align: center;">
                             <div style="font-size: 0.7rem; opacity: 0.8; margin-bottom: 0.25rem; text-transform: uppercase; letter-spacing: 1px;">
                                 Reign Time
                             </div>

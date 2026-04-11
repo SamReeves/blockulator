@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Fail if application CSS/JS contains literal hex or rgb()/rgba() outside
- * css/variables.css and js/theme/sdr-palette.js.
+ * the allowlisted token bridge and palette modules.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,8 +11,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(__dirname, '..');
 
 const SKIP = new Set([
+    path.join(REPO_ROOT, 'css', 'tokens.css'),
     path.join(REPO_ROOT, 'js', 'theme', 'sdr-palette.js'),
-    path.join(REPO_ROOT, 'css', 'variables.css'),
 ]);
 
 const reHex = /#[0-9a-fA-F]{3,8}\b/;
@@ -22,7 +22,7 @@ const reRgba = /\brgba\s*\(/;
 function walkDir(dir, acc = []) {
     if (!fs.existsSync(dir)) return acc;
     for (const name of fs.readdirSync(dir)) {
-        if (name === 'node_modules' || name === 'dist' || name === '.git') continue;
+        if (name === 'node_modules' || name === 'dist' || name === '.git' || name === 'vendor') continue;
         const full = path.join(dir, name);
         const st = fs.statSync(full);
         if (st.isDirectory()) walkDir(full, acc);
@@ -59,7 +59,7 @@ const targets = [
 const all = targets.flatMap(checkFile);
 
 if (all.length) {
-    console.error('SDR color guard: hex/rgb/rgba found outside css/variables.css or js/theme/sdr-palette.js:\n');
+    console.error('SDR color guard: hex/rgb/rgba found outside allowlisted token files:\n');
     console.error(all.join('\n'));
     process.exit(1);
 }

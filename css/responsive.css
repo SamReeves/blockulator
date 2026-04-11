@@ -6,13 +6,13 @@
 @media (min-width: 768px) {
     .content {
         max-width: 900px;
-        padding: var(--md-sys-spacing-8);
+        padding: 2rem;
     }
 
     .game-list, .tool-list {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: var(--md-sys-spacing-3);
+        gap: var(--sdr-space-1);
     }
 }
 
@@ -23,7 +23,7 @@
     }
 
     .app-header {
-        padding: var(--md-sys-spacing-3) var(--md-sys-spacing-8);
+        padding: var(--sdr-space-1) 2rem;
     }
 
     .game-list, .tool-list {
@@ -59,12 +59,12 @@
     /* Header / Nav */
     .app-header {
         grid-template-columns: 1fr;
-        gap: var(--md-sys-spacing-2);
-        padding: var(--md-sys-spacing-2) var(--md-sys-spacing-3);
+        gap: 0.5rem;
+        padding: 0.5rem var(--sdr-space-1);
     }
 
     .header-left {
-        gap: var(--md-sys-spacing-2);
+        gap: 0.5rem;
     }
 
     .brand-logo {
@@ -80,12 +80,12 @@
         order: 3;
         width: 100%;
         justify-content: flex-start;
-        gap: var(--md-sys-spacing-1);
+        gap: 0.25rem;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
         -ms-overflow-style: none;
-        padding: var(--md-sys-spacing-1) 0;
+        padding: 0.25rem 0;
     }
 
     .header-nav::-webkit-scrollbar {
@@ -128,7 +128,7 @@
 
     /* Market / Table */
     .primary-view-area {
-        padding: var(--md-sys-spacing-4);
+        padding: var(--sdr-space-2);
     }
 
     .view-header {
@@ -158,8 +158,8 @@
     /* Futures */
     .futures-page-header {
         flex-direction: column;
-        gap: var(--md-sys-spacing-4);
-        padding: var(--md-sys-spacing-5);
+        gap: var(--sdr-space-2);
+        padding: 1.25rem;
     }
 
     .futures-title {
@@ -200,7 +200,7 @@
 
     .info-row {
         flex-direction: column;
-        gap: var(--md-sys-spacing-1);
+        gap: 0.25rem;
     }
 
     /* About */
@@ -250,7 +250,7 @@
     .filter-controls-group {
         flex-direction: column;
         align-items: flex-start;
-        gap: var(--md-sys-spacing-3);
+        gap: var(--sdr-space-1);
         width: 100%;
     }
 
@@ -493,7 +493,7 @@
 /* ── Extra small mobile ─────────────────────── */
 @media (max-width: 480px) {
     .app-header {
-        padding: var(--md-sys-spacing-2);
+        padding: 0.5rem;
     }
 
     .brand-logo {
@@ -527,19 +527,3 @@
     }
 }
 
-/* ── Accessibility ──────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* View Transitions API */
-::view-transition-old(root),
-::view-transition-new(root) {
-    animation-duration: var(--md-sys-motion-duration-medium);
-}

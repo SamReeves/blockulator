@@ -28,7 +28,7 @@ export function getTemplate(config = {}) {
                             placeholder="Write something permanent..."
                             maxlength="280"
                             rows="3"
-                            style="width: 100%; padding: 0.75rem; background: var(--md-sys-color-surface); border: 1px solid ${panelColor}; border-radius: 0; color: var(--md-sys-color-on-surface); font-size: 0.9rem; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"
+                            style="width: 100%; padding: 0.75rem; background: var(--sdr-bg-darker); border: 1px solid ${panelColor}; border-radius: 0; color: var(--sdr-text-dark); font-size: 0.9rem; resize: vertical; font-family: inherit; margin-bottom: 0.5rem;"
                         ></textarea>
                         <div style="font-size: 0.7rem; opacity: 0.6; text-align: right; margin-bottom: 0.75rem;">
                             <span id="char-count">0</span>/280

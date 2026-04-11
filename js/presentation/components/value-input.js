@@ -231,9 +231,9 @@ export class ValueInput {
         }
         
         if (isValid) {
-            input.style.borderColor = 'var(--md-sys-color-primary)';
+            input.style.borderColor = 'var(--sdr-primary)';
         } else {
-            input.style.borderColor = 'var(--md-sys-color-error)';
+            input.style.borderColor = 'var(--sdr-error)';
         }
     }
 

@@ -8,6 +8,7 @@ import { web3Provider } from '../infrastructure/blockchain/web3-provider.js';
 import { WalletConnectComponent } from '../presentation/components/wallet-connect.js';
 import { ToastComponent } from '../presentation/components/toast.js';
 import { initConfetti } from '../presentation/effects/confetti-animation.js';
+import { attachHoverParticles } from '../presentation/effects/sdr-particles-bg.js';
 import { eventBus, EVENTS } from '../infrastructure/events/event-bus.js';
 import { MasterRouter } from './master-router.js';
 
@@ -91,8 +92,18 @@ export class MasterApp {
         // Toast notifications
         this.toastComponent = new ToastComponent();
         
-        // Confetti effects
+        // Celebration effects (particles spawn on-demand, not on page load)
         initConfetti();
+        
+        // SDR footer link hover particles - all three words + count as attractor nodes
+        const sdrFooterLink = document.getElementById('sdr-footer-link');
+        const wordSecure = document.getElementById('sdr-word-secure');
+        const wordData = document.getElementById('sdr-word-data');
+        const wordResearch = document.getElementById('sdr-word-research');
+        const particleCount = document.getElementById('sdr-particle-count');
+        if (sdrFooterLink && wordSecure && wordData && wordResearch && particleCount) {
+            attachHoverParticles(sdrFooterLink, [wordSecure, wordData, wordResearch, particleCount], 1, 10, 1000000, particleCount);
+        }
         
         // App-level error handling
         this.initErrorHandling();

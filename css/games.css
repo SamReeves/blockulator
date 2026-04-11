@@ -6,11 +6,11 @@
 .game-list, .tool-list {
     display: flex;
     flex-direction: column;
-    gap: var(--md-sys-spacing-3);
+    gap: var(--sdr-space-1);
 }
 
 .game-card, .tool-card {
-    animation: fadeInUp 0.4s var(--md-sys-motion-easing-emphasized) backwards;
+    animation: fadeInUp 0.4s var(--sdr-ease-emphasized) backwards;
 }
 
 .game-card:nth-child(1), .tool-card:nth-child(1) { animation-delay: 0.05s; }
@@ -29,23 +29,23 @@
 
 /* Dice Gods - Dice Grid */
 .dice-selection-area {
-    margin: var(--md-sys-spacing-6) 0;
+    margin: var(--sdr-space-3) 0;
 }
 
 .dice-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--md-sys-spacing-3);
+    gap: var(--sdr-space-1);
 }
 
 .dice-button {
     aspect-ratio: 1;
-    background: var(--md-sys-color-surface-variant);
+    background: var(--sdr-bg-dark);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
     font-size: 2rem;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -53,7 +53,7 @@
 
 .dice-button:hover {
     border-color: var(--sdr-accent);
-    background: var(--md-sys-color-surface-container);
+    background: var(--sdr-bg-card);
     transform: none;
 }
 
@@ -65,15 +65,15 @@
 
 /* Game Card Base */
 .game-card, .tool-card {
-    padding: var(--md-sys-spacing-4);
-    border-radius: var(--md-sys-shape-corner-none);
+    padding: var(--sdr-space-2);
+    border-radius: 0;
     border: var(--sdr-line);
     cursor: pointer;
-    transition: border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
-        background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+    transition: border-color var(--sdr-duration-short) var(--sdr-ease-standard),
+        background-color var(--sdr-duration-short) var(--sdr-ease-standard);
     position: relative;
     overflow: hidden;
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
     background: var(--sdr-panel);
     box-shadow: none;
 }
@@ -93,7 +93,7 @@
 
 .game-card:hover, .tool-card:hover {
     border-color: var(--sdr-accent);
-    background: var(--md-sys-color-outline-variant);
+    background: var(--sdr-outline-variant);
     transform: none;
     box-shadow: none;
 }
@@ -106,11 +106,11 @@
 .game-card h3, .tool-card h3 {
     font-size: 1rem;
     font-weight: 600;
-    margin-bottom: var(--md-sys-spacing-1);
+    margin-bottom: 0.25rem;
 }
 
 .game-card p, .tool-card p {
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--sdr-text-light);
     font-size: 0.875rem;
     margin: 0;
 }
@@ -121,18 +121,18 @@
 .winners-grid, .winner-item, .message-item, .discussion-card,
 .play-history, .simulation-panel, .voting-interface,
 .vote-distribution-panel, .calculator-controls {
-    background: var(--md-sys-color-surface-variant);
+    background: var(--sdr-bg-dark);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-none);
-    padding: var(--md-sys-spacing-4);
+    border-radius: 0;
+    padding: var(--sdr-space-2);
     box-shadow: none;
 }
 
 .game-sections {
     display: flex;
     flex-direction: column;
-    gap: var(--md-sys-spacing-6);
-    margin-top: var(--md-sys-spacing-6);
+    gap: var(--sdr-space-3);
+    margin-top: var(--sdr-space-3);
     overflow: visible;
 }
 
@@ -162,14 +162,14 @@
     border-left: 1px solid var(--panel-color, var(--sdr-accent));
     background: var(--sdr-bg-dark);
     padding: 1rem;
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
 }
 
 .game-panel-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--panel-color, var(--md-sys-color-primary));
+    color: var(--panel-color, var(--sdr-primary));
     margin: 0;
 }
 
@@ -197,7 +197,7 @@
     padding: 0.5rem;
     background: var(--sdr-bg-darker);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
     font-size: 0.75rem;
 }
 
@@ -214,9 +214,9 @@
 
 /* Hero Card (Current Leader/Winner Display) */
 .hero-card {
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
     padding: 1rem;
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
     border: var(--sdr-line);
     border-left: 1px solid var(--hero-color, var(--panel-color, var(--sdr-accent)));
     background: var(--sdr-panel);
@@ -282,7 +282,7 @@ details[open] .collapsible-arrow {
     display: flex;
     gap: 0.75rem;
     padding: 0.75rem;
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
     border: var(--sdr-line);
     border-left: 1px solid var(--step-color, var(--panel-color, var(--sdr-accent)));
     background: var(--sdr-bg-dark);
@@ -295,7 +295,7 @@ details[open] .collapsible-arrow {
 }
 
 .step-content span {
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--sdr-text-light);
     font-size: 0.8rem;
 }
 
@@ -303,7 +303,7 @@ details[open] .collapsible-arrow {
 .strategy-callout {
     padding: 0.75rem;
     background: var(--sdr-bg-dark);
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
     border: var(--sdr-line);
     border-left: 1px solid var(--panel-color, var(--sdr-accent));
     font-size: 0.85rem;
@@ -311,12 +311,12 @@ details[open] .collapsible-arrow {
 }
 
 .strategy-callout strong {
-    color: var(--panel-color, var(--md-sys-color-primary));
+    color: var(--panel-color, var(--sdr-primary));
 }
 
 /* Chart Error State */
 .chart-error {
-    color: var(--md-sys-color-error);
+    color: var(--sdr-error);
     padding: 1rem;
     text-align: center;
 }
@@ -325,7 +325,7 @@ details[open] .collapsible-arrow {
 .admin-panel {
     border: 1px solid color-mix(in srgb, var(--sdr-particle-red) 55%, transparent);
     background: color-mix(in srgb, var(--sdr-particle-red) 8%, transparent);
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
 }
 
 .admin-panel-header {
@@ -372,56 +372,56 @@ details[open] .collapsible-arrow {
 .demon-standings {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: var(--md-sys-spacing-4);
-    margin-bottom: var(--md-sys-spacing-6);
+    gap: var(--sdr-space-2);
+    margin-bottom: var(--sdr-space-3);
 }
 
 .demon-card {
-    background: var(--md-sys-color-surface-container);
+    background: var(--sdr-bg-card);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-none);
-    padding: var(--md-sys-spacing-6);
+    border-radius: 0;
+    padding: var(--sdr-space-3);
     text-align: center;
-    transition: border-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    transition: border-color var(--sdr-duration-medium) var(--sdr-ease-standard);
     box-shadow: none;
 }
 
 .demon-card.leading {
-    border-color: var(--md-sys-color-warning);
+    border-color: var(--sdr-warning);
     box-shadow: none;
 }
 
 .demon-name {
     font-size: 1.5rem;
     font-weight: 700;
-    margin-bottom: var(--md-sys-spacing-2);
+    margin-bottom: 0.5rem;
 }
 
 .demon-votes {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--md-sys-color-primary);
+    color: var(--sdr-primary);
 }
 
 .demon-voting-buttons {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--md-sys-spacing-4);
+    gap: var(--sdr-space-2);
 }
 
 .btn-demon {
-    padding: var(--md-sys-spacing-6);
-    background: var(--md-sys-color-surface-variant);
+    padding: var(--sdr-space-3);
+    background: var(--sdr-bg-dark);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
     cursor: pointer;
-    transition: border-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    transition: border-color var(--sdr-duration-medium) var(--sdr-ease-standard);
     font-size: 1rem;
     font-weight: 600;
 }
 
 .btn-demon:hover {
-    border-color: var(--md-sys-color-error);
+    border-color: var(--sdr-error);
     transform: none;
     box-shadow: none;
 }
@@ -443,9 +443,9 @@ details[open] .collapsible-arrow {
 }
 
 .status-card {
-    background: var(--md-sys-color-surface-container);
+    background: var(--sdr-bg-card);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-none);
+    border-radius: 0;
     padding: 1rem 1.25rem;
     transition: border-color 0.2s ease, background-color 0.2s ease;
     display: flex;
@@ -512,7 +512,7 @@ details[open] .collapsible-arrow {
     margin: 0;
     font-size: 1.125rem;
     font-weight: 600;
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
     line-height: 1.3;
     display: inline;
     margin-right: 0.5rem;
@@ -520,7 +520,7 @@ details[open] .collapsible-arrow {
 
 .status-description {
     font-size: 0.8125rem;
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--sdr-text-light);
     line-height: 1.4;
     display: inline;
 }
@@ -540,16 +540,16 @@ details[open] .collapsible-arrow {
 }
 
 .status-value {
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
     font-weight: 600;
 }
 
 .status-separator {
-    color: var(--md-sys-color-outline);
+    color: var(--sdr-border);
     margin: 0 0.25rem;
 }
 
 .status-details {
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--sdr-text-light);
     font-weight: 400;
 }

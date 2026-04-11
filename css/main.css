@@ -6,7 +6,7 @@
    responsive overrides last.
    ============================================ */
 
-@import url('variables.css');
+@import url('tokens.css');
 @import url('reset.css');
 @import url('utilities.css');
 @import url('layout.css');

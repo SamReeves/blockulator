@@ -30,19 +30,17 @@ A mobile-first web application for blockchain-based games and on-chain scientifi
   - Sub-routes: `https://site.com/#/games/pissing-contest`
 - **No server configuration required** - All routes handled client-side with JavaScript
 
-**Styling:** `index.html` loads `css/main.css`, which pulls in `css/variables.css` (SDR-aligned tokens) and the rest of the split stylesheets. The DigitalOcean static site build copies the `css/` tree into `dist/`. Root `styles.css` is a legacy monolith and is not used by the SPA or the deploy bundle.
+**Styling:** `index.html` loads `vendor/sdr/lib/tokens.css` (SDR design system), then `css/main.css` (which imports `css/tokens.css` for Blockulator-specific tokens). JS modules import from vendored SDR files via `js/theme/sdr-palette.js`. Run `scripts/sync-sdr.sh` to refresh from upstream.
 
-Literal hex and `rgb()` / `rgba()` in application code must live only in `css/variables.css` and the mirrored `js/theme/sdr-palette.js`; everything else uses `var(--sdr-*)` / MD aliases or imports from that palette module (`npm test` runs `scripts/check-sdr-colors.mjs`).
+Literal hex and `rgb()` / `rgba()` outside `css/tokens.css` and `js/theme/sdr-palette.js` are rejected by `npm test` (`scripts/check-sdr-colors.mjs`).
 
 ### Project Structure
 
 ```
 blockulator/
 ├── index.html              # Single page application (SPA)
-├── css/                    # Canonical theme (`main.css` imports variables, layout, games, …)
-├── styles.css              # Legacy monolith (not loaded by `index.html`; do not extend for new UI)
-├── games/
-│   └── index.html          # Games listing (routes to SPA)
+├── vendor/sdr/lib/         # SDR design tokens + particles (sync via scripts/sync-sdr.sh)
+├── css/                    # Styles (`main.css` imports tokens.css, layout, games, …)
 ├── js/
 │   ├── application/        # Core application logic
 │   │   ├── master-app.js   # Main SPA controller
@@ -57,7 +55,7 @@ blockulator/
 │   │   └── events/         # Event bus
 │   └── presentation/       # UI components
 │       ├── components/     # Reusable components
-│       ├── views/          # Page views
+│       └── views/          # Page views
 ├── contracts/
 │   ├── src/               # Vyper source code
 │   │   ├── games/         # Game contracts

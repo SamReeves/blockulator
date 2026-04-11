@@ -168,7 +168,7 @@ export class DiceGods extends Game {
         
         if (!plays || plays.length === 0) {
             listContainer.innerHTML = `
-                <div style="text-align: center; padding: 1.5rem; color: var(--md-sys-color-on-surface-variant); font-size: 0.875rem;">
+                <div style="text-align: center; padding: 1.5rem; color: var(--sdr-text-light); font-size: 0.875rem;">
                     No plays yet
                 </div>
             `;
@@ -181,27 +181,27 @@ export class DiceGods extends Game {
             const weight = 11 - playIndex;
             const isCurrentUser = this.isCurrentUser(play.player);
             const hiBg = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.12);
-            const loBg = rgbaFromHex(SDR_PALETTE.primaryDark, 0.2);
+            const loBg = rgbaFromHex(SDR_PALETTE.secondary, 0.2);
 
             return `
-                <div style="padding: 0.75rem; background: ${isCurrentUser ? hiBg : loBg}; border-radius: 0; border-left: 1px solid ${isCurrentUser ? SDR_PALETTE.particleEmerald : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem;">
+                <div style="padding: 0.75rem; background: ${isCurrentUser ? hiBg : loBg}; border-radius: 0; border-left: 1px solid ${isCurrentUser ? SDR_PALETTE.particleEmerald : 'var(--sdr-border)'}; margin-bottom: 0.5rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="font-size: 1.5rem;">${this.DICE_EMOJIS[number - 1]}</span>
                             <div>
-                                <div style="font-weight: bold; font-size: 0.875rem; color: var(--md-sys-color-on-surface);">
+                                <div style="font-weight: bold; font-size: 0.875rem; color: var(--sdr-text-dark);">
                                     #${playIndex} ${isCurrentUser ? '(You)' : ''}
                                 </div>
-                                <div style="font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);">
+                                <div style="font-size: 0.7rem; font-family: monospace; color: var(--sdr-text-light);">
                                     ${this.dom.formatAddress(play.player)}
                                 </div>
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-weight: bold; font-size: 0.875rem; color: var(--md-sys-color-on-surface);">
+                            <div style="font-weight: bold; font-size: 0.875rem; color: var(--sdr-text-dark);">
                                 ${this.dom.formatWei(play.amount)}
                             </div>
-                            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
+                            <div style="font-size: 0.7rem; color: var(--sdr-text-light);">
                                 ${weight}x
                             </div>
                         </div>

@@ -88,7 +88,7 @@ export class PixelEditor {
         
         // Canvas container
         const canvasContainer = document.createElement('div');
-        canvasContainer.style.cssText = 'display: flex; justify-content: center; background: var(--md-sys-color-surface-variant); padding: 2rem; border-radius: 8px;';
+        canvasContainer.style.cssText = 'display: flex; justify-content: center; background: var(--sdr-bg-dark); padding: 2rem; border-radius: 8px;';
         
         // Ensure crisp rendering (in case it wasn't set in constructor)
         this.displayCanvas.style.imageRendering = 'pixelated';
@@ -103,7 +103,7 @@ export class PixelEditor {
             const saveBtn = document.createElement('button');
             saveBtn.className = 'btn-primary';
             saveBtn.textContent = '💾 Save Badge';
-            saveBtn.style.cssText = 'padding: 0.75rem 2rem; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;';
+            saveBtn.style.cssText = 'padding: 0.75rem 2rem; background: var(--sdr-primary); color: var(--sdr-text-white); border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;';
             saveBtn.addEventListener('click', () => {
                 const pixelData = this.getPixelData();
                 this.onSave(pixelData);
@@ -121,7 +121,7 @@ export class PixelEditor {
     createToolbar() {
         const toolbar = document.createElement('div');
         toolbar.className = 'pixel-editor-toolbar';
-        toolbar.style.cssText = 'display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; padding: 1rem; background: var(--md-sys-color-surface-variant); border-radius: 8px;';
+        toolbar.style.cssText = 'display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; padding: 1rem; background: var(--sdr-bg-dark); border-radius: 8px;';
         
         // Color picker
         const colorGroup = document.createElement('div');
@@ -130,7 +130,7 @@ export class PixelEditor {
         const colorPicker = document.createElement('input');
         colorPicker.type = 'color';
         colorPicker.value = this.currentColor;
-        colorPicker.style.cssText = 'width: 50px; height: 40px; cursor: pointer; border: 2px solid var(--md-sys-color-outline); border-radius: 4px;';
+        colorPicker.style.cssText = 'width: 50px; height: 40px; cursor: pointer; border: 2px solid var(--sdr-border); border-radius: 4px;';
         colorPicker.addEventListener('change', (e) => {
             this.setColor(e.target.value);
         });
@@ -158,15 +158,15 @@ export class PixelEditor {
             btn.className = tool.name === this.currentTool ? 'tool-btn active' : 'tool-btn';
             btn.textContent = tool.icon;
             btn.title = tool.title;
-            btn.style.cssText = `padding: 0.5rem 1rem; border: 2px solid var(--md-sys-color-outline); border-radius: 4px; cursor: pointer; background: ${tool.name === this.currentTool ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-surface)'}; font-size: 1.2rem;`;
+            btn.style.cssText = `padding: 0.5rem 1rem; border: 2px solid var(--sdr-border); border-radius: 4px; cursor: pointer; background: ${tool.name === this.currentTool ? 'var(--sdr-primary)' : 'var(--sdr-bg-darker)'}; font-size: 1.2rem;`;
             btn.addEventListener('click', () => {
                 this.setTool(tool.name);
                 // Update all tool buttons
                 toolsGroup.querySelectorAll('.tool-btn').forEach(b => {
-                    b.style.background = 'var(--md-sys-color-surface)';
+                    b.style.background = 'var(--sdr-bg-darker)';
                     b.classList.remove('active');
                 });
-                btn.style.background = 'var(--md-sys-color-primary)';
+                btn.style.background = 'var(--sdr-primary)';
                 btn.classList.add('active');
             });
             toolsGroup.appendChild(btn);
@@ -180,19 +180,19 @@ export class PixelEditor {
         
         const undoBtn = document.createElement('button');
         undoBtn.textContent = '↶ Undo';
-        undoBtn.style.cssText = 'padding: 0.5rem 1rem; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; cursor: pointer; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface);';
+        undoBtn.style.cssText = 'padding: 0.5rem 1rem; border: 1px solid var(--sdr-border); border-radius: 4px; cursor: pointer; background: var(--sdr-bg-dark); color: var(--sdr-text-dark);';
         undoBtn.addEventListener('click', () => this.undo());
         actionsGroup.appendChild(undoBtn);
         
         const redoBtn = document.createElement('button');
         redoBtn.textContent = '↷ Redo';
-        redoBtn.style.cssText = 'padding: 0.5rem 1rem; border: 1px solid var(--md-sys-color-outline); border-radius: 4px; cursor: pointer; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-on-surface);';
+        redoBtn.style.cssText = 'padding: 0.5rem 1rem; border: 1px solid var(--sdr-border); border-radius: 4px; cursor: pointer; background: var(--sdr-bg-dark); color: var(--sdr-text-dark);';
         redoBtn.addEventListener('click', () => this.redo());
         actionsGroup.appendChild(redoBtn);
         
         const clearBtn = document.createElement('button');
         clearBtn.textContent = '🗑️ Clear';
-        clearBtn.style.cssText = 'padding: 0.5rem 1rem; border: 1px solid var(--md-sys-color-error); border-radius: 4px; cursor: pointer; background: var(--md-sys-color-surface-variant); color: var(--md-sys-color-error);';
+        clearBtn.style.cssText = 'padding: 0.5rem 1rem; border: 1px solid var(--sdr-error); border-radius: 4px; cursor: pointer; background: var(--sdr-bg-dark); color: var(--sdr-error);';
         clearBtn.addEventListener('click', () => {
             if (confirm('Clear the entire canvas?')) {
                 this.clear();
@@ -500,7 +500,7 @@ export class PixelEditor {
         if (toolBtns) {
             toolBtns.forEach(b => {
                 const isPen = b.title === 'Pen';
-                b.style.background = isPen ? 'var(--md-sys-color-primary)' : 'var(--md-sys-color-surface)';
+                b.style.background = isPen ? 'var(--sdr-primary)' : 'var(--sdr-bg-darker)';
                 b.classList.toggle('active', isPen);
             });
         }

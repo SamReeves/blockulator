@@ -67,7 +67,7 @@ export class KingLadder {
                     Recent Kings
                 </div>
                 <div id="ladder-rungs" style="display: flex; flex-direction: column; gap: 0.5rem;">
-                    <div style="text-align: center; padding: 2rem 1rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.5;">
+                    <div style="text-align: center; padding: 2rem 1rem; color: var(--sdr-text-light); opacity: 0.5;">
                         No history yet
                     </div>
                 </div>
@@ -127,7 +127,7 @@ export class KingLadder {
         
         if (this.kings.length === 0) {
             rungsEl.innerHTML = `
-                <div style="text-align: center; padding: 2rem 1rem; color: var(--md-sys-color-on-surface-variant); opacity: 0.5; font-size: 0.8rem;">
+                <div style="text-align: center; padding: 2rem 1rem; color: var(--sdr-text-light); opacity: 0.5; font-size: 0.8rem;">
                     No previous kings yet
                 </div>
             `;
@@ -140,7 +140,7 @@ export class KingLadder {
             const position = index + 1;
             const youBg = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.12);
             const youBgHi = rgbaFromHex(SDR_PALETTE.particleEmerald, 0.18);
-            const otherBg = rgbaFromHex(SDR_PALETTE.primaryDark, 0.35);
+            const otherBg = rgbaFromHex(SDR_PALETTE.secondary, 0.35);
             const otherBgHi = rgbaFromHex(SDR_PALETTE.primary, 0.25);
 
             return `

@@ -1,23 +1,23 @@
 /* ============================================
    ABOUT — minimal chrome (Secure Data Research)
-   Tokens: css/variables.css (--sdr-*, --sdr-hairline-*, --sdr-particle-*)
+   Phi-based spacing: --sdr-space-1..4, --sdr-phi
+   Typography: --sdr-text-ui-sm..xl
    ============================================ */
 
 .about-content {
-    max-width: min(100%, calc(38rem * 1.618));
+    max-width: min(100%, calc(38rem * var(--sdr-phi)));
     margin: 0 auto;
-    padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem) 3rem;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-        sans-serif;
-    color: var(--sdr-text);
+    padding: var(--sdr-space-4) var(--sdr-space-2) var(--sdr-space-4);
+    font-family: var(--sdr-font-body);
+    color: var(--sdr-text-dark);
     background: transparent;
 }
 
 /* Hero — type only, like SDR hero (no panel) */
 .about-hero {
     text-align: center;
-    padding: clamp(1.5rem, 5vw, 3rem) 0 clamp(2rem, 6vw, 3.5rem);
-    margin-bottom: clamp(2rem, 5vw, 3rem);
+    padding: var(--sdr-space-4) 0 calc(var(--sdr-space-4) * var(--sdr-phi));
+    margin-bottom: var(--sdr-space-4);
     background: none;
     border: none;
 }
@@ -36,15 +36,15 @@
 }
 
 .hero-tagline {
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
-    color: var(--sdr-text-muted);
-    margin: 0 0 0.75rem 0;
+    font-size: var(--sdr-text-ui-lg);
+    color: var(--sdr-text-light);
+    margin: 0 0 var(--sdr-space-1) 0;
     font-weight: 500;
     line-height: 1.35;
 }
 
 .hero-subtitle {
-    font-size: clamp(0.875rem, 2vw, 0.95rem);
+    font-size: var(--sdr-text-ui-md);
     color: var(--sdr-link);
     margin: 0 auto;
     max-width: 36rem;
@@ -54,7 +54,7 @@
 
 /* Sections — headings as structure, no ruled boxes */
 .about-section {
-    margin-bottom: clamp(2rem, 5vw, 2.75rem);
+    margin-bottom: var(--sdr-space-4);
 }
 
 .about-section h2 {
@@ -63,16 +63,16 @@
     letter-spacing: var(--sdr-label-tracking);
     text-transform: uppercase;
     color: var(--sdr-label-color);
-    margin: 0 0 1rem 0;
+    margin: 0 0 var(--sdr-space-2) 0;
     padding: 0;
     border: none;
 }
 
 .about-section p {
-    font-size: 0.9375rem;
+    font-size: var(--sdr-text-ui-md);
     line-height: 1.75;
     color: var(--sdr-link);
-    margin: 0 0 1rem 0;
+    margin: 0 0 var(--sdr-space-2) 0;
     max-width: 40rem;
 }
 
@@ -86,18 +86,16 @@
     border: none;
     border-radius: 0;
     font-size: 0.92em;
-    color: var(--sdr-text-muted);
+    color: var(--sdr-text-light);
     font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, monospace;
     font-weight: 500;
 }
-
-/* Links: .about-link grouped with .sdr-link in utilities.css */
 
 /* Advantages — stacked prose, no cards */
 .fp127-advantages {
     display: flex;
     flex-direction: column;
-    gap: clamp(1.5rem, 4vw, 2rem);
+    gap: var(--sdr-space-3);
     max-width: 40rem;
 }
 
@@ -110,7 +108,7 @@
 
 .advantage-item h3 {
     color: var(--sdr-text-white);
-    font-size: 1rem;
+    font-size: var(--sdr-space-2);
     font-weight: 600;
     margin: 0 0 0.4rem 0;
     letter-spacing: -0.01em;
@@ -118,7 +116,7 @@
 
 .advantage-item p {
     color: var(--sdr-link);
-    font-size: 0.9rem;
+    font-size: var(--sdr-text-ui-md);
     line-height: 1.7;
     margin: 0;
     max-width: none;
@@ -135,7 +133,7 @@
 .comparison-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.8125rem;
+    font-size: var(--sdr-text-ui-md);
     border: none;
 }
 
@@ -143,8 +141,8 @@
     text-align: left;
     color: var(--sdr-label-color);
     font-weight: 600;
-    padding: 0.5rem 0 0.65rem 0;
-    font-size: max(0.6875rem, 0.75rem);
+    padding: var(--sdr-space-1) 0;
+    font-size: var(--sdr-text-ui-sm);
     text-transform: uppercase;
     letter-spacing: 0.1em;
     border: none;
@@ -152,7 +150,7 @@
 }
 
 .comparison-table td {
-    padding: 0.55rem 0;
+    padding: var(--sdr-space-1) 0;
     border: none;
     border-bottom: 1px solid var(--sdr-hairline-soft);
     color: var(--sdr-link);
@@ -168,11 +166,11 @@
 }
 
 .comparison-table tbody tr:hover td {
-    color: var(--sdr-text-muted);
+    color: var(--sdr-text-light);
 }
 
 .comparison-highlight td {
-    color: var(--sdr-text-muted);
+    color: var(--sdr-text-light);
     background: transparent;
     font-weight: 500;
 }
@@ -184,8 +182,8 @@
 
 /* Library precision chart — particle base corners (global tokens) */
 .about-chart-caption {
-    margin: 1.5rem 0 0.75rem 0;
-    font-size: max(0.6875rem, 0.75rem);
+    margin: var(--sdr-space-3) 0 var(--sdr-space-1) 0;
+    font-size: var(--sdr-text-ui-sm);
     color: var(--sdr-label-color);
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -201,9 +199,9 @@
 .about-chart-row {
     display: grid;
     grid-template-columns: 5.25rem minmax(0, 1fr) 2.75rem;
-    gap: 0.5rem 0.65rem;
+    gap: var(--sdr-space-1);
     align-items: center;
-    margin-bottom: 0.55rem;
+    margin-bottom: var(--sdr-space-1);
 }
 
 .about-chart-row:last-child {
@@ -211,9 +209,9 @@
 }
 
 .about-chart-label {
-    font-size: 0.8125rem;
+    font-size: var(--sdr-text-ui-md);
     font-weight: 500;
-    color: var(--sdr-text);
+    color: var(--sdr-text-dark);
     text-align: right;
 }
 
@@ -228,7 +226,7 @@
     display: block;
     height: 100%;
     min-width: 3px;
-    transition: width 0.35s ease;
+    transition: width var(--sdr-duration-long) var(--sdr-ease-emphasized);
     box-shadow: none;
 }
 
@@ -253,9 +251,9 @@
 }
 
 .about-chart-value {
-    font-size: 0.75rem;
+    font-size: var(--sdr-text-ui-sm);
     font-variant-numeric: tabular-nums;
-    color: var(--sdr-text-muted);
+    color: var(--sdr-text-light);
     text-align: right;
 }
 
@@ -274,13 +272,13 @@
 
 .also-item {
     display: block;
-    padding: 0.65rem 0;
+    padding: var(--sdr-space-1) 0;
     background: none;
     border: none;
     border-radius: 0;
     text-decoration: none;
     border-bottom: 1px solid var(--sdr-hairline-soft);
-    transition: color 0.2s ease;
+    transition: color var(--sdr-duration-short);
 }
 
 .also-item:last-child {
@@ -299,8 +297,8 @@
 
 .also-item strong {
     display: block;
-    color: var(--sdr-text);
-    font-size: 0.9rem;
+    color: var(--sdr-text-dark);
+    font-size: var(--sdr-text-ui-md);
     font-weight: 600;
     margin-bottom: 0.15rem;
 }
@@ -308,7 +306,7 @@
 .also-item span {
     display: block;
     color: var(--sdr-label-color);
-    font-size: 0.8rem;
+    font-size: var(--sdr-text-ui-md);
     font-weight: 400;
     line-height: 1.45;
 }
@@ -316,12 +314,12 @@
 /* Footer line of copy — no box */
 .about-tech {
     margin-bottom: 0;
-    padding-top: clamp(1.5rem, 4vw, 2rem);
+    padding-top: var(--sdr-space-3);
 }
 
 .about-tech p {
     color: var(--sdr-label-color);
-    font-size: max(0.6875rem, 0.75rem);
+    font-size: var(--sdr-text-ui-sm);
     text-align: center;
     margin: 0;
     padding: 0;

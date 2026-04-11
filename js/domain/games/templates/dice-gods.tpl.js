@@ -55,7 +55,7 @@ export function getTemplate(config = {}) {
                 </summary>
                 <div style="margin-top: 1rem;">
                     <div class="distribution-bars" id="distribution-bars" style="margin-bottom: 1rem;">
-                        <div style="text-align: center; padding: 1rem; color: var(--md-sys-color-on-surface-variant);">
+                        <div style="text-align: center; padding: 1rem; color: var(--sdr-text-light);">
                             No plays yet...
                         </div>
                     </div>

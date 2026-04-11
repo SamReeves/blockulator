@@ -1,6 +1,6 @@
 /* ============================================
    TI-style calculator + FP127 arithmetic UI
-   All colors via tokens in variables.css (no literals here).
+   All colors via theme bridge / CDN tokens (no literals here).
    ============================================ */
 
 /* --- Preset demos (arithmetic) --- */
@@ -11,7 +11,7 @@
     align-items: center;
     margin-bottom: 1rem;
     padding: 0.75rem;
-    background: var(--md-sys-color-outline-variant);
+    background: var(--sdr-outline-variant);
     border: 1px solid var(--sdr-border);
     border-radius: 0.375rem;
 }
@@ -246,15 +246,15 @@
 }
 
 .ti-status.loading {
-    color: var(--md-sys-color-warning);
+    color: var(--sdr-warning);
 }
 
 .ti-status.success {
-    color: var(--md-sys-color-success);
+    color: var(--sdr-success);
 }
 
 .ti-status.error {
-    color: var(--md-sys-color-error);
+    color: var(--sdr-error);
 }
 
 /* --- Toolbar --- */
@@ -268,7 +268,7 @@
 .ti-tool-btn {
     position: relative;
     padding: 0.375rem 0.75rem;
-    background: var(--md-sys-color-outline-variant);
+    background: var(--sdr-outline-variant);
     border: 2px solid var(--sdr-border);
     border-bottom-width: 4px;
     border-radius: 0.375rem;
@@ -509,7 +509,7 @@
 
 /* --- Technical info --- */
 .arithmetic-info {
-    background: var(--md-sys-color-outline-variant);
+    background: var(--sdr-outline-variant);
     border: 2px solid var(--sdr-border);
     border-radius: 0.5rem;
     padding: 1.5rem;

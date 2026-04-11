@@ -15,7 +15,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
         sans-serif;
     background-color: var(--sdr-bg-darker);
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
     line-height: 1.6;
     overflow-x: hidden;
 }

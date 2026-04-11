@@ -20,7 +20,7 @@
 .modal-content {
     background: var(--sdr-bg-dark);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     box-shadow: none;
     max-width: 90vw;
     max-height: 90vh;
@@ -39,15 +39,15 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--md-sys-color-outline);
-    background: var(--md-sys-color-surface-container);
+    border-bottom: 1px solid var(--sdr-border);
+    background: var(--sdr-bg-card);
 }
 
 .modal-title {
     margin: 0;
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
 }
 
 .modal-close {
@@ -55,40 +55,40 @@
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
-    color: var(--md-sys-color-on-surface-variant);
+    color: var(--sdr-text-light);
     padding: 0.25rem 0.5rem;
     transition: all 0.2s ease;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
 }
 
 .modal-close:hover {
-    background: var(--md-sys-color-surface-variant);
-    color: var(--md-sys-color-on-surface);
+    background: var(--sdr-bg-dark);
+    color: var(--sdr-text-dark);
 }
 
 .modal-file-info {
     padding: 0.75rem 2rem;
-    background: var(--md-sys-color-surface-variant);
-    border-bottom: 1px solid var(--md-sys-color-outline);
+    background: var(--sdr-bg-dark);
+    border-bottom: 1px solid var(--sdr-border);
 }
 
 .file-path {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
     font-size: 0.875rem;
-    color: var(--md-sys-color-primary);
+    color: var(--sdr-primary);
 }
 
 .modal-body {
     flex: 1;
     overflow: auto;
     padding: 0;
-    background: var(--md-sys-color-surface);
+    background: var(--sdr-bg-darker);
 }
 
 .source-code {
     margin: 0;
     padding: 2rem;
-    background: var(--md-sys-color-surface);
+    background: var(--sdr-bg-darker);
     overflow-x: auto;
 }
 
@@ -96,7 +96,7 @@
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
     font-size: 0.875rem;
     line-height: 1.6;
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
     white-space: pre;
     display: block;
 }
@@ -106,13 +106,13 @@
     justify-content: flex-end;
     gap: 1rem;
     padding: 1.5rem 2rem;
-    border-top: 1px solid var(--md-sys-color-outline);
-    background: var(--md-sys-color-surface-container);
+    border-top: 1px solid var(--sdr-border);
+    background: var(--sdr-bg-card);
 }
 
 .modal-footer button {
     padding: 0.75rem 1.5rem;
-    border-radius: var(--md-sys-shape-corner-full);
+    border-radius: 0;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;

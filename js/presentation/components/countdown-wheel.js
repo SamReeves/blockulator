@@ -61,7 +61,7 @@ export class CountdownWheel {
                     <div id="countdown-wheel-time" style="font-size: 1.8rem; font-weight: bold; font-family: monospace; margin-bottom: 0.25rem; color: ${SDR_PALETTE.particleGold};">
                         --:--:--
                     </div>
-                    <div id="countdown-wheel-status" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; color: var(--md-sys-color-on-surface);">
+                    <div id="countdown-wheel-status" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; color: var(--sdr-text-dark);">
                         Until Next Day
                     </div>
                     <div id="countdown-wheel-alert" style="margin-top: 0.5rem; font-size: 0.75rem; font-weight: bold; color: ${SDR_PALETTE.particleRed}; display: none;">

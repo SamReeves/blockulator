@@ -179,7 +179,7 @@ export class PissingContest extends Game {
             
             if (!winners || winners.length === 0) {
                 historyContainer.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                    <div style="text-align: center; padding: 2rem; color: var(--sdr-text-light);">
                         No completed rounds yet
                     </div>
                 `;
@@ -209,7 +209,7 @@ export class PissingContest extends Game {
             
             if (filteredDetails.length === 0) {
                 historyContainer.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                    <div style="text-align: center; padding: 2rem; color: var(--sdr-text-light);">
                         No round details available
                     </div>
                 `;
@@ -225,7 +225,7 @@ export class PissingContest extends Game {
                 const entry = document.createElement('div');
                 const hi = rgbaFromHex(SDR_PALETTE.particleGold, 0.12);
                 const lo = rgbaFromHex(SDR_PALETTE.particleSapphire, 0.08);
-                entry.style.cssText = `padding: 0.75rem; background: ${isRecent ? hi : lo}; border-radius: 0; border-left: 1px solid ${isRecent ? SDR_PALETTE.particleGold : 'var(--md-sys-color-outline)'}; margin-bottom: 0.5rem; font-size: 0.875rem;`;
+                entry.style.cssText = `padding: 0.75rem; background: ${isRecent ? hi : lo}; border-radius: 0; border-left: 1px solid ${isRecent ? SDR_PALETTE.particleGold : 'var(--sdr-border)'}; margin-bottom: 0.5rem; font-size: 0.875rem;`;
                 
                 const flexContainer = document.createElement('div');
                 flexContainer.style.cssText = 'display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;';
@@ -240,7 +240,7 @@ export class PissingContest extends Game {
                 const addressDisplay = await this.components.AddressBadge.createWithAddress(winnerAddress, this.web3Provider, {
                     size: 16,
                     formatAddress: true,
-                    addressStyle: 'font-size: 0.7rem; font-family: monospace; color: var(--md-sys-color-on-surface-variant);'
+                    addressStyle: 'font-size: 0.7rem; font-family: monospace; color: var(--sdr-text-light);'
                 });
                 leftDiv.appendChild(addressDisplay);
                 
@@ -250,7 +250,7 @@ export class PissingContest extends Game {
                     <div style="font-weight: bold; font-size: 0.875rem;">
                         ${this.dom.formatWei(detail.prize)}
                     </div>
-                    <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant);">
+                    <div style="font-size: 0.7rem; color: var(--sdr-text-light);">
                         ${detail.donationCount} donations
                     </div>
                 `;
@@ -266,7 +266,7 @@ export class PissingContest extends Game {
             const historyContainer = document.getElementById('winners-history');
             if (historyContainer) {
                 historyContainer.innerHTML = `
-                    <div style="text-align: center; padding: 2rem; color: var(--md-sys-color-on-surface-variant);">
+                    <div style="text-align: center; padding: 2rem; color: var(--sdr-text-light);">
                         Failed to load history
                     </div>
                 `;

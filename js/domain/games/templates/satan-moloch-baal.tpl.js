@@ -21,10 +21,10 @@ export function getTemplate(config = {}) {
                     <span style="font-size: 1.5rem;">${demon.emoji}</span>
                     <span style="font-weight: bold; color: ${demon.color};">${demon.name}</span>
                 </div>
-                <div id="${demon.key}-votes" style="font-size: 0.875rem; color: var(--md-sys-color-on-surface-variant);">0 votes</div>
+                <div id="${demon.key}-votes" style="font-size: 0.875rem; color: var(--sdr-text-light);">0 votes</div>
             </div>
             <div id="${demon.key}-total" style="font-size: 1.1rem; font-weight: bold; margin-bottom: 0.5rem;">0 wei</div>
-            <div style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">
+            <div style="font-size: 0.75rem; color: var(--sdr-text-light);">
                 <span>👑</span> <span id="${demon.key}-top-devotee">None</span>
             </div>
         </div>
@@ -39,7 +39,7 @@ export function getTemplate(config = {}) {
         { key: 'user-total-burned', label: '🔥 Total', color: SDR_PALETTE.particleRed },
     ].map(stat => `
         <div style="padding: 0.75rem; background: ${rgbaFromHex(stat.color, 0.12)}; border-radius: 0; border: 1px solid ${SDR_PALETTE.border}; border-left: 1px solid ${stat.color};">
-            <div style="font-size: 0.7rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 0.25rem;">${stat.label}</div>
+            <div style="font-size: 0.7rem; color: var(--sdr-text-light); margin-bottom: 0.25rem;">${stat.label}</div>
             <div id="${stat.key}" style="font-size: 1rem; font-weight: bold;">0 wei</div>
         </div>
     `).join('');
@@ -68,7 +68,7 @@ export function getTemplate(config = {}) {
                             <span>👹</span>
                             <span>Demon Standings</span>
                         </span>
-                        <span style="font-size: 0.75rem; color: var(--md-sys-color-on-surface-variant);">🔥 <span id="total-burned">0 wei</span></span>
+                        <span style="font-size: 0.75rem; color: var(--sdr-text-light);">🔥 <span id="total-burned">0 wei</span></span>
                     </h3>
                     
                     <div id="demon-standings" style="display: grid; gap: 0.75rem;">

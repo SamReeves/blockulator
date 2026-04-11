@@ -192,7 +192,7 @@ export class WalletConnectComponent {
                 const createLink = document.createElement('a');
                 createLink.textContent = 'Create Badge';
                 createLink.style.cssText = `
-                    color: var(--md-sys-color-primary);
+                    color: var(--sdr-primary);
                     text-decoration: none;
                     font-size: 0.875rem;
                     font-weight: 500;
@@ -203,7 +203,7 @@ export class WalletConnectComponent {
                     align-items: center;
                 `;
                 createLink.onmouseover = () => {
-                    createLink.style.backgroundColor = 'var(--md-sys-color-surface-variant)';
+                    createLink.style.backgroundColor = 'var(--sdr-bg-dark)';
                 };
                 createLink.onmouseout = () => {
                     createLink.style.backgroundColor = 'transparent';

@@ -4,20 +4,20 @@
 
 /* Primary Button */
 .btn-primary {
-    padding: var(--md-sys-spacing-3) var(--md-sys-spacing-6);
+    padding: var(--sdr-space-1) var(--sdr-space-3);
     background-color: var(--sdr-primary);
     color: var(--sdr-text-white);
     border: none;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
     box-shadow: none;
 }
 
 .btn-primary:hover {
-    background-color: var(--sdr-primary-dark);
+    background-color: var(--sdr-secondary);
     transform: none;
     box-shadow: none;
 }
@@ -29,67 +29,67 @@
 
 /* Secondary Button */
 .btn-secondary {
-    padding: var(--md-sys-spacing-3) var(--md-sys-spacing-6);
-    background: var(--md-sys-color-surface-variant);
-    color: var(--md-sys-color-on-surface);
+    padding: var(--sdr-space-1) var(--sdr-space-3);
+    background: var(--sdr-bg-dark);
+    color: var(--sdr-text-dark);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .btn-secondary:hover {
-    background: var(--md-sys-color-surface-container);
-    border-color: var(--md-sys-color-primary);
+    background: var(--sdr-bg-card);
+    border-color: var(--sdr-primary);
 }
 
 /* Small Buttons */
 .btn-small {
-    padding: var(--md-sys-spacing-1) var(--md-sys-spacing-3);
+    padding: 0.25rem var(--sdr-space-1);
     font-size: 0.875rem;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     border: none;
     cursor: pointer;
     font-weight: 500;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .btn-small.btn-primary {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     box-shadow: none;
 }
 
 .btn-small.btn-secondary {
-    background: var(--md-sys-color-surface-container);
-    color: var(--md-sys-color-on-surface);
-    border: 1px solid var(--md-sys-color-outline);
+    background: var(--sdr-bg-card);
+    color: var(--sdr-text-dark);
+    border: 1px solid var(--sdr-border);
 }
 
 /* Large Button */
 .btn-large {
-    padding: var(--md-sys-spacing-4) var(--md-sys-spacing-6);
+    padding: var(--sdr-space-2) var(--sdr-space-3);
     font-size: 1.1rem;
     white-space: nowrap;
 }
 
 /* Submit Button */
 .btn-submit {
-    padding: var(--md-sys-spacing-3) var(--md-sys-spacing-6);
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    padding: var(--sdr-space-1) var(--sdr-space-3);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     border: none;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .btn-submit:hover {
-    background: var(--md-sys-color-primary-container);
+    background: var(--sdr-primary-container);
     transform: none;
     box-shadow: none;
 }
@@ -102,58 +102,58 @@
 
 /* Back Button */
 .btn-back {
-    padding: var(--md-sys-spacing-2) var(--md-sys-spacing-4);
-    background: var(--md-sys-color-surface);
+    padding: 0.5rem var(--sdr-space-2);
+    background: var(--sdr-bg-darker);
     border: var(--sdr-line);
-    border-radius: var(--md-sys-shape-corner-small);
-    color: var(--md-sys-color-on-surface);
+    border-radius: 0;
+    color: var(--sdr-text-dark);
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .btn-back:hover {
-    background: var(--md-sys-color-surface-container);
+    background: var(--sdr-bg-card);
     border-color: var(--sdr-accent);
     transform: none;
 }
 
 /* Play Button */
 .btn-play {
-    padding: var(--md-sys-spacing-4);
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    padding: var(--sdr-space-2);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     border: none;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     cursor: pointer;
     font-weight: 600;
 }
 
 .btn-play:hover {
-    background: var(--md-sys-color-primary-container);
+    background: var(--sdr-primary-container);
 }
 
 /* Toggle Create Button */
 .btn-toggle-create {
     width: 100%;
-    padding: var(--md-sys-spacing-4);
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    padding: var(--sdr-space-2);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     border: none;
-    border-radius: var(--md-sys-shape-corner-medium);
+    border-radius: 0;
     font-weight: 600;
     cursor: pointer;
 }
 
 .btn-toggle-create:hover {
-    background: var(--md-sys-color-primary-container);
+    background: var(--sdr-primary-container);
 }
 
 /* Button Groups */
 .button-group {
     display: flex;
-    gap: var(--md-sys-spacing-3);
+    gap: var(--sdr-space-1);
 }
 
 .button-group .btn-play {
@@ -162,22 +162,22 @@
 
 /* Link Button */
 .btn-link {
-    padding: var(--md-sys-spacing-2) var(--md-sys-spacing-3);
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    padding: 0.5rem var(--sdr-space-1);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     border: none;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     text-decoration: none;
     text-align: center;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
     display: inline-block;
 }
 
 .btn-link:hover {
-    background: var(--md-sys-color-primary-container);
+    background: var(--sdr-primary-container);
 }
 
 /* Close Button */
@@ -186,26 +186,26 @@
     border: none;
     font-size: 1.25rem;
     cursor: pointer;
-    color: var(--md-sys-color-on-surface-variant);
-    padding: var(--md-sys-spacing-1);
-    transition: color var(--md-sys-motion-duration-short);
+    color: var(--sdr-text-dark-variant);
+    padding: 0.25rem;
+    transition: color var(--sdr-duration-short);
 }
 
 .btn-close:hover {
-    color: var(--md-sys-color-on-surface);
+    color: var(--sdr-text-dark);
 }
 
 /* Splash Button */
 .btn-splash {
-    padding: var(--md-sys-spacing-2) var(--md-sys-spacing-3);
+    padding: 0.5rem var(--sdr-space-1);
     background-color: var(--sdr-bg-card);
     color: var(--sdr-text);
     border: 1px solid var(--sdr-border);
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
     white-space: nowrap;
 }
 
@@ -217,19 +217,19 @@
 
 /* Discussion Open Button */
 .btn-open-discussion {
-    padding: var(--md-sys-spacing-2) var(--md-sys-spacing-3);
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    padding: 0.5rem var(--sdr-space-1);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     border: none;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .btn-open-discussion:hover {
-    background: var(--md-sys-color-primary-container);
+    background: var(--sdr-primary-container);
     transform: none;
 }
 
@@ -237,13 +237,13 @@
 .btn-copy-inline,
 .btn-etherscan-inline {
     padding: 2px 6px;
-    background: var(--md-sys-color-surface-container);
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-small);
-    color: var(--md-sys-color-on-surface);
+    background: var(--sdr-bg-card);
+    border: 1px solid var(--sdr-border);
+    border-radius: 0;
+    color: var(--sdr-text-dark);
     font-size: 0.75rem;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
@@ -251,13 +251,13 @@
 }
 
 .btn-copy-inline:hover {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     transform: none;
 }
 
 .btn-etherscan-inline:hover {
-    background: var(--md-sys-color-secondary);
+    background: var(--sdr-secondary);
     color: var(--sdr-text-white);
     transform: none;
 }
@@ -265,48 +265,48 @@
 /* Expand/Collapse Message */
 .btn-expand-message,
 .btn-collapse-message {
-    margin-left: var(--md-sys-spacing-2);
-    padding: var(--md-sys-spacing-1) var(--md-sys-spacing-2);
-    background: var(--md-sys-color-surface-container);
-    border: 1px solid var(--md-sys-color-outline);
-    border-radius: var(--md-sys-shape-corner-small);
-    color: var(--md-sys-color-primary);
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--sdr-bg-card);
+    border: 1px solid var(--sdr-border);
+    border-radius: 0;
+    color: var(--sdr-primary);
     font-size: 0.75rem;
     cursor: pointer;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .btn-expand-message:hover,
 .btn-collapse-message:hover {
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
 }
 
 /* Copy ABI Button */
 .btn-copy-abi {
-    margin-top: var(--md-sys-spacing-3);
-    padding: var(--md-sys-spacing-2) var(--md-sys-spacing-4);
-    background: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    margin-top: var(--sdr-space-1);
+    padding: 0.5rem var(--sdr-space-2);
+    background: var(--sdr-primary);
+    color: var(--sdr-text-white);
     border: none;
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     cursor: pointer;
     font-size: 0.875rem;
-    transition: all var(--md-sys-motion-duration-short);
+    transition: all var(--sdr-duration-short);
 }
 
 .btn-copy-abi:hover {
-    background: var(--md-sys-color-primary-container);
+    background: var(--sdr-primary-container);
 }
 
 /* Copy Button (generic) */
 .btn-copy {
-    padding: var(--md-sys-spacing-1);
+    padding: 0.25rem;
     background: none;
     border: none;
     cursor: pointer;
     font-size: 1rem;
-    transition: transform var(--md-sys-motion-duration-short);
+    transition: transform var(--sdr-duration-short);
 }
 
 .btn-copy:hover {
@@ -322,7 +322,7 @@
     background: color-mix(in srgb, var(--btn-color, var(--panel-color, var(--sdr-primary))) 35%, var(--sdr-bg-card));
     border: var(--sdr-line);
     color: var(--sdr-text-white);
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     font-weight: 600;
     cursor: pointer;
     box-shadow: none;
@@ -348,7 +348,7 @@
     background: var(--sdr-bg-card);
     border: var(--sdr-line);
     color: var(--sdr-text);
-    border-radius: var(--md-sys-shape-corner-small);
+    border-radius: 0;
     font-weight: 600;
     cursor: pointer;
     box-shadow: none;
@@ -359,7 +359,7 @@
 .btn-action-secondary:hover {
     transform: none;
     border-color: var(--sdr-accent);
-    background: var(--bg-hover);
+    background: var(--sdr-outline-variant);
     box-shadow: none;
 }
 

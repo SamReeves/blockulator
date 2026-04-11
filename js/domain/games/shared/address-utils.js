@@ -47,14 +47,14 @@ export async function renderAddressInElement(elementId, address, web3Provider, o
     } = options;
     
     if (isZeroAddress(address)) {
-        element.innerHTML = `<span style="color: var(--md-sys-color-on-surface-variant);">${emptyText}</span>`;
+        element.innerHTML = `<span style="color: var(--sdr-text-light);">${emptyText}</span>`;
         return;
     }
     
     const addressHtml = `
         <span class="address-display" style="display: flex; align-items: center; gap: 0.5rem;">
             <span style="font-family: monospace; font-size: 0.85rem;">${formatAddress(address)}</span>
-            ${isCurrentUser ? `<span style="color: var(--md-sys-color-primary); font-size: 0.75rem;">${currentUserSuffix}</span>` : ''}
+            ${isCurrentUser ? `<span style="color: var(--sdr-primary); font-size: 0.75rem;">${currentUserSuffix}</span>` : ''}
             <span id="${elementId}-badge"></span>
         </span>
     `;
