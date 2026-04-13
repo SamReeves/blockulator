@@ -1,186 +1,153 @@
 /* ============================================
-   BUTTONS
+   BUTTONS — Composable SDR Button System
    ============================================ */
 
-/* Primary Button */
-.btn-primary {
+/* Base button styles shared by all buttons */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-submit,
+.btn-back,
+.btn-play,
+.btn-toggle-create,
+.btn-link,
+.btn-splash,
+.btn-open-discussion,
+.btn-copy-abi,
+.btn-action,
+.btn-action-secondary {
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--sdr-duration-short);
+}
+
+/* Primary variant (default) */
+.btn,
+.btn-primary,
+.btn-submit,
+.btn-play,
+.btn-toggle-create,
+.btn-link,
+.btn-open-discussion,
+.btn-copy-abi {
     padding: var(--sdr-space-1) var(--sdr-space-3);
-    background-color: var(--sdr-primary);
+    background: var(--sdr-primary);
     color: var(--sdr-text-white);
     border: none;
-    border-radius: 0;
     font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--sdr-duration-short);
-    box-shadow: none;
 }
 
-.btn-primary:hover {
-    background-color: var(--sdr-secondary);
-    transform: none;
-    box-shadow: none;
+.btn:hover,
+.btn-primary:hover,
+.btn-submit:hover,
+.btn-play:hover,
+.btn-toggle-create:hover,
+.btn-link:hover,
+.btn-open-discussion:hover,
+.btn-copy-abi:hover {
+    background: var(--sdr-secondary);
 }
 
+.btn:active,
 .btn-primary:active {
-    transform: none;
     opacity: 0.92;
 }
 
-/* Secondary Button */
-.btn-secondary {
+.btn:disabled,
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Secondary variant */
+.btn-secondary,
+.btn-back,
+.btn-splash {
     padding: var(--sdr-space-1) var(--sdr-space-3);
     background: var(--sdr-bg-dark);
     color: var(--sdr-text-dark);
     border: var(--sdr-line);
-    border-radius: 0;
     font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--sdr-duration-short);
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover,
+.btn-back:hover {
     background: var(--sdr-bg-card);
     border-color: var(--sdr-primary);
 }
 
-/* Small Buttons */
-.btn-small {
+.btn-splash:hover {
+    border-color: var(--sdr-accent);
+    color: var(--sdr-text-white);
+}
+
+/* Size modifiers */
+.btn-small,
+.btn--sm {
     padding: 0.25rem var(--sdr-space-1);
     font-size: 0.875rem;
-    border-radius: 0;
-    border: none;
-    cursor: pointer;
     font-weight: 500;
-    transition: all var(--sdr-duration-short);
 }
 
-.btn-small.btn-primary {
-    background: var(--sdr-primary);
-    color: var(--sdr-text-white);
-    box-shadow: none;
-}
-
-.btn-small.btn-secondary {
-    background: var(--sdr-bg-card);
-    color: var(--sdr-text-dark);
-    border: 1px solid var(--sdr-border);
-}
-
-/* Large Button */
-.btn-large {
+.btn-large,
+.btn--lg {
     padding: var(--sdr-space-2) var(--sdr-space-3);
     font-size: 1.1rem;
     white-space: nowrap;
 }
 
-/* Submit Button */
-.btn-submit {
-    padding: var(--sdr-space-1) var(--sdr-space-3);
-    background: var(--sdr-primary);
-    color: var(--sdr-text-white);
-    border: none;
-    border-radius: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--sdr-duration-short);
+/* Block (full-width) modifier */
+.btn--block,
+.btn-toggle-create {
+    width: 100%;
 }
 
-.btn-submit:hover {
-    background: var(--sdr-primary-container);
-    transform: none;
-    box-shadow: none;
-}
-
-.btn-submit:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* Back Button */
+/* Specific button adjustments */
 .btn-back {
     padding: 0.5rem var(--sdr-space-2);
     background: var(--sdr-bg-darker);
-    border: var(--sdr-line);
-    border-radius: 0;
-    color: var(--sdr-text-dark);
     font-size: 0.875rem;
     font-weight: 500;
-    cursor: pointer;
-    transition: all var(--sdr-duration-short);
 }
 
 .btn-back:hover {
-    background: var(--sdr-bg-card);
     border-color: var(--sdr-accent);
-    transform: none;
 }
 
-/* Play Button */
 .btn-play {
     padding: var(--sdr-space-2);
-    background: var(--sdr-primary);
-    color: var(--sdr-text-white);
-    border: none;
-    border-radius: 0;
-    cursor: pointer;
-    font-weight: 600;
 }
 
-.btn-play:hover {
-    background: var(--sdr-primary-container);
-}
-
-/* Toggle Create Button */
-.btn-toggle-create {
-    width: 100%;
-    padding: var(--sdr-space-2);
-    background: var(--sdr-primary);
-    color: var(--sdr-text-white);
-    border: none;
-    border-radius: 0;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-toggle-create:hover {
-    background: var(--sdr-primary-container);
-}
-
-/* Button Groups */
-.button-group {
-    display: flex;
-    gap: var(--sdr-space-1);
-}
-
-.button-group .btn-play {
-    flex: 1;
-}
-
-/* Link Button */
 .btn-link {
     padding: 0.5rem var(--sdr-space-1);
-    background: var(--sdr-primary);
-    color: var(--sdr-text-white);
-    border: none;
-    border-radius: 0;
-    text-decoration: none;
-    text-align: center;
     font-size: 0.875rem;
     font-weight: 500;
-    cursor: pointer;
-    transition: all var(--sdr-duration-short);
+    text-decoration: none;
+    text-align: center;
     display: inline-block;
 }
 
-.btn-link:hover {
-    background: var(--sdr-primary-container);
+.btn-splash {
+    padding: 0.5rem var(--sdr-space-1);
+    background: var(--sdr-bg-card);
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
 }
 
-/* Close Button */
+.btn-open-discussion {
+    padding: 0.5rem var(--sdr-space-1);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.btn-copy-abi {
+    margin-top: var(--sdr-space-1);
+    padding: 0.5rem var(--sdr-space-2);
+    font-size: 0.875rem;
+}
+
+/* Close button (icon-only) */
 .btn-close {
     background: none;
     border: none;
@@ -195,51 +162,26 @@
     color: var(--sdr-text-dark);
 }
 
-/* Splash Button */
-.btn-splash {
-    padding: 0.5rem var(--sdr-space-1);
-    background-color: var(--sdr-bg-card);
-    color: var(--sdr-text);
-    border: 1px solid var(--sdr-border);
-    border-radius: 0;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all var(--sdr-duration-short);
-    white-space: nowrap;
-}
-
-.btn-splash:hover {
-    border-color: var(--sdr-accent);
-    color: var(--sdr-text-white);
-    box-shadow: none;
-}
-
-/* Discussion Open Button */
-.btn-open-discussion {
-    padding: 0.5rem var(--sdr-space-1);
-    background: var(--sdr-primary);
-    color: var(--sdr-text-white);
+/* Copy button (icon-only) */
+.btn-copy {
+    padding: 0.25rem;
+    background: none;
     border: none;
-    border-radius: 0;
-    font-size: 0.875rem;
-    font-weight: 500;
     cursor: pointer;
-    transition: all var(--sdr-duration-short);
+    font-size: 1rem;
+    transition: opacity var(--sdr-duration-short);
 }
 
-.btn-open-discussion:hover {
-    background: var(--sdr-primary-container);
-    transform: none;
+.btn-copy:hover {
+    opacity: 0.85;
 }
 
-/* Copy Buttons (inline) */
+/* Inline buttons (tiny, for use in text/tables) */
 .btn-copy-inline,
 .btn-etherscan-inline {
     padding: 2px 6px;
     background: var(--sdr-bg-card);
     border: 1px solid var(--sdr-border);
-    border-radius: 0;
     color: var(--sdr-text-dark);
     font-size: 0.75rem;
     cursor: pointer;
@@ -253,23 +195,20 @@
 .btn-copy-inline:hover {
     background: var(--sdr-primary);
     color: var(--sdr-text-white);
-    transform: none;
 }
 
 .btn-etherscan-inline:hover {
     background: var(--sdr-secondary);
     color: var(--sdr-text-white);
-    transform: none;
 }
 
-/* Expand/Collapse Message */
+/* Message expand/collapse buttons */
 .btn-expand-message,
 .btn-collapse-message {
     margin-left: 0.5rem;
     padding: 0.25rem 0.5rem;
     background: var(--sdr-bg-card);
     border: 1px solid var(--sdr-border);
-    border-radius: 0;
     color: var(--sdr-primary);
     font-size: 0.75rem;
     cursor: pointer;
@@ -282,39 +221,7 @@
     color: var(--sdr-text-white);
 }
 
-/* Copy ABI Button */
-.btn-copy-abi {
-    margin-top: var(--sdr-space-1);
-    padding: 0.5rem var(--sdr-space-2);
-    background: var(--sdr-primary);
-    color: var(--sdr-text-white);
-    border: none;
-    border-radius: 0;
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all var(--sdr-duration-short);
-}
-
-.btn-copy-abi:hover {
-    background: var(--sdr-primary-container);
-}
-
-/* Copy Button (generic) */
-.btn-copy {
-    padding: 0.25rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: transform var(--sdr-duration-short);
-}
-
-.btn-copy:hover {
-    transform: none;
-    opacity: 0.85;
-}
-
-/* Game-specific Action Buttons */
+/* Game action buttons (panel-color aware) */
 .btn-action {
     width: 100%;
     padding: 0.75rem;
@@ -322,22 +229,15 @@
     background: color-mix(in srgb, var(--btn-color, var(--panel-color, var(--sdr-primary))) 35%, var(--sdr-bg-card));
     border: var(--sdr-line);
     color: var(--sdr-text-white);
-    border-radius: 0;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: none;
     transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .btn-action:hover {
-    transform: none;
     border-color: var(--sdr-accent);
     background: color-mix(in srgb, var(--btn-color, var(--panel-color, var(--sdr-primary))) 45%, var(--sdr-bg-card));
-    box-shadow: none;
 }
 
 .btn-action:active {
-    transform: none;
     opacity: 0.9;
 }
 
@@ -348,22 +248,25 @@
     background: var(--sdr-bg-card);
     border: var(--sdr-line);
     color: var(--sdr-text);
-    border-radius: 0;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: none;
     transition: border-color 0.2s ease, background-color 0.2s ease;
     margin-top: 0.75rem;
 }
 
 .btn-action-secondary:hover {
-    transform: none;
     border-color: var(--sdr-accent);
     background: var(--sdr-outline-variant);
-    box-shadow: none;
 }
 
 .btn-action-secondary:active {
-    transform: none;
     opacity: 0.9;
+}
+
+/* Button groups */
+.button-group {
+    display: flex;
+    gap: var(--sdr-space-1);
+}
+
+.button-group .btn-play {
+    flex: 1;
 }

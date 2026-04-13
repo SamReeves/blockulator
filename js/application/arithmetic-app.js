@@ -5,6 +5,7 @@
 
 import { loadContract } from '../infrastructure/blockchain/load-contract.js';
 import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js';
+import { SourceViewer } from '../presentation/components/source-viewer.js';
 import { getContractMetadata } from '../infrastructure/config/contract-registry.js';
 import { decimalToFp127, fp127ToDecimal, isValidFp127Decimal, formatFp127Display } from '../infrastructure/math/fp127-math.js';
 
@@ -261,63 +262,48 @@ export class ArithmeticApp {
         ];
 
         container.innerHTML = `
-            <div class="fp127-contracts-section">
-                <h2 class="section-title">Source Code</h2>
-                <div id="fp127-contract-grid" class="fp127-contract-grid"></div>
+            <div class="fp127-contracts-section source-section-lazy" style="opacity: 0;">
+                <div class="fp127-contract-header">
+                    <h2 class="section-title">Source Code</h2>
+                    <p class="section-subtitle">Pure Huff Assembly • 12 Modules</p>
+                </div>
+                <div id="fp127-contract-info-row"></div>
+                <div id="fp127-source-viewers"></div>
             </div>
         `;
 
-        const grid = document.getElementById('fp127-contract-grid');
-
-        // Contract card (address, Etherscan, ABI)
-        const contractCard = document.createElement('div');
-        contractCard.className = 'contract-info-card';
-        contractCard.innerHTML = `
-            <div class="contract-card-header">
-                <h4>${metadata.emoji} ${metadata.name} Contract</h4>
-                <p class="contract-card-description">Deployed contract — Etherscan link and ABI</p>
-            </div>
-        `;
+        // Contract info row (address, Etherscan, ABI)
+        const infoRow = document.getElementById('fp127-contract-info-row');
         const contractInfo = ContractInfoRenderer.createContractInfo(
             metadata.contractAddress,
             null,
             metadata.abiFile
         );
-        contractInfo.style.marginTop = '1rem';
-        contractCard.appendChild(contractInfo);
-        grid.appendChild(contractCard);
+        infoRow.appendChild(contractInfo);
 
-        // Source module cards
-        for (const mod of SOURCE_MODULES) {
-            const card = document.createElement('div');
-            card.className = 'contract-info-card';
-            card.innerHTML = `
-                <div class="contract-card-header">
-                    <h4>0x ${mod.name}</h4>
-                    <p class="contract-card-description">${mod.desc}</p>
-                </div>
-            `;
-            const sourceInfo = document.createElement('div');
-            sourceInfo.className = 'contract-info';
-            sourceInfo.style.marginTop = '1rem';
-
-            const pathLabel = document.createElement('span');
-            pathLabel.className = 'contract-label';
-            pathLabel.textContent = mod.file.split('/').pop();
-            pathLabel.style.fontFamily = "'Courier New', monospace";
-            pathLabel.style.fontSize = '0.75rem';
-            sourceInfo.appendChild(pathLabel);
-
-            const viewSourceBtn = document.createElement('button');
-            viewSourceBtn.className = 'contract-badge contract-badge-source';
-            viewSourceBtn.innerHTML = '📜 View Source';
-            viewSourceBtn.title = `View ${mod.name} source code`;
-            viewSourceBtn.onclick = () => ContractInfoRenderer.showSourceModal(mod.file);
-            sourceInfo.appendChild(viewSourceBtn);
-
-            card.appendChild(sourceInfo);
-            grid.appendChild(card);
-        }
+        // Source viewers - all collapsed by default, lazy loaded when section is visible
+        const viewersContainer = document.getElementById('fp127-source-viewers');
+        const section = container.querySelector('.fp127-contracts-section');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const sources = SOURCE_MODULES.map(mod => ({
+                        sourceUrl: mod.file,
+                        title: `${mod.name} — ${mod.desc}`,
+                        language: 'asm'
+                    }));
+                    
+                    const group = SourceViewer.createGroup(sources);
+                    viewersContainer.appendChild(group);
+                    section.style.opacity = '1';
+                    section.style.transition = 'opacity 0.3s ease';
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        observer.observe(section);
     }
 
     setupListeners() {
@@ -812,7 +798,17 @@ export class ArithmeticApp {
             console.error('Calculation error:', error);
             this.showStatus(`Error: ${error.message || 'Calculation failed'}`, 'error');
             resultEl.textContent = 'Error';
+        } finally {
+            this._scrollFp127LcdToEnd();
         }
+    }
+
+    _scrollFp127LcdToEnd() {
+        const inner = document.querySelector('#fp127-container .ti-lcd-inner');
+        if (!inner) return;
+        requestAnimationFrame(() => {
+            inner.scrollLeft = inner.scrollWidth;
+        });
     }
 
     clear() {
@@ -828,6 +824,7 @@ export class ArithmeticApp {
         this.lastRawResult = null;
         this.showStatus('', '');
         this.updateExpression();
+        this._scrollFp127LcdToEnd();
     }
 
     copyResult() {
@@ -856,6 +853,7 @@ export class ArithmeticApp {
                 rawEl.textContent = `0x${hex}`;
                 rawEl.style.display = 'block';
             }
+            this._scrollFp127LcdToEnd();
         } else {
             hexBtn.classList.remove('arith-hex-active');
             rawEl.style.display = 'none';

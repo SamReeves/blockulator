@@ -4,8 +4,8 @@
 
 /* Form Panel (sliding panel for create forms) */
 .form-panel {
-    background: var(--sdr-bg-card);
-    border: 1px solid var(--sdr-border);
+    background: var(--sdr-glass);
+    border: none;
     border-radius: 0;
     padding: var(--sdr-space-3);
     margin-bottom: var(--sdr-space-3);
@@ -53,8 +53,8 @@
 .form-group textarea,
 .form-group select {
     padding: var(--sdr-space-1);
-    background: var(--sdr-bg-darker);
-    border: 1px solid var(--sdr-border);
+    background: var(--sdr-glass);
+    border: 1px solid var(--sdr-hairline-soft);
     border-radius: 0;
     color: var(--sdr-text-dark);
     font-size: 1rem;
@@ -64,7 +64,8 @@
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: var(--sdr-primary);
+    border-color: color-mix(in srgb, var(--sdr-primary) 45%, var(--sdr-border));
+    background: var(--sdr-glass-strong);
 }
 
 .form-group textarea {
@@ -298,7 +299,6 @@
     outline: 1px solid var(--sdr-accent);
     outline-offset: 1px;
     border-color: var(--sdr-accent);
-    box-shadow: none;
 }
 
 /* Generic input classes */

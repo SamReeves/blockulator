@@ -17,8 +17,7 @@
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: none;
-    border-bottom: var(--sdr-line);
+    border-bottom: none;
 }
 
 .app-error-content {
@@ -49,14 +48,14 @@
 
 /* Header */
 .app-header {
-    background: color-mix(in srgb, var(--sdr-bg-dark) 92%, transparent);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: var(--sdr-void-surface);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
     padding: 0.25rem var(--sdr-space-2);
     display: grid;
     grid-template-columns: 0.8fr auto 1fr;
     align-items: center;
-    border-bottom: 1px solid var(--sdr-border);
+    border-bottom: none;
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -118,9 +117,9 @@
 }
 
 .nav-link-active {
-    background: var(--sdr-bg-card);
+    background: var(--sdr-glass-strong);
     color: var(--sdr-text-white);
-    border: 1px solid var(--sdr-border);
+    border: none;
 }
 
 /* Header Right */
@@ -173,24 +172,23 @@
 }
 
 .copy-btn {
-    background: var(--sdr-bg-card);
-    border: var(--sdr-line);
+    background: transparent;
+    border: none;
     border-radius: 0;
     padding: 2px 6px;
     cursor: pointer;
     font-size: 0.75rem;
-    transition: all var(--sdr-duration-short);
+    transition: background-color var(--sdr-duration-short), color var(--sdr-duration-short);
     color: var(--sdr-text-light);
 }
 
 .copy-btn:hover {
-    background: color-mix(in srgb, var(--sdr-text-white) 10%, transparent);
-    transform: none;
+    background: var(--sdr-glass);
+    color: var(--sdr-text-dark);
 }
 
 .copy-btn.copied {
-    background: color-mix(in srgb, var(--sdr-success) 20%, transparent);
-    border-color: var(--sdr-success);
+    background: color-mix(in srgb, var(--sdr-success) 18%, transparent);
     color: var(--sdr-success);
 }
 
@@ -217,8 +215,6 @@
 
 .testnet-badge:hover {
     background: var(--sdr-warning-container);
-    transform: none;
-    box-shadow: none;
 }
 
 .testnet-badge.mainnet {
@@ -245,10 +241,11 @@
 .network-dropdown {
     position: fixed;
     z-index: 10000;
-    background: var(--sdr-bg-darker);
-    border: var(--sdr-line);
+    background: var(--sdr-void-surface-strong);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: none;
     border-radius: 0;
-    box-shadow: none;
     min-width: 200px;
     overflow: hidden;
     animation: dropdownFadeIn 0.2s ease;
@@ -326,10 +323,10 @@
 
 /* Footer */
 .app-footer {
-    background: var(--sdr-bg-dark);
+    background: transparent;
     padding: var(--sdr-space-2);
     text-align: center;
-    border-top: 1px solid var(--sdr-border);
+    border-top: none;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -361,7 +358,6 @@
 
 .footer-button:hover {
     color: var(--sdr-warning);
-    transform: none;
 }
 
 .footer-separator {

@@ -5,6 +5,7 @@
 import { CALCULATOR_REGISTRY, CATEGORIES, getCalculatorById } from '../domain/calculators/calculator-registry.js?v=2';
 import { loadContract } from '../infrastructure/blockchain/load-contract.js?v=2';
 import { ContractInfoRenderer } from '../presentation/renderers/contract-info-renderer.js?v=2';
+import { SourceViewer } from '../presentation/components/source-viewer.js';
 import { getContractsByType, getContractMetadata } from '../infrastructure/config/contract-registry.js?v=2';
 
 // Explicit key layout — every function has a visible button.
@@ -79,9 +80,8 @@ export class CalculatorApp {
                 </div>
             </div>
 
-            <!-- Smart Contracts Section -->
-            <div class="calculator-contracts-section">
-                <h2 class="section-title">Smart Contracts</h2>
+            <!-- Source Code Section (lazy loaded) -->
+            <div class="calculator-contracts-section source-section-lazy" style="opacity: 0;">
                 <div id="calculator-contract-info"></div>
             </div>
         `;
@@ -102,39 +102,109 @@ export class CalculatorApp {
     }
 
     /**
-     * Render contract info section with links to contracts
+     * Render contract info section with links to contracts (lazy loaded when visible)
      */
     renderContractInfo() {
         const container = document.getElementById('calculator-contract-info');
         if (!container) return;
 
+        const section = container.closest('.calculator-contracts-section');
+        if (!section) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    this._populateContractInfo(container);
+                    section.style.opacity = '1';
+                    section.style.transition = 'opacity 0.3s ease';
+                    observer.disconnect();
+                }
+            });
+        }, { threshold: 0.1 });
+
+        observer.observe(section);
+    }
+
+    _populateContractInfo(container) {
         container.innerHTML = '';
 
-        // Get all calculator contracts from registry
         const calculatorContracts = getContractsByType('calculator');
 
-        // Render each contract
+        // Group contracts by their source file to avoid duplicates
+        const sourceFiles = new Map();
+        
         calculatorContracts.forEach(contractKey => {
             const metadata = getContractMetadata(contractKey);
-            
-            const contractCard = document.createElement('div');
-            contractCard.className = 'contract-info-card';
-            contractCard.innerHTML = `
-                <div class="contract-card-header">
-                    <h4>${metadata.emoji} ${metadata.name}</h4>
-                    <p class="contract-card-description">${metadata.description}</p>
-                </div>
-            `;
-            
-            const contractInfo = ContractInfoRenderer.createContractInfo(
-                metadata.contractAddress,
-                metadata.sourceFile,
-                metadata.abiFile
-            );
-            contractInfo.style.marginTop = '1rem';
-            contractCard.appendChild(contractInfo);
-            container.appendChild(contractCard);
+            if (metadata.sourceFile && !sourceFiles.has(metadata.sourceFile)) {
+                sourceFiles.set(metadata.sourceFile, {
+                    sourceFile: metadata.sourceFile,
+                    abiFile: metadata.abiFile,
+                    name: metadata.name,
+                    description: metadata.description,
+                    contractAddress: metadata.contractAddress
+                });
+            }
         });
+
+        // Build source viewer entries
+        const sources = [];
+        sourceFiles.forEach((meta, sourceFile) => {
+            const filename = sourceFile.split('/').pop();
+            sources.push({
+                sourceUrl: sourceFile,
+                title: `${filename} — ${meta.description}`,
+                language: 'python'
+            });
+        });
+
+        // Add ABI viewers
+        const abiFiles = new Set();
+        calculatorContracts.forEach(contractKey => {
+            const metadata = getContractMetadata(contractKey);
+            if (metadata.abiFile && !abiFiles.has(metadata.abiFile)) {
+                abiFiles.add(metadata.abiFile);
+                sources.push({
+                    sourceUrl: metadata.abiFile,
+                    title: `${metadata.abiFile.split('/').pop()} — ABI`,
+                    language: 'json'
+                });
+            }
+        });
+
+        // Create header with contract links
+        const headerSection = document.createElement('div');
+        headerSection.className = 'fp127-contract-header';
+        headerSection.innerHTML = `
+            <h2 class="section-title">Source Code</h2>
+            <p class="section-subtitle">Vyper 0.4 • ${sourceFiles.size} Modules</p>
+        `;
+        container.appendChild(headerSection);
+
+        // Contract address row
+        const infoRow = document.createElement('div');
+        infoRow.id = 'vyper-contract-info-row';
+        infoRow.style.marginBottom = 'var(--sdr-space-3)';
+        infoRow.style.paddingBottom = 'var(--sdr-space-2)';
+        
+        // Just show one representative contract link (first one)
+        const firstMeta = sourceFiles.values().next().value;
+        if (firstMeta) {
+            const contractInfo = ContractInfoRenderer.createContractInfo(
+                firstMeta.contractAddress,
+                null,
+                firstMeta.abiFile
+            );
+            infoRow.appendChild(contractInfo);
+        }
+        container.appendChild(infoRow);
+
+        // Source viewers container
+        const viewersContainer = document.createElement('div');
+        viewersContainer.id = 'vyper-source-viewers';
+        
+        const group = SourceViewer.createGroup(sources);
+        viewersContainer.appendChild(group);
+        container.appendChild(viewersContainer);
     }
 
     buildButtons() {
@@ -327,7 +397,17 @@ export class CalculatorApp {
             const { reason, rangeHint } = this.parseError(error, calc);
             resultEl.textContent = `ERR: ${reason}`;
             this.showStatus(rangeHint || reason, 'error');
+        } finally {
+            this._scrollVyperLcdToEnd();
         }
+    }
+
+    _scrollVyperLcdToEnd() {
+        const inner = document.querySelector('#vyper-container .ti-lcd-inner');
+        if (!inner) return;
+        requestAnimationFrame(() => {
+            inner.scrollLeft = inner.scrollWidth;
+        });
     }
 
     getExtraInputValues() {

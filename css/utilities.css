@@ -6,8 +6,6 @@
 .sdr-panel {
     background: var(--sdr-panel);
     border: var(--sdr-line);
-    box-shadow: none;
-    border-radius: 0;
 }
 
 .sdr-panel--padded {

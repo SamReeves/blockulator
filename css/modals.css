@@ -8,20 +8,22 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: color-mix(in srgb, var(--sdr-bg-darker) 75%, transparent);
+    background: color-mix(in srgb, var(--sdr-bg-darker) 55%, transparent);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10000;
     padding: 2rem;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .modal-content {
-    background: var(--sdr-bg-dark);
-    border: var(--sdr-line);
+    background: var(--sdr-void-surface-strong);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: none;
     border-radius: 0;
-    box-shadow: none;
     max-width: 90vw;
     max-height: 90vh;
     display: flex;
@@ -39,8 +41,8 @@
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 2rem;
-    border-bottom: 1px solid var(--sdr-border);
-    background: var(--sdr-bg-card);
+    border-bottom: none;
+    background: transparent;
 }
 
 .modal-title {
@@ -62,14 +64,14 @@
 }
 
 .modal-close:hover {
-    background: var(--sdr-bg-dark);
+    background: var(--sdr-glass);
     color: var(--sdr-text-dark);
 }
 
 .modal-file-info {
     padding: 0.75rem 2rem;
-    background: var(--sdr-bg-dark);
-    border-bottom: 1px solid var(--sdr-border);
+    background: transparent;
+    border-bottom: none;
 }
 
 .file-path {
@@ -82,13 +84,13 @@
     flex: 1;
     overflow: auto;
     padding: 0;
-    background: var(--sdr-bg-darker);
+    background: transparent;
 }
 
 .source-code {
     margin: 0;
     padding: 2rem;
-    background: var(--sdr-bg-darker);
+    background: transparent;
     overflow-x: auto;
 }
 
@@ -106,8 +108,8 @@
     justify-content: flex-end;
     gap: 1rem;
     padding: 1.5rem 2rem;
-    border-top: 1px solid var(--sdr-border);
-    background: var(--sdr-bg-card);
+    border-top: none;
+    background: transparent;
 }
 
 .modal-footer button {

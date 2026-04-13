@@ -1,10 +1,9 @@
 /* ============================================
    Blockulator tokens — extends vendor/sdr/lib/tokens.css
-   Adds: error/warning/success, particles, motion, utilities.
-   Uses SDR phi spacing: --sdr-space-1..4 from vendor tokens.
+   Semantic colors, particle accents, motion, and utilities.
    ============================================ */
 :root {
-    /* Semantic colors (not in SDR base) */
+    /* Semantic colors */
     --sdr-error: #ef4444;
     --sdr-warning: #f59e0b;
     --sdr-success: #00694e;
@@ -12,13 +11,13 @@
     --sdr-warning-container: #422006;
     --sdr-success-container: #14532d;
 
-    /* Particle accent colors (from SDR palette.js indices 0, 8, 11, 15) */
+    /* Particle accent colors (vendor palette.js indices 0, 8, 11, 15) */
     --sdr-particle-emerald: #00694e;
     --sdr-particle-red: #e4002b;
     --sdr-particle-gold: #a09860;
     --sdr-particle-sapphire: #4070a0;
 
-    /* Motion */
+    /* Motion (extends vendor panel-ease/fade-duration) */
     --sdr-duration-short: 150ms;
     --sdr-duration-medium: 250ms;
     --sdr-duration-long: 400ms;
@@ -27,6 +26,14 @@
 
     /* Utilities */
     --sdr-line: 1px solid var(--sdr-border);
+    /* Semi-transparent surfaces — show particle background through UI chrome */
+    --sdr-glass: color-mix(in srgb, var(--sdr-bg-darker) 42%, transparent);
+    --sdr-glass-strong: color-mix(in srgb, var(--sdr-bg-darker) 62%, transparent);
+
+    /* Void — brand rhythm: depth from emptiness + particles; edges nearly absent */
+    --sdr-void-surface: color-mix(in srgb, var(--sdr-bg-darker) 34%, transparent);
+    --sdr-void-surface-strong: color-mix(in srgb, var(--sdr-bg-darker) 52%, transparent);
+    --sdr-void-edge: 1px solid color-mix(in srgb, var(--sdr-text-light) 6%, transparent);
     --sdr-panel: var(--sdr-bg-card);
     --sdr-chart-track: rgba(255, 255, 255, 0.14);
     --sdr-pixel-paper: #ffffff;

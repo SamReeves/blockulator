@@ -6,6 +6,7 @@
    responsive overrides last.
    ============================================ */
 
+@import url('../vendor/sdr/lib/tokens.css');
 @import url('tokens.css');
 @import url('reset.css');
 @import url('utilities.css');
@@ -13,12 +14,9 @@
 @import url('buttons.css');
 @import url('forms.css');
 @import url('tables.css');
-@import url('games.css');
-@import url('calculators.css');
-@import url('ti-calculator.css');
-@import url('futures.css');
-@import url('about.css');
-@import url('benchmarks.css');
+@import url('game-ui.css');
+@import url('calculator.css');
+@import url('pages.css');
 @import url('modals.css');
-@import url('components.css');
+@import url('source-viewer.css');
 @import url('responsive.css');
