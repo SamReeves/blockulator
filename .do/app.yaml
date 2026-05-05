@@ -1,6 +1,6 @@
-name: whalegames
+name: blockulator
 static_sites:
-  - name: whalegames-frontend
+  - name: blockulator-frontend
     github:
       branch: testnet
       deploy_on_push: true
