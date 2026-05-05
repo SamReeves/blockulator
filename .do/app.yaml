@@ -2,7 +2,8 @@ name: blockulator
 static_sites:
   - name: blockulator-frontend
     github:
-      branch: testnet
+      repo: samreeves/blockulator
+      branch: master
       deploy_on_push: true
-    build_command: mkdir -p dist && cp index.html blockulator.png blockulator_favicon.png dist/ && cp -r js contracts docs css dist/
+    build_command: mkdir -p dist && cp index.html blockulator.png blockulator_favicon.png dist/ && cp -r js dist/js && cp -r contracts dist/contracts && cp -r css dist/css && cp -r docs dist/docs && cp -r vendor dist/vendor
     output_dir: dist
