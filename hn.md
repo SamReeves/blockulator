@@ -4,6 +4,7 @@ FP127 is a 127.128 signed fixed-point library written in pure Huff
 and deployed as one callable contract: https://blockulator.com (Sepolia).
 It exposes 34 ops including mul, div, exp, ln, sqrt, pow, log2,
 log10, Lambert W₀, validated against mpmath at 100 decimal places.
+Source is available at https://github.com/SamReeves/blockulator
 
 I gave a talk on it at EthCC[9]:
 https://www.youtube.com/watch?v=a_tL99NY-yc

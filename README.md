@@ -1,224 +1,111 @@
 # Blockulator
 
-A mobile-first web application for blockchain-based games and on-chain scientific computing. Built with vanilla JavaScript for simplicity and deployed as static files.
+High-precision on-chain math for the EVM, plus a frontend that calls the deployed contracts for every calculation it shows.
 
-## 🎮 Games
-
-- **💦 Pissing Contest** - Compete to make the biggest splash
-- **👑 King of the Hill** - Dethrone the king
-- **🎲 Dice Gods** - Pick the least popular number
-- **⏰ Last Call** - Last donor wins after timer
-- **🍩 Time to Make the Donuts** - First donor daily at midnight
-
-## 🛠️ Mathematical Tools
-
-- **📈 e^x Estimator** - On-chain exponential calculation
-- **🔢 Factorial Lookup** - On-chain factorial computation
-
-## 🏗️ Architecture
-
-### Pure Vanilla JavaScript
-- **No frameworks** - Direct DOM manipulation for maximum control
-- **Zero build step** - What you write is what runs
-- **Event-driven** - Loose coupling between game logic and animations
-- **Modular** - Each game/tool is an independent module
-
-### Routing
-- **Hash-based SPA routing** - Client-side navigation using URL hash fragments
-- **Deep links** - Direct links to any page or sub-page work out of the box
-  - Main views: `https://site.com/#/games`, `https://site.com/#/calculator`, `https://site.com/#/futures`
-  - Sub-routes: `https://site.com/#/games/pissing-contest`
-- **No server configuration required** - All routes handled client-side with JavaScript
-
-**Styling:** `index.html` loads `vendor/sdr/lib/tokens.css` (SDR design system), then `css/main.css` (which imports `css/tokens.css` for Blockulator-specific tokens). JS modules import from vendored SDR files via `js/theme/sdr-palette.js`. Run `scripts/sync-sdr.sh` to refresh from upstream.
-
-Literal hex and `rgb()` / `rgba()` outside `css/tokens.css` and `js/theme/sdr-palette.js` are rejected by `npm test` (`scripts/check-sdr-colors.mjs`).
-
-### Project Structure
-
-```
-blockulator/
-├── index.html              # Single page application (SPA)
-├── vendor/sdr/lib/         # SDR design tokens + particles (sync via scripts/sync-sdr.sh)
-├── css/                    # Styles (`main.css` imports tokens.css, layout, games, …)
-├── js/
-│   ├── application/        # Core application logic
-│   │   ├── master-app.js   # Main SPA controller
-│   │   └── master-router.js # Hash routing (#/games, #/calculator, etc)
-│   ├── domain/             # Business logic
-│   │   ├── games/          # Game modules (9 games)
-│   │   ├── calculators/    # Calculator modules (21 calculators)
-│   │   └── discussions/    # Discussion modules
-│   ├── infrastructure/     # Framework code
-│   │   ├── blockchain/     # Web3 provider
-│   │   ├── config/         # Configuration
-│   │   └── events/         # Event bus
-│   └── presentation/       # UI components
-│       ├── components/     # Reusable components
-│       └── views/          # Page views
-├── contracts/
-│   ├── src/               # Vyper source code
-│   │   ├── games/         # Game contracts
-│   │   ├── futures/       # Future contracts
-│   │   ├── discussions/   # Discussion contracts
-│   │   └── tools/         # Math utility contracts
-│   ├── build/             # Compilation artifacts
-│   │   ├── abis/          # Contract ABI JSON files
-│   │   └── bytecode/      # Contract bytecode
-│   └── deployments/       # Deployment scripts
-└── blockulator.png         # Logo
-```
-
-## 🚀 Getting Started
-
-### Local Development
-
-1. **Open `index.html` directly in your browser** - No build step needed!
-   ```bash
-   # Using Python's built-in server (optional)
-   python3 -m http.server 8000
-   
-   # Or using Node's http-server
-   npx http-server -p 8000
-   ```
-
-2. **Connect your wallet** - Make sure you have MetaMask installed
-
-3. **Update contract configuration**:
-   - Add your contract ABIs to `contracts/build/abis/`
-   - Update contract addresses in `contracts/deployments/addresses.js`
-
-### Production Deployment
-
-Deploy static files to any web server or CDN. No build step required - just upload the files.
-
-## 🔧 Integrating Your Contracts
-
-### 1. Add Contract ABIs
-
-Contract ABIs are automatically generated in `contracts/build/abis/` from Vyper source files.
-
-Example ABI structure:
-```json
-[
-  {
-    "inputs": [{"name": "number", "type": "uint256"}],
-    "name": "play",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  }
-]
-```
-
-### 2. Update Contract Addresses
-
-Contract addresses are configured in `js/infrastructure/config/contract-addresses.js`.
-
-### 3. Update Game Modules
-
-In each game file (e.g., `js/domain/games/pissing-contest.js`), update the contract initialization:
-
-```javascript
-import { CONTRACT_ADDRESSES } from '../../contracts/deployments/addresses.js';
-
-// Load ABI
-const response = await fetch('/contracts/build/abis/pissing-contest.json');
-const abi = await response.json();
-
-// Initialize contract
-this.contract = web3Provider.getContract(
-    CONTRACT_ADDRESSES.PISSING_CONTEST,
-    abi
-);
-```
-
-### 4. Implement Contract Calls
-
-Replace the placeholder code with actual contract interactions:
-
-```javascript
-async play(number, weiAmount) {
-    const tx = await this.contract.play(number, {
-        value: ethers.BigNumber.from(weiAmount)
-    });
-    await tx.wait();
-    
-    // Update UI
-    await this.refreshState();
-}
-```
-
-## 🎨 Adding Animations
-
-The app includes an event bus for triggering animations without coupling them to game logic.
-
-### Example: Confetti on Win
-
-```javascript
-// In your animation code
-import { eventBus, EVENTS } from './ui/events.js';
-
-eventBus.on(EVENTS.WINNER_DETERMINED, (data) => {
-    // Trigger your confetti animation
-    createConfetti();
-});
-
-// In game code
-eventBus.emit(EVENTS.WINNER_DETERMINED, { player: address });
-```
-
-### Available Events
-
-See `js/infrastructure/events/event-bus.js` for all available events:
-- `WALLET_CONNECTED`, `WALLET_DISCONNECTED`
-- `PLAY_SUBMITTED`, `PLAY_CONFIRMED`, `PLAY_FAILED`
-- `WINNER_DETERMINED`
-- `CONFETTI`, `SPLASH`
-
-## 🎯 Design Philosophy
-
-### Mobile-First
-- Touch-friendly interface
-- Responsive layout (600px, 768px, 1024px breakpoints)
-- Optimized for portrait mode
-- Progressive disclosure of complex data
-
-### Event-Driven Architecture
-- Games emit events for state changes
-- Animations listen to events independently
-- Clean separation of concerns
-- Easy to add effects without modifying game logic
-
-### Minimal Dependencies
-- **ethers.js** - Only external dependency for Web3 interactions
-- Served via CDN (can be bundled if needed)
-- No build tools, no bundlers, no transpilers
-
-## 🔐 Security Considerations
-
-- Always validate user input before submitting transactions
-- Display transaction details clearly before confirmation
-- Handle failed transactions gracefully
-- Never expose private keys or sensitive data
-- Use HTTPS in production
-
-## 📝 TODO Items
-
-- [ ] Add transaction history persistence
-- [ ] Add sound effects
-- [ ] Implement proper error handling for different networks
-- [ ] Add unit tests for game logic
-- [ ] Create animation library for physics effects
-
-## 🔗 Live Site
-
-Visit [blockulator.com](https://blockulator.com) to try it out on Sepolia testnet.
-
-## 📄 License
-
-MIT
+Live at [blockulator.com](https://blockulator.com) (Sepolia).
 
 ---
 
-**Project**: Blockulator - Blockchain-powered scientific computing and game theory experiments.
+## FP127 — 128-bit fixed-point in pure Huff
+
+The headline work in this repo is **FP127**, a 127.128 signed fixed-point math library for the EVM. It's deployed as a single callable contract that other contracts can `staticcall` for `mul`, `div`, `exp`, `ln`, `sqrt`, `pow`, `log2`, `log10`, `exp2`, `exp10`, `lambertW0`, plus the usual rounding and comparison ops. 34 operations total.
+
+- Signed 127.128, two's complement, fits in one `uint256` word
+- ~38 decimal digits of fractional precision (vs ~18 for WAD-style libraries)
+- Validated against Python `mpmath` at 100 decimal places
+- Fuzz-tested across the full input domain; benchmarked head-to-head against ABDKMath64x64, Solady WAD, and PRBMath
+- Gas: add ~50, mul 1,027, div 518 (cheaper than Solady), exp ~21k, ln ~41k
+
+**EthCC[9] talk:** https://www.youtube.com/watch?v=a_tL99NY-yc
+
+**Deep dive:** [`docs/fp127/README_FIXEDPOINT127.md`](docs/fp127/README_FIXEDPOINT127.md)
+
+**Sources:** [`contracts/src/tools/huff/fp127/`](contracts/src/tools/huff/fp127/)
+**Tests:** [`test/fp127/`](test/fp127/)
+**Generators:** [`scripts/fp127/generators/`](scripts/fp127/generators/)
+**Benchmarks and fuzz scatter plots:** [`docs/benchmarks/`](docs/benchmarks/)
+
+---
+
+## What else is in the repo
+
+The frontend at blockulator.com is a vanilla-JS SPA that exercises the deployed contracts directly. There's no client-side math anywhere; every result is an `eth_call` to a contract on Sepolia.
+
+- **21 on-chain calculators** that read from deployed math contracts: π, e, τ, sin, cos, atan, √, 2^x, 10^x, e^x, ln, log₂, log₁₀, erf, Φ, φ, n!, ln(n!), C(n,k), z-score, Gaussian tail, sinh, cosh, tanh, gcd/lcm.
+- **A handful of on-chain games** on Sepolia (King of the Hill, Dice Gods, Last Call, Time to Make the Donuts, Pay-It-Forward, and a few others) used as live examples of contracts that call the math library.
+- **A small futures market** with linear, exponential, Gaussian, and uniform payouts, demonstrating the math library in a pricing context.
+
+The games and markets are not the point of the project. They exist because the math library needed real callers to exercise it end-to-end.
+
+---
+
+## Architecture
+
+- **Contracts.** Huff for FP127. Vyper for the higher-level calculator and game contracts. Solidity wrappers in `contracts/src/bench/` for benchmarking against ABDKMath, Solady, and PRBMath.
+- **Frontend.** Vanilla JS, no build step, hash-based SPA routing. `index.html` loads design tokens from `vendor/sdr/lib/`, then `css/main.css`, then ES modules from `js/`.
+- **Tests.** Foundry for Solidity/Huff. Node scripts for end-to-end contract integration. Python with `mpmath` for precision oracles.
+
+```
+blockulator/
+├── contracts/
+│   ├── src/
+│   │   ├── tools/huff/fp127/        # FP127 (Huff)
+│   │   ├── tools/{math,trig,constants}/  # Vyper math contracts
+│   │   ├── games/                   # Game contracts
+│   │   ├── market/                  # Futures market contracts
+│   │   └── bench/                   # Wrappers for benchmark tests
+│   ├── build/abis/                  # Committed ABIs
+│   └── deployments/                 # Deployment scripts
+├── test/fp127/                      # Foundry tests for FP127
+├── test/bench/                      # Cross-library benchmarks
+├── scripts/fp127/generators/        # Constants and lookup-table generators
+├── docs/fp127/                      # FP127 documentation
+├── docs/benchmarks/                 # Fuzz scatter plots, precision data
+├── js/                              # Frontend (SPA)
+├── css/                             # Stylesheets
+├── vendor/sdr/lib/                  # Vendored design tokens + particles
+└── index.html                       # SPA entry point
+```
+
+---
+
+## Build and test
+
+```bash
+# Compile Huff and run FP127 unit tests
+make test
+
+# Run all benchmarks (ABDK, Solady, PRBMath, FP127)
+make bench
+
+# Regenerate the precision-sweep dataset
+make benchmarks
+```
+
+For the frontend, no build step:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000`.
+
+Submodules need to be present for the benchmark suite:
+
+```bash
+git submodule update --init --recursive
+```
+
+---
+
+## Design tokens
+
+Styling uses tokens vendored from a separate design system in `vendor/sdr/`. Run `scripts/sync-sdr.sh` to refresh from upstream.
+
+Literal hex colors and `rgb()`/`rgba()` outside `css/tokens.css` and `js/theme/sdr-palette.js` are rejected by `npm test` (`scripts/check-sdr-colors.mjs`).
+
+---
+
+## License
+
+MIT.
