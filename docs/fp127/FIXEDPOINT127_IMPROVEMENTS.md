@@ -44,12 +44,8 @@ Completed rigorous testing and optimization of the FixedPoint127 fixed-point ari
 - Overflow detection (wraps, no revert - EVM default behavior)
 
 #### Benchmark (`test_fp_benchmark.py`)
-- Compares FixedPoint127 vs binary256 implementations
-- **Result**: FixedPoint127 vastly superior
-  - FixedPoint127 MUL: 128 bits precision (exact)
-  - HEX_FP MUL: 0.2 bits precision (BROKEN)
-  - FixedPoint127 DIV: 88.4 bits avg precision
-  - HEX_FP DIV: 0.0 bits precision (BROKEN)
+- FixedPoint127 MUL: 128 bits precision (exact)
+- FixedPoint127 DIV: 88.4 bits avg precision
 
 ## Performance Characteristics
 
@@ -71,18 +67,6 @@ Completed rigorous testing and optimization of the FixedPoint127 fixed-point ari
 - **TO_FIXED18**: `(FixedPoint127 * 10^18) >> 128`
 - **Gas**: ~100-200 per conversion (estimated)
 
-## Comparison: FixedPoint127 vs HEX_FP
-
-| Feature | FixedPoint127 | HEX_FP |
-|---------|-------|--------|
-| Format | 127.128 two's complement | 1-bit sign + 8-bit exp + 247-bit mantissa |
-| Precision (mul) | 128 bits (exact) | **0.2 bits (BROKEN)** |
-| Precision (div) | 62 bits | **0.0 bits (BROKEN)** |
-| Gas (estimated) | Low (~200-600) | High (~1000-2000+) |
-| Complexity | Simple | Complex (normalize, pack/unpack) |
-| Dynamic range | ±2^127 | ±16^(127) (much wider) |
-| **Recommendation** | **Use for arithmetic** | **Fix or deprecate** |
-
 ## Known Issues
 
 ### FixedPoint127
@@ -98,19 +82,7 @@ Completed rigorous testing and optimization of the FixedPoint127 fixed-point ari
    - Could implement IEEE 754-like tagged format (discussed in previous conversation)
    - Would add ~50-100 gas overhead per operation
 
-### HEX_FP
-1. **CRITICAL: Completely broken** - 0 bits of precision in benchmark
-   - Likely issue with conversion between fixed32 and hex float format
-   - Needs urgent investigation and fix
-   - **Do not use in production**
-
 ## Next Steps
-
-### Immediate (Critical)
-1. **Fix binary256 implementation** - currently unusable
-   - Debug conversion functions (HEX_FROM_FIXED32, HEX_TO_FIXED32)
-   - Verify normalization logic
-   - Re-run benchmark after fixes
 
 ### Short-term (Optional Enhancements)
 1. **IEEE 754-like special values** for FixedPoint127
@@ -147,7 +119,6 @@ Completed rigorous testing and optimization of the FixedPoint127 fixed-point ari
 - ✅ Sign handling
 - ✅ Boundary values
 - ✅ Overflow behavior
-- ✅ Comparative benchmark (FixedPoint127 vs binary256)
 - ❌ Gas benchmarking (pyrevm limitation)
 - ❌ Underflow behavior (not tested)
 - ❌ Subnormal handling (not applicable to fixed-point)
@@ -158,7 +129,3 @@ The FixedPoint127 system is **production-ready** for arithmetic operations with 
 - Division has ~62 bits of precision (acceptable for most use cases)
 - No overflow protection (wraps like EVM default)
 - No special values (Inf, NaN)
-
-The binary256 system is **currently broken** and needs urgent fixes before any use.
-
-**Recommendation**: Use FixedPoint127 for all fixed-point arithmetic. Fix or deprecate binary256.

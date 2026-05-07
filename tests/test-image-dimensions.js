@@ -206,7 +206,7 @@ async function runTests(network = 'sepolia') {
     } else if (network === 'local') {
         console.log('📍 Testing on LOCAL NODE\n');
         provider = new ethers.providers.JsonRpcProvider('http://127.0.0.1:8545');
-        const privateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+        const privateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'; // Anvil/Hardhat default account #0, public test key — DO NOT FUND
         wallet = new ethers.Wallet(privateKey, provider);
     } else {
         throw new Error('Unknown network. Use "local" or "sepolia"');

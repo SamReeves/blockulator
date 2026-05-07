@@ -5,7 +5,7 @@ help:
 	@echo ""
 	@echo "  make compile       - Compile Huff contracts"
 	@echo "  make test          - FP127 unit tests"
-	@echo "  make test-all      - All Foundry tests (unit + bench + HexFP)"
+	@echo "  make test-all      - All Foundry tests (unit + bench)"
 	@echo "  make bench         - All benchmarks (unified + isolated x4)"
 	@echo "  make bench-unified - Unified benchmark (ABDK vs Solady vs Vyper vs FP127)"
 	@echo "  make benchmarks    - Precision sweep -> JSON"

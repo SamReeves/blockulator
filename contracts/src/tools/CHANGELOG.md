@@ -14,8 +14,6 @@
 - ✅ All 20 math tool contracts updated
 - ✅ New interfaces provided for easy integration
 
-**Details:** See [PURE_FUNCTIONS_FIX.md](../../PURE_FUNCTIONS_FIX.md)
-
 ---
 
 ## Files Changed

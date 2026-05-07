@@ -6,17 +6,12 @@ On-chain math implementations in pure Huff assembly, organized by number system.
 
 ```
 huff/
-├── fp127/              # 128.128 fixed-point arithmetic
+├── fp127/              # 127.128 fixed-point arithmetic
 │   ├── constants.huff         # Core constants (ONE_FP127, FRAC_BITS, etc.)
 │   ├── arithmetic.huff        # Add, sub, mul, div, conversions
 │   ├── tables.huff            # Lookup tables for exp/ln (generated)
 │   ├── transcendental.huff    # exp, ln, sqrt
 │   └── test_fp127.huff        # Deployable test contract
-├── binary256/          # IEEE 754 binary256 floating-point
-│   ├── constants.huff         # Format constants and bit masks
-│   ├── arithmetic.huff        # Core operations (pack, unpack, normalize, add, sub, mul, div)
-│   ├── transcendental.huff    # exp, ln, sqrt (placeholders)
-│   └── test_binary256.huff    # Deployable test contract
 └── README.md           # This file
 ```
 
@@ -68,35 +63,6 @@ Internally, inputs are converted from fixed18 to 128.128 format: `fp127 = (fixed
 
 Results are converted back to fixed18 for output.
 
-## Binary256: IEEE 754 Octuple Precision
-
-IEEE 754 binary256 (octuple precision) floating-point arithmetic.
-
-- **Format**: 1-bit sign + 19-bit exponent + 236-bit significand (256 bits total)
-- **Precision**: ~71 decimal digits (236 bits)
-- **Range**: 2^(±262143) (vastly exceeds fixedpoint127)
-
-### Files
-
-| File | Purpose |
-|------|---------|
-| `constants.huff` | Format constants (SIGN_BIT, EXP_*, SIGNIFICAND_*, special values) |
-| `arithmetic.huff` | Core operations (pack, unpack, normalize, add, sub, mul, div) |
-| `transcendental.huff` | exp, ln, sqrt (currently placeholders) |
-| `test_binary256.huff` | Deployable test contract |
-
-### Design Highlights
-
-Value representation (normal): `(-1)^sign × 2^(exp - 262143) × 1.significand`
-
-Significand normalized to [2^236, 2^237) with implicit leading 1. Binary CLZ (count leading zeros) enables O(log n) normalization.
-
-### Advantages
-
-- Native support for special values (±0, ±Inf, NaN)
-- Binary CLZ normalization (O(log n) vs O(n))
-- Exponent field enables efficient transcendentals
-
 ## Building
 
 ```bash
@@ -105,7 +71,6 @@ Significand normalized to [2^236, 2^237) with implicit leading 1. Binary CLZ (co
 
 # Or compile individual contracts
 huffc --evm-version paris contracts/src/tools/huff/fp127/test_fp127.huff -r
-huffc --evm-version paris contracts/src/tools/huff/binary256/test_binary256.huff -r
 ```
 
 Output: `contracts/build/huff/*.bin` and `contracts/build/huff/*.runtime.bin`
@@ -115,7 +80,6 @@ Output: `contracts/build/huff/*.bin` and `contracts/build/huff/*.runtime.bin`
 ```bash
 # Foundry tests
 forge test --match-contract FP127Test     # FP127 arithmetic + transcendentals
-forge test --match-contract HexFPTest     # Binary256 operations
 
 # Benchmarks
 forge test --match-contract ArithBench          # Gas + precision comparison
@@ -143,4 +107,3 @@ FP127 is optimized for gas efficiency:
 - `ln`: ~41k gas
 - `sqrt`: ~63k gas (via exp/ln)
 
-Binary256 provides vastly greater range but at higher gas cost due to normalization overhead.

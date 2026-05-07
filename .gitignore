@@ -28,6 +28,7 @@ Thumbs.db
 # Build artifacts (compilation outputs)
 dist/
 _static/
+artifacts/
 contracts/build/bins/
 contracts/build/bytecode/
 contracts/build/huff/*.hex
@@ -63,4 +64,7 @@ __pycache__/
 tests/*-local-*.json
 tests/*-output.txt
 tests/storage-*.json
+
+# Generated bench data
+scripts/generators/massive_bench_cases.sol.txt
 
