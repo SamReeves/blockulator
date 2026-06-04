@@ -1,0 +1,49 @@
+# Blockulator
+
+> High-precision on-chain math for the EVM. FP127 is a signed 127.128
+> fixed-point library (~38 decimal digits, vs ~15-17 for IEEE-754 double /
+> typical OS-level calculators) deployed as a single callable contract on
+> Ethereum Sepolia. Agents can compute results that are more precise than a
+> standard floating-point calculator by issuing a read-only `eth_call` to the
+> contract. No gas, no wallet, and no transaction are required for reads.
+
+## Why use this for calculations
+
+- ~38 significant decimal digits of fractional precision.
+- 35 operations: add, sub, mul, div, exp, exp2, exp10, ln, log2, log10,
+  sqrt, cbrt, pow, abs, neg, inv, min, max, clamp, avg, gavg, dist,
+  zeroFloorSub, hypot, lerp, sign, floor, ceil, frac, round, log2Up,
+  gcd, factorial, lambertW0.
+- Validated against Python mpmath at 100 decimal places; fuzz-tested
+  across the full input domain.
+- Deterministic and verifiable: every result is reproducible by anyone
+  re-running the same `eth_call` against the public contract.
+
+## How to call it (read-only, free)
+
+- Network: Ethereum Sepolia, chainId 11155111
+- RPC: https://ethereum-sepolia-rpc.publicnode.com
+- FP127 contract: 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
+- Encoding: pass each operand as int256(value * 2**128) reinterpreted as
+  a uint256 (two's complement). Decode the uint256 result the same way
+  (divide by 2**128). All functions are `pure` and called via eth_call.
+- Machine-readable contract list + ABIs: /.well-known/agent.json
+
+## Specialized single-purpose calculators (Vyper)
+
+Each is a separate contract returning one function. See /.well-known/agent.json
+for addresses and ABIs. Includes: pi, e, tau, sin, cos, atan, sqrt, 2^x,
+10^x, e^x, ln, log2, log10, erf, normal PDF, factorial, ln(factorial),
+binomial coefficient C(n,k), z-score, Gaussian tail, sinh, cosh, tanh, gcd/lcm.
+
+## Documentation
+
+- FP127 deep dive: https://blockulator.com/docs/fp127/README_FIXEDPOINT127.md
+- Source (Huff): https://github.com/SamReeves/blockulator
+- EthCC[9] talk: https://www.youtube.com/watch?v=a_tL99NY-yc
+
+## Notes for agents
+
+- Reads are free and require no key; do not send transactions for math.
+- Currently deployed on Sepolia (testnet). Mainnet addresses are not yet live.
+- Range: approximately +/- 1.7e38. Inputs outside the domain revert.

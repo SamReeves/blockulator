@@ -5,5 +5,5 @@ static_sites:
       repo: samreeves/blockulator
       branch: master
       deploy_on_push: true
-    build_command: mkdir -p dist && cp index.html blockulator.png blockulator_favicon.png dist/ && cp -r js contracts docs css vendor dist/
+    build_command: mkdir -p dist && cp index.html blockulator.png blockulator_favicon.png robots.txt llms.txt dist/ && cp -r js contracts docs css vendor dist/ && cp -r .well-known dist/.well-known
     output_dir: dist
