@@ -33,6 +33,12 @@ jobs:
       - name: FP127 equivalence and property tests
         run: FOUNDRY_FUZZ_RUNS=5000 forge test --match-path "test/fp127/Equivalence*"
 
+      - name: Precision against mpmath
+        run: forge test --match-contract Precision -vv | grep -E "PREC|Suite result"
+
+      - name: Legacy suites against the Yul object
+        run: FP127_TARGET=yul forge test --match-contract "FP127Test|ArithmeticTest|TranscendentalTest|UtilityTest|TestFP127MathLib" 2>&1 | grep -E "tests passed"
+
       - name: Gas table
         run: forge test --match-path "test/fp127/Gas*" -vv | grep -E "GAS"
 

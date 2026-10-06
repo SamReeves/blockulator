@@ -16,11 +16,13 @@ This directory holds **one hand-written file** and four generated ones.
 | `FP127Caller.sol` | hand-written: thin `staticcall` harness around a deployed object |
 
 ```
-make gen          # regenerate the four outputs
-make gen-check    # fail if they are stale (CI runs this)
-make test         # gen-check + equivalence and property tests
-make bench        # gas for every form of every op
-make size         # deployed runtime size against the 24,576-byte limit
+make gen              # regenerate the four outputs
+make gen-check        # fail if they are stale (CI runs this)
+make test             # gen-check + equivalence, divergence and property tests
+make test-precision   # correct bits of every op against mpmath at 100 digits
+make test-legacy-yul  # the Huff-era suites, run against the Yul object
+make bench            # gas for every form of every op
+make size             # deployed runtime size against the 24,576-byte limit
 ```
 
 ## Two forms, one source
@@ -38,16 +40,17 @@ closure of helpers it calls, inside a `("memory-safe")` assembly block. No
 external call, no shared address, cheapest per op. This is the form Austin
 Griffith and Hadrien Croubois suggested.
 
-`test/fp127/Equivalence.t.sol` proves the two agree on the full `int256`
-domain, including which inputs revert and with what data, and proves both
-agree with the Huff bytecode live on Sepolia on every input where the Huff
-did not wrap.
+`test/fp127/Equivalence.t.sol` and `EquivalenceOps.t.sol` prove the two
+agree on the full `int256` domain, including which inputs revert and with
+what data, and prove both agree with the Huff bytecode live on Sepolia on
+every input where the Huff computed a defined answer.
 
 ## Rules the source must obey
 
 The generator (`scripts/fp127/gen.py`) rejects a source that breaks any of
 these, because the inline-assembly dialect is a strict subset of Yul and
-because a library must not trample its caller's memory.
+because a library must not trample its caller's memory or shadow its own
+members.
 
 1. Top level holds only comments and `function` definitions.
 2. No `object`, `code`, `datacopy`, `dataoffset`, `datasize`, `codecopy`,
@@ -58,11 +61,13 @@ because a library must not trample its caller's memory.
    space). Anything else must be `mload(0x40)`-relative.
 4. Yul identifiers never start with `_`. The library wrapper names its
    Solidity parameters `_a`, `_b`, `_r` so nothing can shadow.
-5. No recursion.
-6. Exported functions carry `/// @export name(type a, ...) returns (type r)`.
+5. No Yul identifier may equal an export's Solidity name, since every
+   assembly block shares scope with the library's members.
+6. No recursion.
+7. Exported functions carry `/// @export name(type a, ...) returns (type r)`.
    Parameter names in the annotation must match the Yul parameters. Helpers
    have no annotation and are not dispatched.
-7. Reverts go through `rev(sel)` with a selector declared by
+8. Reverts go through `rev(sel)` with a selector declared by
    `/// @error Name() 0xselector`. The generator checks every selector
    against keccak and every `rev(...)` literal against the declared list.
 
@@ -72,69 +77,131 @@ Native 127.128 only. There is no `Raw` suffix and no 18-decimal flavour of
 each op; `fromFixed18` and `toFixed18` are the bridge. All parameters are
 `int256`. Errors are `Overflow()`, `DivisionByZero()`, `OutOfRange()`.
 
-| op | semantics | rounding | reverts |
-|---|---|---|---|
-| `add(a, b)` | a + b | exact | `Overflow` |
-| `sub(a, b)` | a − b | exact | `Overflow` |
-| `mul(a, b)` | a·b / 2^128 | floor (toward −∞) | `Overflow` |
-| `div(a, b)` | a·2^128 / b | truncate (toward 0) | `DivisionByZero`, `Overflow` |
-| `fromFixed18(x)` | x·2^128 / 10^18 | truncate | `OutOfRange` if \|x\| ≥ 2^127 |
-| `toFixed18(x)` | x·10^18 / 2^128 | floor | never |
+| op | semantics | reverts |
+|---|---|---|
+| `add`, `sub` | exact | `Overflow` |
+| `mul(a, b)` | floor(a·b / 2^128) | `Overflow` |
+| `div(a, b)` | trunc(a·2^128 / b) | `DivisionByZero`, `Overflow` |
+| `fromFixed18(x)` | trunc(x·2^128 / 10^18) | `OutOfRange` if \|x\| ≥ 2^127 |
+| `toFixed18(x)` | floor(x·10^18 / 2^128) | never |
+| `exp(x)` | e^x; 0 below −88 | `Overflow` above 88 |
+| `exp2(x)` | 2^x; 0 below −128 | `Overflow` at or above 127 |
+| `exp10(x)` | 10^x | `Overflow` |
+| `ln`, `log2`, `log10` | x > 0 | `OutOfRange` |
+| `log2Up(x)` | ceil(log2 x), exact for powers of two | `OutOfRange` |
+| `sqrt(x)` | x ≥ 0 | `OutOfRange` |
+| `cbrt(x)` | all x, odd | `Overflow` only at −2^255 |
+| `pow(x, y)` | x^y for x ≥ 0; 0^0 = 1; exact for y ∈ {1,2,3,4,½,¼,−1} and x ∈ {2,10} | `OutOfRange` for x < 0 |
+| `inv(x)` | 1/x | `DivisionByZero`, `Overflow` |
+| `abs`, `neg` | | `Overflow` at −2^255 |
+| `sign`, `min`, `max`, `clamp`, `avg`, `floor`, `frac` | exact, never revert | |
+| `ceil`, `round` | exact | `Overflow` at the top of the range |
+| `zeroFloorSub`, `dist`, `lerp`, `hypot`, `gavg` | checked compositions | `Overflow`, `OutOfRange` |
+| `gcd(a, b)` | gcd of \|floor a\|, \|floor b\| | never |
+| `factorial(n)` | floor(n)! for 0 ≤ n < 34 | `OutOfRange` |
+| `lambertW0(x)` | W(x) for x ≥ −1/e | `OutOfRange` |
 
-Rounding directions are inherited from the Huff and preserved exactly.
+Rounding directions are inherited from the Huff and preserved exactly:
 `mul` floors because it is the middle 256 bits of the exact 512-bit two's
 complement product; `div` truncates because it strips signs, divides, and
-re-signs.
+re-signs; every polynomial Horner step floors.
 
-## What changed from the Huff
+## Precision
 
-The Huff had no guards: `add`, `sub`, `mul` wrapped mod 2^256,
-`fromFixed18` lost its top bit above 2^127, and `div` by zero returned
-`(|a| >> 128) * 128` (observed live: `divRaw(2.0, 0) == 256`). The Yul
-reverts in every one of those cases. Everything else is bit-identical, and
-`test_divergence_*` in the equivalence suite records each change with the
-Huff's old answer.
+`make test-precision` prints correct bits per input against mpmath at 100
+decimal places. Measured on this build, relative to the result:
 
-`mul` is implemented differently but computes the same function. The Huff
-used a 4-term schoolbook split on 128-bit halves. The Yul forms the exact
-512-bit product with `mul` and `mulmod(a, b, not(0))`, corrects the high word
-for signs, and takes the middle 256 bits. That is cheaper and gives the
-overflow check for free: the high word must be the sign extension of the
-result.
-
-`div` was already a full-precision Bloemen `mulDiv` with a 2^128 multiplier
-in the Huff. The old README's "~62-bit two-step chunking" text described an
-earlier version and was wrong about the deployed code. The Yul ports the
-mulDiv verbatim and adds the two guards it was missing.
+| op | bits | notes |
+|---|---|---|
+| exp, exp2, exp10 | 123 – exact | 123 at x = 80, where 2^128 ULP is coarse against e^80 |
+| ln, log2, log10 | 125 – exact | 115 at ln(0.999), where the result itself is 2^-10 |
+| sqrt | exact | all tested inputs bit-exact |
+| cbrt | 124 – exact | via pow |
+| pow | 119 – exact | 119 at 1.01^365 |
+| hypot, gavg | exact | |
+| lambertW0 | 118 – 130 | 118 at x = 0.001, where the result is small |
 
 ## Gas
 
-Measured by `test/fp127/Gas.t.sol` on π × e style inputs. The first three
-columns include the `staticcall` itself (warm address) and the Solidity
-ABI encoding around it, which is what an integrating contract pays. The
-last column is the inline library as an internal call.
+Measured by `test/fp127/Gas.t.sol`. Columns one and two include the
+`staticcall` itself (warm address) and the ABI encoding around it; the third
+is `FP127Caller`, one more hop; the last is the inline library as an
+internal call.
 
-| op | Huff (staticcall) | Yul object (staticcall) | FP127Caller | FP127Lib (inline) |
+| op | Huff | Yul object | Caller | FP127Lib |
 |---|---:|---:|---:|---:|
-| add | 3,290 | 3,347 | 4,671 | 155 |
-| sub | 3,315 | 3,369 | 4,715 | 155 |
-| mul | 3,489 | 3,491 | 4,848 | 282 |
-| div | 3,850 | 3,683 | 5,008 | 677 |
-| fromFixed18 | 3,346 | 3,233 | 4,450 | 159 |
-| toFixed18 | 3,394 | 3,241 | 4,413 | 128 |
+| add | 3,290 | 3,765 | 5,089 | 155 |
+| sub | 3,315 | 3,787 | 5,133 | 155 |
+| mul | 3,489 | 3,978 | 5,335 | 282 |
+| div | 3,850 | 3,838 | 5,163 | 665 |
+| fromFixed18 | 3,346 | 3,607 | 4,824 | 159 |
+| toFixed18 | 3,394 | 3,659 | 4,831 | 140 |
+| exp | 8,406 | 7,357 | | 4,758 |
+| exp2 | 8,248 | 7,203 | | 4,793 |
+| ln | 7,108 | 6,671 | | 4,106 |
+| log2 | 7,081 | 7,030 | | 4,058 |
+| sqrt | 6,877 | 6,221 | | 3,455 |
+| cbrt | 12,853 | 6,152 | | 5,553 |
+| lambertW0 | 23,621 | 35,327 | | 41,069 |
 
-The Yul object costs the same as the Huff to within noise, with checks
-added. The inline library removes the call overhead entirely, which is the
-whole argument for shipping it.
+The arithmetic core costs about 400 gas more through the object than in the
+previous PR because the dispatcher now has 36 cases. Transcendentals are
+cheaper than the Huff. Lambert W is the one op that got dearer: two more
+refinement steps buy 126+ bits where the Huff had 50 to 100.
 
-Deployed runtime: 519 bytes for these six ops.
+Deployed runtime: 6,178 bytes.
 
-## Legacy baseline
+## What changed from the Huff
+
+**Guards.** The Huff had none: `add`/`sub`/`mul` wrapped, `fromFixed18` lost
+its top bit above 2^127, `div` by zero returned `(|a| >> 128) * 128`
+(observed live: `divRaw(2.0, 0) == 256`), `exp` above 88 and `factorial`
+above 33 returned `MAX_UINT256`, `exp2(127)` wrapped to the minimum,
+`log2(x ≤ 0)` returned 0, `sqrt(x < 0)` and `log2Up(x ≤ 0)` read garbage,
+`lambertW0` below −1/e returned 0. The Yul reverts in every one of those
+cases, and `test_divergence_*` records each old answer.
+
+**`mul`.** Same function, different construction: the exact 512-bit product
+from `mul` and `mulmod(a, b, not(0))`, corrected for signs, middle 256 bits
+taken. Cheaper, and the overflow check falls out of it.
+
+**`div`.** Was already a full-precision Bloemen `mulDiv` with a 2^128
+multiplier. The old README's "~62-bit two-step chunking" described an
+earlier version. Ported verbatim plus the two missing guards.
+
+**`gcd`.** The Huff extracted integer parts with a logical shift and then
+tested the sign bit of the shifted word, so negatives were mishandled. The
+Yul uses an arithmetic shift and absolute values.
+
+**`factorial`.** Computed by exact integer multiplication instead of a
+34-entry jump table. Identical values.
+
+**`lambertW0`.** Redesigned. The Huff seeded from a 64-entry interpolation
+table and ran two FSC steps and an IB finisher, documented as quartic.
+Measured, each FSC step in this arithmetic roughly doubles the correct bits
+(7, 14, 29, 58, 117), so that recipe delivered 50 to 100 bits on (0, 64),
+under 40 bits near 0, read past the table above 64 and ran out of gas below
+0. The Yul seeds to five to eight bits (Winitzki's approximation for x > 0,
+the origin series for −¼ < x < 0, the branch-point series down to −1/e),
+runs four FSC steps and one IB step, and measures 118 to 130 bits across the
+domain. W(1..5) are still exact table values. The 64-entry table is gone,
+which is where most of the bytecode saving came from.
+
+**Shortcuts.** `pow`, `cbrt` and `lambertW0` keep the exact shortcuts from
+`shortcut_constants.huff`. The bytecode on Sepolia predates that file (its
+W(2) is the iterated value, 3 ULP from the table), so the equivalence
+suite compares those paths to the Huff within a tolerance rather than to
+the bit.
+
+## Legacy baseline and suites
 
 `contracts/archive/huff/fp127.sepolia.runtime.hex` is the runtime bytecode
 of the Huff contract at `0xfae694D0c2c44181791F838c54Ed64C3151FfE30`,
 fetched at Sepolia block 11,857,616 with `make fetch-baseline`. keccak256
 of the hex text: `0x74946c4dd85b8bbbab56d77d34defdf4e66ea15c0647993ea445f0b95591d10b`.
-Tests etch it, so no Huff toolchain is needed to run the comparison. The
-Huff sources themselves still live under `contracts/src/tools/huff/` until
-the port is complete.
+
+`test/fp127/LegacyShim.sol` presents the old ABI on top of the Yul object,
+so the Huff-era suites run unchanged against the port with
+`FP127_TARGET=yul`: 412 of 431 pass; the 19 failures are debug helpers that
+only ever existed in `test_fp127.huff`. The Huff sources themselves still
+live under `contracts/src/tools/huff/` until #19 retires them.
