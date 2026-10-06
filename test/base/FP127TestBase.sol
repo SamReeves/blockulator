@@ -12,12 +12,13 @@ abstract contract FP127TestBase is Test {
     uint256 constant ONE_FP127 = uint256(1) << 128;
 
     function _deployFP127() internal {
-        _deployFP127FromFile("contracts/build/huff/test_fp127.runtime.bin");
+        _deployFP127FromFile("contracts/archive/huff/fp127.sepolia.runtime.hex");
     }
 
     function _deployFP127FromFile(string memory path) internal {
-        string memory hexCode = vm.readFile(path);
-        bytes memory code = vm.parseBytes(string.concat("0x", hexCode));
+        // The baseline file is the 0x-prefixed runtime bytecode fetched from
+        // Sepolia with `make fetch-baseline`; no Huff toolchain is needed.
+        bytes memory code = vm.parseBytes(vm.readFile(path));
         address addr = makeAddr("fp127");
         vm.etch(addr, code);
         fp127 = IFP127(addr);
@@ -46,22 +47,26 @@ abstract contract FP127TestBase is Test {
     }
 
     function _oracle(string memory func, uint256 x) internal returns (uint256) {
-        string[] memory cmd = new string[](4);
-        cmd[0] = "python3";
-        cmd[1] = "scripts/fp127/fp127_oracle.py";
-        cmd[2] = func;
-        cmd[3] = vm.toString(x);
+        string[] memory cmd = new string[](6);
+        cmd[0] = "uv";
+        cmd[1] = "run";
+        cmd[2] = "python";
+        cmd[3] = "scripts/fp127/fp127_oracle.py";
+        cmd[4] = func;
+        cmd[5] = vm.toString(x);
         bytes memory out = vm.ffi(cmd);
         return abi.decode(out, (uint256));
     }
     
     function _oracle2(string memory func, uint256 a, uint256 b) internal returns (uint256) {
-        string[] memory cmd = new string[](5);
-        cmd[0] = "python3";
-        cmd[1] = "scripts/fp127/fp127_oracle.py";
-        cmd[2] = func;
-        cmd[3] = vm.toString(a);
-        cmd[4] = vm.toString(b);
+        string[] memory cmd = new string[](7);
+        cmd[0] = "uv";
+        cmd[1] = "run";
+        cmd[2] = "python";
+        cmd[3] = "scripts/fp127/fp127_oracle.py";
+        cmd[4] = func;
+        cmd[5] = vm.toString(a);
+        cmd[6] = vm.toString(b);
         bytes memory out = vm.ffi(cmd);
         return abi.decode(out, (uint256));
     }
