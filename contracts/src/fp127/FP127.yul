@@ -500,8 +500,7 @@ object "FP127" {
             function lwfsc(x, w) -> wn {
                 let wp1 := add(w, 0x100000000000000000000000000000000)
                 let ew := fp127_exp(w)
-                let s := sub(mulraw(w, ew), x)
-                let rr := fp127_div(s, mulraw(ew, wp1))
+                let rr := fp127_div(sub(w, fp127_div(x, ew)), wp1)
                 let corr := mulraw(rr, add(fp127_div(rr, shl(1, wp1)), 0x100000000000000000000000000000000))
                 wn := sub(w, corr)
             }
@@ -538,7 +537,11 @@ object "FP127" {
                     }
                 }
                 default {
-                    let l := fp127_ln(add(x, 0x100000000000000000000000000000000))
+                    // ln(1 + x); for x within ONE of the top of the range 1 + x would
+                    // wrap, and ln(x) is the same seed to far more bits than needed.
+                    let xp := x
+                    if slt(x, 0x7ffffffffffffffffffffffffffffffeffffffffffffffffffffffffffffffff) { xp := add(x, 0x100000000000000000000000000000000) }
+                    let l := fp127_ln(xp)
                     let l1 := fp127_ln(add(l, 0x100000000000000000000000000000000))
                     w := mulraw(l, sub(0x100000000000000000000000000000000, fp127_div(l1, add(l, 0x200000000000000000000000000000000))))
                 }

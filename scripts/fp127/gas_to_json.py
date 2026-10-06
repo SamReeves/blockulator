@@ -1,0 +1,111 @@
+#!/usr/bin/env python3
+"""Turn GAS| lines from test/fp127/GasLadder.t.sol into docs/benchmarks/gas.json
+and docs/benchmarks/gas.md.
+
+    forge test --match-contract GasLadder -vv | uv run scripts/fp127/gas_to_json.py
+
+Line format:  GAS|<op>|<inputIndex>|<input hex>|<form>|<gas or NA>
+Forms:        huff yul caller lib abdk solady prb
+"""
+from __future__ import annotations
+
+import json
+import statistics
+import subprocess
+import sys
+from datetime import date
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT_JSON = ROOT / "docs" / "benchmarks" / "gas.json"
+OUT_MD = ROOT / "docs" / "benchmarks" / "gas.md"
+FORMS = ["huff", "yul", "caller", "lib", "abdk", "solady", "prb"]
+FORM_LABEL = {
+    "huff": "Huff (Sepolia, staticcall)",
+    "yul": "Yul object (staticcall)",
+    "caller": "FP127Caller",
+    "lib": "FP127Lib (inline)",
+    "abdk": "ABDKMath64x64",
+    "solady": "Solady",
+    "prb": "PRBMath SD59x18",
+}
+
+
+def git(*args: str) -> str:
+    return subprocess.run(["git", *args], capture_output=True, text=True, cwd=ROOT).stdout.strip()
+
+
+def versions() -> dict[str, str]:
+    def tag(path: str) -> str:
+        return subprocess.run(["git", "-C", str(ROOT / path), "describe", "--tags", "--always"],
+                              capture_output=True, text=True).stdout.strip()
+    return {
+        "fp127": git("rev-parse", "--short", "HEAD"),
+        "huff": "sepolia:0xfae694D0c2c44181791F838c54Ed64C3151FfE30@11857616",
+        "solady": tag("lib/solady"),
+        "prb-math": tag("lib/prb-math"),
+        "abdk": tag("lib/abdk-libraries-solidity"),
+        "forge": subprocess.run(["forge", "--version"], capture_output=True, text=True).stdout.split("\n")[0].strip(),
+    }
+
+
+def main() -> int:
+    ops: dict[str, dict] = {}
+    for line in sys.stdin:
+        line = line.strip()
+        if "GAS|" not in line:
+            continue
+        line = line[line.index("GAS|"):]
+        parts = line.split("|")
+        if len(parts) != 6:
+            continue
+        _, op, idx, inp, form, gas = parts
+        e = ops.setdefault(op, {"inputs": {}, "gas": {f: {} for f in FORMS}})
+        e["inputs"][int(idx)] = inp.strip()
+        e["gas"][form][int(idx)] = None if gas.strip() == "NA" else int(gas)
+
+    out_ops = {}
+    for op, e in sorted(ops.items()):
+        n = max(e["inputs"]) + 1 if e["inputs"] else 0
+        out_ops[op] = {
+            "inputs": [e["inputs"].get(i) for i in range(n)],
+            "gas": {f: [e["gas"][f].get(i) for i in range(n)] for f in FORMS},
+        }
+
+    doc = {
+        "generated": date.today().isoformat(),
+        "description": "Gas per op across an input ladder. First four forms are FP127; the first two and the third include the external call. Competitors are measured as internal library calls like FP127Lib. null = reverted or unsupported.",
+        "versions": versions(),
+        "forms": FORMS,
+        "formLabels": FORM_LABEL,
+        "ops": out_ops,
+    }
+    OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
+    OUT_JSON.write_text(json.dumps(doc, indent=1) + "\n")
+
+    lines = [
+        "# FP127 gas ladder",
+        "",
+        f"Generated {doc['generated']} by `make bench`. Versions: " + ", ".join(f"{k} {v}" for k, v in doc["versions"].items()) + ".",
+        "",
+        "Each cell is min / median / max gas over the op's input ladder. The first two FP127 columns and the Caller column include the `staticcall`; FP127Lib and the competitor libraries are internal calls. A dash means the library does not offer the op or reverted on every ladder input.",
+        "",
+        "| op | " + " | ".join(FORM_LABEL[f] for f in FORMS) + " |",
+        "|---|" + "---:|" * len(FORMS),
+    ]
+    for op, e in out_ops.items():
+        cells = []
+        for f in FORMS:
+            vals = [g for g in e["gas"][f] if g is not None]
+            if not vals:
+                cells.append("—")
+            else:
+                cells.append(f"{min(vals):,} / {int(statistics.median(vals)):,} / {max(vals):,}")
+        lines.append(f"| {op} | " + " | ".join(cells) + " |")
+    OUT_MD.write_text("\n".join(lines) + "\n")
+    print(f"wrote {OUT_JSON.relative_to(ROOT)} and {OUT_MD.relative_to(ROOT)}: {len(out_ops)} ops")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
