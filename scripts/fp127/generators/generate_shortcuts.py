@@ -12,7 +12,7 @@ Output:
 
 Usage:
   python3 generate_shortcuts.py > guards.txt
-  # Then copy shortcut_constants.huff to contracts/src/tools/huff/fp127/
+  # Then copy shortcut_constants.huff to contracts/archive/huff/src/fp127/
   # And paste guard snippets from guards.txt into each function
 """
 
