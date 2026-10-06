@@ -59,6 +59,12 @@ fetch-baseline:
 # ---- deployment ------------------------------------------------------------
 
 DEPLOY_SCRIPT := script/DeployFP127.s.sol
+CREATE2_PROXY := 0x4e59b44847b379578588920cA78FbF26c0B4956C
+SALT := 0x4650313237207631000000000000000000000000000000000000000000000000
+# Sepolia (Amsterdam fork) charges about 1,550 gas per byte of deposited code,
+# not 200: the node estimates ~10.45M gas for this deployment where forge
+# 1.7.1's local EVM says 1.46M, so the transaction is sent with an explicit limit.
+DEPLOY_GAS ?= 12000000
 
 predict: build
 	@forge script $(DEPLOY_SCRIPT) --sig "predict()" --rpc-url $(SEPOLIA_RPC) 2>&1 | grep -E "deployer|salt|hash|keccak|bytes|address|deployed"
@@ -66,7 +72,15 @@ predict: build
 deploy-sepolia: build
 	@test -n "$$DEPLOYER_KEY" || (echo "DEPLOYER_KEY is not set" && exit 1)
 	@$(PY) scripts/fp127/stdjson.py check
-	@forge script $(DEPLOY_SCRIPT) --rpc-url $(SEPOLIA_RPC) --private-key "$$DEPLOYER_KEY" --broadcast
+	@set -e; \
+	ADDR=$$(forge script $(DEPLOY_SCRIPT) --sig "predict()" --rpc-url $(SEPOLIA_RPC) 2>&1 | grep -E '^\s+address' | awk '{print $$2}'); \
+	echo "address $$ADDR"; \
+	if [ "$$(cast code $$ADDR --rpc-url $(SEPOLIA_RPC))" != "0x" ]; then echo "already deployed"; exit 0; fi; \
+	INIT=$$($(PY) python -c "import json;print(json.load(open('out/FP127.yul/FP127.json'))['bytecode']['object'][2:])"); \
+	cast send $(CREATE2_PROXY) "$(SALT)$$INIT" --rpc-url $(SEPOLIA_RPC) --private-key "$$DEPLOYER_KEY" --gas-limit $(DEPLOY_GAS) --json \
+		| tee contracts/deployments/FP127.sepolia.receipt.json \
+		| $(PY) python -c "import json,sys;r=json.load(sys.stdin);print('status',r['status'],'tx',r['transactionHash'],'block',int(r['blockNumber'],16),'gasUsed',int(r['gasUsed'],16))"; \
+	echo "code at $$ADDR: $$(( ($$(cast code $$ADDR --rpc-url $(SEPOLIA_RPC) | wc -c) - 3) / 2 )) bytes"
 
 verify-sepolia: build
 	@$(PY) scripts/fp127/stdjson.py check
