@@ -17,13 +17,13 @@ import {console} from "forge-std/console.sol";
 contract Precision is FP127Harness {
     string constant OUT = "docs/fp127/precision.json";
 
-    function _ops() internal pure returns (string[36] memory o) {
+    function _ops() internal pure returns (string[37] memory o) {
         o = [
             "add", "sub", "mul", "div", "fromFixed18", "toFixed18",
             "exp", "exp2", "exp10", "ln", "log2", "log10", "log2Up",
             "sqrt", "cbrt", "pow", "inv", "abs", "neg", "sign", "min", "max", "clamp", "avg",
             "zeroFloorSub", "dist", "lerp", "floor", "ceil", "frac", "round", "gcd", "factorial",
-            "hypot", "gavg", "lambertW0"
+            "hypot", "gavg", "lambertW0", "lambertWm1"
         ];
     }
 
@@ -33,7 +33,8 @@ contract Precision is FP127Harness {
         if (h == keccak256("hypot") || h == keccak256("gavg")) return 120;
         if (h == keccak256("exp") || h == keccak256("exp2") || h == keccak256("exp10")
             || h == keccak256("ln") || h == keccak256("log2") || h == keccak256("log10")
-            || h == keccak256("pow") || h == keccak256("cbrt") || h == keccak256("lambertW0")) return 115;
+            || h == keccak256("pow") || h == keccak256("cbrt") || h == keccak256("lambertW0")
+            || h == keccak256("lambertWm1")) return 115;
         return 256;
     }
 
@@ -99,14 +100,14 @@ contract Precision is FP127Harness {
         }
     }
 
-    /// W0 has infinite slope at the branch point -1/e: one ULP of input
+    /// Both branches have infinite slope at the branch point -1/e: one ULP of input
     /// resolution there moves W by about 2^-63, so no implementation can
     /// report more than ~63 correct bits within 2^-20 of it. The floor is
     /// relaxed to 60 bits in that neighbourhood only.
     int256 constant NEG_INV_E = -int256(0x5e2d58d8b3bcdf1abadec7829054f90d);
 
     function _one(string memory op, string[] memory inp, string memory expected, uint256 floorBits, Stats memory st) internal view {
-        if (keccak256(bytes(op)) == keccak256("lambertW0")) {
+        if (keccak256(bytes(op)) == keccak256("lambertW0") || keccak256(bytes(op)) == keccak256("lambertWm1")) {
             int256 x = int256(vm.parseUint(inp[0]));
             if (x < NEG_INV_E + (ONE >> 20)) floorBits = 60;
         }
@@ -148,7 +149,7 @@ contract Precision is FP127Harness {
     }
 
     function test_precision_all() public {
-        string[36] memory ops = _ops();
+        string[37] memory ops = _ops();
         string memory doc;
         for (uint256 i; i < ops.length; i++) {
             doc = _record(ops[i], _runOp(ops[i]));
