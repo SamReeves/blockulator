@@ -28,6 +28,36 @@ contract LibUser {
     function div(int256 a, int256 b) external pure returns (int256) { return FP127Lib.div(a, b); }
     function fromFixed18(int256 x) external pure returns (int256) { return FP127Lib.fromFixed18(x); }
     function toFixed18(int256 x) external pure returns (int256) { return FP127Lib.toFixed18(x); }
+    function exp(int256 x) external pure returns (int256) { return FP127Lib.exp(x); }
+    function exp2(int256 x) external pure returns (int256) { return FP127Lib.exp2(x); }
+    function exp10(int256 x) external pure returns (int256) { return FP127Lib.exp10(x); }
+    function ln(int256 x) external pure returns (int256) { return FP127Lib.ln(x); }
+    function log2(int256 x) external pure returns (int256) { return FP127Lib.log2(x); }
+    function log10(int256 x) external pure returns (int256) { return FP127Lib.log10(x); }
+    function log2Up(int256 x) external pure returns (int256) { return FP127Lib.log2Up(x); }
+    function sqrt(int256 x) external pure returns (int256) { return FP127Lib.sqrt(x); }
+    function cbrt(int256 x) external pure returns (int256) { return FP127Lib.cbrt(x); }
+    function abs(int256 x) external pure returns (int256) { return FP127Lib.abs(x); }
+    function neg(int256 x) external pure returns (int256) { return FP127Lib.neg(x); }
+    function inv(int256 x) external pure returns (int256) { return FP127Lib.inv(x); }
+    function sign(int256 x) external pure returns (int256) { return FP127Lib.sign(x); }
+    function floor(int256 x) external pure returns (int256) { return FP127Lib.floor(x); }
+    function ceil(int256 x) external pure returns (int256) { return FP127Lib.ceil(x); }
+    function frac(int256 x) external pure returns (int256) { return FP127Lib.frac(x); }
+    function round(int256 x) external pure returns (int256) { return FP127Lib.round(x); }
+    function factorial(int256 x) external pure returns (int256) { return FP127Lib.factorial(x); }
+    function lambertW0(int256 x) external pure returns (int256) { return FP127Lib.lambertW0(x); }
+    function pow(int256 a, int256 b) external pure returns (int256) { return FP127Lib.pow(a, b); }
+    function min(int256 a, int256 b) external pure returns (int256) { return FP127Lib.min(a, b); }
+    function max(int256 a, int256 b) external pure returns (int256) { return FP127Lib.max(a, b); }
+    function avg(int256 a, int256 b) external pure returns (int256) { return FP127Lib.avg(a, b); }
+    function zeroFloorSub(int256 a, int256 b) external pure returns (int256) { return FP127Lib.zeroFloorSub(a, b); }
+    function dist(int256 a, int256 b) external pure returns (int256) { return FP127Lib.dist(a, b); }
+    function gavg(int256 a, int256 b) external pure returns (int256) { return FP127Lib.gavg(a, b); }
+    function hypot(int256 a, int256 b) external pure returns (int256) { return FP127Lib.hypot(a, b); }
+    function gcd(int256 a, int256 b) external pure returns (int256) { return FP127Lib.gcd(a, b); }
+    function clamp(int256 a, int256 b, int256 c) external pure returns (int256) { return FP127Lib.clamp(a, b, c); }
+    function lerp(int256 a, int256 b, int256 c) external pure returns (int256) { return FP127Lib.lerp(a, b, c); }
 }
 
 /// @notice Independent reference arithmetic built on Solady's fullMulDiv so

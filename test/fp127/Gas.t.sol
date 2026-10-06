@@ -96,4 +96,47 @@ contract Gas is FP127Harness {
         _row("toFixed18", abi.encodeWithSignature("toFixed18(int256)", PI),
              abi.encodeWithSignature("toFixed18(uint256)", uint256(PI)), l);
     }
+
+    function _row1(string memory op, int256 x, uint256 libGas) internal view {
+        bytes memory newCall = abi.encodeWithSignature(string.concat(op, "(int256)"), x);
+        bytes memory huffCall = abi.encodeWithSignature(string.concat(op, "Raw(uint256)"), uint256(x));
+        uint256 h = _measure(address(huff), huffCall);
+        uint256 o = _measure(address(obj), newCall);
+        console.log(string.concat("GAS|", op, "|"), h, o);
+        console.log(string.concat("GAS_LIB|", op, "|"), libGas);
+    }
+
+    function test_gas_exp() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.exp(ONE); uint256 l = g0 - gasleft(); require(r != 0);
+        _row1("exp", ONE, l);
+    }
+    function test_gas_exp2() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.exp2(ONE + ONE / 3); uint256 l = g0 - gasleft(); require(r != 0);
+        _row1("exp2", ONE + ONE / 3, l);
+    }
+    function test_gas_ln() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.ln(E); uint256 l = g0 - gasleft(); require(r != 0);
+        _row1("ln", E, l);
+    }
+    function test_gas_log2() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.log2(PI); uint256 l = g0 - gasleft(); require(r != 0);
+        _row1("log2", PI, l);
+    }
+    function test_gas_sqrt() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.sqrt(2 * ONE); uint256 l = g0 - gasleft(); require(r != 0);
+        _row1("sqrt", 2 * ONE, l);
+    }
+    function test_gas_cbrt() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.cbrt(10 * ONE); uint256 l = g0 - gasleft(); require(r != 0);
+        _row1("cbrt", 10 * ONE, l);
+    }
+    function test_gas_pow() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.pow(PI, E); uint256 l = g0 - gasleft(); require(r != 0);
+        _row("pow", abi.encodeWithSignature("pow(int256,int256)", PI, E),
+             abi.encodeWithSignature("powRaw(uint256,uint256)", uint256(PI), uint256(E)), l);
+    }
+    function test_gas_lambertW0() public view {
+        uint256 g0 = gasleft(); int256 r = FP127Lib.lambertW0(10 * ONE); uint256 l = g0 - gasleft(); require(r != 0);
+        _row1("lambertW0", 10 * ONE, l);
+    }
 }
