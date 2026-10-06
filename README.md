@@ -57,7 +57,6 @@ blockulator/
 │   ├── build/abis/                  # Committed ABIs
 │   └── deployments/                 # Deployment scripts
 ├── test/fp127/                      # Foundry tests for FP127
-├── test/bench/                      # Cross-library benchmarks
 ├── scripts/fp127/generators/        # Constants and lookup-table generators
 ├── docs/fp127/                      # FP127 documentation
 ├── docs/benchmarks/                 # Fuzz scatter plots, precision data
@@ -84,13 +83,14 @@ uv sync                                   # mpmath + keccak for the oracle and g
 make gen-check   # generated FP127 files are current
 make test        # FP127 equivalence, divergence and property tests
 make bench       # gas: Huff baseline vs Yul object vs inline library
-make test-legacy # Huff-era precision suites against the Sepolia bytecode (needs ffi)
+make bench       # gas ladder: Huff, Yul object, FP127Lib, ABDK, Solady, PRBMath
 ```
 
 The Huff baseline used by the tests is the runtime bytecode fetched from
-Sepolia (`make fetch-baseline`); no `huffc` is needed. The original
-Huff-era benchmark suites are opt-in because they need the IR pipeline and
-take minutes to compile: `FOUNDRY_PROFILE=bench forge test`.
+Sepolia (`make fetch-baseline`); no `huffc` is needed. Precision against
+mpmath uses committed vectors (`test/fp127/vectors/`), so `make test` needs
+no ffi. Results: [`docs/fp127/precision.md`](docs/fp127/precision.md) and
+[`docs/benchmarks/gas.md`](docs/benchmarks/gas.md).
 
 For the frontend, no build step:
 

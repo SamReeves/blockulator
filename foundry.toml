@@ -9,8 +9,7 @@ cache_path = "cache"
 # archived Huff live beside them and are skipped.
 skip = ["contracts/src/**/*.vy", "contracts/src/tools/**", "contracts/src/games/**",
         "contracts/src/market/**", "contracts/src/content/**", "contracts/src/discussions/**",
-        "contracts/src/identity/**", "contracts/src/interfaces/**", "contracts/src/tests/**",
-        "test/bench/**"]
+        "contracts/src/identity/**", "contracts/src/interfaces/**", "contracts/src/tests/**"]
 
 solc_version = "0.8.24"
 evm_version = "shanghai"
@@ -26,6 +25,8 @@ fs_permissions = [
   { access = "read", path = "contracts/build" },
   { access = "read", path = "contracts/archive" },
   { access = "read", path = "out" },
+  { access = "read", path = "test/fp127/vectors" },
+  { access = "read-write", path = "docs/fp127" },
   { access = "read", path = "scripts" },
   { access = "read-write", path = "docs/benchmarks" }
 ]
@@ -33,11 +34,6 @@ fs_permissions = [
 [profile.default.fuzz]
 runs = 1000
 
-# The legacy bench suites were written for the IR pipeline and take many
-# minutes to compile. They are opt-in: FOUNDRY_PROFILE=bench forge test.
-[profile.bench]
-via_ir = true
-test = "test/bench"
 
 [lint]
 lint_on_build = false
