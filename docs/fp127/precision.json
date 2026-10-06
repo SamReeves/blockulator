@@ -139,6 +139,13 @@
     "reverts": 3,
     "worstInput": "0xffffffffffffffffffffffffffffffffa1d2a7274c4320e54521387d6fab06f3"
   },
+  "lambertWm1": {
+    "meanBits": 160,
+    "minBits": 64,
+    "n": 66,
+    "reverts": 6,
+    "worstInput": "0xffffffffffffffffffffffffffffffffa1d2a7274c4320e54521387d6fab06f3"
+  },
   "lerp": {
     "meanBits": 256,
     "minBits": 256,

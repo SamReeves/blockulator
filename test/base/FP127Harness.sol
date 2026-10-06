@@ -47,6 +47,7 @@ contract LibUser {
     function round(int256 x) external pure returns (int256) { return FP127Lib.round(x); }
     function factorial(int256 x) external pure returns (int256) { return FP127Lib.factorial(x); }
     function lambertW0(int256 x) external pure returns (int256) { return FP127Lib.lambertW0(x); }
+    function lambertWm1(int256 x) external pure returns (int256) { return FP127Lib.lambertWm1(x); }
     function pow(int256 a, int256 b) external pure returns (int256) { return FP127Lib.pow(a, b); }
     function min(int256 a, int256 b) external pure returns (int256) { return FP127Lib.min(a, b); }
     function max(int256 a, int256 b) external pure returns (int256) { return FP127Lib.max(a, b); }
@@ -170,6 +171,13 @@ abstract contract FP127Harness is Test {
         assertEq(x.ok, y.ok, string.concat(what, ": ok flag"));
         if (x.ok) assertEq(x.value, y.value, string.concat(what, ": value"));
         else assertEq(keccak256(x.err), keccak256(y.err), string.concat(what, ": revert data"));
+    }
+
+    /// Asserts that the Yul object reverts on `call` with the custom error `err`.
+    function _expectRevert(bytes memory call, bytes4 err, string memory what) internal view {
+        Res memory o = _try(address(obj), call);
+        assertFalse(o.ok, string.concat(what, ": expected revert"));
+        assertEq(_sel(o.err), err, string.concat(what, ": wrong error"));
     }
 
     function _sel(bytes memory err) internal pure returns (bytes4 s) {

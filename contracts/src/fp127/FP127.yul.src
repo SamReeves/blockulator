@@ -674,3 +674,57 @@ function fp127_lambertW0(x) -> r {
     w := lwfsc(x, w)
     r := lwib(x, w)
 }
+
+// ---------------------------------------------------------------------------
+// Lambert W, secondary branch
+// ---------------------------------------------------------------------------
+
+/// One log-form Newton step for the secondary branch. For x < 0 and w < 0,
+/// w e^w = x is equivalent to w + ln(-w) = ln(-x) =: lx, and Newton on
+/// f(w) = w + ln(-w) - lx gives
+///   w' = w - w (w + ln(-w) - lx) / (w + 1).
+/// Algebraically this is the Iacono-Boyd step with the logarithm split, but
+/// it never forms e^w or x / w: on this branch w reaches about -93 at
+/// x = -2^-128, where e^-w overflows and e^w underflows the format.
+function lwm1(lx, w) -> wn {
+    let f := sub(add(w, fp127_ln(sub(0, w))), lx)
+    wn := sub(w, fp127_div(mulraw(w, f), add(w, 0x100000000000000000000000000000000)))
+}
+
+/// @export lambertWm1(int256 x) returns (int256 r)
+/// @notice Secondary real branch of the Lambert W function, W(x) e^W(x) = x
+///         with W(x) <= -1, for -1/e <= x < 0.
+/// @dev Reverts with OutOfRange below -1/e and for x >= 0. Returns exactly
+///      -ONE at the branch point. Seeds: the branch-point series
+///      -1 - p - p^2/3 - 11/72 p^3, p = sqrt(2 (1 + e x)), for x < -1/4; the
+///      asymptotic L - ln(-L) + ln(-L) / L with L = ln(-x) for -1/4 <= x < 0.
+///      Five log-form Newton steps follow (seed 8 to 40 bits, each step
+///      doubles). Measured 126 to 128 correct bits across the domain; about
+///      65 bits within 2^-20 of -1/e, where the slope is infinite and one ULP
+///      of input moves W by 2^-63. The archived Huff lambertwm1 was never
+///      functional and is not the reference for this routine.
+function fp127_lambertWm1(x) -> r {
+    if slt(x, sub(0, 0x5e2d58d8b3bcdf1abadec7829054f90d)) { rev(0x7db3aba7) }
+    if iszero(slt(x, 0)) { rev(0x7db3aba7) }
+    let lx := fp127_ln(sub(0, x))
+    let w := 0
+    switch slt(x, sub(0, 0x40000000000000000000000000000000))
+    case 1 {
+        let q := add(0x100000000000000000000000000000000, mulraw(x, 0x2b7e151628aed2a6abf7158809cf4f3c7))
+        if iszero(sgt(q, 0)) { r := sub(0, 0x100000000000000000000000000000000) leave }
+        let p := fp127_sqrt(shl(1, q))
+        let p2 := mulraw(p, p)
+        w := sub(sub(0, 0x100000000000000000000000000000000), p)
+        w := sub(w, div(p2, 3))
+        w := sub(w, div(mul(mulraw(p2, p), 11), 72))
+    }
+    default {
+        let ll := fp127_ln(sub(0, lx))
+        w := add(sub(lx, ll), fp127_div(ll, lx))
+    }
+    w := lwm1(lx, w)
+    w := lwm1(lx, w)
+    w := lwm1(lx, w)
+    w := lwm1(lx, w)
+    r := lwm1(lx, w)
+}

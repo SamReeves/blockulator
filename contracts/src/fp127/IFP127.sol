@@ -145,4 +145,16 @@ interface IFP127 {
     ///      steps, which gave 50 to 100 bits on (0, 64), read past the table
     ///      above 64 and ran out of gas below 0.
     function lambertW0(int256 x) external pure returns (int256 r);
+    /// @notice Secondary real branch of the Lambert W function, W(x) e^W(x) = x
+    ///         with W(x) <= -1, for -1/e <= x < 0.
+    /// @dev Reverts with OutOfRange below -1/e and for x >= 0. Returns exactly
+    ///      -ONE at the branch point. Seeds: the branch-point series
+    ///      -1 - p - p^2/3 - 11/72 p^3, p = sqrt(2 (1 + e x)), for x < -1/4; the
+    ///      asymptotic L - ln(-L) + ln(-L) / L with L = ln(-x) for -1/4 <= x < 0.
+    ///      Five log-form Newton steps follow (seed 8 to 40 bits, each step
+    ///      doubles). Measured 126 to 128 correct bits across the domain; about
+    ///      65 bits within 2^-20 of -1/e, where the slope is infinite and one ULP
+    ///      of input moves W by 2^-63. The archived Huff lambertwm1 was never
+    ///      functional and is not the reference for this routine.
+    function lambertWm1(int256 x) external pure returns (int256 r);
 }

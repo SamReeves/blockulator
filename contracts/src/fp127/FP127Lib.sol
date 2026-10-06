@@ -2077,4 +2077,191 @@ library FP127Lib {
             _r := fp127_lambertW0(_x)
         }
     }
+    /// @notice Secondary real branch of the Lambert W function, W(x) e^W(x) = x
+    ///         with W(x) <= -1, for -1/e <= x < 0.
+    /// @dev Reverts with OutOfRange below -1/e and for x >= 0. Returns exactly
+    ///      -ONE at the branch point. Seeds: the branch-point series
+    ///      -1 - p - p^2/3 - 11/72 p^3, p = sqrt(2 (1 + e x)), for x < -1/4; the
+    ///      asymptotic L - ln(-L) + ln(-L) / L with L = ln(-x) for -1/4 <= x < 0.
+    ///      Five log-form Newton steps follow (seed 8 to 40 bits, each step
+    ///      doubles). Measured 126 to 128 correct bits across the domain; about
+    ///      65 bits within 2^-20 of -1/e, where the slope is infinite and one ULP
+    ///      of input moves W by 2^-63. The archived Huff lambertwm1 was never
+    ///      functional and is not the reference for this routine.
+    function lambertWm1(int256 _x) internal pure returns (int256 _r) {
+        assembly ("memory-safe") {
+            function absw(x) -> r {
+                let m := sar(255, x)
+                r := sub(xor(x, m), m)
+            }
+
+            function divu(a, b) -> q {
+                let prod0 := shl(128, a)
+                let prod1 := shr(128, a)
+                let remainder := mulmod(a, 0x100000000000000000000000000000000, b)
+                prod1 := sub(prod1, gt(remainder, prod0))
+                prod0 := sub(prod0, remainder)
+                let twos := and(sub(0, b), b)
+                b := div(b, twos)
+                prod0 := div(prod0, twos)
+                prod0 := or(prod0, mul(prod1, add(div(sub(0, twos), twos), 1)))
+                let iv := xor(mul(3, b), 2)
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                q := mul(prod0, iv)
+            }
+
+            function rev(sel) {
+                mstore(0x00, shl(224, sel))
+                revert(0x00, 0x04)
+            }
+
+            function fp127_div(a, b) -> r {
+                if iszero(b) { rev(0x23d359a3) }
+                let ng := xor(slt(a, 0), slt(b, 0))
+                let ua := absw(a)
+                let ub := absw(b)
+                if iszero(lt(shr(128, ua), ub)) { rev(0x35278d12) }
+                let q := divu(ua, ub)
+                if gt(q, add(0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, ng)) { rev(0x35278d12) }
+                r := sub(xor(q, sub(0, ng)), sub(0, ng))
+            }
+
+            function mulraw(a, b) -> r {
+                let p0 := mul(a, b)
+                let mm := mulmod(a, b, not(0))
+                let p1 := sub(sub(mm, p0), lt(mm, p0))
+                p1 := sub(p1, mul(slt(a, 0), b))
+                p1 := sub(p1, mul(slt(b, 0), a))
+                r := or(shl(128, p1), shr(128, p0))
+            }
+
+            function log2poly(f) -> r {
+                r := 0x1b6d3bb5d0b9dadf116f3d6f43a6d72d
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffe13d3482175f7606c558738bb08090ba)
+                r := add(mulraw(r, f), 0x219345c1858ee5f042fedb743014a22c)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffdb1127702fe34463c5f84ad56433d859)
+                r := add(mulraw(r, f), 0x2909627ae34f376129ad84443f1c2dcc)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffd1d57135a90aaf7aa5769f8c670bcfe5)
+                r := add(mulraw(r, f), 0x34c2ec54f5bda90af68b5dddfb665690)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffc271ec478bf8051a7c98106d2bda72a1)
+                r := add(mulraw(r, f), 0x49ddb143be6ff9e4b19c67d5b27fdea3)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffa3aae26b51f407a220bc2d21afb87cee)
+                r := add(mulraw(r, f), 0x7b1c2770e80ff5d27f0554864e620bde)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffff4755c4d6a3e80f444178012f97232a8a)
+                r := add(mulraw(r, f), 0x171547652b82fe1777d0ffda0d23a7bb1)
+                r := mulraw(r, f)
+            }
+
+            function msb(x) -> r {
+                if iszero(lt(x, 0x100000000000000000000000000000000)) { r := 128 x := shr(128, x) }
+                if iszero(lt(x, 0x10000000000000000)) { r := add(r, 64) x := shr(64, x) }
+                if iszero(lt(x, 0x100000000)) { r := add(r, 32) x := shr(32, x) }
+                if iszero(lt(x, 0x10000)) { r := add(r, 16) x := shr(16, x) }
+                if iszero(lt(x, 0x100)) { r := add(r, 8) x := shr(8, x) }
+                if iszero(lt(x, 0x10)) { r := add(r, 4) x := shr(4, x) }
+                if iszero(lt(x, 0x4)) { r := add(r, 2) x := shr(2, x) }
+                if iszero(lt(x, 0x2)) { r := add(r, 1) }
+            }
+
+            function fp127_log2(x) -> r {
+                if iszero(sgt(x, 0)) { rev(0x7db3aba7) }
+                if eq(x, 0x100000000000000000000000000000000) { r := 0 leave }
+                let m := msb(x)
+                if iszero(and(x, sub(x, 1))) { r := shl(128, sub(m, 128)) leave }
+                let ip := shl(128, sub(m, 128))
+                let s := sub(m, 128)
+                let mm := shr(s, x)
+                if slt(s, 0) { mm := shl(sub(0, s), x) }
+                let acc := 0
+                if iszero(gt(0x16a09e667f3bcc908b2fb1366ea957d3e, mm)) {
+                    mm := mulraw(mm, 0xb504f333f9de6484597d89b3754abe9f)
+                    acc := add(acc, 0x80000000000000000000000000000000)
+                }
+                if iszero(gt(0x1306fe0a31b7152de8d5a46305c85edec, mm)) {
+                    mm := mulraw(mm, 0xd744fccad69d6af439a68bb9902d3fde)
+                    acc := add(acc, 0x40000000000000000000000000000000)
+                }
+                if iszero(gt(0x1172b83c7d517adcdf7c8c50eb14a7920, mm)) {
+                    mm := mulraw(mm, 0xeac0c6e7dd24392ed02d75b3706e54fa)
+                    acc := add(acc, 0x20000000000000000000000000000000)
+                }
+                if iszero(gt(0x10b5586cf9890f6298b92b71842a98364, mm)) {
+                    mm := mulraw(mm, 0xf5257d152486cc2c7b9d0c7aed980fc3)
+                    acc := add(acc, 0x10000000000000000000000000000000)
+                }
+                if iszero(gt(0x1059b0d31585743ae7c548eb68ca417fe, mm)) {
+                    mm := mulraw(mm, 0xfa83b2db722a033a7c25bb14315d7fcc)
+                    acc := add(acc, 0x08000000000000000000000000000000)
+                }
+                if iszero(gt(0x102c9a3e778060ee6f7caca4f7a29bde9, mm)) {
+                    mm := mulraw(mm, 0xfd3e0c0cf486c174853f3a5931e0ee03)
+                    acc := add(acc, 0x04000000000000000000000000000000)
+                }
+                if iszero(gt(0x10163da9fb33356d84a66ae336dcdfa40, mm)) {
+                    mm := mulraw(mm, 0xfe9e115c7b8f884badd25995e79d2f09)
+                    acc := add(acc, 0x02000000000000000000000000000000)
+                }
+                r := add(ip, add(acc, log2poly(sub(mm, 0x100000000000000000000000000000000))))
+            }
+
+            function fp127_ln(x) -> r {
+                r := fp127_log2(x)
+                if iszero(r) { leave }
+                r := mulraw(r, 0xb17217f7d1cf79abc9e3b39803f2f6af)
+            }
+
+            function fp127_sqrt(x) -> r {
+                if slt(x, 0) { rev(0x7db3aba7) }
+                if iszero(x) { r := 0 leave }
+                let e := add(128, msb(x))
+                let y := shl(shr(1, e), 1)
+                if and(e, 1) { y := mulraw(y, 0x16a09e667f3bcc908b2fb1366ea957d3e) }
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                r := shr(1, add(y, divu(x, y)))
+            }
+
+            function lwm1(lx, w) -> wn {
+                let f := sub(add(w, fp127_ln(sub(0, w))), lx)
+                wn := sub(w, fp127_div(mulraw(w, f), add(w, 0x100000000000000000000000000000000)))
+            }
+
+            function fp127_lambertWm1(x) -> r {
+                if slt(x, sub(0, 0x5e2d58d8b3bcdf1abadec7829054f90d)) { rev(0x7db3aba7) }
+                if iszero(slt(x, 0)) { rev(0x7db3aba7) }
+                let lx := fp127_ln(sub(0, x))
+                let w := 0
+                switch slt(x, sub(0, 0x40000000000000000000000000000000))
+                case 1 {
+                    let q := add(0x100000000000000000000000000000000, mulraw(x, 0x2b7e151628aed2a6abf7158809cf4f3c7))
+                    if iszero(sgt(q, 0)) { r := sub(0, 0x100000000000000000000000000000000) leave }
+                    let p := fp127_sqrt(shl(1, q))
+                    let p2 := mulraw(p, p)
+                    w := sub(sub(0, 0x100000000000000000000000000000000), p)
+                    w := sub(w, div(p2, 3))
+                    w := sub(w, div(mul(mulraw(p2, p), 11), 72))
+                }
+                default {
+                    let ll := fp127_ln(sub(0, lx))
+                    w := add(sub(lx, ll), fp127_div(ll, lx))
+                }
+                w := lwm1(lx, w)
+                w := lwm1(lx, w)
+                w := lwm1(lx, w)
+                w := lwm1(lx, w)
+                r := lwm1(lx, w)
+            }
+
+            _r := fp127_lambertWm1(_x)
+        }
+    }
 }

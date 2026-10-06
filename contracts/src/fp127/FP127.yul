@@ -85,6 +85,9 @@ object "FP127" {
             case 0xae610b48 { /* sign(int256) */
                 ret(fp127_sign(calldataload(4)))
             }
+            case 0xae94abc8 { /* lambertWm1(int256) */
+                ret(fp127_lambertWm1(calldataload(4)))
+            }
             case 0xb47ca3c7 { /* log10(int256) */
                 ret(fp127_log10(calldataload(4)))
             }
@@ -550,6 +553,37 @@ object "FP127" {
                 w := lwfsc(x, w)
                 w := lwfsc(x, w)
                 r := lwib(x, w)
+            }
+
+            function lwm1(lx, w) -> wn {
+                let f := sub(add(w, fp127_ln(sub(0, w))), lx)
+                wn := sub(w, fp127_div(mulraw(w, f), add(w, 0x100000000000000000000000000000000)))
+            }
+
+            function fp127_lambertWm1(x) -> r {
+                if slt(x, sub(0, 0x5e2d58d8b3bcdf1abadec7829054f90d)) { rev(0x7db3aba7) }
+                if iszero(slt(x, 0)) { rev(0x7db3aba7) }
+                let lx := fp127_ln(sub(0, x))
+                let w := 0
+                switch slt(x, sub(0, 0x40000000000000000000000000000000))
+                case 1 {
+                    let q := add(0x100000000000000000000000000000000, mulraw(x, 0x2b7e151628aed2a6abf7158809cf4f3c7))
+                    if iszero(sgt(q, 0)) { r := sub(0, 0x100000000000000000000000000000000) leave }
+                    let p := fp127_sqrt(shl(1, q))
+                    let p2 := mulraw(p, p)
+                    w := sub(sub(0, 0x100000000000000000000000000000000), p)
+                    w := sub(w, div(p2, 3))
+                    w := sub(w, div(mul(mulraw(p2, p), 11), 72))
+                }
+                default {
+                    let ll := fp127_ln(sub(0, lx))
+                    w := add(sub(lx, ll), fp127_div(ll, lx))
+                }
+                w := lwm1(lx, w)
+                w := lwm1(lx, w)
+                w := lwm1(lx, w)
+                w := lwm1(lx, w)
+                r := lwm1(lx, w)
             }
         }
     }

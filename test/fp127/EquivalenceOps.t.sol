@@ -99,6 +99,10 @@ contract EquivalenceOps is FP127Harness {
         x = bound(x, -int256(0x5e2d58d8b3bcdf1abadec7829054f90d), int256(1) << 200);
         _objLib(abi.encodeCall(IFP127.lambertW0, (x)), "lambertW0");
     }
+    function testFuzz_objEqLib_lambertWm1(int256 x) public view {
+        x = bound(x, -int256(0x5e2d58d8b3bcdf1abadec7829054f90d) - 1, 1);
+        _objLib(abi.encodeCall(IFP127.lambertWm1, (x)), "lambertWm1");
+    }
 
     // ------------------------------------------------------------------
     // Object == Huff on the Huff's defined domain
@@ -258,12 +262,6 @@ contract EquivalenceOps is FP127Harness {
     // ------------------------------------------------------------------
     // Divergences: Yul reverts, Huff returned a sentinel or garbage
     // ------------------------------------------------------------------
-
-    function _expectRevert(bytes memory call, bytes4 err, string memory what) internal view {
-        Res memory o = _try(address(obj), call);
-        assertFalse(o.ok, string.concat(what, ": expected revert"));
-        assertEq(_sel(o.err), err, string.concat(what, ": wrong error"));
-    }
 
     function test_divergence_exp_overflow() public view {
         // Huff: exp(89) returns MAX_UINT256 (-1 as int256).

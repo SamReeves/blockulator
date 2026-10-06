@@ -117,6 +117,32 @@ contract Behaviour is FP127Harness {
         assertLe(_absd(obj.lambertW0(E_RAW), ONE), 16);
     }
 
+    int256 constant NEG_INV_E = -int256(0x5e2d58d8b3bcdf1abadec7829054f90d);
+
+    function test_lambertm1_known() public view {
+        // -INV_E_RAW is floor(2^128 / e) negated, a fraction of an ULP inside
+        // the domain, where W = -1 - sqrt(2 e d) is about -1 - 2^-63. Both
+        // branches carry ~63 bits there (infinite slope), so compare loosely.
+        assertLe(_absd(obj.lambertWm1(NEG_INV_E), -ONE), ONE >> 60);
+        // W_{-1}(-2 e^-2) = -2, W_{-1}(-3 e^-3) = -3
+        int256 x2 = obj.mul(-2 * ONE, obj.exp(-2 * ONE));
+        assertLe(_absd(obj.lambertWm1(x2), -2 * ONE), 16);
+        int256 x3 = obj.mul(-3 * ONE, obj.exp(-3 * ONE));
+        assertLe(_absd(obj.lambertWm1(x3), -3 * ONE), 16);
+        // the smallest negative input is still in the domain
+        int256 wmin = obj.lambertWm1(-1);
+        assertLt(wmin, -93 * ONE);
+        assertGt(wmin, -94 * ONE);
+    }
+
+    function test_lambertm1_domain() public view {
+        _expectRevert(abi.encodeCall(IFP127.lambertWm1, (0)), IFP127.OutOfRange.selector, "lambertWm1(0)");
+        _expectRevert(abi.encodeCall(IFP127.lambertWm1, (ONE)), IFP127.OutOfRange.selector, "lambertWm1(1)");
+        _expectRevert(abi.encodeCall(IFP127.lambertWm1, (MAX)), IFP127.OutOfRange.selector, "lambertWm1(MAX)");
+        _expectRevert(abi.encodeCall(IFP127.lambertWm1, (NEG_INV_E - 1)), IFP127.OutOfRange.selector, "lambertWm1(-1/e - 1)");
+        _expectRevert(abi.encodeCall(IFP127.lambertWm1, (MIN)), IFP127.OutOfRange.selector, "lambertWm1(MIN)");
+    }
+
     // ------------------------------------------------------------------
     // Shortcut dispatch: the shortcut must equal the direct op
     // ------------------------------------------------------------------
@@ -213,6 +239,18 @@ contract Behaviour is FP127Harness {
         int256 back = obj.mul(w, obj.exp(w));
         int256 tol = (x < 0 ? -x : x) >> 112;
         assertLe(_absd(back, x), tol + 8);
+    }
+
+    /// On the secondary branch w + ln(-w) = ln(-x), w <= -1, and W_{-1} <= W_0.
+    function testFuzz_prop_lambertWm1_inverse(int256 x) public view {
+        x = bound(x, NEG_INV_E, -1);
+        int256 w = obj.lambertWm1(x);
+        assertLe(w, -ONE + (ONE >> 60));
+        assertLe(w, obj.lambertW0(x) + (ONE >> 60));
+        int256 lhs = w + obj.ln(-w);
+        int256 rhs = obj.ln(-x);
+        int256 tol = (w < 0 ? -w : w) >> 100;
+        assertLe(_absd(lhs, rhs), tol + 8);
     }
 
     function testFuzz_prop_floor_ceil(int256 x) public view {
