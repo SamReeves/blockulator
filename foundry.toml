@@ -1,28 +1,43 @@
 [profile.default]
-src = "contracts/src/bench"
+src = "contracts/src"
 out = "out"
 libs = ["lib"]
 test = "test"
 cache_path = "cache"
 
-# Solidity compiler settings
+# Only Solidity and Yul under contracts/src are compiled. Vyper sources and
+# archived Huff live beside them and are skipped.
+skip = ["contracts/src/**/*.vy", "contracts/src/tools/**", "contracts/src/games/**",
+        "contracts/src/market/**", "contracts/src/content/**", "contracts/src/discussions/**",
+        "contracts/src/identity/**", "contracts/src/interfaces/**", "contracts/src/tests/**",
+        "test/bench/**"]
+
 solc_version = "0.8.24"
 evm_version = "shanghai"
 optimizer = true
 optimizer_runs = 200
-via_ir = true
+via_ir = false
 
-# Test settings
 verbosity = 3
-gas_reports = ["*"]
 ffi = true
 gas_limit = "18446744073709551615"
 
 fs_permissions = [
   { access = "read", path = "contracts/build" },
+  { access = "read", path = "contracts/archive" },
+  { access = "read", path = "out" },
   { access = "read", path = "scripts" },
   { access = "read-write", path = "docs/benchmarks" }
 ]
 
 [profile.default.fuzz]
 runs = 1000
+
+# The legacy bench suites were written for the IR pipeline and take many
+# minutes to compile. They are opt-in: FOUNDRY_PROFILE=bench forge test.
+[profile.bench]
+via_ir = true
+test = "test/bench"
+
+[lint]
+lint_on_build = false
