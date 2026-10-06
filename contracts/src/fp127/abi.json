@@ -1,0 +1,151 @@
+[
+  {
+    "type": "error",
+    "name": "Overflow",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "DivisionByZero",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OutOfRange",
+    "inputs": []
+  },
+  {
+    "type": "function",
+    "name": "fromFixed18",
+    "stateMutability": "pure",
+    "inputs": [
+      {
+        "type": "int256",
+        "name": "x",
+        "internalType": "int256"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "int256",
+        "name": "r",
+        "internalType": "int256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "toFixed18",
+    "stateMutability": "pure",
+    "inputs": [
+      {
+        "type": "int256",
+        "name": "x",
+        "internalType": "int256"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "int256",
+        "name": "r",
+        "internalType": "int256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "add",
+    "stateMutability": "pure",
+    "inputs": [
+      {
+        "type": "int256",
+        "name": "a",
+        "internalType": "int256"
+      },
+      {
+        "type": "int256",
+        "name": "b",
+        "internalType": "int256"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "int256",
+        "name": "r",
+        "internalType": "int256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "sub",
+    "stateMutability": "pure",
+    "inputs": [
+      {
+        "type": "int256",
+        "name": "a",
+        "internalType": "int256"
+      },
+      {
+        "type": "int256",
+        "name": "b",
+        "internalType": "int256"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "int256",
+        "name": "r",
+        "internalType": "int256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "mul",
+    "stateMutability": "pure",
+    "inputs": [
+      {
+        "type": "int256",
+        "name": "a",
+        "internalType": "int256"
+      },
+      {
+        "type": "int256",
+        "name": "b",
+        "internalType": "int256"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "int256",
+        "name": "r",
+        "internalType": "int256"
+      }
+    ]
+  },
+  {
+    "type": "function",
+    "name": "div",
+    "stateMutability": "pure",
+    "inputs": [
+      {
+        "type": "int256",
+        "name": "a",
+        "internalType": "int256"
+      },
+      {
+        "type": "int256",
+        "name": "b",
+        "internalType": "int256"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "int256",
+        "name": "r",
+        "internalType": "int256"
+      }
+    ]
+  }
+]
