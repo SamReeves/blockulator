@@ -15,7 +15,8 @@ import {console} from "forge-std/console.sol";
 /// op's floor. Per-op count / min / mean bits and the worst input are printed
 /// as PREC|op|n|min|mean|worstInput and written to docs/fp127/precision.json.
 contract Precision is FP127Harness {
-    string constant OUT = "docs/fp127/precision.json";
+    /// Where the per-op stats are written; empty disables the write.
+    function _out() internal pure virtual returns (string memory) { return "docs/fp127/precision.json"; }
 
     function _ops() internal pure returns (string[37] memory o) {
         o = [
@@ -148,12 +149,12 @@ contract Precision is FP127Harness {
         return vm.serializeString("precision", op, entry);
     }
 
-    function test_precision_all() public {
+    function test_precision_all() public virtual {
         string[37] memory ops = _ops();
         string memory doc;
         for (uint256 i; i < ops.length; i++) {
             doc = _record(ops[i], _runOp(ops[i]));
         }
-        vm.writeJson(doc, OUT);
+        if (bytes(_out()).length > 0) vm.writeJson(doc, _out());
     }
 }

@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Directories
-HUFF_DIR="contracts/src/tools/huff"
+HUFF_DIR="contracts/archive/huff/src"
 BUILD_DIR="contracts/build/huff"
 ABI_DIR="contracts/build/abis"
 BYTECODE_DIR="contracts/build/bytecode"

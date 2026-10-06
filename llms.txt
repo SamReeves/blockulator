@@ -23,10 +23,15 @@
 
 - Network: Ethereum Sepolia, chainId 11155111
 - RPC: https://ethereum-sepolia-rpc.publicnode.com
-- FP127 contract: 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
-- Encoding: pass each operand as int256(value * 2**128) reinterpreted as
-  a uint256 (two's complement). Decode the uint256 result the same way
-  (divide by 2**128). All functions are `pure` and called via eth_call.
+- FP127 contract: 0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28 (CREATE2, salt "FP127 v1";
+  record at /contracts/deployments/FP127.md)
+- ABI: /contracts/src/fp127/abi.json. Every operand and result is an
+  int256 holding value * 2**128; divide the result by 2**128. Function
+  names carry no suffix: add, mul, exp, ln, sqrt, pow, lambertW0, ...
+  Out-of-domain inputs revert with Overflow(), DivisionByZero() or
+  OutOfRange(). All functions are `pure` and called via eth_call.
+- Inline form: contracts/src/fp127/FP127Lib.sol, the same code as a
+  Solidity library for contracts that prefer no external call.
 - Machine-readable contract list + ABIs: /.well-known/agent.json
 
 ## Specialized single-purpose calculators (Vyper)
@@ -38,8 +43,9 @@ binomial coefficient C(n,k), z-score, Gaussian tail, sinh, cosh, tanh, gcd/lcm.
 
 ## Documentation
 
-- FP127 deep dive: https://blockulator.com/docs/fp127/README_FIXEDPOINT127.md
-- Source (Huff): https://github.com/SamReeves/blockulator
+- FP127 README: https://github.com/SamReeves/blockulator/blob/master/contracts/src/fp127/README.md
+- Precision and gas tables: /docs/fp127/precision.md, /docs/benchmarks/gas.md
+- Source (Yul): https://github.com/SamReeves/blockulator
 - EthCC[9] talk: https://www.youtube.com/watch?v=a_tL99NY-yc
 
 ## Notes for agents

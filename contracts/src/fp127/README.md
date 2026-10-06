@@ -31,8 +31,12 @@ make size             # deployed runtime size against the 24,576-byte limit
 The same Yul function bodies are emitted twice.
 
 **Deployed object.** `FP127.yul` wraps the bodies in a `switch` on the
-4-byte selector. Deploy it once per chain (CREATE2 with a published salt is
-the plan) and every contract that `staticcall`s it runs identical bytecode.
+4-byte selector. It is deployed with CREATE2 through the deterministic
+proxy at `0x4e59b44847b379578588920cA78FbF26c0B4956C` with salt
+`"FP127 v1"`, which puts it at `0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28` on
+every chain it is deployed to (Sepolia today; record and verification
+recipe in [`contracts/deployments/FP127.md`](../../deployments/FP127.md)).
+Every contract that `staticcall`s it runs identical bytecode.
 `FP127Caller.sol` is the minimal Solidity wrapper for that path; it bubbles
 revert data unchanged.
 
@@ -198,5 +202,6 @@ of the Huff contract at `0xfae694D0c2c44181791F838c54Ed64C3151FfE30`,
 fetched at Sepolia block 11,857,616 with `make fetch-baseline`. keccak256
 of the hex text: `0x74946c4dd85b8bbbab56d77d34defdf4e66ea15c0647993ea445f0b95591d10b`.
 The equivalence suites etch it, so no Huff toolchain is needed. The Huff
-sources still live under `contracts/src/tools/huff/` until #19 retires them;
-the Huff-era test suites were replaced by the files above.
+sources are archived under `contracts/archive/huff/` (see its README); the
+Huff-era test suites were replaced by the files above and the Huff-era
+documents by [`docs/fp127/HISTORY.md`](../../../docs/fp127/HISTORY.md).

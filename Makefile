@@ -1,4 +1,4 @@
-.PHONY: help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline compile-huff size
+.PHONY: help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia
 
 PY := uv run
 BASELINE_ADDR := 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
@@ -16,8 +16,11 @@ help:
 	@echo "  make precision-report - Rewrite docs/fp127/precision.md from docs/fp127/precision.json"
 	@echo "  make bench            - Gas ladder for every op and form -> docs/benchmarks/gas.json + gas.md"
 	@echo "  make size             - Print the deployed FP127 runtime size in bytes"
-	@echo "  make fetch-baseline   - Re-fetch the live Huff runtime bytecode from Sepolia"
-	@echo "  make compile-huff     - Build the archived Huff sources (needs huffc)"
+	@echo "  make fetch-baseline   - Re-fetch the legacy Huff runtime bytecode from Sepolia"
+	@echo "  make predict          - Print the CREATE2 address of the current FP127 object"
+	@echo "  make deploy-sepolia   - Deploy via the CREATE2 proxy (reads DEPLOYER_KEY)"
+	@echo "  make verify-sepolia   - Prove the live runtime equals the artifact, then verify on Sourcify + Blockscout"
+	@echo "  make smoke-sepolia    - Run every committed vector against the live Sepolia contract"
 	@echo ""
 
 gen:
@@ -53,5 +56,22 @@ fetch-baseline:
 	@echo "fetched at block $$(cast block-number --rpc-url $(SEPOLIA_RPC))"
 	@cast keccak "$$(cat contracts/archive/huff/fp127.sepolia.runtime.hex)"
 
-compile-huff:
-	@bash contracts/deployments/compile-huff.sh
+# ---- deployment ------------------------------------------------------------
+
+DEPLOY_SCRIPT := script/DeployFP127.s.sol
+
+predict: build
+	@forge script $(DEPLOY_SCRIPT) --sig "predict()" --rpc-url $(SEPOLIA_RPC) 2>&1 | grep -E "deployer|salt|hash|keccak|bytes|address|deployed"
+
+deploy-sepolia: build
+	@test -n "$$DEPLOYER_KEY" || (echo "DEPLOYER_KEY is not set" && exit 1)
+	@$(PY) scripts/fp127/stdjson.py check
+	@forge script $(DEPLOY_SCRIPT) --rpc-url $(SEPOLIA_RPC) --private-key "$$DEPLOYER_KEY" --broadcast
+
+verify-sepolia: build
+	@$(PY) scripts/fp127/stdjson.py check
+	@$(PY) scripts/fp127/stdjson.py onchain $(SEPOLIA_RPC) $$($(PY) python -c "import json;print(json.load(open('contracts/deployments/FP127.json'))['address'])")
+	@$(PY) scripts/fp127/verify.py 11155111 $$($(PY) python -c "import json;print(json.load(open('contracts/deployments/FP127.json'))['address'])")
+
+smoke-sepolia: build
+	@forge test --match-contract Deployed --fork-url $(SEPOLIA_RPC) -vv

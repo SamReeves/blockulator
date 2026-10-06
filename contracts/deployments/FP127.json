@@ -1,0 +1,28 @@
+{
+ "contract": "FP127",
+ "chainId": 11155111,
+ "network": "sepolia",
+ "address": "0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28",
+ "deployer": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
+ "salt": "0x4650313237207631000000000000000000000000000000000000000000000000",
+ "saltAscii": "FP127 v1",
+ "initCodeHash": "0x5d86a72291f2abba6b311a94d55253789b0cd17ba1020e1120f7d41ec96dfbc2",
+ "runtimeKeccak": "0xea2e14cacd103541f26ee0bd599375e890bbdc302a86a0074fcb8b28657159e2",
+ "runtimeBytes": 6512,
+ "source": "contracts/src/fp127/FP127.yul",
+ "sourceCommit": null,
+ "compiler": {
+  "language": "Yul",
+  "solc": "0.8.24+commit.e11b9ed9",
+  "optimizer": true,
+  "runs": 200,
+  "evmVersion": "shanghai"
+ },
+ "txHash": null,
+ "block": null,
+ "verification": {
+  "sourcify": null,
+  "blockscout": null
+ },
+ "abi": "contracts/src/fp127/abi.json"
+}

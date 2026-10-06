@@ -405,7 +405,7 @@ export const CONTRACT_REGISTRY = {
             sepolia: '0xfae694D0c2c44181791F838c54Ed64C3151FfE30',
             mainnet: '0x0000000000000000000000000000000000000000'
         },
-        source: 'contracts/src/tools/huff/fp127/fp127.huff',
+        source: 'contracts/archive/huff/src/fp127/fp127.huff',
         abi: 'contracts/build/abis/fixedpoint127.json'
     },
     
