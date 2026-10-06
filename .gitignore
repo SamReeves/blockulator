@@ -31,9 +31,6 @@ _static/
 artifacts/
 contracts/build/bins/
 contracts/build/bytecode/
-contracts/build/huff/*.hex
-contracts/build/huff/*.bin
-contracts/build/huff/*.runtime.bin
 contracts/build/vyper/*.hex
 contracts/build/vyper/*.bin
 
@@ -55,6 +52,13 @@ contracts/deployments/*.log
 
 # Foundry lock
 foundry.lock
+
+# Foundry broadcast logs, except the public record of the Sepolia FP127 deployment
+broadcast/
+!broadcast/DeployFP127.s.sol/
+!broadcast/DeployFP127.s.sol/11155111/
+broadcast/DeployFP127.s.sol/11155111/*
+!broadcast/DeployFP127.s.sol/11155111/run-latest.json
 
 # Python bytecode
 __pycache__/

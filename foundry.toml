@@ -24,6 +24,7 @@ gas_limit = "18446744073709551615"
 fs_permissions = [
   { access = "read", path = "contracts/build" },
   { access = "read", path = "contracts/archive" },
+  { access = "read", path = "contracts/deployments" },
   { access = "read", path = "out" },
   { access = "read", path = "test/fp127/vectors" },
   { access = "read-write", path = "docs/fp127" },
@@ -33,6 +34,9 @@ fs_permissions = [
 
 [profile.default.fuzz]
 runs = 1000
+
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC}"
 
 
 [lint]
