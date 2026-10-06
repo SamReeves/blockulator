@@ -42,3 +42,4 @@ Bits are relative correct bits of the 127.128 result: msb(|truth|) - msb(|truth 
 | hypot | 121 | 0 | exact | exact |  |
 | gavg | 166 | 34 | exact | exact |  |
 | lambertW0 | 108 | 3 | 61 | 163 | `0xffffffffffffffffffffffffffffffffa1d2a7274c4320e54521387d6fab06f3` |
+| lambertWm1 | 66 | 6 | 64 | 160 | `0xffffffffffffffffffffffffffffffffa1d2a7274c4320e54521387d6fab06f3` |

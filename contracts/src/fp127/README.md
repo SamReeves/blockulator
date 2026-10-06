@@ -103,6 +103,7 @@ each op; `fromFixed18` and `toFixed18` are the bridge. All parameters are
 | `gcd(a, b)` | gcd of \|floor a\|, \|floor b\| | never |
 | `factorial(n)` | floor(n)! for 0 ≤ n < 34 | `OutOfRange` |
 | `lambertW0(x)` | W(x) for x ≥ −1/e | `OutOfRange` |
+| `lambertWm1(x)` | W₋₁(x) for −1/e ≤ x < 0 | `OutOfRange` |
 
 Rounding directions are inherited from the Huff and preserved exactly:
 `mul` floors because it is the middle 256 bits of the exact 512-bit two's
@@ -169,6 +170,20 @@ the origin series for −¼ < x < 0, the branch-point series down to −1/e),
 runs four FSC steps and one IB step, and measures 118 to 130 bits across the
 domain. W(1..5) are still exact table values. The 64-entry table is gone,
 which is where most of the bytecode saving came from.
+
+**`lambertWm1`.** New. The Huff had a `lambertwm1.huff` that never shipped
+(`huffc` ran out of code size) and could not have worked: it referenced an
+undefined constant, had its domain checks inverted, seeded with the wrong
+sign and called the step macro with the wrong stack convention. The Yul
+routine is a fresh implementation on the secondary real branch, −1/e ≤ x < 0,
+W ≤ −1. Neither W₀ step transfers: the FSC residual needs e^−w and the IB
+step needs x / w = e^w, and on this branch w reaches about −93 at x = −2^−128,
+where one overflows and the other underflows the format. Instead it iterates
+the log form w + ln(−w) = ln(−x) by Newton, w′ = w − w (w + ln(−w) − L) / (w + 1),
+which is the IB step with the logarithm split and needs only `ln` and `div`.
+Seeds are the branch-point series below −¼ and the three-term asymptotic
+L − ln(−L) + ln(−L)/L above it; five steps take 8 to 40 seed bits to 126 to
+128. At the branch point itself it returns exactly −1.
 
 **Shortcuts.** `pow`, `cbrt` and `lambertW0` keep the exact shortcuts from
 `shortcut_constants.huff`. The bytecode on Sepolia predates that file (its
