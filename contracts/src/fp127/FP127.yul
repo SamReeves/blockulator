@@ -7,11 +7,68 @@ object "FP127" {
     object "runtime" {
         code {
             switch shr(224, calldataload(0))
+            case 0x1b5ac4b5 { /* abs(int256) */
+                ret(fp127_abs(calldataload(4)))
+            }
+            case 0x2110b689 { /* dist(int256,int256) */
+                ret(fp127_dist(calldataload(4), calldataload(36)))
+            }
+            case 0x29aa9cbe { /* min(int256,int256) */
+                ret(fp127_min(calldataload(4), calldataload(36)))
+            }
+            case 0x3a02c983 { /* inv(int256) */
+                ret(fp127_inv(calldataload(4)))
+            }
+            case 0x42fba7ae { /* ceil(int256) */
+                ret(fp127_ceil(calldataload(4)))
+            }
             case 0x43509138 { /* div(int256,int256) */
                 ret(fp127_div(calldataload(4), calldataload(36)))
             }
+            case 0x4c0dafa2 { /* exp10(int256) */
+                ret(fp127_exp10(calldataload(4)))
+            }
+            case 0x54a53dc1 { /* neg(int256) */
+                ret(fp127_neg(calldataload(4)))
+            }
+            case 0x58b4370b { /* round(int256) */
+                ret(fp127_round(calldataload(4)))
+            }
+            case 0x5ad78e8a { /* factorial(int256) */
+                ret(fp127_factorial(calldataload(4)))
+            }
+            case 0x63b03896 { /* gcd(int256,int256) */
+                ret(fp127_gcd(calldataload(4), calldataload(36)))
+            }
+            case 0x665df460 { /* sqrt(int256) */
+                ret(fp127_sqrt(calldataload(4)))
+            }
+            case 0x6de23d34 { /* lambertW0(int256) */
+                ret(fp127_lambertW0(calldataload(4)))
+            }
+            case 0x7b8d0f0c { /* clamp(int256,int256,int256) */
+                ret(fp127_clamp(calldataload(4), calldataload(36), calldataload(68)))
+            }
+            case 0x81fe5786 { /* max(int256,int256) */
+                ret(fp127_max(calldataload(4), calldataload(36)))
+            }
+            case 0x84e13b60 { /* lerp(int256,int256,int256) */
+                ret(fp127_lerp(calldataload(4), calldataload(36), calldataload(68)))
+            }
+            case 0x8e6f2353 { /* ln(int256) */
+                ret(fp127_ln(calldataload(4)))
+            }
+            case 0x92b0c5b2 { /* pow(int256,int256) */
+                ret(fp127_pow(calldataload(4), calldataload(36)))
+            }
             case 0x9aea0a13 { /* fromFixed18(int256) */
                 ret(fp127_fromFixed18(calldataload(4)))
+            }
+            case 0xa13ed853 { /* gavg(int256,int256) */
+                ret(fp127_gavg(calldataload(4), calldataload(36)))
+            }
+            case 0xa1985bb6 { /* log2Up(int256) */
+                ret(fp127_log2Up(calldataload(4)))
             }
             case 0xa2745c74 { /* toFixed18(int256) */
                 ret(fp127_toFixed18(calldataload(4)))
@@ -22,8 +79,41 @@ object "FP127" {
             case 0xadefc37b { /* sub(int256,int256) */
                 ret(fp127_sub(calldataload(4), calldataload(36)))
             }
+            case 0xae2785ac { /* frac(int256) */
+                ret(fp127_frac(calldataload(4)))
+            }
+            case 0xae610b48 { /* sign(int256) */
+                ret(fp127_sign(calldataload(4)))
+            }
+            case 0xb47ca3c7 { /* log10(int256) */
+                ret(fp127_log10(calldataload(4)))
+            }
             case 0xbbe93d91 { /* mul(int256,int256) */
                 ret(fp127_mul(calldataload(4), calldataload(36)))
+            }
+            case 0xc479210c { /* hypot(int256,int256) */
+                ret(fp127_hypot(calldataload(4), calldataload(36)))
+            }
+            case 0xd4b6188c { /* cbrt(int256) */
+                ret(fp127_cbrt(calldataload(4)))
+            }
+            case 0xda3ff648 { /* floor(int256) */
+                ret(fp127_floor(calldataload(4)))
+            }
+            case 0xdbbb06d2 { /* exp2(int256) */
+                ret(fp127_exp2(calldataload(4)))
+            }
+            case 0xe0d68737 { /* log2(int256) */
+                ret(fp127_log2(calldataload(4)))
+            }
+            case 0xe46751e3 { /* exp(int256) */
+                ret(fp127_exp(calldataload(4)))
+            }
+            case 0xebf274be { /* avg(int256,int256) */
+                ret(fp127_avg(calldataload(4), calldataload(36)))
+            }
+            case 0xff78cf2d { /* zeroFloorSub(int256,int256) */
+                ret(fp127_zeroFloorSub(calldataload(4), calldataload(36)))
             }
             default { revert(0, 0) }
 
@@ -40,6 +130,46 @@ object "FP127" {
             function absw(x) -> r {
                 let m := sar(255, x)
                 r := sub(xor(x, m), m)
+            }
+
+            function msb(x) -> r {
+                if iszero(lt(x, 0x100000000000000000000000000000000)) { r := 128 x := shr(128, x) }
+                if iszero(lt(x, 0x10000000000000000)) { r := add(r, 64) x := shr(64, x) }
+                if iszero(lt(x, 0x100000000)) { r := add(r, 32) x := shr(32, x) }
+                if iszero(lt(x, 0x10000)) { r := add(r, 16) x := shr(16, x) }
+                if iszero(lt(x, 0x100)) { r := add(r, 8) x := shr(8, x) }
+                if iszero(lt(x, 0x10)) { r := add(r, 4) x := shr(4, x) }
+                if iszero(lt(x, 0x4)) { r := add(r, 2) x := shr(2, x) }
+                if iszero(lt(x, 0x2)) { r := add(r, 1) }
+            }
+
+            function mulraw(a, b) -> r {
+                let p0 := mul(a, b)
+                let mm := mulmod(a, b, not(0))
+                let p1 := sub(sub(mm, p0), lt(mm, p0))
+                p1 := sub(p1, mul(slt(a, 0), b))
+                p1 := sub(p1, mul(slt(b, 0), a))
+                r := or(shl(128, p1), shr(128, p0))
+            }
+
+            function divu(a, b) -> q {
+                let prod0 := shl(128, a)
+                let prod1 := shr(128, a)
+                let remainder := mulmod(a, 0x100000000000000000000000000000000, b)
+                prod1 := sub(prod1, gt(remainder, prod0))
+                prod0 := sub(prod0, remainder)
+                let twos := and(sub(0, b), b)
+                b := div(b, twos)
+                prod0 := div(prod0, twos)
+                prod0 := or(prod0, mul(prod1, add(div(sub(0, twos), twos), 1)))
+                let iv := xor(mul(3, b), 2)
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                iv := mul(iv, sub(2, mul(b, iv)))
+                q := mul(prod0, iv)
             }
 
             function fp127_fromFixed18(x) -> r {
@@ -73,35 +203,350 @@ object "FP127" {
                 r := or(shl(128, p1), shr(128, p0))
             }
 
-            function divu(a, b) -> q {
-                let prod0 := shl(128, a)
-                let prod1 := shr(128, a)
-                let remainder := mulmod(a, 0x100000000000000000000000000000000, b)
-                prod1 := sub(prod1, gt(remainder, prod0))
-                prod0 := sub(prod0, remainder)
-                let twos := and(sub(0, b), b)
-                b := div(b, twos)
-                prod0 := div(prod0, twos)
-                prod0 := or(prod0, mul(prod1, add(div(sub(0, twos), twos), 1)))
-                let inv := xor(mul(3, b), 2)
-                inv := mul(inv, sub(2, mul(b, inv)))
-                inv := mul(inv, sub(2, mul(b, inv)))
-                inv := mul(inv, sub(2, mul(b, inv)))
-                inv := mul(inv, sub(2, mul(b, inv)))
-                inv := mul(inv, sub(2, mul(b, inv)))
-                inv := mul(inv, sub(2, mul(b, inv)))
-                q := mul(prod0, inv)
-            }
-
             function fp127_div(a, b) -> r {
                 if iszero(b) { rev(0x23d359a3) }
-                let neg := xor(slt(a, 0), slt(b, 0))
+                let ng := xor(slt(a, 0), slt(b, 0))
                 let ua := absw(a)
                 let ub := absw(b)
                 if iszero(lt(shr(128, ua), ub)) { rev(0x35278d12) }
                 let q := divu(ua, ub)
-                if gt(q, add(0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, neg)) { rev(0x35278d12) }
-                r := sub(xor(q, sub(0, neg)), sub(0, neg))
+                if gt(q, add(0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff, ng)) { rev(0x35278d12) }
+                r := sub(xor(q, sub(0, ng)), sub(0, ng))
+            }
+
+            function exp2frac(f) -> r {
+                r := 0x7ac5115747d8
+                r := add(mulraw(r, f), 0x9f29a09462d53)
+                r := add(mulraw(r, f), 0x1486d87bca24a71)
+                r := add(mulraw(r, f), 0x24ae7d9788480f70)
+                r := add(mulraw(r, f), 0x3ee3a1d249cac3699)
+                r := add(mulraw(r, f), 0x661103e6e8ef83bd5e)
+                r := add(mulraw(r, f), 0x9c744e6a6d037e9b359)
+                r := add(mulraw(r, f), 0xe1b74210e03ffef9130e)
+                r := add(mulraw(r, f), 0x1314964d60c074d3410b05)
+                r := add(mulraw(r, f), 0x18161931668b3732335b8ec)
+                r := add(mulraw(r, f), 0x1c3bd650fc2b5e1a3c2798ba)
+                r := add(mulraw(r, f), 0x1e8cac7351bb1ac06cff974a0)
+                r := add(mulraw(r, f), 0x1e4cf5158b8eca22258a9523c8)
+                r := add(mulraw(r, f), 0x1b5253d395e7c3d9b7d23fb041c)
+                r := add(mulraw(r, f), 0x162c0223a5c823fd9180c0672a87)
+                r := add(mulraw(r, f), 0xffe5fe2c458634358a5e0cbc3190)
+                r := add(mulraw(r, f), 0xa184897c363c3b7a585493a61d0c1)
+                r := add(mulraw(r, f), 0x5761ff9e299cc441c5fda6496fc0bb)
+                r := add(mulraw(r, f), 0x276556df749cee539977c16ab26986b)
+                r := add(mulraw(r, f), 0xe35846b82505fc599d3b15d9947eebb)
+                r := add(mulraw(r, f), 0x3d7f7bff058b1d50de2d60dd92e71277)
+                r := add(mulraw(r, f), 0xb17217f7d1cf79abc9e3b39803f2f637)
+                r := add(mulraw(r, f), 0x100000000000000000000000000000000)
+            }
+
+            function exp2core(x) -> r {
+                if iszero(x) { r := 0x100000000000000000000000000000000 leave }
+                if slt(x, 0) {
+                    let ax := sub(0, x)
+                    let k := shr(128, ax)
+                    let f := and(ax, 0xffffffffffffffffffffffffffffffff)
+                    if iszero(f) { r := shr(k, 0x100000000000000000000000000000000) leave }
+                    r := shr(add(k, 1), exp2frac(sub(0x100000000000000000000000000000000, f)))
+                    leave
+                }
+                r := shl(sar(128, x), exp2frac(and(x, 0xffffffffffffffffffffffffffffffff)))
+            }
+
+            function fp127_exp2(x) -> r {
+                if iszero(slt(x, 0x7f00000000000000000000000000000000)) { rev(0x35278d12) }
+                if slt(x, sub(0, 0x8000000000000000000000000000000000)) { r := 0 leave }
+                r := exp2core(x)
+            }
+
+            function fp127_exp(x) -> r {
+                if iszero(x) { r := 0x100000000000000000000000000000000 leave }
+                if sgt(x, 0x5800000000000000000000000000000000) { rev(0x35278d12) }
+                if slt(x, sub(0, 0x5800000000000000000000000000000000)) { r := 0 leave }
+                r := exp2core(mulraw(x, 0x171547652b82fe1777d0ffda0d23a7d11))
+            }
+
+            function fp127_exp10(x) -> r {
+                r := fp127_exp2(fp127_mul(x, 0x35269e12f346e2bf924afdbfd36bf6d33))
+            }
+
+            function log2poly(f) -> r {
+                r := 0x1b6d3bb5d0b9dadf116f3d6f43a6d72d
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffe13d3482175f7606c558738bb08090ba)
+                r := add(mulraw(r, f), 0x219345c1858ee5f042fedb743014a22c)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffdb1127702fe34463c5f84ad56433d859)
+                r := add(mulraw(r, f), 0x2909627ae34f376129ad84443f1c2dcc)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffd1d57135a90aaf7aa5769f8c670bcfe5)
+                r := add(mulraw(r, f), 0x34c2ec54f5bda90af68b5dddfb665690)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffc271ec478bf8051a7c98106d2bda72a1)
+                r := add(mulraw(r, f), 0x49ddb143be6ff9e4b19c67d5b27fdea3)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffffa3aae26b51f407a220bc2d21afb87cee)
+                r := add(mulraw(r, f), 0x7b1c2770e80ff5d27f0554864e620bde)
+                r := add(mulraw(r, f), 0xffffffffffffffffffffffffffffffff4755c4d6a3e80f444178012f97232a8a)
+                r := add(mulraw(r, f), 0x171547652b82fe1777d0ffda0d23a7bb1)
+                r := mulraw(r, f)
+            }
+
+            function fp127_log2(x) -> r {
+                if iszero(sgt(x, 0)) { rev(0x7db3aba7) }
+                if eq(x, 0x100000000000000000000000000000000) { r := 0 leave }
+                let m := msb(x)
+                if iszero(and(x, sub(x, 1))) { r := shl(128, sub(m, 128)) leave }
+                let ip := shl(128, sub(m, 128))
+                let s := sub(m, 128)
+                let mm := shr(s, x)
+                if slt(s, 0) { mm := shl(sub(0, s), x) }
+                let acc := 0
+                if iszero(gt(0x16a09e667f3bcc908b2fb1366ea957d3e, mm)) {
+                    mm := mulraw(mm, 0xb504f333f9de6484597d89b3754abe9f)
+                    acc := add(acc, 0x80000000000000000000000000000000)
+                }
+                if iszero(gt(0x1306fe0a31b7152de8d5a46305c85edec, mm)) {
+                    mm := mulraw(mm, 0xd744fccad69d6af439a68bb9902d3fde)
+                    acc := add(acc, 0x40000000000000000000000000000000)
+                }
+                if iszero(gt(0x1172b83c7d517adcdf7c8c50eb14a7920, mm)) {
+                    mm := mulraw(mm, 0xeac0c6e7dd24392ed02d75b3706e54fa)
+                    acc := add(acc, 0x20000000000000000000000000000000)
+                }
+                if iszero(gt(0x10b5586cf9890f6298b92b71842a98364, mm)) {
+                    mm := mulraw(mm, 0xf5257d152486cc2c7b9d0c7aed980fc3)
+                    acc := add(acc, 0x10000000000000000000000000000000)
+                }
+                if iszero(gt(0x1059b0d31585743ae7c548eb68ca417fe, mm)) {
+                    mm := mulraw(mm, 0xfa83b2db722a033a7c25bb14315d7fcc)
+                    acc := add(acc, 0x08000000000000000000000000000000)
+                }
+                if iszero(gt(0x102c9a3e778060ee6f7caca4f7a29bde9, mm)) {
+                    mm := mulraw(mm, 0xfd3e0c0cf486c174853f3a5931e0ee03)
+                    acc := add(acc, 0x04000000000000000000000000000000)
+                }
+                if iszero(gt(0x10163da9fb33356d84a66ae336dcdfa40, mm)) {
+                    mm := mulraw(mm, 0xfe9e115c7b8f884badd25995e79d2f09)
+                    acc := add(acc, 0x02000000000000000000000000000000)
+                }
+                r := add(ip, add(acc, log2poly(sub(mm, 0x100000000000000000000000000000000))))
+            }
+
+            function fp127_ln(x) -> r {
+                r := fp127_log2(x)
+                if iszero(r) { leave }
+                r := mulraw(r, 0xb17217f7d1cf79abc9e3b39803f2f6af)
+            }
+
+            function fp127_log10(x) -> r {
+                r := mulraw(fp127_log2(x), 0x4d104d427de7fbcc47c4acd605be48bc)
+            }
+
+            function fp127_log2Up(x) -> r {
+                if iszero(sgt(x, 0)) { rev(0x7db3aba7) }
+                if iszero(and(x, sub(x, 1))) { r := shl(128, sub(msb(x), 128)) leave }
+                r := fp127_ceil(fp127_log2(x))
+            }
+
+            function fp127_sqrt(x) -> r {
+                if slt(x, 0) { rev(0x7db3aba7) }
+                if iszero(x) { r := 0 leave }
+                let e := add(128, msb(x))
+                let y := shl(shr(1, e), 1)
+                if and(e, 1) { y := mulraw(y, 0x16a09e667f3bcc908b2fb1366ea957d3e) }
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                y := shr(1, add(y, divu(x, y)))
+                r := shr(1, add(y, divu(x, y)))
+            }
+
+            function fp127_pow(x, y) -> r {
+                if iszero(y) { r := 0x100000000000000000000000000000000 leave }
+                if iszero(x) { r := 0 leave }
+                if eq(x, 0x100000000000000000000000000000000) { r := 0x100000000000000000000000000000000 leave }
+                if slt(x, 0) { rev(0x7db3aba7) }
+                switch y
+                case 0x100000000000000000000000000000000 { r := x }
+                case 0x200000000000000000000000000000000 { r := fp127_mul(x, x) }
+                case 0x300000000000000000000000000000000 { r := fp127_mul(fp127_mul(x, x), x) }
+                case 0x400000000000000000000000000000000 { let x2 := fp127_mul(x, x) r := fp127_mul(x2, x2) }
+                case 0x80000000000000000000000000000000 { r := fp127_sqrt(x) }
+                case 0x40000000000000000000000000000000 { r := fp127_sqrt(fp127_sqrt(x)) }
+                case 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000 { r := fp127_div(0x100000000000000000000000000000000, x) }
+                default {
+                    switch x
+                    case 0x200000000000000000000000000000000 { r := fp127_exp2(y) }
+                    case 0xa00000000000000000000000000000000 { r := fp127_exp10(y) }
+                    default { r := fp127_exp2(fp127_mul(y, fp127_log2(x))) }
+                }
+            }
+
+            function fp127_cbrt(x) -> r {
+                if iszero(x) { r := 0 leave }
+                if slt(x, 0) {
+                    r := sub(0, fp127_pow(fp127_abs(x), 0x55555555555555555555555555555555))
+                    leave
+                }
+                switch x
+                case 0x800000000000000000000000000000000 { r := 0x200000000000000000000000000000000 }
+                case 0x1b00000000000000000000000000000000 { r := 0x300000000000000000000000000000000 }
+                case 0x4000000000000000000000000000000000 { r := 0x400000000000000000000000000000000 }
+                default { r := fp127_pow(x, 0x55555555555555555555555555555555) }
+            }
+
+            function fp127_gavg(a, b) -> r {
+                r := fp127_sqrt(fp127_mul(a, b))
+            }
+
+            function fp127_hypot(a, b) -> r {
+                r := fp127_sqrt(fp127_add(fp127_mul(a, a), fp127_mul(b, b)))
+            }
+
+            function fp127_inv(x) -> r {
+                r := fp127_div(0x100000000000000000000000000000000, x)
+            }
+
+            function fp127_abs(x) -> r {
+                if eq(x, 0x8000000000000000000000000000000000000000000000000000000000000000) { rev(0x35278d12) }
+                r := absw(x)
+            }
+
+            function fp127_neg(x) -> r {
+                if eq(x, 0x8000000000000000000000000000000000000000000000000000000000000000) { rev(0x35278d12) }
+                r := sub(0, x)
+            }
+
+            function fp127_sign(x) -> r {
+                r := shl(128, sub(sgt(x, 0), slt(x, 0)))
+            }
+
+            function fp127_min(a, b) -> r {
+                r := b
+                if slt(a, b) { r := a }
+            }
+
+            function fp127_max(a, b) -> r {
+                r := b
+                if sgt(a, b) { r := a }
+            }
+
+            function fp127_clamp(x, lo, hi) -> r {
+                r := fp127_min(hi, fp127_max(lo, x))
+            }
+
+            function fp127_avg(a, b) -> r {
+                r := add(add(sar(1, a), sar(1, b)), and(and(a, b), 1))
+            }
+
+            function fp127_zeroFloorSub(a, b) -> r {
+                r := fp127_sub(a, b)
+                if slt(r, 0) { r := 0 }
+            }
+
+            function fp127_dist(a, b) -> r {
+                r := fp127_abs(fp127_sub(a, b))
+            }
+
+            function fp127_lerp(a, b, t) -> r {
+                r := fp127_add(a, fp127_mul(t, fp127_sub(b, a)))
+            }
+
+            function fp127_floor(x) -> r {
+                r := and(x, 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000)
+            }
+
+            function fp127_ceil(x) -> r {
+                r := sub(0, and(sub(0, x), 0xffffffffffffffffffffffffffffffff00000000000000000000000000000000))
+                if slt(r, x) { rev(0x35278d12) }
+            }
+
+            function fp127_frac(x) -> r {
+                r := and(x, 0xffffffffffffffffffffffffffffffff)
+            }
+
+            function fp127_round(x) -> r {
+                r := fp127_floor(fp127_add(x, 0x80000000000000000000000000000000))
+            }
+
+            function fp127_gcd(a, b) -> r {
+                let x := absw(sar(128, a))
+                let y := absw(sar(128, b))
+                for {} y {} {
+                    let t := mod(x, y)
+                    x := y
+                    y := t
+                }
+                r := shl(128, x)
+            }
+
+            function fp127_factorial(n) -> r {
+                if slt(n, 0) { rev(0x7db3aba7) }
+                let k := shr(128, n)
+                if gt(k, 33) { rev(0x7db3aba7) }
+                r := 1
+                for { let i := 2 } iszero(gt(i, k)) { i := add(i, 1) } { r := mul(r, i) }
+                r := shl(128, r)
+            }
+
+            function lw(i) -> w {
+                switch i
+                case 1 { w := 0x91304d7c74b2ba5eafddaa6286dc28e1 }
+                case 2 { w := 0xda445aab89e28ccbe8ac8e1abd5cd1db }
+                case 3 { w := 0x10cc6d44fa669b9692193f0dda5206864 }
+                case 4 { w := 0x133c14613aee484452ac550f2b1a0300d }
+                case 5 { w := 0x153a43a4803052f93079ab9ede1d51097 }
+                default { w := 0 }
+            }
+
+            function lwfsc(x, w) -> wn {
+                let wp1 := add(w, 0x100000000000000000000000000000000)
+                let ew := fp127_exp(w)
+                let s := sub(mulraw(w, ew), x)
+                let rr := fp127_div(s, mulraw(ew, wp1))
+                let corr := mulraw(rr, add(fp127_div(rr, shl(1, wp1)), 0x100000000000000000000000000000000))
+                wn := sub(w, corr)
+            }
+
+            function lwib(x, w) -> wn {
+                let num := mulraw(w, add(0x100000000000000000000000000000000, fp127_ln(fp127_div(x, w))))
+                wn := fp127_div(num, add(0x100000000000000000000000000000000, w))
+            }
+
+            function fp127_lambertW0(x) -> r {
+                if slt(x, sub(0, 0x5e2d58d8b3bcdf1abadec7829054f90d)) { rev(0x7db3aba7) }
+                if iszero(x) { r := 0 leave }
+                let idx := sar(128, x)
+                if and(iszero(and(x, 0xffffffffffffffffffffffffffffffff)), and(sgt(idx, 0), slt(idx, 6))) {
+                    r := lw(idx)
+                    leave
+                }
+                let w := 0
+                switch slt(x, 0)
+                case 1 {
+                    switch sgt(x, sub(0, 0x40000000000000000000000000000000))
+                    case 1 {
+                        let x2 := mulraw(x, x)
+                        w := add(sub(x, x2), mulraw(x2, add(x, sar(1, x))))
+                    }
+                    default {
+                        let q := add(0x100000000000000000000000000000000, mulraw(x, 0x2b7e151628aed2a6abf7158809cf4f3c7))
+                        if slt(q, 0) { q := 0 }
+                        let p := fp127_sqrt(shl(1, q))
+                        let p2 := mulraw(p, p)
+                        w := sub(p, 0x100000000000000000000000000000000)
+                        w := sub(w, div(p2, 3))
+                        w := add(w, div(mul(mulraw(p2, p), 11), 72))
+                    }
+                }
+                default {
+                    let l := fp127_ln(add(x, 0x100000000000000000000000000000000))
+                    let l1 := fp127_ln(add(l, 0x100000000000000000000000000000000))
+                    w := mulraw(l, sub(0x100000000000000000000000000000000, fp127_div(l1, add(l, 0x200000000000000000000000000000000))))
+                }
+                w := lwfsc(x, w)
+                w := lwfsc(x, w)
+                w := lwfsc(x, w)
+                w := lwfsc(x, w)
+                r := lwib(x, w)
             }
         }
     }
