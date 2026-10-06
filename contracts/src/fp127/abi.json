@@ -782,5 +782,24 @@
         "internalType": "int256"
       }
     ]
+  },
+  {
+    "type": "function",
+    "name": "lambertWm1",
+    "stateMutability": "pure",
+    "inputs": [
+      {
+        "type": "int256",
+        "name": "x",
+        "internalType": "int256"
+      }
+    ],
+    "outputs": [
+      {
+        "type": "int256",
+        "name": "r",
+        "internalType": "int256"
+      }
+    ]
   }
 ]
