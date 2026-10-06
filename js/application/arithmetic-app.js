@@ -247,18 +247,18 @@ export class ArithmeticApp {
         if (!metadata) return;
 
         const SOURCE_MODULES = [
-            { file: 'contracts/src/tools/huff/fp127/fp127.huff', name: 'FP127 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
-            { file: 'contracts/src/tools/huff/fp127/constants.huff', name: 'Constants', desc: '127.128 format constants: ONE, LN2, LOG2E, E, PI' },
-            { file: 'contracts/src/tools/huff/fp127/primitives.huff', name: 'Primitives', desc: 'Safe comparisons, negation, and bit operations' },
-            { file: 'contracts/src/tools/huff/fp127/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 127.128 fixed-point' },
-            { file: 'contracts/src/tools/huff/fp127/exp.huff', name: 'Exponential', desc: '2^x and e^x via degree-22 minimax polynomial' },
-            { file: 'contracts/src/tools/huff/fp127/ln.huff', name: 'Natural Log', desc: 'ln(x) = log2(x) * ln(2)' },
-            { file: 'contracts/src/tools/huff/fp127/log2.huff', name: 'Log Base 2', desc: 'log2(x) via MSB extraction + Horner polynomial' },
-            { file: 'contracts/src/tools/huff/fp127/sqrt.huff', name: 'Square Root', desc: 'Carmack CLZ initial guess + Newton-Raphson refinement' },
-            { file: 'contracts/src/tools/huff/fp127/pow.huff', name: 'Power', desc: 'x^y = 2^(y * log2(x))' },
-            { file: 'contracts/src/tools/huff/fp127/utils.huff', name: 'Utilities', desc: 'abs, min, max, avg, gavg, dist, clamp, sign, floor, ceil' },
-            { file: 'contracts/src/tools/huff/fp127/transcendental_utils.huff', name: 'Transcendental Utils', desc: 'cbrt, hypot, lerp, log10, exp10, factorial' },
-            { file: 'contracts/src/tools/huff/fp127/lambertw0.huff', name: 'Lambert W0', desc: 'Lambert W principal branch via Fritsch iteration' },
+            { file: 'contracts/archive/huff/src/fp127/fp127.huff', name: 'FP127 Contract', desc: 'Entry point — dispatcher, ABI interface, conversions' },
+            { file: 'contracts/archive/huff/src/fp127/constants.huff', name: 'Constants', desc: '127.128 format constants: ONE, LN2, LOG2E, E, PI' },
+            { file: 'contracts/archive/huff/src/fp127/primitives.huff', name: 'Primitives', desc: 'Safe comparisons, negation, and bit operations' },
+            { file: 'contracts/archive/huff/src/fp127/arithmetic.huff', name: 'Arithmetic', desc: 'Core add, sub, mul, div for 127.128 fixed-point' },
+            { file: 'contracts/archive/huff/src/fp127/exp.huff', name: 'Exponential', desc: '2^x and e^x via degree-22 minimax polynomial' },
+            { file: 'contracts/archive/huff/src/fp127/ln.huff', name: 'Natural Log', desc: 'ln(x) = log2(x) * ln(2)' },
+            { file: 'contracts/archive/huff/src/fp127/log2.huff', name: 'Log Base 2', desc: 'log2(x) via MSB extraction + Horner polynomial' },
+            { file: 'contracts/archive/huff/src/fp127/sqrt.huff', name: 'Square Root', desc: 'Carmack CLZ initial guess + Newton-Raphson refinement' },
+            { file: 'contracts/archive/huff/src/fp127/pow.huff', name: 'Power', desc: 'x^y = 2^(y * log2(x))' },
+            { file: 'contracts/archive/huff/src/fp127/utils.huff', name: 'Utilities', desc: 'abs, min, max, avg, gavg, dist, clamp, sign, floor, ceil' },
+            { file: 'contracts/archive/huff/src/fp127/transcendental_utils.huff', name: 'Transcendental Utils', desc: 'cbrt, hypot, lerp, log10, exp10, factorial' },
+            { file: 'contracts/archive/huff/src/fp127/lambertw0.huff', name: 'Lambert W0', desc: 'Lambert W principal branch via Fritsch iteration' },
         ];
 
         container.innerHTML = `
