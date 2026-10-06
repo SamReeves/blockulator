@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  fp127:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Python deps
+        run: uv sync --frozen
+
+      - name: Generated files are current
+        run: make gen-check
+
+      - name: Build
+        run: forge build
+
+      - name: FP127 equivalence and property tests
+        run: FOUNDRY_FUZZ_RUNS=5000 forge test --match-path "test/fp127/Equivalence*"
+
+      - name: Gas table
+        run: forge test --match-path "test/fp127/Gas*" -vv | grep -E "GAS"
+
+      - name: Runtime size
+        run: make size

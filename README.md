@@ -71,32 +71,32 @@ blockulator/
 
 ## Build and test
 
+FP127 is being ported from Huff to a single Yul source that generates both a
+deployable object and an inlinable Solidity library. See
+[`contracts/src/fp127/README.md`](contracts/src/fp127/README.md) for the
+layout, the rules, and the gas table. Progress is tracked on the
+[project board](https://github.com/users/SamReeves/projects/2).
+
 ```bash
-# Compile Huff and run FP127 unit tests
-make test
+git submodule update --init --recursive   # solady, prb-math, abdk, forge-std
+uv sync                                   # mpmath + keccak for the oracle and generator
 
-# Run all benchmarks (ABDK, Solady, PRBMath, FP127)
-make bench
-
-# Regenerate the precision-sweep dataset
-make benchmarks
+make gen-check   # generated FP127 files are current
+make test        # FP127 equivalence, divergence and property tests
+make bench       # gas: Huff baseline vs Yul object vs inline library
+make test-legacy # Huff-era precision suites against the Sepolia bytecode (needs ffi)
 ```
+
+The Huff baseline used by the tests is the runtime bytecode fetched from
+Sepolia (`make fetch-baseline`); no `huffc` is needed. The original
+Huff-era benchmark suites are opt-in because they need the IR pipeline and
+take minutes to compile: `FOUNDRY_PROFILE=bench forge test`.
 
 For the frontend, no build step:
 
 ```bash
 python3 -m http.server 8000
 ```
-
-Then open `http://localhost:8000`.
-
-Submodules need to be present for the benchmark suite:
-
-```bash
-git submodule update --init --recursive
-```
-
----
 
 ## Design tokens
 

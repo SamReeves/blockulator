@@ -68,3 +68,4 @@ tests/storage-*.json
 # Generated bench data
 scripts/generators/massive_bench_cases.sol.txt
 
+.venv/
