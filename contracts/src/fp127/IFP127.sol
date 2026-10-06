@@ -40,4 +40,109 @@ interface IFP127 {
     ///      DivisionByZero when b == 0 (the Huff returned garbage) and with
     ///      Overflow when the quotient does not fit in int256 (the Huff wrapped).
     function div(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice 2^x.
+    /// @dev Reverts with Overflow for x >= 127 (2^127 is 2^255 raw, which does
+    ///      not fit; the Huff returned MAX_UINT256 above 127 and wrapped at 127
+    ///      exactly). Returns 0 for x < -128, where the true value is below one
+    ///      ULP, exactly as the Huff did.
+    function exp2(int256 x) external pure returns (int256 r);
+    /// @notice e^x, computed as 2^(x * log2(e)).
+    /// @dev Reverts with Overflow for x > 88 (the Huff returned MAX_UINT256).
+    ///      Returns 0 for x < -88 as the Huff did. exp(0) is exactly ONE.
+    function exp(int256 x) external pure returns (int256 r);
+    /// @notice 10^x, computed as 2^(x * log2(10)).
+    /// @dev The multiplication is checked, so absurd x reverts with Overflow
+    ///      rather than wrapping as the Huff did; the exp2 range checks then
+    ///      apply.
+    function exp10(int256 x) external pure returns (int256 r);
+    /// @notice log2(x) for x > 0.
+    /// @dev Reverts with OutOfRange for x <= 0 (the Huff returned 0). Exact for
+    ///      powers of two. Otherwise: integer part from the MSB, mantissa
+    ///      normalised into [1, 2), seven range-reduction stages by 2^(1/2^k),
+    ///      then the polynomial on the residual. Verbatim port of FP127_LOG2.
+    function log2(int256 x) external pure returns (int256 r);
+    /// @notice ln(x) = log2(x) * ln(2) for x > 0. Reverts with OutOfRange otherwise.
+    function ln(int256 x) external pure returns (int256 r);
+    /// @notice log10(x) = log2(x) / log2(10) for x > 0. Reverts with OutOfRange otherwise.
+    function log10(int256 x) external pure returns (int256 r);
+    /// @notice ceil(log2(x)) for x > 0. Exact for powers of two.
+    /// @dev Reverts with OutOfRange for x <= 0 (the Huff read garbage).
+    function log2Up(int256 x) external pure returns (int256 r);
+    /// @notice sqrt(x) for x >= 0.
+    /// @dev Reverts with OutOfRange for x < 0 (the Huff read garbage). Initial
+    ///      guess 2^floor((128 + msb)/2), times sqrt(2) when the exponent is
+    ///      odd, then seven Newton steps. Verbatim port of FP127_SQRT.
+    function sqrt(int256 x) external pure returns (int256 r);
+    /// @notice x^y = 2^(y * log2(x)) for x >= 0.
+    /// @dev Special cases in Huff order: y == 0 gives 1 (including 0^0); x == 0
+    ///      gives 0; x == 1 gives 1; x < 0 reverts with OutOfRange. Exact
+    ///      shortcuts for y in {1, 2, 3, 4, 1/2, 1/4, -1} and for x in {2, 10}
+    ///      are kept because they are both cheaper and more accurate than the
+    ///      general path, and because the Huff had them.
+    function pow(int256 x, int256 y) external pure returns (int256 r);
+    /// @notice Cube root, defined for all x: cbrt(-x) = -cbrt(x).
+    /// @dev Shortcuts for 8, 27, 64. Otherwise pow(|x|, 1/3) with the sign
+    ///      restored, exactly as the Huff did (the negative path goes straight
+    ///      to pow and does not see the shortcuts).
+    function cbrt(int256 x) external pure returns (int256 r);
+    /// @notice Geometric mean sqrt(a * b). Reverts with OutOfRange if a * b < 0.
+    function gavg(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice sqrt(a^2 + b^2), checked.
+    function hypot(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice 1 / x. Reverts with DivisionByZero for x == 0.
+    function inv(int256 x) external pure returns (int256 r);
+    /// @notice |x|. Reverts with Overflow for x == -2^255, which has no positive.
+    function abs(int256 x) external pure returns (int256 r);
+    /// @notice -x. Reverts with Overflow for x == -2^255.
+    function neg(int256 x) external pure returns (int256 r);
+    /// @notice -1, 0 or 1 in 127.128.
+    function sign(int256 x) external pure returns (int256 r);
+    /// @notice Signed minimum.
+    function min(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice Signed maximum.
+    function max(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice min(hi, max(lo, x)). If lo > hi the result is hi, as in the Huff.
+    function clamp(int256 x, int256 lo, int256 hi) external pure returns (int256 r);
+    /// @notice floor((a + b) / 2) without intermediate overflow.
+    function avg(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice max(0, a - b), with the subtraction checked.
+    function zeroFloorSub(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice |a - b|, checked.
+    function dist(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice a + t * (b - a), checked. t is not clamped to [0, 1].
+    function lerp(int256 a, int256 b, int256 t) external pure returns (int256 r);
+    /// @notice Largest integer <= x. Clearing the fraction bits of a two's
+    ///         complement word is a floor for both signs.
+    function floor(int256 x) external pure returns (int256 r);
+    /// @notice Smallest integer >= x, as -floor(-x). Reverts with Overflow when
+    ///         that integer is 2^127, which does not fit.
+    function ceil(int256 x) external pure returns (int256 r);
+    /// @notice x - floor(x), always in [0, 1).
+    function frac(int256 x) external pure returns (int256 r);
+    /// @notice Nearest integer, halves rounded up: floor(x + 1/2). Checked.
+    function round(int256 x) external pure returns (int256 r);
+    /// @notice gcd of the integer parts |floor(a)|, |floor(b)|, as a 127.128 integer.
+    /// @dev The Huff extracted integer parts with a logical shift and then
+    ///      tested the sign bit of the shifted word, so it mishandled negative
+    ///      inputs. The Yul uses an arithmetic shift and absolute values.
+    ///      Results agree for non-negative inputs.
+    function gcd(int256 a, int256 b) external pure returns (int256 r);
+    /// @notice floor(n)! for 0 <= n < 34. 33! is the largest that fits.
+    /// @dev Reverts with OutOfRange outside that domain (the Huff returned
+    ///      MAX_UINT256). Computed by exact integer multiplication rather than
+    ///      the Huff jump table; the values are identical.
+    function factorial(int256 n) external pure returns (int256 r);
+    /// @notice Principal branch of the Lambert W function, W(x) e^W(x) = x, for
+    ///         x >= -1/e.
+    /// @dev Reverts with OutOfRange below -1/e (the Huff returned 0). W(0) = 0
+    ///      and W(1..5) come from the table. Everything else is seeded to five
+    ///      to eight bits and refined by four FSC steps and one IB step, which
+    ///      measured at 126 to 128 correct bits across the domain. Seeds:
+    ///      Winitzki's L (1 - ln(1 + L) / (2 + L)) with L = ln(1 + x) for x > 0;
+    ///      the origin series x - x^2 + 3/2 x^3 for -1/4 < x < 0; the
+    ///      branch-point series -1 + p - p^2/3 + 11/72 p^3, p = sqrt(2 (1 + e x)),
+    ///      down to -1/e. The Huff used a 64-entry interpolation table with two
+    ///      steps, which gave 50 to 100 bits on (0, 64), read past the table
+    ///      above 64 and ran out of gas below 0.
+    function lambertW0(int256 x) external pure returns (int256 r);
 }

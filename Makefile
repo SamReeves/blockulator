@@ -11,6 +11,8 @@ help:
 	@echo "  make gen-check      - Fail if the generated files are stale"
 	@echo "  make build          - gen-check + forge build"
 	@echo "  make test           - gen-check + FP127 Foundry tests (equivalence, properties)"
+	@echo "  make test-precision - Correct bits of every op against mpmath (needs ffi + uv)"
+	@echo "  make test-legacy-yul- Huff-era suites run against the Yul object through LegacyShim"
 	@echo "  make size           - Print the deployed FP127 runtime size in bytes"
 	@echo "  make bench          - Isolated gas benchmarks (Huff baseline, Yul object, inline lib)"
 	@echo "  make test-legacy    - Legacy Huff-era precision suites against the Sepolia bytecode"
@@ -29,6 +31,12 @@ build: gen-check
 
 test: gen-check
 	@forge test --match-path "test/fp127/Equivalence*" -vv
+
+test-precision: gen-check
+	@forge test --match-contract Precision -vv
+
+test-legacy-yul: gen-check
+	@FP127_TARGET=yul forge test --match-contract "FP127Test|ArithmeticTest|TranscendentalTest|UtilityTest|TestFP127MathLib" -vv
 
 size: build
 	@$(PY) python -c "import json;d=json.load(open('out/FP127.yul/FP127.json'));b=d['deployedBytecode']['object'];print('FP127 runtime:', (len(b)-2)//2, 'bytes of 24576')"

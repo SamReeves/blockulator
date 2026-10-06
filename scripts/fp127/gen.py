@@ -36,8 +36,12 @@ FORBIDDEN = [
     r"\bdatasize\b", r"\bcodecopy\b", r"\bcalldataload\b", r"\bcalldatasize\b",
     r"\bcalldatacopy\b", r"\breturn\s*\(", r"\bpc\s*\(", r"\bjump\b",
     r"\bjumpi\b", r"\bsload\b", r"\bsstore\b", r"\bcall\b", r"\bstaticcall\b",
-    r"\bdelegatecall\b", r"\bcreate2?\b", r"\bselfdestruct\b", r"\blog[0-4]\b",
+    r"\bdelegatecall\b", r"\bcreate2?\b", r"\bselfdestruct\b", r"\blog[0-4]\s*\(",
 ]
+
+
+def strip_comments(text: str) -> str:
+    return re.sub(r"//[^\n]*", "", text)
 ALLOWED_LITERAL_MEM = {"0", "0x0", "0x00", "0x20"}
 
 
@@ -140,7 +144,7 @@ def parse(text: str) -> Source:
         name = m.group(1)
         params = [p.strip() for p in m.group(2).split(",") if p.strip()]
         rets = [r.strip() for r in (m.group(3) or "").split(",") if r.strip()]
-        calls = set(_CALL_RE.findall(text[open_idx : end + 1]))
+        calls = set(_CALL_RE.findall(re.sub(r"//[^\n]*", "", text[open_idx : end + 1])))
         funcs[name] = Func(name, params, rets, body, calls)
 
         # doc comment block immediately above the function
@@ -210,18 +214,19 @@ def validate(src: Source, raw: str) -> None:
             problems.append(f"rev({m.group(1)}) uses an undeclared error selector")
 
     for f in src.funcs.values():
+        body = strip_comments(f.text)
         if f.name.startswith("_"):
             problems.append(f"{f.name}: Yul identifiers must not start with '_'")
         for pat in FORBIDDEN:
-            if re.search(pat, f.text):
+            if re.search(pat, body):
                 problems.append(f"{f.name}: forbidden builtin {pat}")
-        for m in re.finditer(r"\b(mstore8?|mload)\(\s*([^,)]+)", f.text):
+        for m in re.finditer(r"\b(mstore8?|mload)\(\s*([^,)]+)", body):
             arg = m.group(2).strip()
             if re.fullmatch(r"0x[0-9a-fA-F]+|\d+", arg) and arg.lower() not in ALLOWED_LITERAL_MEM:
                 problems.append(
                     f"{f.name}: literal memory address {arg}; use mload(0x40)-relative"
                 )
-        for v in re.findall(r"\blet\s+([A-Za-z_][A-Za-z0-9_]*)", f.text):
+        for v in re.findall(r"\blet\s+([A-Za-z_][A-Za-z0-9_]*)", body):
             if v.startswith("_"):
                 problems.append(f"{f.name}: variable {v} must not start with '_'")
         for callee in f.calls:
@@ -235,6 +240,14 @@ def validate(src: Source, raw: str) -> None:
     names = [e.sol_name for e in src.exports]
     if len(names) != len(set(names)):
         problems.append("duplicate export names")
+    # Inside a library assembly block every Yul identifier shares scope with
+    # the library's own members, so none may reuse an export's Solidity name.
+    reserved = set(names) | {"ONE"}
+    for f in src.funcs.values():
+        body = strip_comments(f.text)
+        idents = set(f.params) | set(f.rets) | set(re.findall(r"\blet\s+([A-Za-z_][A-Za-z0-9_]*)", body)) | {f.name}
+        for ident in sorted(idents & reserved):
+            problems.append(f"{f.name}: identifier {ident!r} shadows a library member")
     sels = [e.selector for e in src.exports]
     if len(sels) != len(set(sels)):
         problems.append("selector collision between exports")

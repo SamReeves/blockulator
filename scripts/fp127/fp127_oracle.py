@@ -687,7 +687,7 @@ def _compute_func(func_name, a, b=None):
         if a < mpf(-1) / mp_exp(mpf(1)):  # Domain: x >= -1/e
             result = mpf(0)
         else:
-            result = lambertw(a, k=0)
+            result = mp.re(lambertw(a, k=0))  # mpmath returns mpc on the negative axis
     else:
         result = mpf(0)
     
@@ -779,6 +779,14 @@ def main():
             result = compute_exp_bkm_only(sys.argv[2])
         elif func == "ln_bkm_only":
             result = compute_ln_bkm_only(sys.argv[2])
+        elif func.startswith("fp_"):
+            # Generic 127.128 path: fp_<op> <a> [b]. Inputs and output are raw
+            # FP127 words (hex or decimal, two's complement). Result rounds
+            # toward zero via to_fp127_int; callers compare with ULP slack.
+            op_name = func[3:].lower()
+            a_val = from_fp127(sys.argv[2])
+            b_val = from_fp127(sys.argv[3]) if len(sys.argv) > 3 else None
+            result = abi_encode_uint256(to_fp127_int(_compute_func(op_name, a_val, b_val)))
         elif func.startswith("multi_"):
             # Multi-format output: multi_mul, multi_div, etc.
             op_name = func[6:]  # Strip "multi_" prefix

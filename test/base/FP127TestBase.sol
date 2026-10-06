@@ -3,6 +3,8 @@ pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import "../fp127/IFP127.sol";
+import {LegacyShim} from "../fp127/LegacyShim.sol";
+import {IFP127 as IYul} from "../../contracts/src/fp127/IFP127.sol";
 
 abstract contract FP127TestBase is Test {
     IFP127 fp127;
@@ -11,8 +13,20 @@ abstract contract FP127TestBase is Test {
     int256 constant E = 2718281828459045235;
     uint256 constant ONE_FP127 = uint256(1) << 128;
 
+    /// FP127_TARGET=huff (default) etches the Sepolia Huff bytecode.
+    /// FP127_TARGET=yul deploys the generated Yul object behind LegacyShim so
+    /// the same suites exercise the port through the old ABI.
     function _deployFP127() internal {
-        _deployFP127FromFile("contracts/archive/huff/fp127.sepolia.runtime.hex");
+        string memory target = vm.envOr("FP127_TARGET", string("huff"));
+        if (keccak256(bytes(target)) == keccak256("yul")) {
+            bytes memory initCode = vm.parseJsonBytes(vm.readFile("out/FP127.yul/FP127.json"), ".bytecode.object");
+            address deployed;
+            assembly ("memory-safe") { deployed := create(0, add(initCode, 0x20), mload(initCode)) }
+            require(deployed != address(0), "yul deploy failed");
+            fp127 = IFP127(address(new LegacyShim(IYul(deployed))));
+        } else {
+            _deployFP127FromFile("contracts/archive/huff/fp127.sepolia.runtime.hex");
+        }
     }
 
     function _deployFP127FromFile(string memory path) internal {
