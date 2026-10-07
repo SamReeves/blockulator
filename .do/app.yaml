@@ -4,6 +4,8 @@
 # This file is the source of truth; the console does not pick it up by itself.
 # To apply it after editing: doctl apps update 2aaea661-12ba-43ac-a4ad-bdce3f411070 --spec .do/app.yaml
 # github.repo flips to securedataresearch/blockulator with the org transfer (#35).
+# .python-version stays in the repo: App Platform runs buildpack detection even for
+# environment_slug html, and the uv lockfile makes the Python buildpack demand it.
 name: blockulator
 region: sfo
 domains:
