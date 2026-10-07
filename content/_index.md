@@ -4,14 +4,14 @@ description = "FP127: 38 decimal digits of fixed-point math for the EVM, measure
 template = "home.html"
 
 [extra]
-headline = "After a year of daily interest, WAD is right to 16 digits. FP127 is right to 36."
-sub = "FP127 is signed 127.128 fixed point for the EVM: one int256, 128 fractional bits, 37 operations, one Yul source that is both a deployed contract and an inlinable Solidity library. Every number on this site is a cell in a committed dataset you can re-run on Sepolia."
-cta_primary_text = "See the ladder"
+headline = "128-bit fixed point for the EVM."
+sub = "FP127 is a signed 127.128 fixed-point library: one int256, 38 decimal digits, 37 operations, deployed on Sepolia and usable inline from Solidity. This site measures it against ABDK, Solady and PRBMath, one step at a time, and shows the method."
+cta_primary_text = "The measurements"
 cta_primary_href = "/demo/"
-cta_secondary_text = "Use the library"
+cta_secondary_text = "The library"
 cta_secondary_href = "/library/"
-steps_title = "What it is."
-tiles_title = "On this site."
+steps_title = "What it is"
+tiles_title = "On this site"
 ask_title = "Three protocols to integrate it on testnet. One partner to fund the audit."
 ask_text = "FP127 is deployed on Sepolia and the inline library is a <code>forge install</code> away. Our engineering time for a testnet integration is at no charge."
 ask_primary_text = "Email us"
@@ -75,4 +75,4 @@ site = "/writeup/"
 color = "emerald"
 +++
 
-The dominant EVM math libraries hold a value to about 18 decimal places and are fine for one multiplication. A lending protocol does not do one multiplication. It accrues every block, and after N accruals the rounding has been applied N times. The [ladder](/demo/) runs that loop through ABDKMath64x64, Solady, PRBMath and FP127 against exact arithmetic and counts the digits that survive. FP127 keeps about twenty more at every N.
+The common EVM math libraries store a value to about 18 decimal places. That is enough for one multiplication and not for a loop: a lending protocol accrues every block, and after N steps the rounding has been applied N times. The [ladder](/demo/) runs nine such loops through ABDKMath64x64, Solady, PRBMath and FP127 for 64 inputs, against exact arithmetic, and counts the digits that survive at each N. It also separates what the number format costs from what the arithmetic costs, and every cell can be re-run on Sepolia.
