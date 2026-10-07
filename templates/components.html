@@ -119,3 +119,29 @@
 <figcaption>Correct significant digits of the result after N steps, capped at 40 on the axis (a WAD cell that happens to be exactly representable records 60). FP127Lib coincides with FP127 and is not drawn. A missing point is a revert. Series: FP127 emerald, Solady gold, ABDK sapphire, PRBMath red, also labelled at the line end.</figcaption>
 </figure>
 {%- endcomponent %}
+
+{#- Median digits per form against N with a min–max band over all inputs. key = "digits" or "digitsFormat". -#}
+{% component ladderband(summary: map, key: string, ladder: array, log10: map, cap: integer) -%}
+{%- set series = ["fp127", "solady", "abdk", "prb"] -%}
+{%- set labels = {"fp127": "FP127", "solady": "Solady", "abdk": "ABDK", "prb": "PRBMath"} -%}
+{%- set dy = {"fp127": 0, "solady": -11, "abdk": 0, "prb": 11} -%}
+{%- set W = 640 %}{% set H = 300 %}{% set L = 44 %}{% set R = 86 %}{% set T = 16 %}{% set B = 40 -%}
+{%- set pw = W - L - R %}{% set ph = H - T - B -%}
+<svg viewBox="0 0 {{ W }} {{ H }}" width="100%" style="max-width:{{ W }}px;display:block">
+{%- for g in [0, 10, 20, 30, 40] %}{% set y = T + ph - ph * g / cap %}
+<line class="grid" x1="{{ L }}" x2="{{ L + pw }}" y1="{{ y }}" y2="{{ y }}"/><text class="tick" x="{{ L - 8 }}" y="{{ y + 4 }}" text-anchor="end">{{ g }}</text>
+{%- endfor %}
+{%- for n in [1, 10, 100, 1000, 10000] %}{% set x = L + pw * (log10[n | str] | float) / 4 %}
+<text class="tick" x="{{ x }}" y="{{ H - 14 }}" text-anchor="middle">{{ n }}</text>
+{%- endfor %}
+<text class="tick" x="{{ L + pw / 2 }}" y="{{ H - 1 }}" text-anchor="middle">N steps</text>
+<text class="tick" transform="translate(11 {{ T + ph / 2 }}) rotate(-90)" text-anchor="middle">correct digits</text>
+{%- for f in series %}{% set_global med = "" %}{% set_global top = "" %}{% set_global bot = "" %}{% set_global lastx = 0 %}{% set_global lasty = 0 %}
+{%- for n in ladder %}{% set row = summary[f][n | str] %}{% if row[key] is defined %}{% set x = L + pw * (log10[n | str] | float) / 4 %}{% set d = row[key] %}{% set ym = T + ph - ph * d.median / cap %}{% set ymax = T + ph - ph * d.max / cap %}{% set ymin = T + ph - ph * d.min / cap %}{% set_global med = med ~ x ~ "," ~ ym ~ " " %}{% set_global top = top ~ x ~ "," ~ ymax ~ " " %}{% set_global bot = x ~ "," ~ ymin ~ " " ~ bot %}{% set_global lastx = x %}{% set_global lasty = ym %}{% endif %}{% endfor %}
+<polygon class="band s-{{ f }}" points="{{ top }}{{ bot }}"/>
+<polyline class="s-{{ f }}" points="{{ med }}"/>
+{%- for n in ladder %}{% set row = summary[f][n | str] %}{% if row[key] is defined %}<circle class="s-{{ f }}" cx="{{ L + pw * (log10[n | str] | float) / 4 }}" cy="{{ T + ph - ph * row[key].median / cap }}" r="3"><title>{{ labels[f] }} N={{ n }}: median {{ row[key].median }}, range {{ row[key].min }}–{{ row[key].max }} over {{ row.count }} inputs{% if row.reverts %}, {{ row.reverts }} reverted{% endif %}</title></circle>{% endif %}{% endfor %}
+<text class="s-{{ f }} lbl" x="{{ lastx + 8 }}" y="{{ lasty + 4 + dy[f] }}">{{ labels[f] }}</text>
+{%- endfor %}
+</svg>
+{%- endcomponent %}
