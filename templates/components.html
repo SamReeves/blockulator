@@ -45,7 +45,7 @@
 <p class="note">Bits are relative correct bits against mpmath at 200 decimal places over the committed vectors; "exact" is bit-identical. Gas is the median over each op's input ladder: "object" includes the <code>staticcall</code> to the deployed FP127, "inline" is <code>FP127Lib</code>. Sources: <a href="/data/ops.json">ops.json</a> (generated from the Yul source), <a href="/data/precision.json">precision.json</a>, <a href="/data/gas.json">gas.json</a>. <code>lerp</code> and <code>clamp</code> are not on the gas ladder.</p>
 {%- endcomponent %}
 
-{% component gastable() -%}
+{% component gastable(repo: string) -%}
 {%- set gas = load_data(path="static/data/gas.json") -%}
 {%- set forms = ["yul", "lib", "abdk", "solady", "prb"] -%}
 <div class="scroll">
@@ -60,7 +60,7 @@
 </tbody>
 </table>
 </div>
-<p class="note">Median gas per op over its input ladder, {{ gas.generated }}. The Yul object column includes the <code>staticcall</code>; the other four are internal library calls. A dash is an op the library does not offer, or that reverted on every ladder input. Min and max per cell are in <a href="/data/gas.json">gas.json</a>; the Huff and FP127Caller columns are in <a href="https://github.com/securedataresearch/blockulator/blob/master/docs/benchmarks/gas.md">gas.md</a>. Versions: {% for k, v in gas.versions %}{{ k }} {{ v }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+<p class="note">Median gas per op over its input ladder, {{ gas.generated }}. The Yul object column includes the <code>staticcall</code>; the other four are internal library calls. A dash is an op the library does not offer, or that reverted on every ladder input. Min and max per cell are in <a href="/data/gas.json">gas.json</a>; the Huff and FP127Caller columns are in <a href="{{ repo }}/blob/master/docs/benchmarks/gas.md">gas.md</a>. Versions: {% for k, v in gas.versions %}{{ k }} {{ v }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
 {%- endcomponent %}
 
 {% component precisiontable() -%}

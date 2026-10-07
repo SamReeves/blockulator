@@ -22,10 +22,6 @@
         max-width: 1200px;
     }
 
-    .app-header {
-        padding: var(--sdr-space-1) 2rem;
-    }
-
     .game-list, .tool-list {
         grid-template-columns: repeat(3, 1fr);
     }
@@ -57,46 +53,14 @@
 /* ── Mobile ─────────────────────────────────── */
 @media (max-width: 768px) {
     /* Header / Nav */
-    .app-header {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-        padding: 0.5rem var(--sdr-space-1);
-    }
 
     .header-left {
         gap: 0.5rem;
     }
 
-    .brand-logo {
-        height: 50px !important;
-    }
-
     .testnet-badge, .readonly-badge {
         font-size: 0.7rem;
         padding: 2px 6px;
-    }
-
-    .header-nav {
-        order: 3;
-        width: 100%;
-        justify-content: flex-start;
-        gap: 0.25rem;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        padding: 0.25rem 0;
-    }
-
-    .header-nav::-webkit-scrollbar {
-        display: none;
-    }
-
-    .nav-link {
-        font-size: 0.8125rem;
-        padding: 6px 10px;
-        white-space: nowrap;
-        flex-shrink: 0;
     }
 
     .header-right {
@@ -492,26 +456,10 @@
 
 /* ── Extra small mobile ─────────────────────── */
 @media (max-width: 480px) {
-    .app-header {
-        padding: 0.5rem;
-    }
-
-    .brand-logo {
-        height: 40px !important;
-    }
-
-    .app-title {
-        font-size: 1.1rem;
-    }
 
     .testnet-badge, .readonly-badge {
         font-size: 0.65rem;
         padding: 2px 4px;
-    }
-
-    .nav-link {
-        font-size: 0.75rem;
-        padding: 5px 8px;
     }
 
     .btn-connect {

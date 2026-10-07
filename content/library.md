@@ -3,7 +3,7 @@ title = "Library"
 description = "The deployed FP127 object, the inline Solidity library, the encoding, and every op."
 +++
 
-FP127 is one Yul source that generates two forms. Both are in [the repository](https://github.com/securedataresearch/blockulator) and both are proven equal on the full `int256` domain, including which inputs revert and with what data.
+FP127 is one Yul source that generates two forms. Both are in [the repository]({{ config.extra.repo }}) and both are proven equal on the full `int256` domain, including which inputs revert and with what data.
 
 ## Encoding
 

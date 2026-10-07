@@ -7,7 +7,7 @@ The [ladder](/demo/) is the argument: precision over N steps, which is how proto
 
 ## Gas per op
 
-{{ <gastable /> }}
+{{ <gastable repo={config.extra.repo} /> }}
 
 Multiplication and division cost about what they cost in WAD. The transcendentals cost more because they compute twice as many bits.
 

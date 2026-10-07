@@ -1,55 +1,74 @@
 # Blockulator
 
-> High-precision on-chain math for the EVM. FP127 is a signed 127.128
-> fixed-point library (~38 decimal digits, vs ~15-17 for IEEE-754 double /
-> typical OS-level calculators) deployed as a single callable contract on
-> Ethereum Sepolia. Agents can compute results that are more precise than a
-> standard floating-point calculator by issuing a read-only `eth_call` to the
-> contract. No gas, no wallet, and no transaction are required for reads.
+> FP127: signed 127.128 fixed-point math for the EVM, about 38 decimal
+> digits in one int256 against 18 for the usual WAD libraries, deployed as
+> one callable contract on Ethereum Sepolia and available as an inlinable
+> Solidity library. Every op is a read-only eth_call: no gas, no wallet, no
+> transaction. Agents get results more precise than a double by calling it.
 
-## Why use this for calculations
+## What it is
 
-- ~38 significant decimal digits of fractional precision.
-- 35 operations: add, sub, mul, div, exp, exp2, exp10, ln, log2, log10,
-  sqrt, cbrt, pow, abs, neg, inv, min, max, clamp, avg, gavg, dist,
-  zeroFloorSub, hypot, lerp, sign, floor, ceil, frac, round, log2Up,
-  gcd, factorial, lambertW0.
-- Validated against Python mpmath at 100 decimal places; fuzz-tested
-  across the full input domain.
-- Deterministic and verifiable: every result is reproducible by anyone
-  re-running the same `eth_call` against the public contract.
+- 37 operations: add, sub, mul, div, fromFixed18, toFixed18, exp, exp2,
+  exp10, ln, log2, log10, log2Up, sqrt, cbrt, pow, gavg, hypot, inv, abs,
+  neg, sign, min, max, clamp, avg, zeroFloorSub, dist, lerp, floor, ceil,
+  frac, round, gcd, factorial, lambertW0, lambertWm1.
+- Encoding: every operand and result is an int256 holding value * 2**128.
+  Decode by dividing by 2**128. Range about +/- 1.7e38.
+- Checked arithmetic: out-of-domain inputs revert with Overflow(),
+  DivisionByZero() or OutOfRange(). Nothing wraps.
+- Validated against mpmath at 200 decimal places: integer and rounding
+  ops bit-exact, transcendentals 115 to 130 correct bits.
+  /data/precision.json
+- Machine-readable op table (signature, selector, domain, reverts):
+  /data/ops.json
 
-## How to call it (read-only, free)
+## How to call it
 
 - Network: Ethereum Sepolia, chainId 11155111
 - RPC: https://ethereum-sepolia-rpc.publicnode.com
-- FP127 contract: 0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28 (CREATE2, salt "FP127 v1";
-  record at /contracts/deployments/FP127.md)
-- ABI: /contracts/src/fp127/abi.json. Every operand and result is an
-  int256 holding value * 2**128; divide the result by 2**128. Function
-  names carry no suffix: add, mul, exp, ln, sqrt, pow, lambertW0, ...
-  Out-of-domain inputs revert with Overflow(), DivisionByZero() or
-  OutOfRange(). All functions are `pure` and called via eth_call.
-- Inline form: contracts/src/fp127/FP127Lib.sol, the same code as a
-  Solidity library for contracts that prefer no external call.
-- Machine-readable contract list + ABIs: /.well-known/agent.json
+- FP127: 0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28 (CREATE2 through
+  0x4e59b44847b379578588920cA78FbF26c0B4956C, salt "FP127 v1"; record at
+  /contracts/deployments/FP127.md and /data/fp127.json)
+- ABI: /data/abi.json. All functions are pure; selectors are in /data/ops.json.
+- Example: sqrt(2) is `sqrt(int256)` with 2 * 2**128 =
+  680564733841876926926749214863536422912; the result divided by 2**128 is
+  1.41421356...
+- Inline form: contracts/src/fp127/FP127Lib.sol in the repository,
+  `forge install securedataresearch/blockulator`, remapping
+  fp127/=lib/blockulator/contracts/src/fp127/.
+- Manifest with the same data: /.well-known/agent.json
 
-## Specialized single-purpose calculators (Vyper)
+## The precision claim, as data
 
-Each is a separate contract returning one function. See /.well-known/agent.json
-for addresses and ABIs. Includes: pi, e, tau, sin, cos, atan, sqrt, 2^x,
-10^x, e^x, ln, log2, log10, erf, normal PDF, factorial, ln(factorial),
-binomial coefficient C(n,k), z-score, Gaussian tail, sinh, cosh, tanh, gcd/lcm.
+- /data/ladder.json: nine iterated scenarios (daily compounding, an
+  amortising loan, exp(ln(x)) round trips, ...) through FP127, FP127Lib,
+  ABDKMath64x64, Solady and PRBMath for N in 1..10000, each cell with the
+  decoded value, correct significant digits, relative error and gas per
+  step, against exact arithmetic. Daily compounding at N = 365: FP127 36
+  digits, Solady and PRBMath 16, ABDK 17.
+- Any cell can be re-run on chain: LadderRunner at
+  0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4,
+  run(uint8 scenario, uint8 form, uint32 n) returns (bool ok, int256 raw,
+  bytes4 reason, uint256 gasPerStep). Scenario ids and forms are in
+  /data/scenarios.json and /contracts/deployments/Ladder.md.
+- /data/gas.json: gas per op and form, min/median/max.
+
+## Pages
+
+- /demo/ the ladder, /why/ the mechanism, /library/ address, ABI and
+  the op table, /compare/ gas and precision per op, /writeup/ the story.
 
 ## Documentation
 
-- FP127 README: https://github.com/SamReeves/blockulator/blob/master/contracts/src/fp127/README.md
-- Precision and gas tables: /docs/fp127/precision.md, /docs/benchmarks/gas.md
-- Source (Yul): https://github.com/SamReeves/blockulator
+- FP127 README: https://github.com/securedataresearch/blockulator/blob/master/contracts/src/fp127/README.md
+- Source: https://github.com/securedataresearch/blockulator
 - EthCC[9] talk: https://www.youtube.com/watch?v=a_tL99NY-yc
 
 ## Notes for agents
 
-- Reads are free and require no key; do not send transactions for math.
-- Currently deployed on Sepolia (testnet). Mainnet addresses are not yet live.
-- Range: approximately +/- 1.7e38. Inputs outside the domain revert.
+- Reads are free and need no key; do not send transactions for math.
+- Sepolia only today; there is no mainnet address yet.
+- The Vyper calculators listed in /.well-known/agent.json with
+  "status": "archived", and the games and futures market on /archive/,
+  still run but call the legacy Huff FP127 and are not maintained. Use the
+  FP127 contract above.

@@ -15,7 +15,7 @@
       <h3>{{ a.name }}</h3>
       <p>{{ a.text }}</p>
       {% if a.address %}<p class="addr"><a href="https://sepolia.etherscan.io/address/{{ a.address }}">{{ a.address }}</a></p>{% endif %}
-      <p class="links"><a class="more" href="#/{{ a.open }}">Open →</a> <a class="more" href="https://github.com/securedataresearch/blockulator/tree/master/{{ a.source }}">Source</a></p>
+      <p class="links"><a class="more" href="#/{{ a.open }}">Open →</a> <a class="more" href="{{ config.extra.repo }}/tree/master/{{ a.source }}">Source</a></p>
     </article>
     {% endfor %}
   </div>
