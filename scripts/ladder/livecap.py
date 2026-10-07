@@ -51,18 +51,26 @@ def main(argv: list[str]) -> int:
                 if res is None:
                     print(f"{sid:20} {form:9} N={n:<6} RPC refused: {err}")
                     break
-                best = n
                 if cell.get("reverted"):
-                    agree = not res["ok"]
+                    agree = not res["ok"] and res["reason"] == cell["reason"]
                 else:
                     agree = res["ok"] and str(res["raw"]) == cell["raw"]
+                    if not res["ok"] and res["reason"] == "0x00000000":
+                        # The adapter ran out of gas inside the runner's try/catch:
+                        # the RPC's eth_call gas cap, not a disagreement.
+                        print(f"{sid:20} {form:9} N={n:<6} out of gas at the RPC cap (needs about {cell['gas'] * n:,})")
+                        break
                 if not agree:
                     mismatches += 1
                     print(f"{sid:20} {form:9} N={n:<6} MISMATCH live={res} committed={cell.get('raw', 'reverted')}")
+                    break
+                best = n
             live_max[form] = best
             print(f"{sid:20} {form:9} liveMaxN={best}")
         scn["liveMaxN"] = live_max
     doc["liveRunner"] = runner
+    doc["liveNote"] = "liveMaxN is the largest N on the ladder that the public Sepolia RPC's eth_call completed for that cell. Above it the runner reports a bare revert because the adapter ran out of gas under the RPC's eth_call limits (measured: calls needing more than about 40M gas, or a few seconds of execution, fail); the demo page greys out verify above it."
+
     LADDER.write_text(json.dumps(doc, indent=1) + "\n")
     print(f"updated {LADDER.relative_to(ROOT)}; mismatches: {mismatches}")
     return 1 if mismatches else 0

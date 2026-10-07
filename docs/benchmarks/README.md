@@ -14,7 +14,10 @@ committed copies match the code at that commit.
   digits and gas per step. Produced by `make ladder` from
   `test/ladder/Ladder.t.sol`, which calls the same `LadderRunner` contract
   that is deployed on Sepolia, via `scripts/ladder/ladder.py`. Scenario
-  parameters and rationale: `scripts/ladder/scenarios.json`.
+  parameters and rationale: `scripts/ladder/scenarios.json`. The same runner
+  is live on Sepolia at `0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4`
+  (`contracts/deployments/Ladder.md`), and `liveMaxN` in the JSON says how
+  far up the ladder a public RPC will execute each cell.
 - [`gas.md`](gas.md) / [`gas.json`](gas.json): gas for every FP127 op across
   an input ladder, for the Huff baseline, the Yul object, `FP127Caller`,
   `FP127Lib` and the three competitor libraries. `make bench`.

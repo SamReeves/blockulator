@@ -221,5 +221,13 @@
       "address": "0x182e59b0a7A3bA2F1Fb53e5390e9f01dcCAEFEb6",
       "abi": "https://blockulator.com/contracts/build/abis/gcd.json"
     }
-  ]
+  ],
+  "ladderRunner": {
+    "id": "ladder-runner",
+    "name": "LadderRunner",
+    "address": "0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4",
+    "description": "Re-run any cell of the terminal-precision ladder (https://blockulator.com/docs/benchmarks/ladder.md) with one eth_call: run(uint8 scenario, uint8 form, uint32 n) returns (bool ok, int256 raw, bytes4 revertSelector, uint256 gasPerStep). Scenario and form ids, scales and the per-cell live cap are in https://blockulator.com/docs/benchmarks/ladder.json; record at /contracts/deployments/Ladder.md.",
+    "abi": "https://blockulator.com/out/LadderRunner.sol/LadderRunner.json",
+    "record": "https://blockulator.com/contracts/deployments/Ladder.json"
+  }
 }
