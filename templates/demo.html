@@ -4,34 +4,32 @@
 {% block hero %}{% set hero_slim = true %}{% set hero_title = page.title %}{% set hero_sub = page.description %}{% include "hero.html" %}{% endblock hero %}
 {% block content %}
 {%- set d = load_data(path="static/data/ladder.json") -%}
-{%- set order = load_data(path="static/data/scenarios.json") -%}
 {%- set forms = ["fp127", "fp127lib", "abdk", "solady", "prb"] -%}
 {%- set short = {"fp127": "FP127", "fp127lib": "FP127Lib", "abdk": "ABDK", "solady": "Solady", "prb": "PRBMath"} -%}
 <article class="prose doc wide">
 {{ page.content | safe }}
 <nav class="tabs" id="scenario-tabs" aria-label="Scenario">
-{%- for s in order.scenarios %}{% set id = s.id %}{% set sc = d.scenarios[id] %}<a href="#{{ id }}" data-tab="{{ id }}"{% if loop.first %} class="on"{% endif %}>{{ sc.title }}</a>{% endfor %}
+{%- for sc in d.scenarios %}{% set id = sc.id %}<a href="#{{ id }}" data-tab="{{ id }}"{% if loop.first %} class="on"{% endif %}>{{ sc.title }}</a>{% endfor %}
 </nav>
-{%- for s in order.scenarios %}{% set id = s.id %}{% set sc = d.scenarios[id] %}
-{% set si = s.index %}
+{%- for sc in d.scenarios %}{% set id = sc.id %}{% set si = sc.index %}{% set ref = sc.inputs[0] %}
 <section class="scenario" id="{{ id }}" data-index="{{ si }}"{% if not loop.first %} hidden{% endif %}>
 <h2>{{ sc.title }}</h2>
 <p class="lead">Step: <code>{{ sc.step }}</code>. Result: {{ sc.result }}.</p>
-<p>{{ sc.why }} Parameters: {% for k, v in sc.resolved %}{{ k }} = <code>{{ v | truncate(length=24) }}</code>{% if not loop.last %}, {% endif %}{% endfor %}.</p>
-{{ <ladderchart sc={sc} ladder={d.ladder} forms={d.forms} /> }}
+<p>{{ sc.why }} Reference input: {% for k, v in ref.resolved %}{{ k }} = <code>{{ v | truncate(length=24) }}</code>{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+{{ <ladderchart sc={ref} ladder={d.ladder} /> }}
 <div class="scroll">
 <table class="ladder">
-<thead><tr><th class="num">N</th><th>truth</th>{% for f in forms %}<th>{{ d.forms[f].label }}</th>{% endfor %}</tr></thead>
+<thead><tr><th class="num">N</th><th>truth</th>{% for fm in d.forms %}<th>{{ fm.label }}</th>{% endfor %}</tr></thead>
 <tbody>
 {%- for n in d.ladder %}{% set ns = n | str %}
 <tr>
 <td class="num">{{ n }}</td>
-<td class="val truth">{{ sc.truth[ns] }}</td>
-{%- for f in forms %}{% set fi = loop.index0 %}{% set c = sc.libraries[f][ns] %}
+<td class="val truth">{{ ref.truth[ns] }}</td>
+{%- for f in forms %}{% set fi = loop.index0 %}{% set c = ref.cells[f][ns] %}
 <td class="val">
 {%- if c.reverted %}<span class="rev">reverts</span> <span class="meta">{{ c.reason }}</span>
-{%- else %}{{ <cell value={c.value} digits={c.digits} /> }}<br><span class="meta">{% if c.exact %}exact{% else %}{{ c.digits }} digits{% endif %} · {{ c.gas }} gas/step</span>{% endif %}
-<br><button class="verify" data-scenario="{{ si }}" data-form="{{ fi }}" data-n="{{ n }}" data-raw="{{ c.raw | default(value='') }}" data-reason="{{ c.reason | default(value='') }}"{% if n > sc.liveMaxN[f] %} disabled title="Above the public RPC's gas limit; run it from your own node"{% endif %}>verify on Sepolia</button>
+{%- else %}{{ <cell value={c.value} digits={c.agree} /> }}<br><span class="meta">{% if c.exact %}exact{% else %}{{ c.digits }} digits{% endif %} · {{ c.digitsFormat }} vs format truth · {{ c.gasPerStep }} gas/step</span>{% endif %}
+<br><button class="verify" data-scenario="{{ si }}" data-input="{{ ref.name }}" data-form="{{ fi }}" data-n="{{ n }}" data-raw="{{ c.raw | default(value='') }}" data-reason="{{ c.reason | default(value='') }}"{% if sc.liveMaxN is undefined %} disabled title="The v2 runner is not deployed yet"{% elif n > sc.liveMaxN[f] %} disabled title="Above the public RPC's gas limit; run it from your own node"{% endif %}>verify on Sepolia</button>
 </td>
 {%- endfor %}
 </tr>
@@ -41,11 +39,11 @@
 </div>
 <table class="gasrow">
 <thead><tr><th>gas per step at N = 10,000</th>{% for f in forms %}<th class="num">{{ short[f] }}</th>{% endfor %}</tr></thead>
-<tbody><tr><td>{{ sc.step }}</td>{% for f in forms %}{% set c = sc.libraries[f]["10000"] %}<td class="num">{{ c.gas }}</td>{% endfor %}</tr></tbody>
+<tbody><tr><td>{{ sc.step }}</td>{% for f in forms %}{% set c = ref.cells[f]["10000"] %}<td class="num">{% if c.gasPerStep is defined %}{{ c.gasPerStep }}{% else %}—{% endif %}</td>{% endfor %}</tr></tbody>
 </table>
 </section>
 {%- endfor %}
-<p class="note">Digits are leading significant digits that agree with the truth, computed by relative error; 60 means bit-identical to the rounded truth. Gas is per step through <code>LadderRunner</code>, so the external-call overhead is amortised over N and the N = 1 cell carries it in full. Full values, raw words and relative errors are in <a href="/data/ladder.json">ladder.json</a>; the generator is <code>make ladder</code>. Verify calls <code>run(scenario, form, n)</code> on <a href="https://repo.sourcify.dev/11155111/{{ d.liveRunner }}">{{ d.liveRunner }}</a> through the public Sepolia RPC and compares the raw word with the committed cell. {{ d.liveNote }}</p>
+<p class="note">Digits are leading significant digits that agree with the truth, computed by relative error; 60 means bit-identical to the rounded truth. Gas is per step through <code>LadderRunner</code>, so the external-call overhead is amortised over N and the N = 1 cell carries it in full. Full values, raw words and relative errors are in <a href="/data/ladder.json">ladder.json</a>; the generator is <code>make ladder</code>. Verify calls <code>run(scenario, form, n)</code> on {% if d.liveRunner is defined %}<a href="https://repo.sourcify.dev/11155111/{{ d.liveRunner }}">{{ d.liveRunner }}</a>{% else %}the runner{% endif %} through the public Sepolia RPC and compares the raw word with the committed cell. {{ d.liveNote | default(value="") }}</p>
 </article>
 <script type="module" src="/js/islands/verify.js"></script>
 {% endblock content %}

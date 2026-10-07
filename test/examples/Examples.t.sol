@@ -6,8 +6,9 @@ import {CompoundExample} from "./CompoundExample.sol";
 import {StaticcallExample} from "./StaticcallExample.sol";
 
 /// @notice The two snippets on the library page compile and agree with the
-///         compound scenario of the ladder (docs/benchmarks/ladder.json,
-///         compound, N = 365: 11051.5578161626437393801159668...). The WAD
+///         compound scenario's reference input of the ladder
+///         (docs/benchmarks/ladder.json, compound, reference, N = 365:
+///         11051.5578161626437393801159668...). The WAD
 ///         rate is truncated to 18 decimals, so the match is to about 15
 ///         digits, not 36; that gap is the point of the why page.
 contract ExamplesTest is Test {

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {LadderBase} from "./LadderBase.sol";
-import {LadderParams as P} from "./LadderParams.sol";
+import {ParamOutOfRange} from "./ILadder.sol";
 import {ABDKMath64x64 as A} from "../../../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
 
 /// @title LadderABDK
@@ -10,9 +10,14 @@ import {ABDKMath64x64 as A} from "../../../lib/abdk-libraries-solidity/ABDKMath6
 ///         real-exponent pow, so pow(x, y) is exp(y ln x) as the library's
 ///         own README suggests.
 contract LadderABDK is LadderBase {
+    /// int128(x) truncates silently in Solidity, so the range is checked here.
+    function _p(int256[] calldata p, uint256 i) internal pure override returns (int256) {
+        int256 x = p[i];
+        if (x != int256(int128(x))) revert ParamOutOfRange(i);
+        return x;
+    }
     function _one() internal pure override returns (int256) { return int256(1) << 64; }
     function _fromUint(uint256 u) internal pure override returns (int256) { return A.fromUInt(u); }
-    function _param(uint8 id) internal pure override returns (int256) { return P.abdk(id); }
     function _add(int256 a, int256 b) internal pure override returns (int256) { return A.add(int128(a), int128(b)); }
     function _sub(int256 a, int256 b) internal pure override returns (int256) { return A.sub(int128(a), int128(b)); }
     function _mul(int256 a, int256 b) internal view override returns (int256) { return A.mul(int128(a), int128(b)); }

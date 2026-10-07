@@ -1,4 +1,4 @@
-.PHONY: site site-check help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-params gen-params-check ladder ladder-check predict-ladder deploy-ladder-sepolia verify-ladder-sepolia
+.PHONY: site site-check help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-inputs gen-inputs-check ladder ladder-check predict-ladder deploy-ladder-sepolia verify-ladder-sepolia
 
 PY := uv run
 BASELINE_ADDR := 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
@@ -16,10 +16,11 @@ help:
 	@echo "  make precision-report - Rewrite docs/fp127/precision.md from docs/fp127/precision.json"
 	@echo "  make bench            - Gas ladder for every op and form -> docs/benchmarks/gas.json + gas.md"
 	@echo "  make size             - Print the deployed FP127 runtime size in bytes"
-	@echo "  make gen-params       - Generate contracts/src/ladder/LadderParams.sol from scripts/ladder/scenarios.json"
-	@echo "  make gen-params-check - Fail if LadderParams.sol is stale"
-	@echo "  make ladder           - Terminal-precision ladder: every scenario x library x N -> docs/benchmarks/ladder.json + ladder.md"
-	@echo "  make ladder-check     - Fail if ladder.json is stale"
+	@echo "  make gen-inputs       - Generate scripts/ladder/inputs.json (every input floored into each representation) from scenarios.json"
+	@echo "  make gen-inputs-check - Fail if inputs.json is stale"
+	@echo "  make ladder           - Terminal-precision ladder: every scenario x input x library x N -> docs/benchmarks/ladder.json + ladder.md"
+	@echo "  make ladder-check     - Fail if ladder.json is stale (gas within 2%)"
+	@echo "  make ladder-selftest  - Unit checks of the ladder's metric definitions"
 	@echo "  make predict-ladder   - CREATE2 addresses of the ladder adapters and runner"
 	@echo "  make site             - Build the Zola site into public/ (pinned Zola is downloaded if none is installed)"
 	@echo "  make site-check       - zola check, the symlinked data test, and deno task test"
@@ -44,14 +45,17 @@ vectors:
 vectors-check:
 	@$(PY) scripts/fp127/oracle.py check
 
-build: gen-check gen-params-check
+build: gen-check gen-inputs-check
 	@forge build
 
-gen-params:
-	@$(PY) scripts/ladder/gen_params.py
+gen-inputs:
+	@$(PY) scripts/ladder/gen_inputs.py
 
-gen-params-check:
-	@$(PY) scripts/ladder/gen_params.py --check
+gen-inputs-check:
+	@$(PY) scripts/ladder/gen_inputs.py --check
+
+ladder-selftest:
+	@$(PY) scripts/ladder/ladder.py --selftest
 
 test: gen-check vectors-check
 	@forge test --match-path "test/fp127/*"
@@ -60,7 +64,7 @@ test: gen-check vectors-check
 ladder: build
 	@forge test --match-path "test/ladder/*" -vv | $(PY) scripts/ladder/ladder.py
 
-ladder-check: build
+ladder-check: build ladder-selftest
 	@forge test --match-path "test/ladder/*" -vv | $(PY) scripts/ladder/ladder.py --check
 
 precision-report:

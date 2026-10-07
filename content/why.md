@@ -5,6 +5,8 @@ description = "Where the bits go in an 18-decimal library, why iteration is what
 
 Every number on this page is a cell in [`ladder.json`](/data/ladder.json)
 or [`gas.json`](/data/gas.json), named in brackets so you can check it.
+Ladder cells are the reference input of each scenario, the one the
+[demo](/demo/) shows in full; `digits` there is against the exact truth.
 
 ## Where the bits go in WAD
 

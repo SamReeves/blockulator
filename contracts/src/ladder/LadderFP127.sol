@@ -4,7 +4,6 @@ pragma solidity ^0.8.24;
 import {LadderBase} from "./LadderBase.sol";
 import {FP127_ADDRESS} from "./ILadder.sol";
 import {IFP127} from "../fp127/IFP127.sol";
-import {LadderParams as P} from "./LadderParams.sol";
 
 /// @title LadderFP127
 /// @notice Every op is a staticcall to the deployed FP127 object, so this
@@ -14,7 +13,6 @@ contract LadderFP127 is LadderBase {
 
     function _one() internal pure override returns (int256) { return int256(1) << 128; }
     function _fromUint(uint256 u) internal pure override returns (int256) { return int256(u) << 128; }
-    function _param(uint8 id) internal pure override returns (int256) { return P.fp127(id); }
     function _add(int256 a, int256 b) internal pure override returns (int256) { return a + b; }
     function _sub(int256 a, int256 b) internal pure override returns (int256) { return a - b; }
     function _mul(int256 a, int256 b) internal view override returns (int256) { return F.mul(a, b); }
