@@ -60,3 +60,18 @@
 .archive .links { margin-top: 12px; display: flex; gap: 16px; }
 .island { margin: 0 0 clamp(48px, 7vw, 96px); box-shadow: var(--shadow); }
 .island-open { display: flex; justify-content: space-between; align-items: center; padding: .6rem 1rem; font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; }
+
+/* demo v2: methodology, toggle, band chart, summary */
+.method { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 20px; margin: 1.2em 0; }
+.method summary { cursor: pointer; font-weight: 600; }
+.method dl { margin: 12px 0 4px; }
+.method dt { font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--g-500); margin-top: 12px; }
+.method dd { margin: 4px 0 0; font-size: 15px; }
+.doc .scenario h3 { font-family: var(--mono); font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--g-500); margin: 2em 0 .6em; font-weight: 500; }
+.toggle { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; margin: 0 0 10px; }
+.toggle label { cursor: pointer; }
+.chart .band { opacity: .14; stroke: none; }
+.chart polygon.s-fp127 { fill: var(--emerald); } .chart polygon.s-solady { fill: var(--gold); } .chart polygon.s-abdk { fill: var(--sapphire); } .chart polygon.s-prb { fill: var(--red); }
+.summary { font-size: 14px; } .summary .meta { color: var(--g-500); font-size: 12px; }
+.inputs { margin: 1em 0 1.4em; } .inputs summary { cursor: pointer; font-weight: 600; }
+.inputlist td { font-size: 13.5px; }

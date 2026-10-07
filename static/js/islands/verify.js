@@ -17,6 +17,14 @@ function show(id) {
 window.addEventListener('hashchange', () => show(location.hash.slice(1)));
 if (location.hash) show(location.hash.slice(1));
 
+// exact-truth / format-truth toggle: swaps the chart and the summary columns of that scenario
+document.addEventListener('change', (e) => {
+    const r = e.target;
+    if (!r.matches('.toggle input[type=radio]')) return;
+    const section = r.closest('section.scenario');
+    section.querySelectorAll('[data-key]').forEach((el) => { el.hidden = el.dataset.key !== r.value; });
+});
+
 let live = null;   // { runner, selector, inputs: Map("id/input" -> cell) }
 async function setup() {
     if (live) return live;

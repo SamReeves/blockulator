@@ -61,6 +61,16 @@ The arithmetic for N = 365: 60 fractional bits minus log2(365) ≈ 8.5 bits
 of accumulated rounding leaves 51 bits, about 15.5 decimal digits, which is
 what the table shows.
 
+The ladder measures each cell twice, and the second measurement says where
+the loss comes from. Against the exact inputs, FP127 is right to 36 digits
+after a year of daily compounding; against the inputs as the format rounds
+them, it is right to 40, the cap [compound, N = 365, fp127, digitsFormat].
+Every digit FP127 loses on that scenario is the rate's rounding to 2^-128,
+applied once and carried N times; the multiplications themselves lose
+nothing the measurement can see. The WAD libraries lose part of theirs the
+same way, 16 against exact inputs and 19 against rounded ones at N = 365
+[compound, N = 365, solady], and the rest to the arithmetic.
+
 ## What it costs
 
 Per op, inline library form, median over the gas ladder [gas.json, lib]:
