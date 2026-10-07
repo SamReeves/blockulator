@@ -1,6 +1,6 @@
 # FP127 gas ladder
 
-Generated 2026-10-06 by `make bench`. Versions: fp127 aba9873, huff sepolia:0xfae694D0c2c44181791F838c54Ed64C3151FfE30@11857616, solady v0.1.26, prb-math v4.2.0, abdk v3.2, forge forge Version: 1.7.1.
+Generated 2026-10-06 by `make bench`. Versions: fp127 b55b9e0, huff sepolia:0xfae694D0c2c44181791F838c54Ed64C3151FfE30@11857616, solady v0.1.26, prb-math v4.2.0, abdk v3.2, forge forge Version: 1.7.1.
 
 Each cell is min / median / max gas over the op's input ladder. The first two FP127 columns and the Caller column include the `staticcall`; FP127Lib and the competitor libraries are internal calls. A dash means the library does not offer the op or reverted on every ladder input.
 

@@ -73,3 +73,7 @@ tests/storage-*.json
 scripts/generators/massive_bench_cases.sol.txt
 
 .venv/
+
+# Zola output
+public/
+zola

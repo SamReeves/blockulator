@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>(function(){var h=location.hash,p=location.pathname;if(p!=='/'&&p!=='/index.html')return;if(h.slice(0,2)!=='#/')return;var s=h.slice(2).split('/'),m={games:'/archive/',vyper:'/archive/',futures:'/archive/',badges:'/badges/',fp127:'/library/',benchmarks:'/compare/',about:'/why/'},t=m[s[0]];if(!t)return;if(s[0]==='games'||s[0]==='vyper'||s[0]==='futures')t+='#/'+s.slice(0,2).join('/');location.replace(t);})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}{{ config.title }}{% endblock title %}</title>
+<meta name="description" content="{% block description %}{{ config.description }}{% endblock description %}">
+<link rel="icon" type="image/png" href="/blockulator_favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/css/site.css">
+<link rel="stylesheet" href="/css/blockulator.css">
+{% if page and page.extra.math %}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'\\(',right:'\\)',display:false}],throwOnError:false});"></script>
+{% endif %}{% block head %}{% endblock head %}</head>
+<body>
+<header class="top">
+  <a class="brand" href="/"><img src="/blockulator_favicon.png" alt="" width="28" height="28"><span>blockulator</span></a>
+  <nav class="links">
+    <a href="/demo/">Demo</a>
+    <a href="/why/">Why</a>
+    <a href="/library/">Library</a>
+    <a href="/compare/">Compare</a>
+    <a href="/badges/">Badges</a>
+    <a href="/archive/">Archive</a>
+    <a href="/writeup/">Write-up</a>
+    <a class="cta" href="https://github.com/securedataresearch/blockulator">Source</a>
+  </nav>
+</header>
+{% block hero %}{% endblock hero %}
+<main class="wrap">
+{% block content %}{% endblock content %}
+</main>
+{% block wide %}{% endblock wide %}
+<script src="/js/hero.js" defer></script>
+<script>document.addEventListener('click',function(e){var b=e.target.closest('.copy');if(!b||!navigator.clipboard)return;navigator.clipboard.writeText(b.dataset.copy).then(function(){var t=b.textContent;b.textContent='copied';setTimeout(function(){b.textContent=t;},1200);});});</script>
+</body>
+</html>

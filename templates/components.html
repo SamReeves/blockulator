@@ -1,0 +1,81 @@
+{% component deployment() -%}
+{%- set d = load_data(path="static/data/fp127.json") -%}
+<dl class="kv">
+  <dt>network</dt><dd>{{ d.network }} (chain id {{ d.chainId }})</dd>
+  <dt>address</dt><dd>{{ d.address }} <button class="copy" data-copy="{{ d.address }}">copy</button></dd>
+  <dt>deployer</dt><dd>{{ d.deployer }} (the CREATE2 proxy)</dd>
+  <dt>salt</dt><dd>"{{ d.saltAscii }}" = {{ d.salt }}</dd>
+  <dt>init code hash</dt><dd>{{ d.initCodeHash }}</dd>
+  <dt>runtime</dt><dd>{{ d.runtimeBytes }} bytes, keccak {{ d.runtimeKeccak }}</dd>
+  <dt>compiler</dt><dd>{{ d.compiler.language }}, solc {{ d.compiler.solc }}, optimizer {{ d.compiler.runs }} runs, {{ d.compiler.evmVersion }}</dd>
+  <dt>deployed</dt><dd><a href="{{ d.explorerTx }}">block {{ d.block }}</a>, source commit {{ d.sourceCommit }}</dd>
+  <dt>verified</dt><dd><a href="{{ d.verification.sourcifyRepo }}">Sourcify</a>, <a href="{{ d.verification.blockscout }}">Blockscout</a>. Etherscan has no Yul path.</dd>
+  <dt>record</dt><dd><a href="/contracts/deployments/FP127.md">FP127.md</a>, <a href="/data/fp127.json">fp127.json</a></dd>
+</dl>
+{%- endcomponent %}
+
+{% component optable() -%}
+{%- set ops = load_data(path="static/data/ops.json") -%}
+{%- set prec = load_data(path="static/data/precision.json") -%}
+{%- set gas = load_data(path="static/data/gas.json") -%}
+<div class="scroll">
+<table class="optable">
+<thead><tr><th>op</th><th>what</th><th>domain</th><th>reverts</th><th class="num">bits<br>min / mean</th><th class="num">gas<br>object</th><th class="num">gas<br>inline</th></tr></thead>
+<tbody>
+{%- for o in ops.ops %}
+{%- set p = prec[o.name] %}
+<tr>
+<td class="mono"><a href="#{{ o.name }}" id="{{ o.name }}">{{ o.signature }}</a><br><span class="sel">{{ o.selector }}</span></td>
+<td>{{ o.notice }}</td>
+<td>{{ o.domain }}</td>
+<td>{{ o.reverts }}</td>
+<td class="num">{% if p.minBits >= 256 %}exact{% else %}{{ p.minBits }} / {{ p.meanBits }}{% endif %}</td>
+{%- if o.name in gas.ops %}
+{%- set s = gas.ops[o.name].summary %}
+<td class="num">{% if s.yul %}{{ s.yul.median }}{% else %}—{% endif %}</td>
+<td class="num">{% if s.lib %}{{ s.lib.median }}{% else %}—{% endif %}</td>
+{%- else %}
+<td class="num">—</td><td class="num">—</td>
+{%- endif %}
+</tr>
+{%- endfor %}
+</tbody>
+</table>
+</div>
+<p class="note">Bits are relative correct bits against mpmath at 200 decimal places over the committed vectors; "exact" is bit-identical. Gas is the median over each op's input ladder: "object" includes the <code>staticcall</code> to the deployed FP127, "inline" is <code>FP127Lib</code>. Sources: <a href="/data/ops.json">ops.json</a> (generated from the Yul source), <a href="/data/precision.json">precision.json</a>, <a href="/data/gas.json">gas.json</a>. <code>lerp</code> and <code>clamp</code> are not on the gas ladder.</p>
+{%- endcomponent %}
+
+{% component gastable() -%}
+{%- set gas = load_data(path="static/data/gas.json") -%}
+{%- set forms = ["yul", "lib", "abdk", "solady", "prb"] -%}
+<div class="scroll">
+<table>
+<thead><tr><th>op</th>{% for f in forms %}<th class="num">{{ gas.formLabels[f] }}</th>{% endfor %}</tr></thead>
+<tbody>
+{%- for name, o in gas.ops %}
+<tr><td class="mono">{{ name }}</td>
+{%- for f in forms %}{% set s = o.summary[f] %}<td class="num">{% if s %}{{ s.median }}{% else %}—{% endif %}</td>{% endfor %}
+</tr>
+{%- endfor %}
+</tbody>
+</table>
+</div>
+<p class="note">Median gas per op over its input ladder, {{ gas.generated }}. The Yul object column includes the <code>staticcall</code>; the other four are internal library calls. A dash is an op the library does not offer, or that reverted on every ladder input. Min and max per cell are in <a href="/data/gas.json">gas.json</a>; the Huff and FP127Caller columns are in <a href="https://github.com/securedataresearch/blockulator/blob/master/docs/benchmarks/gas.md">gas.md</a>. Versions: {% for k, v in gas.versions %}{{ k }} {{ v }}{% if not loop.last %}, {% endif %}{% endfor %}.</p>
+{%- endcomponent %}
+
+{% component precisiontable() -%}
+{%- set prec = load_data(path="static/data/precision.json") -%}
+<div class="scroll">
+<table>
+<thead><tr><th>op</th><th class="num">vectors</th><th class="num">reverts</th><th class="num">min bits</th><th class="num">mean bits</th><th>worst input</th></tr></thead>
+<tbody>
+{%- for name, p in prec %}
+<tr><td class="mono">{{ name }}</td><td class="num">{{ p.n }}</td><td class="num">{{ p.reverts }}</td>
+{%- if p.minBits >= 256 %}<td class="num">exact</td><td class="num">exact</td>{% else %}<td class="num">{{ p.minBits }}</td><td class="num">{{ p.meanBits }}</td>{% endif %}
+<td class="mono small">{{ p.worstInput }}</td></tr>
+{%- endfor %}
+</tbody>
+</table>
+</div>
+<p class="note">Relative correct bits of the 127.128 result, msb(|truth|) − msb(|truth − got|), against mpmath at 200 decimal places over the committed vectors in <code>test/fp127/vectors/</code>. "exact" is bit-identical, or within 2 ULP for an approximated op. Reverts counts vectors where the oracle and the Yul both reject the input with the same error. Source: <a href="/data/precision.json">precision.json</a>.</p>
+{%- endcomponent %}

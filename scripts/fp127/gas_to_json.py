@@ -67,14 +67,23 @@ def main() -> int:
     out_ops = {}
     for op, e in sorted(ops.items()):
         n = max(e["inputs"]) + 1 if e["inputs"] else 0
+        gas = {f: [e["gas"][f].get(i) for i in range(n)] for f in FORMS}
+        summary = {}
+        for f in FORMS:
+            vals = [g for g in gas[f] if g is not None]
+            summary[f] = (
+                {"min": min(vals), "median": int(statistics.median(vals)), "max": max(vals)}
+                if vals else None
+            )
         out_ops[op] = {
             "inputs": [e["inputs"].get(i) for i in range(n)],
-            "gas": {f: [e["gas"][f].get(i) for i in range(n)] for f in FORMS},
+            "gas": gas,
+            "summary": summary,
         }
 
     doc = {
         "generated": date.today().isoformat(),
-        "description": "Gas per op across an input ladder. First four forms are FP127; the first two and the third include the external call. Competitors are measured as internal library calls like FP127Lib. null = reverted or unsupported.",
+        "description": "Gas per op across an input ladder. First four forms are FP127; the first two and the third include the external call. Competitors are measured as internal library calls like FP127Lib. null = reverted or unsupported. summary holds min/median/max per form, null where there is no measurement.",
         "versions": versions(),
         "forms": FORMS,
         "formLabels": FORM_LABEL,
@@ -96,11 +105,11 @@ def main() -> int:
     for op, e in out_ops.items():
         cells = []
         for f in FORMS:
-            vals = [g for g in e["gas"][f] if g is not None]
-            if not vals:
+            s = e["summary"][f]
+            if s is None:
                 cells.append("—")
             else:
-                cells.append(f"{min(vals):,} / {int(statistics.median(vals)):,} / {max(vals):,}")
+                cells.append(f"{s['min']:,} / {s['median']:,} / {s['max']:,}")
         lines.append(f"| {op} | " + " | ".join(cells) + " |")
     OUT_MD.write_text("\n".join(lines) + "\n")
     print(f"wrote {OUT_JSON.relative_to(ROOT)} and {OUT_MD.relative_to(ROOT)}: {len(out_ops)} ops")

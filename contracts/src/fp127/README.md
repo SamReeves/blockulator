@@ -4,7 +4,7 @@ Signed 127.128 fixed-point arithmetic for the EVM. One `int256` per value,
 `value = raw / 2^128`, so `ONE = 2^128`. Range about ±1.7e38, 128 fractional
 bits, about 38 decimal digits.
 
-This directory holds **one hand-written file** and four generated ones.
+This directory holds **one hand-written file** and five generated ones.
 
 | file | role |
 |---|---|
@@ -13,10 +13,11 @@ This directory holds **one hand-written file** and four generated ones.
 | `FP127Lib.sol` | generated: Solidity library, one `assembly` block per op |
 | `IFP127.sol` | generated: interface and custom errors of the deployed object |
 | `abi.json` | generated: ABI of the deployed object |
+| `ops.json` | generated: op table (signature, selector, domain, reverts) for the site |
 | `FP127Caller.sol` | hand-written: thin `staticcall` harness around a deployed object |
 
 ```
-make gen              # regenerate the four outputs
+make gen              # regenerate the five outputs
 make gen-check        # fail if they are stale (CI runs this)
 make vectors          # regenerate the mpmath vectors in test/fp127/vectors/
 make vectors-check    # fail if they are stale (CI runs this)
