@@ -8,15 +8,76 @@
 {%- set short = {"fp127": "FP127", "fp127lib": "FP127Lib", "abdk": "ABDK", "solady": "Solady", "prb": "PRBMath"} -%}
 <article class="prose doc wide">
 {{ page.content | safe }}
+
+<details class="method" id="method">
+<summary>How this was measured</summary>
+<dl>
+<dt>truth</dt><dd>{{ d.methodology.truth }}</dd>
+<dt>rounding</dt><dd>{{ d.methodology.rounding }}</dd>
+<dt>digits</dt><dd>{{ d.methodology.digits }}</dd>
+<dt>agree</dt><dd>{{ d.methodology.agree }}</dd>
+<dt>gas</dt><dd>{{ d.methodology.gas }}</dd>
+<dt>live</dt><dd>{{ d.methodology.live }}</dd>
+<dt>reproduce</dt><dd>{{ d.methodology.reproduce }} Generated {{ d.generated }}; versions: {% for k, v in d.versions %}{{ k }} {{ v }}{% if not loop.last %}, {% endif %}{% endfor %}.</dd>
+</dl>
+</details>
+
 <nav class="tabs" id="scenario-tabs" aria-label="Scenario">
-{%- for sc in d.scenarios %}{% set id = sc.id %}<a href="#{{ id }}" data-tab="{{ id }}"{% if loop.first %} class="on"{% endif %}>{{ sc.title }}</a>{% endfor %}
+{%- for sc in d.scenarios %}<a href="#{{ sc.id }}" data-tab="{{ sc.id }}"{% if loop.first %} class="on"{% endif %}>{{ sc.title }}</a>{% endfor %}
 </nav>
 {%- for sc in d.scenarios %}{% set id = sc.id %}{% set si = sc.index %}{% set ref = sc.inputs[0] %}
 <section class="scenario" id="{{ id }}" data-index="{{ si }}"{% if not loop.first %} hidden{% endif %}>
 <h2>{{ sc.title }}</h2>
 <p class="lead">Step: <code>{{ sc.step }}</code>. Result: {{ sc.result }}.</p>
-<p>{{ sc.why }} Reference input: {% for k, v in ref.resolved %}{{ k }} = <code>{{ v | truncate(length=24) }}</code>{% if not loop.last %}, {% endif %}{% endfor %}.</p>
-{{ <ladderchart sc={ref} ladder={d.ladder} /> }}
+<p>{{ sc.why }}</p>
+
+<h3>Over all {{ sc.inputs | length }} input{{ sc.inputs | length | pluralize }}</h3>
+<div class="chartwrap">
+<div class="toggle" role="radiogroup" aria-label="Truth">
+  <label><input type="radio" name="truth-{{ id }}" value="digits" checked> vs exact inputs (what a protocol sees)</label>
+  <label><input type="radio" name="truth-{{ id }}" value="digitsFormat"> vs inputs as each format rounds them (the arithmetic alone)</label>
+</div>
+<figure class="figure chart" data-key="digits" role="img" aria-label="Median correct digits against N per library, with the range over all inputs as a band, against the exact truth.">
+{{ <ladderband summary={sc.summary} key="digits" ladder={d.ladder} log10={d.ladderLog10} cap={d.chartCap} /> }}
+</figure>
+<figure class="figure chart" data-key="digitsFormat" hidden role="img" aria-label="Median correct digits against N per library, with the range over all inputs as a band, against the format-rounded truth.">
+{{ <ladderband summary={sc.summary} key="digitsFormat" ladder={d.ladder} log10={d.ladderLog10} cap={d.chartCap} /> }}
+</figure>
+<figcaption class="note">Line: median correct digits over the inputs; band: the range; capped at {{ d.chartCap }} on the axis. FP127Lib coincides with FP127 and is not drawn. A missing point means every input reverted at that N. FP127 emerald, Solady gold, ABDK sapphire, PRBMath red, labelled at the line end; hover a point for the numbers.</figcaption>
+</div>
+
+<div class="scroll">
+<table class="summary">
+<thead><tr><th class="num">N</th>{% for f in forms %}<th class="num">{{ short[f] }}</th>{% endfor %}</tr></thead>
+<tbody>
+{%- for n in d.ladder %}{% set ns = n | str %}
+<tr><td class="num">{{ n }}</td>
+{%- for f in forms %}{% set row = sc.summary[f][ns] %}
+<td class="num" data-key="digits">{% if row.digits is defined %}{{ row.digits.median }} <span class="meta">({{ row.digits.min }}–{{ row.digits.max }})</span>{% else %}—{% endif %}{% if row.reverts %} <span class="rev meta">{{ row.reverts }} rev</span>{% endif %}</td>
+<td class="num" data-key="digitsFormat" hidden>{% if row.digitsFormat is defined %}{{ row.digitsFormat.median }} <span class="meta">({{ row.digitsFormat.min }}–{{ row.digitsFormat.max }})</span>{% else %}—{% endif %}{% if row.reverts %} <span class="rev meta">{{ row.reverts }} rev</span>{% endif %}</td>
+{%- endfor %}
+</tr>
+{%- endfor %}
+</tbody>
+</table>
+</div>
+<p class="note">Median (min–max) correct digits over the inputs, capped at {{ d.chartCap }}; "rev" counts inputs that reverted at that N and are excluded.</p>
+
+<details class="inputs">
+<summary>The inputs and the ops</summary>
+<table class="inputlist">
+<thead><tr><th>input</th><th>parameters</th><th>why</th></tr></thead>
+<tbody>
+{%- for i in sc.inputs %}
+<tr><td class="mono">{{ i.name }}{% if i.reference %} <span class="meta">reference</span>{% endif %}</td><td class="mono">{% for k, v in i.params %}{{ k }} = {{ v }}{% if not loop.last %}, {% endif %}{% endfor %}{% if sc.derived %}; {% for k, v in sc.derived %}{{ k }} = {{ v }}{% endfor %}{% endif %}</td><td>{{ i.why }}</td></tr>
+{%- endfor %}
+</tbody>
+</table>
+<p>Library calls per step: {% for f in forms %}<strong>{{ short[f] }}</strong> {{ sc.ops[f] | join(sep=", ") }}{% if not loop.last %}; {% endif %}{% endfor %}. Parameters reach each adapter floored into its representation (<a href="/data/ladder-inputs.json">ladder-inputs.json</a>).</p>
+</details>
+
+<h3>The reference input in full: {% for k, v in ref.params %}{{ k }} = {{ v }}{% if not loop.last %}, {% endif %}{% endfor %}</h3>
+<p>Each cell: the value with the digits that agree with the truth in ink and the rest in red; below it, correct digits against the exact truth, against the format-rounded truth, the signed error in units of the last place, and gas per step.</p>
 <div class="scroll">
 <table class="ladder">
 <thead><tr><th class="num">N</th><th>truth</th>{% for fm in d.forms %}<th>{{ fm.label }}</th>{% endfor %}</tr></thead>
@@ -27,8 +88,8 @@
 <td class="val truth">{{ ref.truth[ns] }}</td>
 {%- for f in forms %}{% set fi = loop.index0 %}{% set c = ref.cells[f][ns] %}
 <td class="val">
-{%- if c.reverted %}<span class="rev">reverts</span> <span class="meta">{{ c.reason }}</span>
-{%- else %}{{ <cell value={c.value} digits={c.agree} /> }}<br><span class="meta">{% if c.exact %}exact{% else %}{{ c.digits }} digits{% endif %} · {{ c.digitsFormat }} vs format truth · {{ c.gasPerStep }} gas/step</span>{% endif %}
+{%- if c.reverted %}<span class="rev">reverts</span> <span class="meta">{{ c.reasonName }} {{ c.reason }}</span>
+{%- else %}{{ <cell value={c.value} digits={c.agree} /> }}<br><span class="meta">{% if c.exact %}exact{% else %}{{ c.digits }} digits{% endif %} · {% if c.digitsFormat >= d.digitsCap %}exact{% else %}{{ c.digitsFormat }}{% endif %} vs format · {{ c.errUlps }} ULP · {{ c.gasPerStep }} gas/step</span>{% endif %}
 <br><button class="verify" data-scenario="{{ si }}" data-input="{{ ref.name }}" data-form="{{ fi }}" data-n="{{ n }}" data-raw="{{ c.raw | default(value='') }}" data-reason="{{ c.reason | default(value='') }}"{% if sc.liveMaxN is undefined %} disabled title="The v2 runner is not deployed yet"{% elif n > sc.liveMaxN[f] %} disabled title="Above the public RPC's gas limit; run it from your own node"{% endif %}>verify on Sepolia</button>
 </td>
 {%- endfor %}
@@ -37,13 +98,9 @@
 </tbody>
 </table>
 </div>
-<table class="gasrow">
-<thead><tr><th>gas per step at N = 10,000</th>{% for f in forms %}<th class="num">{{ short[f] }}</th>{% endfor %}</tr></thead>
-<tbody><tr><td>{{ sc.step }}</td>{% for f in forms %}{% set c = ref.cells[f]["10000"] %}<td class="num">{% if c.gasPerStep is defined %}{{ c.gasPerStep }}{% else %}—{% endif %}</td>{% endfor %}</tr></tbody>
-</table>
 </section>
 {%- endfor %}
-<p class="note">Digits are leading significant digits that agree with the truth, computed by relative error; 60 means bit-identical to the rounded truth. Gas is per step through <code>LadderRunner</code>, so the external-call overhead is amortised over N and the N = 1 cell carries it in full. Full values, raw words and relative errors are in <a href="/data/ladder.json">ladder.json</a>; the generator is <code>make ladder</code>. Verify calls <code>run(scenario, form, n)</code> on {% if d.liveRunner is defined %}<a href="https://repo.sourcify.dev/11155111/{{ d.liveRunner }}">{{ d.liveRunner }}</a>{% else %}the runner{% endif %} through the public Sepolia RPC and compares the raw word with the committed cell. {{ d.liveNote | default(value="") }}</p>
+<p class="note">Verify calls <code>run(scenario, form, n, p)</code> on {% if d.liveRunner is defined %}<a href="https://repo.sourcify.dev/11155111/{{ d.liveRunner }}">{{ d.liveRunner }}</a>{% else %}the runner{% endif %} through the public Sepolia RPC with the input's floored parameters and compares the raw word with the committed cell. {{ d.liveNote | default(value="") }} The whole dataset is <a href="/data/ladder.json">ladder.json</a>; the generator is <code>make ladder</code>.</p>
 </article>
 <script type="module" src="/js/islands/verify.js"></script>
 {% endblock content %}
