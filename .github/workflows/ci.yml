@@ -44,6 +44,9 @@ jobs:
       - name: Gas ladder
         run: make bench && cat docs/benchmarks/gas.md
 
+      - name: Terminal-precision ladder is current
+        run: make ladder-check
+
       - name: Runtime size
         run: make size
 
@@ -55,3 +58,5 @@ jobs:
             docs/fp127/precision.md
             docs/benchmarks/gas.json
             docs/benchmarks/gas.md
+            docs/benchmarks/ladder.json
+            docs/benchmarks/ladder.md

@@ -1,4 +1,4 @@
-.PHONY: help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia
+.PHONY: help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-params gen-params-check ladder ladder-check
 
 PY := uv run
 BASELINE_ADDR := 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
@@ -16,6 +16,10 @@ help:
 	@echo "  make precision-report - Rewrite docs/fp127/precision.md from docs/fp127/precision.json"
 	@echo "  make bench            - Gas ladder for every op and form -> docs/benchmarks/gas.json + gas.md"
 	@echo "  make size             - Print the deployed FP127 runtime size in bytes"
+	@echo "  make gen-params       - Generate contracts/src/ladder/LadderParams.sol from scripts/ladder/scenarios.json"
+	@echo "  make gen-params-check - Fail if LadderParams.sol is stale"
+	@echo "  make ladder           - Terminal-precision ladder: every scenario x library x N -> docs/benchmarks/ladder.json + ladder.md"
+	@echo "  make ladder-check     - Fail if ladder.json is stale"
 	@echo "  make fetch-baseline   - Re-fetch the legacy Huff runtime bytecode from Sepolia"
 	@echo "  make predict          - Print the CREATE2 address of the current FP127 object"
 	@echo "  make deploy-sepolia   - Deploy via the CREATE2 proxy (reads DEPLOYER_KEY)"
@@ -35,11 +39,24 @@ vectors:
 vectors-check:
 	@$(PY) scripts/fp127/oracle.py check
 
-build: gen-check
+build: gen-check gen-params-check
 	@forge build
+
+gen-params:
+	@$(PY) scripts/ladder/gen_params.py
+
+gen-params-check:
+	@$(PY) scripts/ladder/gen_params.py --check
 
 test: gen-check vectors-check
 	@forge test --match-path "test/fp127/*"
+	@forge test --match-path "test/ladder/*" -q
+
+ladder: build
+	@forge test --match-path "test/ladder/*" -vv | $(PY) scripts/ladder/ladder.py
+
+ladder-check: build
+	@forge test --match-path "test/ladder/*" -vv | $(PY) scripts/ladder/ladder.py --check
 
 precision-report:
 	@$(PY) scripts/fp127/precision_report.py

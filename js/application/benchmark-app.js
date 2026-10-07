@@ -42,16 +42,23 @@ export class BenchmarkApp {
         this.useMedian = false;
     }
 
+    /// The Huff-era single-op sweep this page rendered has been retired.
+    /// The site rewrite replaces this view with the terminal-precision
+    /// ladder; until then, point at the committed tables.
     async init() {
-        this.renderHTML();
-        await this.loadData();
-        this.setupListeners();
-        this.renderSummaryTable();
-        // Defer charts to next frame so containers have layout dimensions
-        requestAnimationFrame(() => {
-            this.renderParallelCoords();
-            this.renderScatterChart();
-        });
+        const el = document.getElementById('benchmarks-container');
+        if (!el) return;
+        el.innerHTML = `
+            <section class="content">
+                <h2>Benchmarks</h2>
+                <p>
+                    Current numbers live in the repository as committed, regenerated tables:
+                    the <a href="docs/benchmarks/ladder.md">terminal-precision ladder</a>
+                    (every scenario through FP127, ABDK, Solady and PRBMath for N up to 10,000),
+                    the <a href="docs/benchmarks/gas.md">gas ladder</a>, and
+                    <a href="docs/fp127/precision.md">per-op precision</a> against mpmath.
+                </p>
+            </section>`;
     }
 
     // ── Data Loading ──────────────────────────────────────────────────
