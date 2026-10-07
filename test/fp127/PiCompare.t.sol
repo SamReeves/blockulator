@@ -1,0 +1,66 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+import "forge-std/Test.sol";
+import {FP127Lib} from "../../contracts/src/fp127/FP127Lib.sol";
+import {FixedPointMathLib as S} from "../../lib/solady/src/utils/FixedPointMathLib.sol";
+import {ABDKMath64x64 as A} from "../../lib/abdk-libraries-solidity/ABDKMath64x64.sol";
+import {SD59x18, sd} from "../../lib/prb-math/src/SD59x18.sol";
+import * as M from "../../lib/prb-math/src/sd59x18/Math.sol";
+
+/// @title PiCompare
+/// @notice Ramanujan's 1914 series for 1/pi, the same recipe through each
+///         library's own sqrt, mul and div on its own grid. The term ratios
+///         are integers and are applied exactly in every format; what
+///         differs is the grid the running term lives on, the sqrt(2), and
+///         the final reciprocal. Prints PICMP|form|terms|raw|scale|gas for
+///         scripts/fp127/pi_compare.py, which writes docs/benchmarks/pi.md.
+contract PiCompare is Test {
+    int256 constant ONE = int256(1) << 128;
+
+    function _series(uint256 terms, int256 one, function(int256) pure returns (int256) sqrt_,
+                     function(int256, int256) pure returns (int256) mul_,
+                     function(int256, int256) pure returns (int256) div_) internal pure returns (int256) {
+        int256 c = one;
+        int256 s = 0;
+        for (uint256 k; k < terms; k++) {
+            s += c * int256(1103 + 26390 * k);
+            uint256 k4 = 4 * k;
+            c = c * int256((k4 + 1) * (k4 + 2) * (k4 + 3) * (k4 + 4)) / int256((k + 1) ** 4 * 24591257856);
+        }
+        int256 invpi = mul_(2 * sqrt_(2 * one), s) / 9801;
+        return div_(one, invpi);
+    }
+
+    function fpSqrt(int256 x) internal pure returns (int256) { return FP127Lib.sqrt(x); }
+    function fpMul(int256 a, int256 b) internal pure returns (int256) { return FP127Lib.mul(a, b); }
+    function fpDiv(int256 a, int256 b) internal pure returns (int256) { return FP127Lib.div(a, b); }
+    function solSqrt(int256 x) internal pure returns (int256) { return int256(S.sqrtWad(uint256(x))); }
+    function solMul(int256 a, int256 b) internal pure returns (int256) { return S.sMulWad(a, b); }
+    function solDiv(int256 a, int256 b) internal pure returns (int256) { return S.sDivWad(a, b); }
+    function prbSqrt(int256 x) internal pure returns (int256) { return M.sqrt(sd(x)).unwrap(); }
+    function prbMul(int256 a, int256 b) internal pure returns (int256) { return M.mul(sd(a), sd(b)).unwrap(); }
+    function prbDiv(int256 a, int256 b) internal pure returns (int256) { return M.div(sd(a), sd(b)).unwrap(); }
+    function abdkSqrt(int256 x) internal pure returns (int256) { return A.sqrt(int128(x)); }
+    function abdkMul(int256 a, int256 b) internal pure returns (int256) { return A.mul(int128(a), int128(b)); }
+    function abdkDiv(int256 a, int256 b) internal pure returns (int256) { return A.div(int128(a), int128(b)); }
+
+    function _log(string memory form, uint256 terms, int256 raw, string memory scale, uint256 gas) internal pure {
+        console.log(string.concat("PICMP|", form, "|", vm.toString(terms), "|", vm.toString(raw), "|", scale, "|", vm.toString(gas)));
+    }
+
+    function test_pi_compare() public view {
+        for (uint256 t = 1; t <= 6; t++) {
+            uint256 g0 = gasleft(); int256 r = _series(t, ONE, fpSqrt, fpMul, fpDiv); _log("fp127lib", t, r, "2**128", g0 - gasleft());
+            g0 = gasleft(); r = _series(t, 1e18, solSqrt, solMul, solDiv); _log("solady", t, r, "10**18", g0 - gasleft());
+            g0 = gasleft(); r = _series(t, 1e18, prbSqrt, prbMul, prbDiv); _log("prb", t, r, "10**18", g0 - gasleft());
+            g0 = gasleft(); r = _series(t, int256(1) << 64, abdkSqrt, abdkMul, abdkDiv); _log("abdk", t, r, "2**64", g0 - gasleft());
+        }
+        // the library op itself, for reference
+        for (uint256 t = 1; t <= 6; t++) {
+            uint256 g0 = gasleft(); int256 r = FP127Lib.pi(int256(t) << 128); _log("fp127-pi", t, r, "2**128", g0 - gasleft());
+        }
+        // PRBMath ships pi as a constant: 18 decimals
+        _log("prb-constant", 0, 3_141592653589793238, "10**18", 0);
+    }
+}

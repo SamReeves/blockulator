@@ -18,8 +18,8 @@ import {Script, console} from "forge-std/Script.sol";
 contract DeployFP127 is Script {
     /// Arachnid's deterministic-deployment-proxy, present on every major chain.
     address constant DEPLOYER = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
-    /// Published salt. ASCII "FP127 v2", right-padded with zeros (v1 was the floor-kernel object).
-    bytes32 constant SALT = bytes32("FP127 v2");
+    /// Published salt. ASCII "FP127 v3", right-padded with zeros (v1 floor kernels, v2 guard bits, v3 adds pi).
+    bytes32 constant SALT = bytes32("FP127 v3");
     string constant ARTIFACT = "out/FP127.yul/FP127.json";
 
     function _artifact() internal view returns (bytes memory initCode, bytes memory runtime) {

@@ -4,7 +4,7 @@ pragma solidity ^0.8.24;
 // @notice The FP127 Yul object's CREATE2 address (contracts/deployments/FP127.md).
 //         Tests etch the artifact's runtime here, so the same adapter code runs
 //         in the harness and on Sepolia.
-address constant FP127_ADDRESS = 0xD8688E72dD6745719484da894C63Cd2685fD7E71;
+address constant FP127_ADDRESS = 0xe43F720861074497db2e974E5c4554E4A3b341B9;
 
 /// @notice Scenario ids. Mirrors "index" in scripts/ladder/scenarios.json.
 library Scenario {
