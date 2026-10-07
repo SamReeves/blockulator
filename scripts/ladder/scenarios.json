@@ -1,0 +1,85 @@
+{
+  "ladder": [1, 2, 5, 10, 20, 50, 100, 365, 1000, 10000],
+  "forms": {
+    "fp127":    {"label": "FP127 (deployed, staticcall)", "scale": "2**128"},
+    "fp127lib": {"label": "FP127Lib (inline)",            "scale": "2**128"},
+    "abdk":     {"label": "ABDKMath64x64",                "scale": "2**64"},
+    "solady":   {"label": "Solady FixedPointMathLib",     "scale": "10**18"},
+    "prb":      {"label": "PRBMath SD59x18",              "scale": "10**18"}
+  },
+  "scenarios": [
+    {
+      "id": "compound", "index": 0, "demo": true,
+      "title": "Daily compound interest",
+      "step": "b = b * (1 + r)",
+      "result": "balance after N days",
+      "params": {"principal": "10000", "rate": "0.1/365"},
+      "why": "Per-block or per-day accrual in every lending protocol: one mul per step, N steps."
+    },
+    {
+      "id": "compound-pow", "index": 1, "demo": true,
+      "title": "Compound interest in one pow",
+      "step": "b0 * (1 + r)^N",
+      "result": "the same balance, computed with one real-exponent pow",
+      "params": {"principal": "10000", "rate": "0.1/365"},
+      "why": "The clever way to skip the loop. pow is exp(N ln(1+r)) in every library, so its precision is bounded by ln and exp, and the error grows with N without any loop."
+    },
+    {
+      "id": "bonding-sqrt", "index": 2, "demo": true,
+      "title": "Square-root bonding curve",
+      "step": "cost += sqrt(s); s += 1",
+      "result": "total cost of N unit buys",
+      "params": {"supply": "1000", "unit": "1"},
+      "why": "Bonding curves price each token at a root of the supply; the sum of N floors is where the digits go."
+    },
+    {
+      "id": "roundtrip", "index": 3, "demo": true,
+      "title": "exp(ln(x)) round trip",
+      "step": "x = exp(ln(x))",
+      "result": "x after N round trips; the answer is the input",
+      "params": {"x0": "1.5"},
+      "why": "Isolates transcendental error. Every step should be the identity; what remains is the library's ln and exp error, compounded."
+    },
+    {
+      "id": "amortise", "index": 4, "demo": true,
+      "title": "Amortising loan",
+      "step": "b = b * (1 + r) - payment",
+      "result": "outstanding balance after N daily payments",
+      "params": {"principal": "300000", "rate": "0.05/365", "term": "366"},
+      "derived": {"payment": "principal * rate / (1 - (1 + rate)^(-term))"},
+      "why": "Subtracting nearly equal numbers. The payment retires the loan at step 366, so at N = 365 the balance is one payment and relative error is amplified several hundred times."
+    },
+    {
+      "id": "geo-mean", "index": 5, "demo": true,
+      "title": "Running geometric mean",
+      "step": "L += ln(x_i); g = exp(L / N), x_i = (i + 2) / (i + 1)",
+      "result": "geometric mean of N terms; truth telescopes to ((N + 2) / 2)^(1 / N)",
+      "params": {},
+      "why": "Index and basket maths: a sum of logs, one division, one exp. The division by N and the final exp expose every accumulated ULP."
+    },
+    {
+      "id": "black-scholes-chain", "index": 6, "demo": true,
+      "title": "Black-Scholes d1 along a price path",
+      "step": "acc += d1(S); S += tick, with d1 = (ln(S / K) + (r + sigma^2 / 2) T) / (sigma sqrt(T))",
+      "result": "sum of d1 over N ticks",
+      "params": {"spot": "100", "strike": "100", "sigma": "0.2", "T": "0.5", "r": "0.05", "tick": "0.01"},
+      "why": "The options-desk case: ln, div, sqrt and mul in one expression, re-evaluated as the spot moves and aggregated."
+    },
+    {
+      "id": "cumulative-product", "index": 7, "demo": true,
+      "title": "Cumulative product of small factors",
+      "step": "p = p * (1 + eps_i), eps_i = +eps for odd i, -eps for even i",
+      "result": "product after N factors",
+      "params": {"eps": "0.0001"},
+      "why": "The general form of fee accrual, index levels and LP share accounting: many factors a basis point from one. The drift from 1 is where the digits are, and it is small."
+    },
+    {
+      "id": "compound-annual", "index": 8, "demo": false,
+      "title": "Annual compounding at 10% (README claim check)",
+      "step": "b = b * 1.1",
+      "result": "balance after N years",
+      "params": {"principal": "10000", "rate": "0.1"},
+      "why": "The old README asserted $25,937.42 true against $25,932.38 for Solady at N = 10 with no source. This row regenerates that number."
+    }
+  ]
+}

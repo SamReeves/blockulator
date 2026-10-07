@@ -1,0 +1,38 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+
+// @notice The FP127 Yul object's CREATE2 address (contracts/deployments/FP127.md).
+//         Tests etch the artifact's runtime here, so the same adapter code runs
+//         in the harness and on Sepolia.
+address constant FP127_ADDRESS = 0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28;
+
+/// @notice Scenario ids. Mirrors "index" in scripts/ladder/scenarios.json.
+library Scenario {
+    uint8 constant COMPOUND = 0;
+    uint8 constant COMPOUND_POW = 1;
+    uint8 constant BONDING_SQRT = 2;
+    uint8 constant ROUNDTRIP = 3;
+    uint8 constant AMORTISE = 4;
+    uint8 constant GEO_MEAN = 5;
+    uint8 constant BLACK_SCHOLES_CHAIN = 6;
+    uint8 constant CUMULATIVE_PRODUCT = 7;
+    uint8 constant COMPOUND_ANNUAL = 8;
+    uint8 constant COUNT = 9;
+}
+
+/// @notice Library (form) ids, in the order of LadderRunner's constructor.
+library Form {
+    uint8 constant FP127 = 0;
+    uint8 constant FP127LIB = 1;
+    uint8 constant ABDK = 2;
+    uint8 constant SOLADY = 3;
+    uint8 constant PRB = 4;
+    uint8 constant COUNT = 5;
+}
+
+/// @notice One adapter per library. `run` executes a scenario for n steps in
+///         the library's native representation and returns the raw result in
+///         that representation. Reverts propagate; the runner catches them.
+interface ILadderAdapter {
+    function run(uint8 scenario, uint32 n) external view returns (int256 raw);
+}
