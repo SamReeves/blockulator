@@ -1,11 +1,28 @@
 # DigitalOcean App Platform spec for blockulator.com.
-# The build downloads a pinned Zola (build.sh) and serves public/.
-# To re-apply this spec after editing it: doctl apps update <app id> --spec .do/app.yaml
+# The app 2aaea661-12ba-43ac-a4ad-bdce3f411070 deploys this repo on every push to master:
+# build.sh downloads a pinned Zola and writes public/, served as a plain static site.
+# This file is the source of truth; the console does not pick it up by itself.
+# To apply it after editing: doctl apps update 2aaea661-12ba-43ac-a4ad-bdce3f411070 --spec .do/app.yaml
+# github.repo flips to securedataresearch/blockulator with the org transfer (#35).
 name: blockulator
+region: sfo
+domains:
+  - domain: blockulator.com
+    type: PRIMARY
+    zone: blockulator.com
+  - domain: www.blockulator.com
+    type: ALIAS
+    zone: blockulator.com
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DOMAIN_FAILED
+enhanced_threat_control_enabled: true
+features:
+  - buildpack-stack=ubuntu-22
 static_sites:
-  - name: blockulator-frontend
+  - name: blockulator
     github:
-      repo: securedataresearch/blockulator
+      repo: SamReeves/blockulator
       branch: master
       deploy_on_push: true
     source_dir: /
@@ -13,3 +30,10 @@ static_sites:
     output_dir: public
     environment_slug: html
     catchall_document: 404.html
+ingress:
+  rules:
+    - component:
+        name: blockulator
+      match:
+        path:
+          prefix: /

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ page.title }} · {{ config.title }}{% endblock title %}
+{% block description %}{{ page.description }}{% endblock description %}
+{% block head %}<link rel="stylesheet" href="/css/legacy/main.css">{% endblock head %}
+{% block hero %}{% set hero_slim = true %}{% set hero_title = page.title %}{% set hero_sub = page.description %}{% include "hero.html" %}{% endblock hero %}
+{% block content %}
+<article class="prose doc wide">
+{{ page.content | safe }}
+</article>
+<section class="block archive">
+  <div class="stories">
+    {% for a in page.extra.apps %}
+    <article class="card story" data-open="{{ a.open }}">
+      <p class="about">{{ a.kind }}</p>
+      <h3>{{ a.name }}</h3>
+      <p>{{ a.text }}</p>
+      {% if a.address %}<p class="addr"><a href="https://sepolia.etherscan.io/address/{{ a.address }}">{{ a.address }}</a></p>{% endif %}
+      <p class="links"><a class="more" href="#/{{ a.open }}">Open →</a> <a class="more" href="https://github.com/securedataresearch/blockulator/tree/master/{{ a.source }}">Source</a></p>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+<div class="island" id="archive-island" hidden>
+{% include "islands/bar.html" %}
+<div class="island-open"><span id="archive-open"></span> <button id="archive-close" class="btn-secondary">Close</button></div>
+<div id="archive-games" hidden>{% include "islands/games.html" %}</div>
+<div id="archive-vyper" hidden><div id="vyper-container"></div></div>
+<div id="archive-futures" hidden>{% include "islands/futures.html" %}</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<script type="module" src="/js/islands/archive.js"></script>
+{% endblock content %}

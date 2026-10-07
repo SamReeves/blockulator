@@ -123,7 +123,7 @@ python3 -m http.server 8000
 Styling uses tokens vendored from a separate design system in `vendor/sdr/`.
 Run `scripts/sync-sdr.sh` to refresh from upstream. Literal hex colors and
 `rgb()`/`rgba()` outside `css/tokens.css` and `js/theme/sdr-palette.js` are
-rejected by `npm test` (`scripts/check-sdr-colors.mjs`).
+rejected by `deno task test` (`scripts/check-sdr-colors.mjs`).
 
 ---
 

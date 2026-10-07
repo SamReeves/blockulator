@@ -66,9 +66,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - uses: denoland/setup-deno@v2
         with:
-          node-version: 22
+          deno-version: v2.x
 
       - name: Build the site with the pinned Zola
         run: ./build.sh
@@ -83,5 +83,5 @@ jobs:
       - name: Links and front matter
         run: ./zola check --skip-external-links   # build.sh left the pinned binary here
 
-      - name: Colour guard and module imports
-        run: npm test
+      - name: Colour guard, digit split, module imports
+        run: deno task test
