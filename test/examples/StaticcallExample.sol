@@ -7,7 +7,7 @@ import {IFP127} from "fp127/IFP127.sol";
 ///         accrual through the shared FP127 object, so every contract on the
 ///         chain runs identical bytecode for the math.
 contract StaticcallExample {
-    IFP127 public constant FP127 = IFP127(0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28);
+    IFP127 public constant FP127 = IFP127(0xD8688E72dD6745719484da894C63Cd2685fD7E71);
     int256 internal constant ONE = int256(1) << 128;
 
     function accrue(int256 principalWad, int256 rateWad, uint256 steps) external view returns (int256 balanceWad) {

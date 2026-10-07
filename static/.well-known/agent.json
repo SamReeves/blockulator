@@ -32,7 +32,7 @@
   "primaryContract": {
     "id": "fp127",
     "name": "FP127",
-    "address": "0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28",
+    "address": "0xD8688E72dD6745719484da894C63Cd2685fD7E71",
     "deployment": "https://blockulator.com/contracts/deployments/FP127.json",
     "abi": "https://blockulator.com/data/abi.json",
     "source": "https://github.com/securedataresearch/blockulator/blob/master/contracts/src/fp127/FP127.yul.src",
@@ -80,19 +80,21 @@
       "path": "contracts/src/fp127/FP127Lib.sol",
       "forgeInstall": "forge install securedataresearch/blockulator",
       "remapping": "fp127/=lib/blockulator/contracts/src/fp127/"
-    }
+    },
+    "status": "pending deployment (salt \"FP127 v2\", guard-bit transcendentals); v1 at 0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28 stays live"
   },
   "ladderRunner": {
     "id": "ladder-runner",
     "name": "LadderRunner",
-    "address": "0x2d741eC5d66D7559857da1c398AE384A389DdE17",
+    "address": "0xae42E3AdEb2FAd105aF59C14714801552867D5E9",
     "description": "Re-run any cell of the terminal-precision ladder (https://blockulator.com/demo/) with one eth_call: run(uint8 scenario, uint8 form, uint32 n, int256[] p) returns (bool ok, int256 raw, bytes4 reason, uint256 gasPerStep, uint256 gasTotal). p is the input's parameters floored into the form's representation, listed per input in https://blockulator.com/data/ladder-inputs.json. Decode raw by the form's scale (2^128 for forms 0 and 1, 2^64 for 2, 1e18 for 3 and 4).",
     "abi": "https://blockulator.com/contracts/deployments/Ladder.json",
     "record": "https://blockulator.com/contracts/deployments/Ladder.json",
     "scenarios": "https://blockulator.com/data/scenarios.json",
     "abiNote": "run(uint8 scenario, uint8 form, uint32 n, int256[] p) returns (bool ok, int256 raw, bytes4 reason, uint256 gasPerStep, uint256 gasTotal); selector 0x281dbbfe",
     "inputs": "https://blockulator.com/data/ladder-inputs.json",
-    "deployment": "https://blockulator.com/contracts/deployments/Ladder.json"
+    "deployment": "https://blockulator.com/contracts/deployments/Ladder.json",
+    "status": "pending deployment (salt \"FP127 ladder v3\", calls FP127 v2); the v2 runner 0x2d741eC5d66D7559857da1c398AE384A389DdE17 answers the same interface against FP127 v1"
   },
   "precision": {
     "dataset": "https://blockulator.com/data/ladder.json",

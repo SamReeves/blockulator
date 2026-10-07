@@ -51,19 +51,20 @@ interface IFP127 {
     ///      Returns 0 for x < -88 as the Huff did. exp(0) is exactly ONE.
     function exp(int256 x) external pure returns (int256 r);
     /// @notice 10^x, computed as 2^(x * log2(10)).
-    /// @dev The multiplication is checked, so absurd x reverts with Overflow
-    ///      rather than wrapping as the Huff did; the exp2 range checks then
-    ///      apply.
+    /// @dev The domain is decided by the checked 128-bit product x * log2(10),
+    ///      exactly as before (absurd x reverts with Overflow, the exp2 range
+    ///      checks then apply); the value is computed from the same product at
+    ///      2^-192 so no bits are lost before exp2.
     function exp10(int256 x) external pure returns (int256 r);
     /// @notice log2(x) for x > 0.
     /// @dev Reverts with OutOfRange for x <= 0 (the Huff returned 0). Exact for
-    ///      powers of two. Otherwise: integer part from the MSB, mantissa
-    ///      normalised into [1, 2), seven range-reduction stages by 2^(1/2^k),
-    ///      then the polynomial on the residual. Verbatim port of FP127_LOG2.
+    ///      powers of two. Otherwise log2g at 2^-192, rounded to nearest.
     function log2(int256 x) external pure returns (int256 r);
-    /// @notice ln(x) = log2(x) * ln(2) for x > 0. Reverts with OutOfRange otherwise.
+    /// @notice ln(x) = log2(x) * ln(2) for x > 0, scaled at 2^-192 before one
+    ///         rounding. Reverts with OutOfRange otherwise.
     function ln(int256 x) external pure returns (int256 r);
-    /// @notice log10(x) = log2(x) / log2(10) for x > 0. Reverts with OutOfRange otherwise.
+    /// @notice log10(x) = log2(x) / log2(10) for x > 0, scaled at 2^-192 before
+    ///         one rounding. Reverts with OutOfRange otherwise.
     function log10(int256 x) external pure returns (int256 r);
     /// @notice ceil(log2(x)) for x > 0. Exact for powers of two.
     /// @dev Reverts with OutOfRange for x <= 0 (the Huff read garbage).

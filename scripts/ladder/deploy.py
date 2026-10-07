@@ -5,7 +5,7 @@
     DEPLOYER_KEY=0x... uv run scripts/ladder/deploy.py deploy [rpc]
     uv run scripts/ladder/deploy.py record [rpc]        # write contracts/deployments/Ladder.json
 
-Six contracts, salt "FP127 ladder v2": the five adapters (no constructor
+Six contracts, salt "FP127 ladder v3": the five adapters (no constructor
 arguments) and LadderRunner (constructor = the five adapter addresses, so
 its init code depends on them). Each transaction is sent with the node's
 own gas estimate plus 25%, because Sepolia's code-deposit pricing is not
@@ -26,7 +26,7 @@ from Crypto.Hash import keccak
 
 ROOT = Path(__file__).resolve().parents[2]
 PROXY = "0x4e59b44847b379578588920cA78FbF26c0B4956C"
-SALT_ASCII = "FP127 ladder v2"
+SALT_ASCII = "FP127 ladder v3"
 SALT = "0x" + SALT_ASCII.encode().ljust(32, b"\0").hex()
 DEFAULT_RPC = "https://ethereum-sepolia-rpc.publicnode.com"
 ADAPTERS = ["LadderFP127", "LadderFP127Lib", "LadderABDK", "LadderSolady", "LadderPRB"]
@@ -102,7 +102,7 @@ def cmd_deploy(rpc: str) -> int:
 
 def cmd_record(rpc: str) -> int:
     rec = {"chainId": 11155111, "network": "sepolia", "proxy": PROXY, "salt": SALT, "saltAscii": SALT_ASCII,
-           "fp127": "0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28", "contracts": {}}
+           "fp127": "0xD8688E72dD6745719484da894C63Cd2685fD7E71", "contracts": {}}
     for c in plan():
         code = cast("code", c["address"], "--rpc-url", rpc)
         rec["contracts"][c["name"]] = {

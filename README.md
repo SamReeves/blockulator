@@ -9,7 +9,7 @@ that are proven to agree bit for bit:
 
 - a **deployed object** (`FP127.yul`) that any contract can `staticcall`,
   at a CREATE2 address with a published salt:
-  `0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28` on Sepolia
+  `0xD8688E72dD6745719484da894C63Cd2685fD7E71` on Sepolia
   ([deployment record](contracts/deployments/FP127.md));
 - an **inline library** (`FP127Lib.sol`) with the same bodies in
   `memory-safe` assembly blocks, for contracts that want no external call.
@@ -20,8 +20,8 @@ usual rounding, comparison and conversion ops. Every argument and result
 is an `int256` holding `value * 2^128`.
 
 - 128 fractional bits, about 38 decimal digits, against 18 for WAD libraries
-- Integer and rounding ops bit-exact; transcendentals 115 to 130 correct bits
-  against mpmath at 200 decimal places ([`docs/fp127/precision.md`](docs/fp127/precision.md))
+- Integer and rounding ops bit-exact; `ln`, `log2`, `log10` within one ULP;
+  `exp`, `exp2`, `exp10` 146 bits or better, against mpmath at 200 decimal places ([`docs/fp127/precision.md`](docs/fp127/precision.md))
 - Checked: out-of-domain inputs revert with `Overflow()`, `DivisionByZero()`
   or `OutOfRange()`
 - Gas ladder against ABDKMath64x64, Solady and PRBMath for every op
@@ -55,7 +55,7 @@ int256 b = FP127Lib.mul(FP127Lib.fromFixed18(1.5e18), FP127Lib.exp(FP127Lib.ONE)
 ```
 
 Deployed, through the interface: `import {IFP127} from "fp127/IFP127.sol";`
-and `IFP127(0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28).ln(x)`. Both
+and `IFP127(0xD8688E72dD6745719484da894C63Cd2685fD7E71).ln(x)`. Both
 examples are compiled and tested in [`test/examples/`](test/examples/).
 
 For agents and scripts, every op is a free `eth_call`:

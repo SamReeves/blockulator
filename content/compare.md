@@ -15,4 +15,4 @@ Multiplication and division cost about what they cost in WAD. The transcendental
 
 {{ <precisiontable /> }}
 
-Integer, rounding and comparison ops are bit-exact. The transcendentals hold 115 to 130 correct bits of 128 across their domains. The two Lambert W branches lose bits only within 2^-20 of the branch point at −1/e, where the slope is infinite and one ULP of input moves the output by 2^-63; everywhere else they measure 126 to 128 bits.
+Integer, rounding and comparison ops are bit-exact, and so are `ln`, `log2` and `log10` to within one ULP of the truth; `exp`, `exp2` and `exp10` hold 146 bits or better, the limit of their degree-24 polynomial. The transcendentals compute with 64 guard bits and round to nearest once, so their error has no sign bias and iterated calls do not drift. The two Lambert W branches lose bits only within 2^-20 of the branch point at −1/e, where the slope is infinite and one ULP of input moves the output by 2^-63; everywhere else they measure 126 to 128 bits.
