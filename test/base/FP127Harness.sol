@@ -48,6 +48,7 @@ contract LibUser {
     function factorial(int256 x) external pure returns (int256) { return FP127Lib.factorial(x); }
     function lambertW0(int256 x) external pure returns (int256) { return FP127Lib.lambertW0(x); }
     function lambertWm1(int256 x) external pure returns (int256) { return FP127Lib.lambertWm1(x); }
+    function pi(int256 n) external pure returns (int256) { return FP127Lib.pi(n); }
     function pow(int256 a, int256 b) external pure returns (int256) { return FP127Lib.pow(a, b); }
     function min(int256 a, int256 b) external pure returns (int256) { return FP127Lib.min(a, b); }
     function max(int256 a, int256 b) external pure returns (int256) { return FP127Lib.max(a, b); }

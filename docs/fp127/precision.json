@@ -209,6 +209,13 @@
     "reverts": 1,
     "worstInput": ""
   },
+  "pi": {
+    "meanBits": 139,
+    "minBits": 122,
+    "n": 8,
+    "reverts": 7,
+    "worstInput": "0x0000000000000000000000000000000300000000000000000000000000000000"
+  },
   "pow": {
     "meanBits": 226,
     "minBits": 122,

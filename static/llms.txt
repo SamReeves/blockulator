@@ -8,10 +8,11 @@
 
 ## What it is
 
-- 37 operations: add, sub, mul, div, fromFixed18, toFixed18, exp, exp2,
+- 38 operations: add, sub, mul, div, fromFixed18, toFixed18, exp, exp2,
   exp10, ln, log2, log10, log2Up, sqrt, cbrt, pow, gavg, hypot, inv, abs,
   neg, sign, min, max, clamp, avg, zeroFloorSub, dist, lerp, floor, ceil,
-  frac, round, gcd, factorial, lambertW0, lambertWm1.
+  frac, round, gcd, factorial, lambertW0, lambertWm1, pi (Ramanujan's
+  series, pi(terms): five terms reach the format's floor).
 - Encoding: every operand and result is an int256 holding value * 2**128.
   Decode by dividing by 2**128. Range about +/- 1.7e38.
 - Checked arithmetic: out-of-domain inputs revert with Overflow(),

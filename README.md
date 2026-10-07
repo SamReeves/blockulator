@@ -14,9 +14,9 @@ that are proven to agree bit for bit:
 - an **inline library** (`FP127Lib.sol`) with the same bodies in
   `memory-safe` assembly blocks, for contracts that want no external call.
 
-37 operations: `add`, `sub`, `mul`, `div`, `exp`, `exp2`, `exp10`, `ln`,
-`log2`, `log10`, `sqrt`, `cbrt`, `pow`, `lambertW0`, `lambertWm1`, and the
-usual rounding, comparison and conversion ops. Every argument and result
+38 operations: `add`, `sub`, `mul`, `div`, `exp`, `exp2`, `exp10`, `ln`,
+`log2`, `log10`, `sqrt`, `cbrt`, `pow`, `lambertW0`, `lambertWm1`, `pi` by
+Ramanujan's series, and the usual rounding, comparison and conversion ops. Every argument and result
 is an `int256` holding `value * 2^128`.
 
 - 128 fractional bits, about 38 decimal digits, against 18 for WAD libraries

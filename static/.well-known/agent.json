@@ -67,6 +67,7 @@
       "min",
       "mul",
       "neg",
+      "pi",
       "pow",
       "round",
       "sign",

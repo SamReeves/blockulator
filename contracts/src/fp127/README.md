@@ -109,6 +109,7 @@ each op; `fromFixed18` and `toFixed18` are the bridge. All parameters are
 | `factorial(n)` | floor(n)! for 0 ≤ n < 34 | `OutOfRange` |
 | `lambertW0(x)` | W(x) for x ≥ −1/e | `OutOfRange` |
 | `lambertWm1(x)` | W₋₁(x) for −1/e ≤ x < 0 | `OutOfRange` |
+| `pi(terms)` | Ramanujan's 1914 series, floor(terms) terms, 1 ≤ terms ≤ 7; five terms reach the floor | `OutOfRange` |
 
 Rounding directions of the arithmetic are inherited from the Huff and
 preserved exactly: `mul` floors because it is the middle 256 bits of the

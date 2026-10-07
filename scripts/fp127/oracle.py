@@ -206,6 +206,20 @@ def op_exp10(x):
     return mfloor(mp.power(10, to_mpf(x)))
 
 
+def op_pi(terms):
+    """Ramanujan's 1914 series in exact reals, floor(terms) terms, floored
+    to the grid; 1 <= floor(terms) <= 7 (zero terms is an empty sum)."""
+    if terms < 0:
+        raise Revert("OutOfRange")
+    n = terms >> 128
+    if n > 7 or n == 0:
+        raise Revert("OutOfRange")
+    s = mpf(0)
+    for k in range(n):
+        s += mp.factorial(4 * k) * (1103 + 26390 * k) / (mp.factorial(k) ** 4 * mpf(396) ** (4 * k))
+    return mfloor(1 / (2 * mp.sqrt(2) / 9801 * s))
+
+
 def _pos(x):
     if x <= 0:
         raise Revert("OutOfRange")
