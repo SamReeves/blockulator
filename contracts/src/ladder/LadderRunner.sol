@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {ILadderAdapter, Form} from "./ILadder.sol";
+import {ILadderAdapter, Form, FP127_ADDRESS} from "./ILadder.sol";
 
 /// @title LadderRunner
 /// @notice One eth_call re-verifies any cell of the terminal-precision ladder
@@ -41,14 +41,18 @@ contract LadderRunner {
     /// @return raw         the result in the library's representation (0 when !ok)
     /// @return reason      the first four bytes of the revert data (0 when ok)
     /// @return gasPerStep  gas consumed by the adapter call divided by n, including
-    ///                     the loop and the external call overhead amortised over n
+    ///                     the loop and the external call overhead amortised over n.
+    ///                     The adapter and the FP127 object are warmed first, so the
+    ///                     figure is the steady-state cost and does not depend on
+    ///                     whether the caller touched them earlier in the transaction.
     function run(uint8 scenario, uint8 form, uint32 n)
         external
         view
         returns (bool ok, int256 raw, bytes4 reason, uint256 gasPerStep)
     {
         ILadderAdapter a = ILadderAdapter(adapter(form));
-        uint256 g0 = gasleft();
+        uint256 warm = address(a).code.length + FP127_ADDRESS.code.length;
+        uint256 g0 = gasleft() + (warm & 0);
         try a.run(scenario, n) returns (int256 r) {
             ok = true;
             raw = r;
