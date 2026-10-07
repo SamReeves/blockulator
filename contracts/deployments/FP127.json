@@ -10,7 +10,7 @@
  "runtimeKeccak": "0x2d357104a339080c80a3145d4070d6df90d03e2196f2149dbcd436461016fb16",
  "runtimeBytes": 7783,
  "source": "contracts/src/fp127/FP127.yul",
- "sourceCommit": "pending",
+ "sourceCommit": "209b476",
  "compiler": {
   "language": "Yul",
   "solc": "0.8.24+commit.e11b9ed9",
@@ -18,8 +18,8 @@
   "runs": 200,
   "evmVersion": "shanghai"
  },
- "txHash": null,
- "block": null,
+ "txHash": "0x02e012ead20235e8241b8e84eb93ac70e3fa65af1de74291ce573bb016a5b64a",
+ "block": 11860704,
  "verification": {
   "sourcify": "https://sourcify.dev/server/v2/contract/11155111/0xD8688E72dD6745719484da894C63Cd2685fD7E71",
   "sourcifyRepo": "https://repo.sourcify.dev/11155111/0xD8688E72dD6745719484da894C63Cd2685fD7E71",
@@ -28,9 +28,8 @@
  },
  "abi": "contracts/src/fp127/abi.json",
  "deployedBy": "0xe6306669b2f188d616bfb518e7b9255d001d731d",
- "gasUsed": null,
- "explorerTx": null,
- "status": "pending deployment: make deploy-sepolia, then fill txHash, block, gasUsed, explorerTx, sourceCommit",
+ "gasUsed": 12248539,
+ "explorerTx": "https://sepolia.etherscan.io/tx/0x02e012ead20235e8241b8e84eb93ac70e3fa65af1de74291ce573bb016a5b64a",
  "previous": {
   "v1": {
    "address": "0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28",

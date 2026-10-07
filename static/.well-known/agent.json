@@ -81,7 +81,7 @@
       "forgeInstall": "forge install securedataresearch/blockulator",
       "remapping": "fp127/=lib/blockulator/contracts/src/fp127/"
     },
-    "status": "pending deployment (salt \"FP127 v2\", guard-bit transcendentals); v1 at 0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28 stays live"
+    "version": "FP127 v2 (guard-bit transcendentals, 2026-10-07); v1 at 0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28 stays live and verified"
   },
   "ladderRunner": {
     "id": "ladder-runner",
@@ -93,8 +93,7 @@
     "scenarios": "https://blockulator.com/data/scenarios.json",
     "abiNote": "run(uint8 scenario, uint8 form, uint32 n, int256[] p) returns (bool ok, int256 raw, bytes4 reason, uint256 gasPerStep, uint256 gasTotal); selector 0x281dbbfe",
     "inputs": "https://blockulator.com/data/ladder-inputs.json",
-    "deployment": "https://blockulator.com/contracts/deployments/Ladder.json",
-    "status": "pending deployment (salt \"FP127 ladder v3\", calls FP127 v2); the v2 runner 0x2d741eC5d66D7559857da1c398AE384A389DdE17 answers the same interface against FP127 v1"
+    "deployment": "https://blockulator.com/contracts/deployments/Ladder.json"
   },
   "precision": {
     "dataset": "https://blockulator.com/data/ladder.json",
