@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {ILadderAdapter, Scenario} from "./ILadder.sol";
-import {LadderParams as P} from "./LadderParams.sol";
+import {ILadderAdapter, Scenario, BadParamCount} from "./ILadder.sol";
 
 /// @title LadderBase
 /// @notice The scenario loops, written once against seven virtual ops and a
 ///         parameter accessor. Each adapter supplies the ops in its library's
 ///         representation; the loops never convert between steps.
 ///
-/// Every scenario is N identical steps. Parameters enter already floored into
-/// the adapter's representation (LadderParams), results leave raw.
+/// Every scenario is N identical steps. Parameters arrive in `p`, already
+/// floored into the adapter's representation (scripts/ladder/inputs.json);
+/// results leave raw. Gas is measured around the scenario function, so it
+/// covers the parameter reads and the loop but not the call into the adapter.
 abstract contract LadderBase is ILadderAdapter {
     error UnknownScenario(uint8 scenario);
 
@@ -18,7 +19,8 @@ abstract contract LadderBase is ILadderAdapter {
 
     function _one() internal pure virtual returns (int256);
     function _fromUint(uint256 u) internal pure virtual returns (int256);
-    function _param(uint8 id) internal pure virtual returns (int256);
+    /// p[i], range-checked by adapters whose type is narrower than int256.
+    function _p(int256[] calldata p, uint256 i) internal pure virtual returns (int256) { return p[i]; }
     function _add(int256 a, int256 b) internal pure virtual returns (int256);
     function _sub(int256 a, int256 b) internal pure virtual returns (int256);
     function _mul(int256 a, int256 b) internal view virtual returns (int256);
@@ -30,55 +32,74 @@ abstract contract LadderBase is ILadderAdapter {
 
     // ---- dispatch ----------------------------------------------------------
 
-    function run(uint8 scenario, uint32 n) external view returns (int256) {
-        if (scenario == Scenario.COMPOUND) return _compound(P.COMPOUND_PRINCIPAL, P.COMPOUND_RATE, n);
-        if (scenario == Scenario.COMPOUND_POW) return _compoundPow(n);
-        if (scenario == Scenario.BONDING_SQRT) return _bondingSqrt(n);
-        if (scenario == Scenario.ROUNDTRIP) return _roundtrip(n);
-        if (scenario == Scenario.AMORTISE) return _amortise(n);
-        if (scenario == Scenario.GEO_MEAN) return _geoMean(n);
-        if (scenario == Scenario.BLACK_SCHOLES_CHAIN) return _blackScholesChain(n);
-        if (scenario == Scenario.CUMULATIVE_PRODUCT) return _cumulativeProduct(n);
-        if (scenario == Scenario.COMPOUND_ANNUAL) return _compound(P.COMPOUND_ANNUAL_PRINCIPAL, P.COMPOUND_ANNUAL_RATE, n);
+    function run(uint8 scenario, uint32 n, int256[] calldata p) external view returns (int256 raw, uint256 gasUsed) {
+        _need(scenario, p, _arity(scenario));
+        uint256 g0 = gasleft();
+        if (scenario == Scenario.COMPOUND) raw = _compound(p, n);
+        else if (scenario == Scenario.COMPOUND_POW) raw = _compoundPow(p, n);
+        else if (scenario == Scenario.BONDING_SQRT) raw = _bondingSqrt(p, n);
+        else if (scenario == Scenario.ROUNDTRIP) raw = _roundtrip(p, n);
+        else if (scenario == Scenario.AMORTISE) raw = _amortise(p, n);
+        else if (scenario == Scenario.GEO_MEAN) raw = _geoMean(n);
+        else if (scenario == Scenario.BLACK_SCHOLES_CHAIN) raw = _blackScholesChain(p, n);
+        else if (scenario == Scenario.CUMULATIVE_PRODUCT) raw = _cumulativeProduct(p, n);
+        else if (scenario == Scenario.COMPOUND_ANNUAL) raw = _compound(p, n);
+        else revert UnknownScenario(scenario);
+        gasUsed = g0 - gasleft();
+    }
+
+    /// Parameter count per scenario, the `order` in scenarios.json.
+    function _arity(uint8 scenario) internal pure returns (uint256) {
+        if (scenario == Scenario.COMPOUND || scenario == Scenario.COMPOUND_POW || scenario == Scenario.COMPOUND_ANNUAL) return 2;
+        if (scenario == Scenario.BONDING_SQRT) return 2;
+        if (scenario == Scenario.ROUNDTRIP) return 1;
+        if (scenario == Scenario.AMORTISE) return 3;
+        if (scenario == Scenario.GEO_MEAN) return 0;
+        if (scenario == Scenario.BLACK_SCHOLES_CHAIN) return 6;
+        if (scenario == Scenario.CUMULATIVE_PRODUCT) return 1;
         revert UnknownScenario(scenario);
+    }
+
+    function _need(uint8 scenario, int256[] calldata p, uint256 k) internal pure {
+        if (p.length != k) revert BadParamCount(scenario, p.length);
     }
 
     // ---- scenarios ---------------------------------------------------------
 
-    /// b = b * (1 + r), N times.
-    function _compound(uint8 principal, uint8 rate, uint32 n) internal view returns (int256 b) {
-        b = _param(principal);
-        int256 g = _add(_one(), _param(rate));
+    /// p = [principal, rate]. b = b * (1 + r), N times.
+    function _compound(int256[] calldata p, uint32 n) internal view returns (int256 b) {
+        b = _p(p, 0);
+        int256 g = _add(_one(), _p(p, 1));
         for (uint32 i; i < n; i++) b = _mul(b, g);
     }
 
-    /// b0 * (1 + r)^N with a real-exponent pow.
-    function _compoundPow(uint32 n) internal view returns (int256) {
-        int256 g = _add(_one(), _param(P.COMPOUND_POW_RATE));
-        return _mul(_param(P.COMPOUND_POW_PRINCIPAL), _pow(g, _fromUint(n)));
+    /// p = [principal, rate]. b0 * (1 + r)^N with a real-exponent pow.
+    function _compoundPow(int256[] calldata p, uint32 n) internal view returns (int256) {
+        int256 g = _add(_one(), _p(p, 1));
+        return _mul(_p(p, 0), _pow(g, _fromUint(n)));
     }
 
-    /// cost += sqrt(s); s += unit, N times.
-    function _bondingSqrt(uint32 n) internal view returns (int256 cost) {
-        int256 s = _param(P.BONDING_SQRT_SUPPLY);
-        int256 unit = _param(P.BONDING_SQRT_UNIT);
+    /// p = [supply, unit]. cost += sqrt(s); s += unit, N times.
+    function _bondingSqrt(int256[] calldata p, uint32 n) internal view returns (int256 cost) {
+        int256 s = _p(p, 0);
+        int256 unit = _p(p, 1);
         for (uint32 i; i < n; i++) {
             cost = _add(cost, _sqrt(s));
             s = _add(s, unit);
         }
     }
 
-    /// x = exp(ln(x)), N times.
-    function _roundtrip(uint32 n) internal view returns (int256 x) {
-        x = _param(P.ROUNDTRIP_X0);
+    /// p = [x0]. x = exp(ln(x)), N times.
+    function _roundtrip(int256[] calldata p, uint32 n) internal view returns (int256 x) {
+        x = _p(p, 0);
         for (uint32 i; i < n; i++) x = _exp(_ln(x));
     }
 
-    /// b = b * (1 + r) - payment, N times.
-    function _amortise(uint32 n) internal view returns (int256 b) {
-        b = _param(P.AMORTISE_PRINCIPAL);
-        int256 g = _add(_one(), _param(P.AMORTISE_RATE));
-        int256 pay = _param(P.AMORTISE_PAYMENT);
+    /// p = [principal, rate, payment]. b = b * (1 + r) - payment, N times.
+    function _amortise(int256[] calldata p, uint32 n) internal view returns (int256 b) {
+        b = _p(p, 0);
+        int256 g = _add(_one(), _p(p, 1));
+        int256 pay = _p(p, 2);
         for (uint32 i; i < n; i++) b = _sub(_mul(b, g), pay);
     }
 
@@ -91,15 +112,15 @@ abstract contract LadderBase is ILadderAdapter {
         return _exp(_div(L, _fromUint(n)));
     }
 
-    /// acc += d1(S); S += tick, N times, with
+    /// p = [spot, strike, sigma, T, r, tick]. acc += d1(S); S += tick, N times, with
     /// d1 = (ln(S / K) + (r + sigma^2 / 2) T) / (sigma sqrt(T)).
-    function _blackScholesChain(uint32 n) internal view returns (int256 acc) {
-        int256 S = _param(P.BLACK_SCHOLES_CHAIN_SPOT);
-        int256 K = _param(P.BLACK_SCHOLES_CHAIN_STRIKE);
-        int256 sigma = _param(P.BLACK_SCHOLES_CHAIN_SIGMA);
-        int256 T = _param(P.BLACK_SCHOLES_CHAIN_T);
-        int256 tick = _param(P.BLACK_SCHOLES_CHAIN_TICK);
-        int256 drift = _mul(_add(_param(P.BLACK_SCHOLES_CHAIN_R), _div(_mul(sigma, sigma), _fromUint(2))), T);
+    function _blackScholesChain(int256[] calldata p, uint32 n) internal view returns (int256 acc) {
+        int256 S = _p(p, 0);
+        int256 K = _p(p, 1);
+        int256 sigma = _p(p, 2);
+        int256 T = _p(p, 3);
+        int256 tick = _p(p, 5);
+        int256 drift = _mul(_add(_p(p, 4), _div(_mul(sigma, sigma), _fromUint(2))), T);
         for (uint32 i; i < n; i++) {
             int256 d1 = _div(_add(_ln(_div(S, K)), drift), _mul(sigma, _sqrt(T)));
             acc = _add(acc, d1);
@@ -107,11 +128,11 @@ abstract contract LadderBase is ILadderAdapter {
         }
     }
 
-    /// p = p * (1 + eps_i), eps_i = +eps for odd i and -eps for even i, i = 1..N.
-    function _cumulativeProduct(uint32 n) internal view returns (int256 p) {
-        p = _one();
-        int256 up = _add(_one(), _param(P.CUMULATIVE_PRODUCT_EPS));
-        int256 dn = _sub(_one(), _param(P.CUMULATIVE_PRODUCT_EPS));
-        for (uint32 i = 1; i <= n; i++) p = _mul(p, i & 1 == 1 ? up : dn);
+    /// p = [eps]. prod = prod * (1 + eps_i), eps_i = +eps for odd i and -eps for even i, i = 1..N.
+    function _cumulativeProduct(int256[] calldata p, uint32 n) internal view returns (int256 prod) {
+        prod = _one();
+        int256 up = _add(_one(), _p(p, 0));
+        int256 dn = _sub(_one(), _p(p, 0));
+        for (uint32 i = 1; i <= n; i++) prod = _mul(prod, i & 1 == 1 ? up : dn);
     }
 }

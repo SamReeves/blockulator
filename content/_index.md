@@ -27,7 +27,7 @@ text = "WAD spends 60 bits of the word on the fraction and the rest on overflow 
 [[extra.steps]]
 label = "the ladder"
 title = "Measured over N steps."
-text = "Eight scenarios, four libraries, N from 1 to 10,000, every cell against 200-digit arithmetic. The slopes match; the intercept is twenty digits apart."
+text = "Nine scenarios, 64 inputs, four libraries, N from 1 to 10,000, every cell against 200-digit arithmetic, twice: from the exact inputs and from the inputs as each format rounds them."
 
 [[extra.steps]]
 label = "two forms"

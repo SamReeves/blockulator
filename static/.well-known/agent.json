@@ -85,12 +85,14 @@
   "ladderRunner": {
     "id": "ladder-runner",
     "name": "LadderRunner",
-    "address": "0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4",
-    "description": "Re-run any cell of the terminal-precision ladder (https://blockulator.com/demo/) with one eth_call: run(uint8 scenario, uint8 form, uint32 n) returns (bool ok, int256 raw, bytes4 revertSelector, uint256 gasPerStep). Scenario and form ids, scales and the per-cell live cap are in https://blockulator.com/data/ladder.json; record at /contracts/deployments/Ladder.md.",
+    "address": "0x2d741eC5d66D7559857da1c398AE384A389DdE17",
+    "description": "Re-run any cell of the terminal-precision ladder (https://blockulator.com/demo/) with one eth_call: run(uint8 scenario, uint8 form, uint32 n, int256[] p) returns (bool ok, int256 raw, bytes4 reason, uint256 gasPerStep, uint256 gasTotal). p is the input's parameters floored into the form's representation, listed per input in https://blockulator.com/data/ladder-inputs.json. Decode raw by the form's scale (2^128 for forms 0 and 1, 2^64 for 2, 1e18 for 3 and 4).",
     "abi": "https://blockulator.com/contracts/deployments/Ladder.json",
     "record": "https://blockulator.com/contracts/deployments/Ladder.json",
     "scenarios": "https://blockulator.com/data/scenarios.json",
-    "abiNote": "run(uint8 scenario, uint8 form, uint32 n) returns (bool ok, int256 raw, bytes4 reason, uint256 gasPerStep); selector 0x986cc444"
+    "abiNote": "run(uint8 scenario, uint8 form, uint32 n, int256[] p) returns (bool ok, int256 raw, bytes4 reason, uint256 gasPerStep, uint256 gasTotal); selector 0x281dbbfe",
+    "status": "pending deployment: salt \"FP127 ladder v2\"; the v1 runner at 0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4 still answers run(uint8,uint8,uint32) for the v1 dataset",
+    "inputs": "https://blockulator.com/data/ladder-inputs.json"
   },
   "precision": {
     "dataset": "https://blockulator.com/data/ladder.json",

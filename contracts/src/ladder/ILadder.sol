@@ -32,7 +32,17 @@ library Form {
 
 /// @notice One adapter per library. `run` executes a scenario for n steps in
 ///         the library's native representation and returns the raw result in
-///         that representation. Reverts propagate; the runner catches them.
+///         that representation, plus the gas the scenario function consumed
+///         (measured inside the adapter, so the external call to it is not
+///         included). `p` holds the scenario's parameters already floored
+///         into the adapter's representation, in the order scenarios.json
+///         declares (scripts/ladder/inputs.json carries them). Reverts
+///         propagate; the runner catches them.
 interface ILadderAdapter {
-    function run(uint8 scenario, uint32 n) external view returns (int256 raw);
+    function run(uint8 scenario, uint32 n, int256[] calldata p) external view returns (int256 raw, uint256 gasUsed);
 }
+
+/// @notice Raised by an adapter when `p` has the wrong length for the scenario.
+error BadParamCount(uint8 scenario, uint256 got);
+/// @notice Raised by an adapter whose representation cannot hold p[i].
+error ParamOutOfRange(uint256 i);

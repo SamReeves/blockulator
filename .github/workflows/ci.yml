@@ -30,6 +30,9 @@ jobs:
       - name: Oracle vectors are current
         run: make vectors-check
 
+      - name: Ladder inputs are current
+        run: make gen-inputs-check
+
       - name: Build
         run: forge build
 

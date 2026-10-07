@@ -1,85 +1,934 @@
 {
-  "ladder": [1, 2, 5, 10, 20, 50, 100, 365, 1000, 10000],
-  "forms": {
-    "fp127":    {"label": "FP127 (deployed, staticcall)", "scale": "2**128"},
-    "fp127lib": {"label": "FP127Lib (inline)",            "scale": "2**128"},
-    "abdk":     {"label": "ABDKMath64x64",                "scale": "2**64"},
-    "solady":   {"label": "Solady FixedPointMathLib",     "scale": "10**18"},
-    "prb":      {"label": "PRBMath SD59x18",              "scale": "10**18"}
+ "ladder": [
+  1,
+  2,
+  5,
+  10,
+  20,
+  50,
+  100,
+  365,
+  1000,
+  10000
+ ],
+ "forms": [
+  {
+   "id": "fp127",
+   "label": "FP127 (deployed, staticcall)",
+   "scale": "2**128"
   },
-  "scenarios": [
+  {
+   "id": "fp127lib",
+   "label": "FP127Lib (inline)",
+   "scale": "2**128"
+  },
+  {
+   "id": "abdk",
+   "label": "ABDKMath64x64",
+   "scale": "2**64"
+  },
+  {
+   "id": "solady",
+   "label": "Solady FixedPointMathLib",
+   "scale": "10**18"
+  },
+  {
+   "id": "prb",
+   "label": "PRBMath SD59x18",
+   "scale": "10**18"
+  }
+ ],
+ "scenarios": [
+  {
+   "id": "compound",
+   "index": 0,
+   "demo": true,
+   "title": "Daily compound interest",
+   "step": "b = b * (1 + r)",
+   "result": "balance after N days",
+   "why": "Per-block or per-day accrual in every lending protocol: one mul per step, N steps.",
+   "order": [
+    "principal",
+    "rate"
+   ],
+   "inputs": [
     {
-      "id": "compound", "index": 0, "demo": true,
-      "title": "Daily compound interest",
-      "step": "b = b * (1 + r)",
-      "result": "balance after N days",
-      "params": {"principal": "10000", "rate": "0.1/365"},
-      "why": "Per-block or per-day accrual in every lending protocol: one mul per step, N steps."
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "principal": "10000",
+      "rate": "0.1/365"
+     },
+     "why": "$10,000 at 10% APR, the headline cell"
     },
     {
-      "id": "compound-pow", "index": 1, "demo": true,
-      "title": "Compound interest in one pow",
-      "step": "b0 * (1 + r)^N",
-      "result": "the same balance, computed with one real-exponent pow",
-      "params": {"principal": "10000", "rate": "0.1/365"},
-      "why": "The clever way to skip the loop. pow is exp(N ln(1+r)) in every library, so its precision is bounded by ln and exp, and the error grows with N without any loop."
+     "name": "tiny-low",
+     "params": {
+      "principal": "1",
+      "rate": "0.01/365"
+     },
+     "why": "one unit at 1%: the integer part is small, the fraction carries everything"
     },
     {
-      "id": "bonding-sqrt", "index": 2, "demo": true,
-      "title": "Square-root bonding curve",
-      "step": "cost += sqrt(s); s += 1",
-      "result": "total cost of N unit buys",
-      "params": {"supply": "1000", "unit": "1"},
-      "why": "Bonding curves price each token at a root of the supply; the sum of N floors is where the digits go."
+     "name": "tiny-high",
+     "params": {
+      "principal": "1",
+      "rate": "0.5/365"
+     },
+     "why": "one unit at 50%"
     },
     {
-      "id": "roundtrip", "index": 3, "demo": true,
-      "title": "exp(ln(x)) round trip",
-      "step": "x = exp(ln(x))",
-      "result": "x after N round trips; the answer is the input",
-      "params": {"x0": "1.5"},
-      "why": "Isolates transcendental error. Every step should be the identity; what remains is the library's ln and exp error, compounded."
+     "name": "mid-1pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.01/365"
+     },
+     "why": "a slow rate: the per-step factor is close to 1"
     },
     {
-      "id": "amortise", "index": 4, "demo": true,
-      "title": "Amortising loan",
-      "step": "b = b * (1 + r) - payment",
-      "result": "outstanding balance after N daily payments",
-      "params": {"principal": "300000", "rate": "0.05/365", "term": "366"},
-      "derived": {"payment": "principal * rate / (1 - (1 + rate)^(-term))"},
-      "why": "Subtracting nearly equal numbers. The payment retires the loan at step 366, so at N = 365 the balance is one payment and relative error is amplified several hundred times."
+     "name": "mid-5pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.05/365"
+     },
+     "why": "a typical lending rate"
     },
     {
-      "id": "geo-mean", "index": 5, "demo": true,
-      "title": "Running geometric mean",
-      "step": "L += ln(x_i); g = exp(L / N), x_i = (i + 2) / (i + 1)",
-      "result": "geometric mean of N terms; truth telescopes to ((N + 2) / 2)^(1 / N)",
-      "params": {},
-      "why": "Index and basket maths: a sum of logs, one division, one exp. The division by N and the final exp expose every accumulated ULP."
+     "name": "mid-50pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.5/365"
+     },
+     "why": "a high rate: the balance grows 150x by N = 10,000"
     },
     {
-      "id": "black-scholes-chain", "index": 6, "demo": true,
-      "title": "Black-Scholes d1 along a price path",
-      "step": "acc += d1(S); S += tick, with d1 = (ln(S / K) + (r + sigma^2 / 2) T) / (sigma sqrt(T))",
-      "result": "sum of d1 over N ticks",
-      "params": {"spot": "100", "strike": "100", "sigma": "0.2", "T": "0.5", "r": "0.05", "tick": "0.01"},
-      "why": "The options-desk case: ln, div, sqrt and mul in one expression, re-evaluated as the spot moves and aggregated."
+     "name": "large",
+     "params": {
+      "principal": "1000000",
+      "rate": "0.1/365"
+     },
+     "why": "a million-unit position"
     },
     {
-      "id": "cumulative-product", "index": 7, "demo": true,
-      "title": "Cumulative product of small factors",
-      "step": "p = p * (1 + eps_i), eps_i = +eps for odd i, -eps for even i",
-      "result": "product after N factors",
-      "params": {"eps": "0.0001"},
-      "why": "The general form of fee accrual, index levels and LP share accounting: many factors a basis point from one. The drift from 1 is where the digits are, and it is small."
+     "name": "huge",
+     "params": {
+      "principal": "100000000",
+      "rate": "0.1/365"
+     },
+     "why": "a hundred-million-unit pool"
     },
     {
-      "id": "compound-annual", "index": 8, "demo": false,
-      "title": "Annual compounding at 10% (README claim check)",
-      "step": "b = b * 1.1",
-      "result": "balance after N years",
-      "params": {"principal": "10000", "rate": "0.1"},
-      "why": "The old README asserted $25,937.42 true against $25,932.38 for Solady at N = 10 with no source. This row regenerates that number."
+     "name": "huge-high",
+     "params": {
+      "principal": "100000000",
+      "rate": "0.5/365"
+     },
+     "why": "the largest balance the ladder reaches, near 10^14"
+    },
+    {
+     "name": "fraction",
+     "params": {
+      "principal": "0.001",
+      "rate": "0.1/365"
+     },
+     "why": "a sub-unit balance: leading zeros in WAD"
     }
-  ]
+   ],
+   "ops": {
+    "fp127": [
+     "mul"
+    ],
+    "fp127lib": [
+     "mul"
+    ],
+    "abdk": [
+     "mul"
+    ],
+    "solady": [
+     "sMulWad"
+    ],
+    "prb": [
+     "mul"
+    ]
+   }
+  },
+  {
+   "id": "compound-pow",
+   "index": 1,
+   "demo": true,
+   "title": "Compound interest in one pow",
+   "step": "b0 * (1 + r)^N",
+   "result": "the same balance, computed with one real-exponent pow",
+   "why": "The clever way to skip the loop. pow is exp(N ln(1+r)) in every library, so its precision is bounded by ln and exp, and the error grows with N without any loop.",
+   "order": [
+    "principal",
+    "rate"
+   ],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "principal": "10000",
+      "rate": "0.1/365"
+     },
+     "why": "$10,000 at 10% APR, the headline cell"
+    },
+    {
+     "name": "tiny-low",
+     "params": {
+      "principal": "1",
+      "rate": "0.01/365"
+     },
+     "why": "one unit at 1%: the integer part is small, the fraction carries everything"
+    },
+    {
+     "name": "tiny-high",
+     "params": {
+      "principal": "1",
+      "rate": "0.5/365"
+     },
+     "why": "one unit at 50%"
+    },
+    {
+     "name": "mid-1pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.01/365"
+     },
+     "why": "a slow rate: the per-step factor is close to 1"
+    },
+    {
+     "name": "mid-5pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.05/365"
+     },
+     "why": "a typical lending rate"
+    },
+    {
+     "name": "mid-50pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.5/365"
+     },
+     "why": "a high rate: the balance grows 150x by N = 10,000"
+    },
+    {
+     "name": "large",
+     "params": {
+      "principal": "1000000",
+      "rate": "0.1/365"
+     },
+     "why": "a million-unit position"
+    },
+    {
+     "name": "huge",
+     "params": {
+      "principal": "100000000",
+      "rate": "0.1/365"
+     },
+     "why": "a hundred-million-unit pool"
+    },
+    {
+     "name": "huge-high",
+     "params": {
+      "principal": "100000000",
+      "rate": "0.5/365"
+     },
+     "why": "the largest balance the ladder reaches, near 10^14"
+    },
+    {
+     "name": "fraction",
+     "params": {
+      "principal": "0.001",
+      "rate": "0.1/365"
+     },
+     "why": "a sub-unit balance: leading zeros in WAD"
+    }
+   ],
+   "ops": {
+    "fp127": [
+     "pow",
+     "mul"
+    ],
+    "fp127lib": [
+     "pow",
+     "mul"
+    ],
+    "abdk": [
+     "exp",
+     "mul",
+     "ln (pow = exp(y ln x))"
+    ],
+    "solady": [
+     "powWad",
+     "sMulWad"
+    ],
+    "prb": [
+     "pow",
+     "mul"
+    ]
+   }
+  },
+  {
+   "id": "bonding-sqrt",
+   "index": 2,
+   "demo": true,
+   "title": "Square-root bonding curve",
+   "step": "cost += sqrt(s); s += 1",
+   "result": "total cost of N unit buys",
+   "why": "Bonding curves price each token at a root of the supply; the sum of N floors is where the digits go.",
+   "order": [
+    "supply",
+    "unit"
+   ],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "supply": "1000",
+      "unit": "1"
+     },
+     "why": "a thousand tokens out, unit buys"
+    },
+    {
+     "name": "from-one",
+     "params": {
+      "supply": "1",
+      "unit": "1"
+     },
+     "why": "the curve from its first token"
+    },
+    {
+     "name": "half-units",
+     "params": {
+      "supply": "1000",
+      "unit": "0.5"
+     },
+     "why": "buys that are not integers"
+    },
+    {
+     "name": "deep",
+     "params": {
+      "supply": "1000000",
+      "unit": "1"
+     },
+     "why": "a million out: sqrt is large, the sum is huge"
+    },
+    {
+     "name": "micro",
+     "params": {
+      "supply": "1",
+      "unit": "0.001"
+     },
+     "why": "thousandth-unit buys from the start"
+    },
+    {
+     "name": "very-deep",
+     "params": {
+      "supply": "1000000000",
+      "unit": "1000"
+     },
+     "why": "a billion out in thousand-token lots"
+    },
+    {
+     "name": "small-steps",
+     "params": {
+      "supply": "10",
+      "unit": "0.01"
+     },
+     "why": "hundredth-unit buys from ten"
+    }
+   ],
+   "ops": {
+    "fp127": [
+     "sqrt",
+     "add"
+    ],
+    "fp127lib": [
+     "sqrt",
+     "add"
+    ],
+    "abdk": [
+     "sqrt",
+     "add"
+    ],
+    "solady": [
+     "sqrtWad",
+     "add"
+    ],
+    "prb": [
+     "sqrt",
+     "add"
+    ]
+   }
+  },
+  {
+   "id": "roundtrip",
+   "index": 3,
+   "demo": true,
+   "title": "exp(ln(x)) round trip",
+   "step": "x = exp(ln(x))",
+   "result": "x after N round trips; the answer is the input",
+   "why": "Isolates transcendental error. Every step should be the identity; what remains is the library's ln and exp error, compounded.",
+   "order": [
+    "x0"
+   ],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "x0": "1.5"
+     },
+     "why": "1.5 is representable in every format, so a perfect library returns it exactly"
+    },
+    {
+     "name": "hundredth",
+     "params": {
+      "x0": "0.01"
+     },
+     "why": "ln is large and negative"
+    },
+    {
+     "name": "tenth",
+     "params": {
+      "x0": "0.1"
+     },
+     "why": "a typical price ratio"
+    },
+    {
+     "name": "near-one-below",
+     "params": {
+      "x0": "0.7"
+     },
+     "why": "ln is small: cancellation territory"
+    },
+    {
+     "name": "just-above-one",
+     "params": {
+      "x0": "1.0001"
+     },
+     "why": "ln is tiny: the log1p regime"
+    },
+    {
+     "name": "two",
+     "params": {
+      "x0": "2"
+     },
+     "why": "the simplest non-trivial value"
+    },
+    {
+     "name": "ten",
+     "params": {
+      "x0": "10"
+     },
+     "why": "a round decade"
+    },
+    {
+     "name": "thousand",
+     "params": {
+      "x0": "1000"
+     },
+     "why": "three decades"
+    },
+    {
+     "name": "million",
+     "params": {
+      "x0": "1000000"
+     },
+     "why": "six decades, near ABDK's comfortable range"
+    },
+    {
+     "name": "awkward",
+     "params": {
+      "x0": "123456.789"
+     },
+     "why": "a value with no special structure"
+    }
+   ],
+   "ops": {
+    "fp127": [
+     "ln",
+     "exp"
+    ],
+    "fp127lib": [
+     "ln",
+     "exp"
+    ],
+    "abdk": [
+     "ln",
+     "exp"
+    ],
+    "solady": [
+     "lnWad",
+     "expWad"
+    ],
+    "prb": [
+     "ln",
+     "exp"
+    ]
+   }
+  },
+  {
+   "id": "amortise",
+   "index": 4,
+   "demo": true,
+   "title": "Amortising loan",
+   "step": "b = b * (1 + r) - payment",
+   "result": "outstanding balance after N daily payments",
+   "why": "Subtracting nearly equal numbers. The payment retires the loan at step 366, so at N = 365 the balance is one payment and relative error is amplified several hundred times.",
+   "order": [
+    "principal",
+    "rate",
+    "payment"
+   ],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "principal": "300000",
+      "rate": "0.05/365",
+      "term": "366"
+     },
+     "why": "a mortgage-sized loan retiring at step 366"
+    },
+    {
+     "name": "small",
+     "params": {
+      "principal": "10000",
+      "rate": "0.05/365",
+      "term": "366"
+     },
+     "why": "a small loan"
+    },
+    {
+     "name": "high-rate",
+     "params": {
+      "principal": "300000",
+      "rate": "0.1/365",
+      "term": "366"
+     },
+     "why": "double the rate"
+    },
+    {
+     "name": "ten-year",
+     "params": {
+      "principal": "300000",
+      "rate": "0.05/365",
+      "term": "3650"
+     },
+     "why": "a ten-year term: at N = 365 nine tenths remain"
+    },
+    {
+     "name": "large-low",
+     "params": {
+      "principal": "1000000",
+      "rate": "0.03/365",
+      "term": "366"
+     },
+     "why": "a large loan at a low rate"
+    },
+    {
+     "name": "very-high",
+     "params": {
+      "principal": "300000",
+      "rate": "0.2/365",
+      "term": "366"
+     },
+     "why": "20% APR"
+    },
+    {
+     "name": "micro",
+     "params": {
+      "principal": "500",
+      "rate": "0.05/365",
+      "term": "366"
+     },
+     "why": "a tiny loan: the payment is a few units"
+    },
+    {
+     "name": "retires-at-10001",
+     "params": {
+      "principal": "300000",
+      "rate": "0.05/365",
+      "term": "10001"
+     },
+     "why": "retires one step past the ladder's end, so N = 10,000 is the one-payment cell"
+    }
+   ],
+   "derived": {
+    "payment": "principal * rate / (1 - (1 + rate)^(-term))"
+   },
+   "ops": {
+    "fp127": [
+     "mul",
+     "sub"
+    ],
+    "fp127lib": [
+     "mul",
+     "sub"
+    ],
+    "abdk": [
+     "mul",
+     "sub"
+    ],
+    "solady": [
+     "sMulWad",
+     "sub"
+    ],
+    "prb": [
+     "mul",
+     "sub"
+    ]
+   }
+  },
+  {
+   "id": "geo-mean",
+   "index": 5,
+   "demo": true,
+   "title": "Running geometric mean",
+   "step": "L += ln(x_i); g = exp(L / N), x_i = (i + 2) / (i + 1)",
+   "result": "geometric mean of N terms; truth telescopes to ((N + 2) / 2)^(1 / N)",
+   "why": "Index and basket maths: a sum of logs, one division, one exp. The division by N and the final exp expose every accumulated ULP.",
+   "order": [],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {},
+     "why": "the scenario has no parameters; its inputs are the integers 1..N"
+    }
+   ],
+   "ops": {
+    "fp127": [
+     "div",
+     "ln",
+     "add",
+     "exp"
+    ],
+    "fp127lib": [
+     "div",
+     "ln",
+     "add",
+     "exp"
+    ],
+    "abdk": [
+     "div",
+     "ln",
+     "add",
+     "exp"
+    ],
+    "solady": [
+     "sDivWad",
+     "lnWad",
+     "add",
+     "expWad"
+    ],
+    "prb": [
+     "div",
+     "ln",
+     "add",
+     "exp"
+    ]
+   }
+  },
+  {
+   "id": "black-scholes-chain",
+   "index": 6,
+   "demo": true,
+   "title": "Black-Scholes d1 along a price path",
+   "step": "acc += d1(S); S += tick, with d1 = (ln(S / K) + (r + sigma^2 / 2) T) / (sigma sqrt(T))",
+   "result": "sum of d1 over N ticks",
+   "why": "The options-desk case: ln, div, sqrt and mul in one expression, re-evaluated as the spot moves and aggregated.",
+   "order": [
+    "spot",
+    "strike",
+    "sigma",
+    "T",
+    "r",
+    "tick"
+   ],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "spot": "100",
+      "strike": "100",
+      "sigma": "0.2",
+      "T": "0.5",
+      "r": "0.05",
+      "tick": "0.01"
+     },
+     "why": "at the money, 20% vol, six months"
+    },
+    {
+     "name": "low-vol",
+     "params": {
+      "spot": "100",
+      "strike": "100",
+      "sigma": "0.05",
+      "T": "0.5",
+      "r": "0.05",
+      "tick": "0.01"
+     },
+     "why": "5% vol: the denominator is small"
+    },
+    {
+     "name": "high-vol",
+     "params": {
+      "spot": "100",
+      "strike": "100",
+      "sigma": "0.8",
+      "T": "0.5",
+      "r": "0.05",
+      "tick": "0.01"
+     },
+     "why": "80% vol"
+    },
+    {
+     "name": "in-the-money",
+     "params": {
+      "spot": "120",
+      "strike": "100",
+      "sigma": "0.2",
+      "T": "0.5",
+      "r": "0.05",
+      "tick": "0.01"
+     },
+     "why": "ln(S/K) is positive and not small"
+    },
+    {
+     "name": "out-of-the-money",
+     "params": {
+      "spot": "80",
+      "strike": "100",
+      "sigma": "0.2",
+      "T": "0.5",
+      "r": "0.05",
+      "tick": "0.01"
+     },
+     "why": "ln(S/K) is negative"
+    },
+    {
+     "name": "short-dated",
+     "params": {
+      "spot": "100",
+      "strike": "100",
+      "sigma": "0.2",
+      "T": "0.01",
+      "r": "0.05",
+      "tick": "0.01"
+     },
+     "why": "sqrt(T) is small"
+    },
+    {
+     "name": "long-dated",
+     "params": {
+      "spot": "100",
+      "strike": "100",
+      "sigma": "0.2",
+      "T": "2",
+      "r": "0.05",
+      "tick": "0.01"
+     },
+     "why": "two years"
+    },
+    {
+     "name": "coarse-ticks",
+     "params": {
+      "spot": "100",
+      "strike": "100",
+      "sigma": "0.2",
+      "T": "0.5",
+      "r": "0.05",
+      "tick": "1"
+     },
+     "why": "whole-unit ticks: S doubles by N = 100 and reaches 10,100"
+    }
+   ],
+   "ops": {
+    "fp127": [
+     "div",
+     "ln",
+     "add",
+     "sqrt",
+     "mul"
+    ],
+    "fp127lib": [
+     "div",
+     "ln",
+     "add",
+     "sqrt",
+     "mul"
+    ],
+    "abdk": [
+     "div",
+     "ln",
+     "add",
+     "sqrt",
+     "mul"
+    ],
+    "solady": [
+     "sDivWad",
+     "lnWad",
+     "add",
+     "sqrtWad",
+     "sMulWad"
+    ],
+    "prb": [
+     "div",
+     "ln",
+     "add",
+     "sqrt",
+     "mul"
+    ]
+   }
+  },
+  {
+   "id": "cumulative-product",
+   "index": 7,
+   "demo": true,
+   "title": "Cumulative product of small factors",
+   "step": "p = p * (1 + eps_i), eps_i = +eps for odd i, -eps for even i",
+   "result": "product after N factors",
+   "why": "The general form of fee accrual, index levels and LP share accounting: many factors a basis point from one. The drift from 1 is where the digits are, and it is small.",
+   "order": [
+    "eps"
+   ],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "eps": "0.0001"
+     },
+     "why": "a basis point"
+    },
+    {
+     "name": "percent",
+     "params": {
+      "eps": "0.01"
+     },
+     "why": "one percent"
+    },
+    {
+     "name": "tenth-percent",
+     "params": {
+      "eps": "0.001"
+     },
+     "why": "ten basis points"
+    },
+    {
+     "name": "micro",
+     "params": {
+      "eps": "0.000001"
+     },
+     "why": "a hundredth of a basis point: the factors are within WAD's last digits of one"
+    },
+    {
+     "name": "five-percent",
+     "params": {
+      "eps": "0.05"
+     },
+     "why": "large factors: the product falls to 4e-6 by N = 10,000"
+    }
+   ],
+   "ops": {
+    "fp127": [
+     "mul"
+    ],
+    "fp127lib": [
+     "mul"
+    ],
+    "abdk": [
+     "mul"
+    ],
+    "solady": [
+     "sMulWad"
+    ],
+    "prb": [
+     "mul"
+    ]
+   }
+  },
+  {
+   "id": "compound-annual",
+   "index": 8,
+   "demo": false,
+   "title": "Annual compounding at 10% (README claim check)",
+   "step": "b = b * 1.1",
+   "result": "balance after N years",
+   "why": "The old README asserted $25,937.42 true against $25,932.38 for Solady at N = 10 with no source. This row regenerates that number.",
+   "order": [
+    "principal",
+    "rate"
+   ],
+   "inputs": [
+    {
+     "name": "reference",
+     "reference": true,
+     "params": {
+      "principal": "10000",
+      "rate": "0.1"
+     },
+     "why": "the README claim"
+    },
+    {
+     "name": "five-pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.05"
+     },
+     "why": "5% a year"
+    },
+    {
+     "name": "unit",
+     "params": {
+      "principal": "1",
+      "rate": "0.1"
+     },
+     "why": "one unit"
+    },
+    {
+     "name": "million",
+     "params": {
+      "principal": "1000000",
+      "rate": "0.1"
+     },
+     "why": "a million units: ABDK overflows sooner"
+    },
+    {
+     "name": "fifty-pct",
+     "params": {
+      "principal": "10000",
+      "rate": "0.5"
+     },
+     "why": "50% a year: every library overflows before N = 100"
+    }
+   ],
+   "ops": {
+    "fp127": [
+     "mul"
+    ],
+    "fp127lib": [
+     "mul"
+    ],
+    "abdk": [
+     "mul"
+    ],
+    "solady": [
+     "sMulWad"
+    ],
+    "prb": [
+     "mul"
+    ]
+   }
+  }
+ ],
+ "_doc": "Scenarios of the terminal-precision ladder. order = the parameter order in the calldata array p the adapters receive (derived values included); inputs = the parameter sets run, the first flagged reference; ops = the library calls each adapter's loop makes, documentation that scripts/ladder/ladder.py copies into the dataset."
 }

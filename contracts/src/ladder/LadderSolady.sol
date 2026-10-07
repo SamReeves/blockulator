@@ -2,7 +2,6 @@
 pragma solidity ^0.8.24;
 
 import {LadderBase} from "./LadderBase.sol";
-import {LadderParams as P} from "./LadderParams.sol";
 import {FixedPointMathLib as S} from "../../../lib/solady/src/utils/FixedPointMathLib.sol";
 
 /// @title LadderSolady
@@ -11,7 +10,6 @@ import {FixedPointMathLib as S} from "../../../lib/solady/src/utils/FixedPointMa
 contract LadderSolady is LadderBase {
     function _one() internal pure override returns (int256) { return 1e18; }
     function _fromUint(uint256 u) internal pure override returns (int256) { return int256(u) * 1e18; }
-    function _param(uint8 id) internal pure override returns (int256) { return P.wad(id); }
     function _add(int256 a, int256 b) internal pure override returns (int256) { return a + b; }
     function _sub(int256 a, int256 b) internal pure override returns (int256) { return a - b; }
     function _mul(int256 a, int256 b) internal view override returns (int256) { return S.sMulWad(a, b); }

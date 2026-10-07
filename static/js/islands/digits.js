@@ -1,15 +1,37 @@
-// Pure: split a decimal string into the prefix that agrees with the truth and the rest.
-// `digits` is the count of correct leading significant digits, as ladder.json records it.
-// Mirrors the `cell` Tera component in templates/components.html, which renders the
-// same split statically; this copy is what the tests exercise and what verify.js uses.
-export function highlightDivergence(value, digits) {
-    let pre = 0;
-    while (pre < value.length && (value[pre] === '-' || value[pre] === '0' || value[pre] === '.')) pre++;
-    if (pre >= value.length) return { matched: value, rest: '' };
-    const intlen = value.slice(pre).split('.')[0].length;
-    const k = digits <= intlen ? pre + digits : pre + digits + 1;
-    if (k >= value.length) return { matched: value, rest: '' };
-    return { matched: value.slice(0, k), rest: value.slice(k) };
+// Pure helpers for the demo page, tested in tests/test-digits.js.
+
+// Leading significant digits of `value` that literally equal `truth`'s: the
+// same rule as `agree` in scripts/ladder/ladder.py. A reading aid for the
+// highlight, not a precision measure (a carry across 0.999…/1.000… gives 0).
+export function agree(value, truth) {
+    const neg = (s) => s.startsWith('-');
+    if (neg(value) !== neg(truth)) return 0;
+    const parts = (s) => {
+        s = s.replace('-', '');
+        const [ip, fp = ''] = s.split('.');
+        const intDigits = ip.replace(/^0+/, '');
+        if (intDigits) return { decade: intDigits.length, sig: intDigits + fp };
+        const lead = fp.match(/^0*/)[0].length;
+        return { decade: -lead, sig: fp.slice(lead) };
+    };
+    const a = parts(value), b = parts(truth);
+    if (a.decade !== b.decade) return 0;
+    let n = 0;
+    while (n < a.sig.length && n < b.sig.length && a.sig[n] === b.sig[n]) n++;
+    return Math.min(n, 42);
+}
+
+// Split a printed value into the agreeing prefix and the rest, by `agree` count.
+export function splitByAgree(value, count) {
+    if (count <= 0) return { matched: '', rest: value };
+    let seen = 0, i = 0;
+    for (; i < value.length; i++) {
+        const ch = value[i];
+        if (ch >= '1' && ch <= '9') seen++;
+        else if (ch === '0' && seen > 0) seen++;
+        if (seen === count) { i++; break; }
+    }
+    return { matched: value.slice(0, i), rest: value.slice(i) };
 }
 
 // Decode a raw library word into a decimal string with `places` fractional digits.
@@ -19,7 +41,29 @@ export function decodeRaw(raw, scale, places = 40) {
     if (neg) x = -x;
     const s = BigInt(scale);
     const ip = x / s;
-    let fp = ((x % s) * 10n ** BigInt(places)) / s;
-    let frac = fp.toString().padStart(places, '0').replace(/0+$/, '');
+    const fp = ((x % s) * 10n ** BigInt(places)) / s;
+    const frac = fp.toString().padStart(places, '0').replace(/0+$/, '');
     return (neg ? '-' : '') + ip.toString() + (frac ? '.' + frac : '');
+}
+
+// ABI encoding of run(uint8 scenario, uint8 form, uint32 n, int256[] p).
+const MASK = (1n << 256n) - 1n;
+const word = (x) => (BigInt(x) & MASK).toString(16).padStart(64, '0');
+export function encodeRun(selector, scenario, form, n, p) {
+    const head = word(scenario) + word(form) + word(n) + word(0x80);
+    const tail = word(p.length) + p.map(word).join('');
+    return selector + head + tail;
+}
+
+export function decodeRun(hex) {
+    const out = hex.startsWith('0x') ? hex.slice(2) : hex;
+    if (out.length < 320) throw new Error('short return data');
+    const signed = (h) => { let x = BigInt('0x' + h); if (x >= 1n << 255n) x -= 1n << 256n; return x; };
+    return {
+        ok: BigInt('0x' + out.slice(0, 64)) === 1n,
+        raw: signed(out.slice(64, 128)),
+        reason: '0x' + out.slice(128, 136),
+        gasPerStep: BigInt('0x' + out.slice(192, 256)),
+        gasTotal: BigInt('0x' + out.slice(256, 320)),
+    };
 }

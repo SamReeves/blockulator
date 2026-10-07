@@ -41,16 +41,22 @@
 ## The precision claim, as data
 
 - /data/ladder.json: nine iterated scenarios (daily compounding, an
-  amortising loan, exp(ln(x)) round trips, ...) through FP127, FP127Lib,
-  ABDKMath64x64, Solady and PRBMath for N in 1..10000, each cell with the
-  decoded value, correct significant digits, relative error and gas per
-  step, against exact arithmetic. Daily compounding at N = 365: FP127 36
-  digits, Solady and PRBMath 16, ABDK 17.
+  amortising loan, exp(ln(x)) round trips, ...), 64 inputs in all, through
+  FP127, FP127Lib, ABDKMath64x64, Solady and PRBMath for N in 1..10000.
+  Every cell carries the decoded value, correct significant digits against
+  the exact truth (digits) and against the truth from the parameters as the
+  library received them (digitsFormat, the arithmetic alone), the signed
+  error in ULPs, and gas per step; summaries give median and range over the
+  inputs; the methodology key says how each number is defined. Daily
+  compounding, reference input, N = 365: FP127 36 digits (40 against the
+  format truth), Solady and PRBMath 16, ABDK 17.
 - Any cell can be re-run on chain: LadderRunner at
-  0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4,
-  run(uint8 scenario, uint8 form, uint32 n) returns (bool ok, int256 raw,
-  bytes4 reason, uint256 gasPerStep). Scenario ids and forms are in
-  /data/scenarios.json and /contracts/deployments/Ladder.md.
+  0x2d741eC5d66D7559857da1c398AE384A389DdE17 (salt "FP127 ladder v2"),
+  run(uint8 scenario, uint8 form, uint32 n, int256[] p) returns (bool ok,
+  int256 raw, bytes4 reason, uint256 gasPerStep, uint256 gasTotal), with p
+  the input's floored parameters from /data/ladder-inputs.json. Scenario
+  ids are in /data/scenarios.json; the record is
+  /contracts/deployments/Ladder.md.
 - /data/gas.json: gas per op and form, min/median/max.
 
 ## Pages
