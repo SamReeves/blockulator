@@ -10,27 +10,30 @@ called this same code, so the two cannot disagree; `scripts/ladder/livecap.py`
 re-runs every cell of every input through the live runner and records the
 largest N the public RPC completes.
 
-Version 3 (the adapters call FP127 v2, the guard-bit kernels) is deployed with
-CREATE2 through the proxy `0x4e59b44847b379578588920cA78FbF26c0B4956C` with
-salt `"FP127 ladder v3"`
-(`0x4650313237206c61646465722076330000000000000000000000000000000000`).
+Version 4 (the adapters call FP127 v3, which adds `pi`) is deployed with CREATE2
+through the proxy `0x4e59b44847b379578588920cA78FbF26c0B4956C` with salt
+`"FP127 ladder v4"`
+(`0x4650313237206c61646465722076340000000000000000000000000000000000`).
+Version 3 (salt `"FP127 ladder v3"`, runner
+`0xae42E3AdEb2FAd105aF59C14714801552867D5E9`) calls FP127 v2 and still answers.
 Version 2 (salt `"FP127 ladder v2"`, runner
 `0x2d741eC5d66D7559857da1c398AE384A389DdE17`) has the same interface and
 still answers, calling FP127 v1.
-Machine-readable copy: `Ladder.json`. Deployed 2026-10-07 by `make deploy-ladder-sepolia`, all six Sourcify `exact_match`.
+Machine-readable copy: `Ladder.json`. Predicted by `make predict-ladder`; the tx, block and gas columns are
+filled after `make deploy-ladder-sepolia`.
 
 | contract | address | tx | block | gas |
 |---|---|---|---:|---:|
-| `LadderFP127` | `0xb6f9cE6F796431082173a6491872835ff3a974e7` | [`0x86142ff3…`](https://sepolia.etherscan.io/tx/0x86142ff3420a61f06b2ecd92df15b6345a8e1b96ff5a7ff8fb8a90e6f253c5ea) | 11,860,707 | 4,103,006 |
-| `LadderFP127Lib` | `0x5087a669a0f9055bfBeE66F696d13c8c4e4D163e` | [`0xa77739ab…`](https://sepolia.etherscan.io/tx/0xa77739aba734cfd118919fde4ad54ce7abdf7c4689385eb55d3b7bffb702d4f6) | 11,860,708 | 9,476,410 |
-| `LadderABDK` | `0xA6b70cBcdE347845dD0a7f147a90D93889650de4` | [`0xfe744665…`](https://sepolia.etherscan.io/tx/0xfe744665505d1d4dcd78a51395b6a88185e4562469a0368d185917101207785e) | 11,860,709 | 9,120,028 |
-| `LadderSolady` | `0x1D2750d404f41Cc867cE41A91Ff28D9947DDc2A0` | [`0x4f0285d5…`](https://sepolia.etherscan.io/tx/0x4f0285d5b681b00ea509a0dee868de55c37d84661a92da2da912005819b76dc7) | 11,860,710 | 5,935,658 |
-| `LadderPRB` | `0xEFc92e7De50d1aB460b6302cD6293eBeda3A7145` | [`0x20aa9979…`](https://sepolia.etherscan.io/tx/0x20aa997954dca96e41bffe5fee149f9f645537200926a33fb8c4953237b2cf10) | 11,860,711 | 9,844,327 |
-| `LadderRunner` | `0xae42E3AdEb2FAd105aF59C14714801552867D5E9` | [`0xdf630e7c…`](https://sepolia.etherscan.io/tx/0xdf630e7c8ea09dfc579d7ec5cdc9721e381f6d031223fad808ec345db80e1ef6) | 11,860,712 | 2,644,656 |
+| `LadderFP127` | `0x3b3b7300B22e621a2350353f2D6BCD5B3Cf79cB6` | pending | | |
+| `LadderFP127Lib` | `0x5Fe3420fc2C330553061bc39d9fb178E7d854Fe1` | pending | | |
+| `LadderABDK` | `0x8974369439217370d5D486FB12EF71C0A1F38897` | pending | | |
+| `LadderSolady` | `0x9F7766CF9f807799CBB92068257891dAD0372de7` | pending | | |
+| `LadderPRB` | `0xa014CCDd2F71B7D253Ba8A9bC0Fd72eba4d8E038` | pending | | |
+| `LadderRunner` | `0x798C37A3E5B421D480AC850258466b5598A1A555` | pending | | |
 
 `LadderRunner` is constructed with the five adapter addresses in that
 order; `LadderFP127` staticcalls the FP127 object at
-`0xD8688E72dD6745719484da894C63Cd2685fD7E71` (version 2).
+`0xe43F720861074497db2e974E5c4554E4A3b341B9` (version 3).
 
 The version 1 contracts (salt `"FP127 ladder v1"`, runner
 `0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4`, `run(uint8,uint8,uint32)` with
@@ -40,7 +43,7 @@ dataset, which is in the repository history up to the ladder-inputs merge.
 ## Calling it
 
 ```
-cast call 0xae42E3AdEb2FAd105aF59C14714801552867D5E9 \
+cast call 0x798C37A3E5B421D480AC850258466b5598A1A555 \
   "run(uint8,uint8,uint32,int256[])(bool,int256,bytes4,uint256,uint256)" \
   <scenario> <form> <n> "[<p0>,<p1>,...]" \
   --rpc-url https://ethereum-sepolia-rpc.publicnode.com
@@ -62,7 +65,7 @@ scenario function.
 Example, the headline cell (compound, reference input, FP127, N = 365):
 
 ```
-cast call 0xae42E3AdEb2FAd105aF59C14714801552867D5E9 \
+cast call 0x798C37A3E5B421D480AC850258466b5598A1A555 \
   "run(uint8,uint8,uint32,int256[])(bool,int256,bytes4,uint256,uint256)" 0 0 365 \
   "[3402823669209384634633746074317682114560000,93228045731763962592705371899114578]" \
   --rpc-url https://ethereum-sepolia-rpc.publicnode.com

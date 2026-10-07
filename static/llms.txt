@@ -29,8 +29,8 @@
 
 - Network: Ethereum Sepolia, chainId 11155111
 - RPC: https://ethereum-sepolia-rpc.publicnode.com
-- FP127: 0xD8688E72dD6745719484da894C63Cd2685fD7E71 (CREATE2 through
-  0x4e59b44847b379578588920cA78FbF26c0B4956C, salt "FP127 v2"; record at
+- FP127: 0xe43F720861074497db2e974E5c4554E4A3b341B9 (CREATE2 through
+  0x4e59b44847b379578588920cA78FbF26c0B4956C, salt "FP127 v3"; record at
   /contracts/deployments/FP127.md and /data/fp127.json)
 - ABI: /data/abi.json. All functions are pure; selectors are in /data/ops.json.
 - Example: sqrt(2) is `sqrt(int256)` with 2 * 2**128 =
@@ -54,7 +54,7 @@
   compounding, reference input, N = 365: FP127 36 digits (40 against the
   format truth), Solady and PRBMath 16, ABDK 17.
 - Any cell can be re-run on chain: LadderRunner at
-  0xae42E3AdEb2FAd105aF59C14714801552867D5E9 (salt "FP127 ladder v3"),
+  0x798C37A3E5B421D480AC850258466b5598A1A555 (salt "FP127 ladder v4"),
   run(uint8 scenario, uint8 form, uint32 n, int256[] p) returns (bool ok,
   int256 raw, bytes4 reason, uint256 gasPerStep, uint256 gasTotal), with p
   the input's floored parameters from /data/ladder-inputs.json. Scenario

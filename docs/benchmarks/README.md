@@ -24,6 +24,10 @@ committed copies match the code at that commit.
   is live on Sepolia at `0x2d741eC5d66D7559857da1c398AE384A389DdE17`
   (`contracts/deployments/Ladder.md`), and `liveMaxN` in the JSON says how
   far up the ladder a public RPC will execute each cell.
+- [`pi.md`](pi.md): **the same recipe, four grids.** Ramanujan's series for
+  1/pi evaluated through each library's own sqrt, mul and div: FP127 reaches
+  36 digits at five terms, ABDK 17, Solady and PRBMath 16. `make pi-compare`
+  from `test/fp127/PiCompare.t.sol`.
 - [`gas.md`](gas.md) / [`gas.json`](gas.json): gas for every FP127 op across
   an input ladder, for the Huff baseline, the Yul object, `FP127Caller`,
   `FP127Lib` and the three competitor libraries. `make bench`.

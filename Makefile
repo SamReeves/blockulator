@@ -1,4 +1,4 @@
-.PHONY: site site-check help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-inputs gen-inputs-check ladder ladder-check predict-ladder deploy-ladder-sepolia verify-ladder-sepolia
+.PHONY: pi-compare site site-check help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-inputs gen-inputs-check ladder ladder-check predict-ladder deploy-ladder-sepolia verify-ladder-sepolia
 
 PY := uv run
 BASELINE_ADDR := 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
@@ -15,6 +15,7 @@ help:
 	@echo "  make test             - gen-check + vectors-check + equivalence, behaviour and precision suites"
 	@echo "  make precision-report - Rewrite docs/fp127/precision.md from docs/fp127/precision.json"
 	@echo "  make bench            - Gas ladder for every op and form -> docs/benchmarks/gas.json + gas.md"
+	@echo "  make pi-compare       - Ramanujan's series through each library's primitives -> docs/benchmarks/pi.md"
 	@echo "  make size             - Print the deployed FP127 runtime size in bytes"
 	@echo "  make gen-inputs       - Generate scripts/ladder/inputs.json (every input floored into each representation) from scenarios.json"
 	@echo "  make gen-inputs-check - Fail if inputs.json is stale"
@@ -76,6 +77,9 @@ size: build
 bench: build
 	@forge test --match-contract GasLadder -vv | $(PY) scripts/fp127/gas_to_json.py
 
+pi-compare: build
+	@forge test --match-contract PiCompare -vv | $(PY) scripts/fp127/pi_compare.py
+
 fetch-baseline:
 	@mkdir -p contracts/archive/huff
 	@cast code $(BASELINE_ADDR) --rpc-url $(SEPOLIA_RPC) | tr -d "\n" > contracts/archive/huff/fp127.sepolia.runtime.hex
@@ -86,7 +90,7 @@ fetch-baseline:
 
 DEPLOY_SCRIPT := script/DeployFP127.s.sol
 CREATE2_PROXY := 0x4e59b44847b379578588920cA78FbF26c0B4956C
-SALT := 0x4650313237207632000000000000000000000000000000000000000000000000
+SALT := 0x4650313237207633000000000000000000000000000000000000000000000000
 # Sepolia (Amsterdam fork) charges about 1,550 gas per byte of deposited code,
 # not 200: the node estimates ~10.45M gas for this deployment where forge
 # 1.7.1's local EVM says 1.46M, so the transaction is sent with an explicit limit.

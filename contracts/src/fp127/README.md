@@ -34,7 +34,7 @@ The same Yul function bodies are emitted twice.
 **Deployed object.** `FP127.yul` wraps the bodies in a `switch` on the
 4-byte selector. It is deployed with CREATE2 through the deterministic
 proxy at `0x4e59b44847b379578588920cA78FbF26c0B4956C` with salt
-`"FP127 v2"`, which puts it at `0xD8688E72dD6745719484da894C63Cd2685fD7E71` on
+`"FP127 v2"`, which puts it at `0xe43F720861074497db2e974E5c4554E4A3b341B9` on
 every chain it is deployed to (Sepolia today; record and verification
 recipe in [`contracts/deployments/FP127.md`](../../deployments/FP127.md)).
 Every contract that `staticcall`s it runs identical bytecode.
