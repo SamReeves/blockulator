@@ -216,10 +216,24 @@ def render_md(doc: dict) -> str:
 
 
 def strip_volatile(doc: dict) -> dict:
+    """The part of the document that must be reproducible anywhere: the data.
+    The date and the tool versions (forge build, FP127 commit) are not."""
     d = json.loads(json.dumps(doc))
-    d.pop("generated", None)
-    d.get("versions", {}).pop("fp127", None)
-    return d
+    return {k: d.get(k) for k in ("ladder", "forms", "digitsCap", "scenarios")}
+
+
+def first_difference(a, b, path="") -> str:
+    if isinstance(a, dict) and isinstance(b, dict):
+        for k in sorted(set(a) | set(b)):
+            if k not in a or k not in b:
+                return f"{path}/{k}: only in {'committed' if k in a else 'regenerated'}"
+            r = first_difference(a[k], b[k], f"{path}/{k}")
+            if r:
+                return r
+        return ""
+    if a != b:
+        return f"{path}: committed {a!r} != regenerated {b!r}"
+    return ""
 
 
 def main(argv: list[str]) -> int:
@@ -233,6 +247,7 @@ def main(argv: list[str]) -> int:
             print(f"ladder ok: {len(doc['scenarios'])} scenarios")
             return 0
         print("ladder.json is stale; run `make ladder`")
+        print("first difference: " + first_difference(strip_volatile(committed), strip_volatile(doc)))
         return 1
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
     OUT_JSON.write_text(json.dumps(doc, indent=1) + "\n")
