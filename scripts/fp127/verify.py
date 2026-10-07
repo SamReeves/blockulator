@@ -28,7 +28,9 @@ EXPLORER = {11155111: "https://repo.sourcify.dev/11155111/", 1: "https://repo.so
 
 
 def http(method: str, url: str, body: bytes | None = None, headers: dict | None = None) -> tuple[int, str]:
-    req = urllib.request.Request(url, data=body, method=method, headers=headers or {})
+    h = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) fp127-verify/1.0", "Accept": "application/json"}
+    h.update(headers or {})
+    req = urllib.request.Request(url, data=body, method=method, headers=h)
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
             return r.status, r.read().decode()
