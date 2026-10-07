@@ -18,13 +18,13 @@ contract Precision is FP127Harness {
     /// Where the per-op stats are written; empty disables the write.
     function _out() internal pure virtual returns (string memory) { return "docs/fp127/precision.json"; }
 
-    function _ops() internal pure returns (string[37] memory o) {
+    function _ops() internal pure returns (string[38] memory o) {
         o = [
             "add", "sub", "mul", "div", "fromFixed18", "toFixed18",
             "exp", "exp2", "exp10", "ln", "log2", "log10", "log2Up",
             "sqrt", "cbrt", "pow", "inv", "abs", "neg", "sign", "min", "max", "clamp", "avg",
             "zeroFloorSub", "dist", "lerp", "floor", "ceil", "frac", "round", "gcd", "factorial",
-            "hypot", "gavg", "lambertW0", "lambertWm1"
+            "hypot", "gavg", "lambertW0", "lambertWm1", "pi"
         ];
     }
 
@@ -37,7 +37,7 @@ contract Precision is FP127Harness {
         if (h == keccak256("exp") || h == keccak256("exp2") || h == keccak256("exp10")) return 140;
         if (h == keccak256("ln") || h == keccak256("log2") || h == keccak256("log10")) return 200;
         if (h == keccak256("pow") || h == keccak256("cbrt") || h == keccak256("lambertW0")
-            || h == keccak256("lambertWm1")) return 115;
+            || h == keccak256("lambertWm1") || h == keccak256("pi")) return 115;
         return 256;
     }
 
@@ -152,7 +152,7 @@ contract Precision is FP127Harness {
     }
 
     function test_precision_all() public virtual {
-        string[37] memory ops = _ops();
+        string[38] memory ops = _ops();
         string memory doc;
         for (uint256 i; i < ops.length; i++) {
             doc = _record(ops[i], _runOp(ops[i]));

@@ -58,6 +58,9 @@ object "FP127" {
             case 0x8e6f2353 { /* ln(int256) */
                 ret(fp127_ln(calldataload(4)))
             }
+            case 0x929edbfb { /* pi(int256) */
+                ret(fp127_pi(calldataload(4)))
+            }
             case 0x92b0c5b2 { /* pow(int256,int256) */
                 ret(fp127_pow(calldataload(4), calldataload(36)))
             }
@@ -525,6 +528,23 @@ object "FP127" {
                 r := 1
                 for { let i := 2 } iszero(gt(i, k)) { i := add(i, 1) } { r := mul(r, i) }
                 r := shl(128, r)
+            }
+
+            function fp127_pi(terms) -> r {
+                if slt(terms, 0) { rev(0x7db3aba7) }
+                let n := sar(128, terms)
+                if gt(n, 7) { rev(0x7db3aba7) }
+                let one := 0x100000000000000000000000000000000
+                let c := one
+                let s := 0
+                for { let k := 0 } lt(k, n) { k := add(k, 1) } {
+                    s := add(s, mul(c, add(1103, mul(26390, k))))
+                    let k4 := mul(4, k)
+                    c := div(mul(c, mul(mul(add(k4, 1), add(k4, 2)), mul(add(k4, 3), add(k4, 4)))), mul(exp(add(k, 1), 4), 24591257856))
+                }
+                if iszero(s) { rev(0x7db3aba7) }
+                let invpi := div(mulraw(shl(1, fp127_sqrt(0x200000000000000000000000000000000)), s), 9801)
+                r := fp127_div(one, invpi)
             }
 
             function lw(i) -> w {

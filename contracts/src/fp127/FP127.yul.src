@@ -704,6 +704,42 @@ function fp127_factorial(n) -> r {
 }
 
 // ---------------------------------------------------------------------------
+// Pi by iteration
+// ---------------------------------------------------------------------------
+
+/// @export pi(int256 terms) returns (int256 r)
+/// @domain 0 <= terms < 8, an integer in 127.128
+/// @reverts OutOfRange() outside that
+/// @notice pi by Ramanujan's 1914 series, floor(terms) terms:
+///         1/pi = (2 sqrt2 / 9801) sum_k (4k)! (1103 + 26390 k) / ((k!)^4 396^(4k)).
+///         Each term adds about eight digits: 7, 15, 23, 31, then 36 at five
+///         terms, the format's floor; more terms change nothing.
+/// @dev Term to term the series is a ratio of integers, so the running
+///      term is updated with one exact integer multiply and divide,
+///      (4k+1)(4k+2)(4k+3)(4k+4) over (k+1)^4 396^4, and the sum is formed
+///      with the integer coefficient 1103 + 26390 k applied to a 127.128
+///      word. The only transcendental op is one sqrt(2); the constant
+///      2 sqrt2 / 9801 is applied as a multiply and then an integer
+///      division last, so it is never floored as a small number on its own.
+///      The last two digits are the sqrt and the final reciprocal flooring.
+function fp127_pi(terms) -> r {
+    if slt(terms, 0) { rev(0x7db3aba7) }
+    let n := sar(128, terms)
+    if gt(n, 7) { rev(0x7db3aba7) }
+    let one := 0x100000000000000000000000000000000
+    let c := one
+    let s := 0
+    for { let k := 0 } lt(k, n) { k := add(k, 1) } {
+        s := add(s, mul(c, add(1103, mul(26390, k))))
+        let k4 := mul(4, k)
+        c := div(mul(c, mul(mul(add(k4, 1), add(k4, 2)), mul(add(k4, 3), add(k4, 4)))), mul(exp(add(k, 1), 4), 24591257856))
+    }
+    if iszero(s) { rev(0x7db3aba7) }
+    let invpi := div(mulraw(shl(1, fp127_sqrt(0x200000000000000000000000000000000)), s), 9801)
+    r := fp127_div(one, invpi)
+}
+
+// ---------------------------------------------------------------------------
 // Lambert W, principal branch
 // ---------------------------------------------------------------------------
 

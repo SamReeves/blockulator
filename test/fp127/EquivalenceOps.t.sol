@@ -107,6 +107,7 @@ contract EquivalenceOps is FP127Harness {
     function testFuzz_objEqLib_round(int256 x) public view { _objLib(abi.encodeCall(IFP127.round, (x)), "round"); }
     function testFuzz_objEqLib_gcd(int256 a, int256 b) public view { _objLib(abi.encodeCall(IFP127.gcd, (a, b)), "gcd"); }
     function testFuzz_objEqLib_factorial(int256 n) public view { _objLib(abi.encodeCall(IFP127.factorial, (n)), "factorial"); }
+    function testFuzz_objEqLib_pi(int256 n) public view { _objLib(abi.encodeCall(IFP127.pi, (n)), "pi"); }
     function testFuzz_objEqLib_lambertW0(int256 x) public view {
         x = bound(x, -int256(0x5e2d58d8b3bcdf1abadec7829054f90d), int256(1) << 200);
         _objLib(abi.encodeCall(IFP127.lambertW0, (x)), "lambertW0");

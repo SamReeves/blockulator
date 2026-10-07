@@ -236,6 +236,7 @@ contract GasLadder is FP127Harness {
         if (h == keccak256("factorial")) return FP127Lib.factorial(x);
         if (h == keccak256("lambertW0")) return FP127Lib.lambertW0(x);
         if (h == keccak256("lambertWm1")) return FP127Lib.lambertWm1(x);
+        if (h == keccak256("pi")) return FP127Lib.pi(x);
         if (h == keccak256("fromFixed18")) return FP127Lib.fromFixed18(x);
         if (h == keccak256("toFixed18")) return FP127Lib.toFixed18(x);
         revert("na");
@@ -343,5 +344,6 @@ contract GasLadder is FP127Harness {
         _run1("lambertW0", [-ONE / 4, ONE / 100, ONE / 2, ONE + ONE / 2, 10 * ONE, 1000 * ONE, ONE << 100], true);
         _run1("lambertWm1", [-int256(0x5e2d58d8b3bcdf1abadec7829054f90d) + 1, -ONE / 3, -ONE / 4, -ONE / 10, -ONE / 1000, -(ONE >> 40), -1], true);
         _run1("factorial", [int256(0), ONE, 5 * ONE, 10 * ONE, 20 * ONE, 30 * ONE, 33 * ONE], false);
+        _run1("pi", [ONE, 2 * ONE, 3 * ONE, 4 * ONE, 5 * ONE, 6 * ONE, 7 * ONE], false);
     }
 }
