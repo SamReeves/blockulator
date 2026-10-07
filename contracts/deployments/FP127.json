@@ -10,7 +10,7 @@
  "runtimeKeccak": "0xab019bcc0e8ce61720b018c96fae06f7b05cc7caaf7c30550c095f82922db496",
  "runtimeBytes": 7593,
  "source": "contracts/src/fp127/FP127.yul",
- "sourceCommit": "pending",
+ "sourceCommit": "7b74fbc",
  "compiler": {
   "language": "Yul",
   "solc": "0.8.24+commit.e11b9ed9",
@@ -18,8 +18,8 @@
   "runs": 200,
   "evmVersion": "shanghai"
  },
- "txHash": null,
- "block": null,
+ "txHash": "0xc7eabd1f47f64f53b26c0299ece0564c286a2fdbef38f461d432f0093489a002",
+ "block": 11861162,
  "verification": {
   "sourcify": "https://sourcify.dev/server/v2/contract/11155111/0xe43F720861074497db2e974E5c4554E4A3b341B9",
   "sourcifyRepo": "https://repo.sourcify.dev/11155111/0xe43F720861074497db2e974E5c4554E4A3b341B9",
@@ -28,8 +28,8 @@
  },
  "abi": "contracts/src/fp127/abi.json",
  "deployedBy": "0xe6306669b2f188d616bfb518e7b9255d001d731d",
- "gasUsed": null,
- "explorerTx": null,
+ "gasUsed": 11955003,
+ "explorerTx": "https://sepolia.etherscan.io/tx/0xc7eabd1f47f64f53b26c0299ece0564c286a2fdbef38f461d432f0093489a002",
  "previous": {
   "v1": {
    "address": "0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28",
@@ -69,6 +69,5 @@
     "etherscan": "unverified: the Etherscan API has no Yul path"
    }
   }
- },
- "status": "pending deployment: make deploy-sepolia, then fill txHash, block, gasUsed, explorerTx, sourceCommit"
+ }
 }
