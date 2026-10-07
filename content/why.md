@@ -44,9 +44,14 @@ The intercept is twenty digits apart, and the intercept is what you keep.
 
 The round trip makes the mechanism visible: `x = exp(ln(x))` should be the
 identity. PRBMath drifts from 16 digits to 12 by N = 10,000 [roundtrip,
-prb]; Solady happens to sit on a fixed point at 1.5 and does not drift at
-all, which is luck, not design; FP127 holds 33 [roundtrip, N = 10000,
-fp127].
+prb]; Solady sits on a fixed point at 1.5 and does not drift, because its
+composed error is under half a unit at 10^-18 and rounding to nearest snaps
+it back; FP127 does the same at 2^-128, returning the identical word on
+every step and holding 38 digits at N = 10,000 [roundtrip, N = 10000,
+fp127]. It did not always: the first Yul port floored every step of exp and
+ln, came back 8 ULPs low on each round trip, and lost a digit per decade of
+N. Rounding to nearest with guard bits fixed it, and the ladder is where
+that showed.
 
 Subtraction is worse. An amortising loan is `b = b·(1+r) − payment` every
 day, and near payoff the balance is a small difference of two large
@@ -79,8 +84,8 @@ Per op, inline library form, median over the gas ladder [gas.json, lib]:
 |---|---:|---:|---:|---:|
 | mul | 472 | 347 | 647 | 480 |
 | div | 939 | 361 | 715 | 578 |
-| exp | 4,894 | 549 | 2,898 | 3,512 |
-| ln | 991 | 720 | 1,052 | 7,325 |
+| exp | 5,353 | 549 | 2,898 | 3,512 |
+| ln | 999 | 720 | 1,052 | 7,325 |
 | sqrt | 3,564 | 622 | 1,333 | 1,111 |
 
 Multiplication and division cost about what they cost in WAD. The

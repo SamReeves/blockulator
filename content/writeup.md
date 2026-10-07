@@ -7,7 +7,7 @@ Every number here is a cell in a committed dataset, named in brackets: [`ladder.
 
 ## What it is
 
-FP127 is a signed 127.128 fixed-point library for the EVM: one `int256` per value, 128 fractional bits, 37 operations including `exp`, `ln`, `sqrt`, `pow` and both real branches of the Lambert W function, written as one Yul source that compiles to a deployed contract and to an inlinable Solidity library. It is validated against mpmath at 200 decimal places, and it is deployed on Sepolia at `0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28`.
+FP127 is a signed 127.128 fixed-point library for the EVM: one `int256` per value, 128 fractional bits, 37 operations including `exp`, `ln`, `sqrt`, `pow` and both real branches of the Lambert W function, written as one Yul source that compiles to a deployed contract and to an inlinable Solidity library. It is validated against mpmath at 200 decimal places, and it is deployed on Sepolia at `0xD8688E72dD6745719484da894C63Cd2685fD7E71`.
 
 The one number that matters: $10,000 at 10% APR compounded daily for a year, one multiplication per day. After 365 steps ABDK is right to 17 digits, Solady and PRBMath to 16, FP127 to 36 [compound, N = 365]. The [ladder](/demo/) has eight of these scenarios, and you can re-run any cell against the chain.
 
@@ -27,7 +27,7 @@ The current FP127 is one file, `FP127.yul.src`, holding Yul function bodies and 
 
 They agree because they are the same text. The equivalence suites then prove it: on the full `int256` domain, including which inputs revert and with what data, the object and the library return identical results, and both agree with the Huff bytecode on Sepolia on every input where the Huff computed a defined answer. The port also made arithmetic checked. Where the Huff wrapped silently on overflow, the Yul reverts with `Overflow()`, `DivisionByZero()` or `OutOfRange()`. Division, which the old documentation described as a 62-bit shortcut, turned out to have been a full 512-by-256 `mulDiv` all along; the docs were stale, and the equivalence suite is what caught it.
 
-Precision per op is in [`precision.json`](/data/precision.json): integer, rounding and comparison ops bit-exact; `exp` 122 bits at worst; `ln` 116; `pow` 119; the Lambert W branches 126 to 128 everywhere except within 2^-20 of the branch point at −1/e, where the slope is infinite and one ULP of input moves the output by 2^-63. The runtime is 6,512 bytes of the 24,576 allowed, and `lambertWm1`, the routine the Huff compiler could not fit, is in it.
+Precision per op is in [`precision.json`](/data/precision.json): integer, rounding and comparison ops bit-exact; `ln`, `log2` and `log10` within one ULP of the truth; `exp` and its family 146 bits at worst; `pow` 122; the Lambert W branches 126 to 128 everywhere except within 2^-20 of the branch point at −1/e, where the slope is infinite and one ULP of input moves the output by 2^-63. The transcendentals compute with 64 guard bits and round to nearest once, which the ladder forced: under the Huff's floor-everywhere policy `exp(ln(x))` came back 8 ULPs low on every call and the error marched in a straight line, and now it comes back the same word every time. The runtime is 7,783 bytes of the 24,576 allowed, and `lambertWm1`, the routine the Huff compiler could not fit, is in it.
 
 ## Trust model
 
@@ -35,7 +35,7 @@ The object has no storage, no owner, no proxy and no upgrade path. It was deploy
 
 ## What it costs
 
-Per op, inline, median over the gas ladder [gas.json, lib]: `mul` 472 against Solady's 347 and PRBMath's 647; `div` 939 against 361 and 715; `exp` 4,894 against 549 and 2,898; `ln` 991 against 720 and 1,052; `sqrt` 3,564 against 622 and 1,333. Multiplication and division cost about what they cost in WAD. The transcendentals cost more because they compute twice as many bits, and `sqrt` in particular pays for seven Newton steps that make it bit-exact. Through the deployed object add the `staticcall`, about 700 gas, to every op. The full table is on the [compare](/compare/) page.
+Per op, inline, median over the gas ladder [gas.json, lib]: `mul` 472 against Solady's 347 and PRBMath's 647; `div` 939 against 361 and 715; `exp` 5,353 against 549 and 2,898; `ln` 999 against 720 and 1,052; `sqrt` 3,564 against 622 and 1,333. Multiplication and division cost about what they cost in WAD. The transcendentals cost more because they compute twice as many bits, and `sqrt` in particular pays for seven Newton steps that make it bit-exact. Through the deployed object add the `staticcall`, about 700 gas, to every op. The full table is on the [compare](/compare/) page.
 
 ## What it is not for
 

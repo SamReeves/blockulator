@@ -21,11 +21,11 @@
     "worstInput": ""
   },
   "cbrt": {
-    "meanBits": 147,
+    "meanBits": 152,
     "minBits": 123,
     "n": 96,
     "reverts": 1,
-    "worstInput": "0x00000000000000000de0b6b3a764000000000000000000000000000000000000"
+    "worstInput": "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
   },
   "ceil": {
     "meanBits": 256,
@@ -56,25 +56,25 @@
     "worstInput": ""
   },
   "exp": {
-    "meanBits": 201,
-    "minBits": 122,
+    "meanBits": 221,
+    "minBits": 146,
     "n": 87,
     "reverts": 4,
-    "worstInput": "0x0000000000000000000000000000005800000000000000000000000000000000"
+    "worstInput": "0x0000000000000000000000000000001400000000000000000000000000000000"
   },
   "exp10": {
-    "meanBits": 190,
-    "minBits": 124,
+    "meanBits": 211,
+    "minBits": 146,
     "n": 66,
     "reverts": 3,
-    "worstInput": "0x0000000000000000000000000000002500000000000000000000000000000000"
+    "worstInput": "0x0000000000000000000000000000000a00000000000000000000000000000000"
   },
   "exp2": {
-    "meanBits": 203,
-    "minBits": 124,
+    "meanBits": 211,
+    "minBits": 146,
     "n": 80,
     "reverts": 3,
-    "worstInput": "0x0000000000000000000000000000007effffffffffffffffffffffffffffffff"
+    "worstInput": "0x0000000000000000000000000000003200000000000000000000000000000000"
   },
   "factorial": {
     "meanBits": 256,
@@ -133,15 +133,15 @@
     "worstInput": ""
   },
   "lambertW0": {
-    "meanBits": 163,
-    "minBits": 61,
+    "meanBits": 249,
+    "minBits": 65,
     "n": 108,
     "reverts": 3,
-    "worstInput": "0xffffffffffffffffffffffffffffffffa1d2a7274c4320e54521387d6fab06f3"
+    "worstInput": "0xffffffffffffffffffffffffffffffffa1d2a7274c4320e54521387d6fab06f4"
   },
   "lambertWm1": {
-    "meanBits": 160,
-    "minBits": 64,
+    "meanBits": 243,
+    "minBits": 67,
     "n": 66,
     "reverts": 6,
     "worstInput": "0xffffffffffffffffffffffffffffffffa1d2a7274c4320e54521387d6fab06f3"
@@ -154,22 +154,22 @@
     "worstInput": ""
   },
   "ln": {
-    "meanBits": 137,
-    "minBits": 116,
+    "meanBits": 255,
+    "minBits": 255,
     "n": 299,
     "reverts": 4,
-    "worstInput": "0x00000000000000000000000000000000ffbe76c8b4395810624dd2f1a9fbe76c"
+    "worstInput": "0x0000000000000000000000000000000000000000000000000000000000000001"
   },
   "log10": {
-    "meanBits": 164,
-    "minBits": 115,
+    "meanBits": 255,
+    "minBits": 255,
     "n": 299,
     "reverts": 4,
-    "worstInput": "0x00000000000000000000000000000000ffbe76c8b4395810624dd2f1a9fbe76c"
+    "worstInput": "0x0000000000000000000000000000000000000000000000000000000000000003"
   },
   "log2": {
-    "meanBits": 237,
-    "minBits": 115,
+    "meanBits": 255,
+    "minBits": 255,
     "n": 299,
     "reverts": 4,
     "worstInput": "0x00000000000000000000000000000000ffbe76c8b4395810624dd2f1a9fbe76c"
@@ -210,8 +210,8 @@
     "worstInput": ""
   },
   "pow": {
-    "meanBits": 216,
-    "minBits": 119,
+    "meanBits": 226,
+    "minBits": 122,
     "n": 369,
     "reverts": 31,
     "worstInput": "0x00000000000000000000000000000001028f5c28f5c28f5c28f5c28f5c28f5c2,0x0000000000000000000000000000016d00000000000000000000000000000000"

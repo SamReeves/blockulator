@@ -34,7 +34,7 @@ The same Yul function bodies are emitted twice.
 **Deployed object.** `FP127.yul` wraps the bodies in a `switch` on the
 4-byte selector. It is deployed with CREATE2 through the deterministic
 proxy at `0x4e59b44847b379578588920cA78FbF26c0B4956C` with salt
-`"FP127 v1"`, which puts it at `0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28` on
+`"FP127 v2"`, which puts it at `0xD8688E72dD6745719484da894C63Cd2685fD7E71` on
 every chain it is deployed to (Sepolia today; record and verification
 recipe in [`contracts/deployments/FP127.md`](../../deployments/FP127.md)).
 Every contract that `staticcall`s it runs identical bytecode.
@@ -110,10 +110,22 @@ each op; `fromFixed18` and `toFixed18` are the bridge. All parameters are
 | `lambertW0(x)` | W(x) for x ≥ −1/e | `OutOfRange` |
 | `lambertWm1(x)` | W₋₁(x) for −1/e ≤ x < 0 | `OutOfRange` |
 
-Rounding directions are inherited from the Huff and preserved exactly:
-`mul` floors because it is the middle 256 bits of the exact 512-bit two's
-complement product; `div` truncates because it strips signs, divides, and
-re-signs; every polynomial Horner step floors.
+Rounding directions of the arithmetic are inherited from the Huff and
+preserved exactly: `mul` floors because it is the middle 256 bits of the
+exact 512-bit two's complement product; `div` truncates because it strips
+signs, divides, and re-signs. The transcendentals do not floor any more
+(v2, 2026-10-07): `exp2`, `exp`, `exp10`, `log2`, `ln` and `log10` run
+their kernels at 2^-192, 64 guard bits below the format, floor every
+product there (`mulg`), and round to nearest once at the end (`round64`).
+`ln` and `log10` scale the unrounded 192-bit `log2`, `exp` and `exp10` form
+their argument at 2^-192, and a large `exp2` result keeps the guard bits as
+result bits, so each of these ops is within about one ULP of the true
+value and its error has no sign bias. The ladder's `exp(ln(x))` round trip,
+which drifted 8 ULPs per step under floor, now returns the same word on
+every step. The polynomials (degree 24 for 2^f, degree 14 for
+log2(1+f)/f) are Chebyshev fits with error below 2^-145, from
+`scripts/fp127/generators/guard_model.py`, which also models the kernels
+in exact integer arithmetic and measures them.
 
 ## Precision
 
@@ -124,8 +136,9 @@ the rest, with the same rounding and domain as the Yul) and writes
 [`docs/fp127/precision.json`](../../../docs/fp127/precision.json);
 `make precision-report` renders
 [`docs/fp127/precision.md`](../../../docs/fp127/precision.md). Every
-integer op is bit-exact. Transcendentals hold 115 bits or better at every
-tested input, most of them exact. The one place precision is structurally
+integer op is bit-exact, and so are `ln`, `log2` and `log10` to within one
+ULP of the rounded truth at every tested input; `exp`, `exp2` and `exp10`
+hold 146 bits or better (their polynomials' limit), `pow` and `cbrt` 122. The one place precision is structurally
 lower is Lambert W at the branch point −1/e, where the function has infinite
 slope and one ULP of input resolution limits any answer to about 63 bits.
 

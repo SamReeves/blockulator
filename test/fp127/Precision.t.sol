@@ -32,9 +32,11 @@ contract Precision is FP127Harness {
     function _floorBits(string memory op) internal pure returns (uint256) {
         bytes32 h = keccak256(bytes(op));
         if (h == keccak256("hypot") || h == keccak256("gavg")) return 120;
-        if (h == keccak256("exp") || h == keccak256("exp2") || h == keccak256("exp10")
-            || h == keccak256("ln") || h == keccak256("log2") || h == keccak256("log10")
-            || h == keccak256("pow") || h == keccak256("cbrt") || h == keccak256("lambertW0")
+        // guard-bit kernels: the exp family is limited by its polynomial (2^-145),
+        // the log family rounds to within one ULP of the truth
+        if (h == keccak256("exp") || h == keccak256("exp2") || h == keccak256("exp10")) return 140;
+        if (h == keccak256("ln") || h == keccak256("log2") || h == keccak256("log10")) return 200;
+        if (h == keccak256("pow") || h == keccak256("cbrt") || h == keccak256("lambertW0")
             || h == keccak256("lambertWm1")) return 115;
         return 256;
     }

@@ -62,6 +62,18 @@ contract EquivalenceOps is FP127Harness {
 
     function _u(int256 x) internal pure returns (uint256) { return uint256(x); }
 
+    /// The transcendentals now run with 64 guard bits and round to nearest,
+    /// where the Huff floored every step: the two agree to the Huff's own
+    /// precision, not bit for bit. Both must succeed and the Yul must be
+    /// within 2^-100 relative (plus 4 ULP) of the Huff.
+    function _objHuffClose(bytes memory newCall, bytes memory huffCall, string memory what) internal view {
+        Res memory o = _try(address(obj), newCall);
+        Res memory h = _try(address(huff), huffCall);
+        assertTrue(h.ok, string.concat(what, ": huff reverted"));
+        assertTrue(o.ok, string.concat(what, ": obj reverted"));
+        assertLe(_absd(o.value, h.value), (_absd(h.value, 0) >> 100) + 4, string.concat(what, ": obj not within 2^-100 of huff"));
+    }
+
     // ------------------------------------------------------------------
     // Object == library, full domain
     // ------------------------------------------------------------------
@@ -110,32 +122,32 @@ contract EquivalenceOps is FP127Harness {
 
     function testFuzz_huff_exp(int256 x) public view {
         x = bound(x, -88 * ONE, 88 * ONE);
-        _objHuff(abi.encodeCall(IFP127.exp, (x)), abi.encodeCall(IHuffOps.expRaw, (_u(x))), "exp");
+        _objHuffClose(abi.encodeCall(IFP127.exp, (x)), abi.encodeCall(IHuffOps.expRaw, (_u(x))), "exp");
     }
 
     function testFuzz_huff_exp2(int256 x) public view {
         x = bound(x, -128 * ONE, 127 * ONE - 1);
-        _objHuff(abi.encodeCall(IFP127.exp2, (x)), abi.encodeCall(IHuffOps.exp2Raw, (_u(x))), "exp2");
+        _objHuffClose(abi.encodeCall(IFP127.exp2, (x)), abi.encodeCall(IHuffOps.exp2Raw, (_u(x))), "exp2");
     }
 
     function testFuzz_huff_exp10(int256 x) public view {
         x = bound(x, -38 * ONE, 38 * ONE);
-        _objHuff(abi.encodeCall(IFP127.exp10, (x)), abi.encodeCall(IHuffOps.exp10Raw, (_u(x))), "exp10");
+        _objHuffClose(abi.encodeCall(IFP127.exp10, (x)), abi.encodeCall(IHuffOps.exp10Raw, (_u(x))), "exp10");
     }
 
     function testFuzz_huff_ln(int256 x) public view {
         x = bound(x, 1, MAX);
-        _objHuff(abi.encodeCall(IFP127.ln, (x)), abi.encodeCall(IHuffOps.lnRaw, (_u(x))), "ln");
+        _objHuffClose(abi.encodeCall(IFP127.ln, (x)), abi.encodeCall(IHuffOps.lnRaw, (_u(x))), "ln");
     }
 
     function testFuzz_huff_log2(int256 x) public view {
         x = bound(x, 1, MAX);
-        _objHuff(abi.encodeCall(IFP127.log2, (x)), abi.encodeCall(IHuffOps.log2Raw, (_u(x))), "log2");
+        _objHuffClose(abi.encodeCall(IFP127.log2, (x)), abi.encodeCall(IHuffOps.log2Raw, (_u(x))), "log2");
     }
 
     function testFuzz_huff_log10(int256 x) public view {
         x = bound(x, 1, MAX);
-        _objHuff(abi.encodeCall(IFP127.log10, (x)), abi.encodeCall(IHuffOps.log10Raw, (_u(x))), "log10");
+        _objHuffClose(abi.encodeCall(IFP127.log10, (x)), abi.encodeCall(IHuffOps.log10Raw, (_u(x))), "log10");
     }
 
     function testFuzz_huff_log2Up(int256 x) public view {
@@ -150,7 +162,7 @@ contract EquivalenceOps is FP127Harness {
 
     function testFuzz_huff_cbrt(int256 x) public view {
         vm.assume(x != MIN);
-        _objHuff(abi.encodeCall(IFP127.cbrt, (x)), abi.encodeCall(IHuffOps.cbrtRaw, (_u(x))), "cbrt");
+        _objHuffClose(abi.encodeCall(IFP127.cbrt, (x)), abi.encodeCall(IHuffOps.cbrtRaw, (_u(x))), "cbrt");
     }
 
     /// General pow path: 0.001 <= x <= 1000, -8 <= y <= 8, result fits.
@@ -160,7 +172,7 @@ contract EquivalenceOps is FP127Harness {
         // the Sepolia bytecode has no shortcuts; keep the fuzzer off them
         vm.assume(x != 2 * ONE && x != 10 * ONE);
         vm.assume(y != ONE && y != 2 * ONE && y != 3 * ONE && y != 4 * ONE && y != ONE / 2 && y != ONE / 4 && y != -ONE);
-        _objHuff(abi.encodeCall(IFP127.pow, (x, y)), abi.encodeCall(IHuffOps.powRaw, (_u(x), _u(y))), "pow");
+        _objHuffClose(abi.encodeCall(IFP127.pow, (x, y)), abi.encodeCall(IHuffOps.powRaw, (_u(x), _u(y))), "pow");
     }
 
     /// Shortcut paths: y in {1, 2, 3, 4, 1/2, 1/4, -1}, x in {2, 10}.
