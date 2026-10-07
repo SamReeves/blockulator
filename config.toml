@@ -1,0 +1,10 @@
+base_url = "https://blockulator.com"
+title = "blockulator"
+description = "FP127: 38 decimal digits of fixed-point math for the EVM, measured against ABDK, Solady and PRBMath."
+compile_sass = false
+build_search_index = false
+generate_feeds = false
+generate_sitemap = true
+
+[markdown]
+external_links_target_blank = false

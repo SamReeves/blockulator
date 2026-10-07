@@ -1,21 +1,10 @@
 #!/usr/bin/env bash
-# Refresh SDR design system assets from upstream securedataresearch.net.
-# Run manually when the parent design system updates.
-
+# Pull the stylesheet and hero shader from securedataresearch.net so this site
+# stays identical in style to the company site. Run when sdr-static changes.
 set -euo pipefail
-
-UPSTREAM="https://securedataresearch.net/lib"
-DEST="$(dirname "$0")/../vendor/sdr/lib"
-
-mkdir -p "$DEST/particles"
-
-echo "Syncing SDR tokens and particles from $UPSTREAM..."
-
-curl -sSf "$UPSTREAM/tokens.css"           -o "$DEST/tokens.css"
-curl -sSf "$UPSTREAM/tokens.js"            -o "$DEST/tokens.js"
-curl -sSf "$UPSTREAM/particles/index.js"   -o "$DEST/particles/index.js"
-curl -sSf "$UPSTREAM/particles/palette.js" -o "$DEST/particles/palette.js"
-curl -sSf "$UPSTREAM/particles/config.js"  -o "$DEST/particles/config.js"
-
-echo "Done. Files updated:"
-ls -lh "$DEST"/*.* "$DEST/particles/"
+UPSTREAM="https://securedataresearch.net"
+DEST="$(cd "$(dirname "$0")/.." && pwd)/static"
+curl -sSf "$UPSTREAM/css/site.css" -o "$DEST/css/site.css"
+curl -sSf "$UPSTREAM/js/hero.js"   -o "$DEST/js/hero.js"
+echo "synced site.css and hero.js from $UPSTREAM"
+git -C "$DEST/.." status --short static/css/site.css static/js/hero.js

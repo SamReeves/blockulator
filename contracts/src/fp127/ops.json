@@ -1,0 +1,433 @@
+{
+  "errors": {
+    "Overflow()": "0x35278d12",
+    "DivisionByZero()": "0x23d359a3",
+    "OutOfRange()": "0x7db3aba7"
+  },
+  "ops": [
+    {
+      "name": "fromFixed18",
+      "signature": "fromFixed18(int256)",
+      "selector": "0x9aea0a13",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Convert an 18-decimal fixed-point value to 127.128.",
+      "domain": "|x| < 2^127",
+      "reverts": "OutOfRange() if |x| >= 2^127"
+    },
+    {
+      "name": "toFixed18",
+      "signature": "toFixed18(int256)",
+      "selector": "0xa2745c74",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Convert a 127.128 value to 18-decimal fixed-point.",
+      "domain": "any x",
+      "reverts": "never"
+    },
+    {
+      "name": "add",
+      "signature": "add(int256,int256)",
+      "selector": "0xa5f3c23b",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "a + b. Reverts with Overflow on signed overflow.",
+      "domain": "any a, b",
+      "reverts": "Overflow() on signed overflow"
+    },
+    {
+      "name": "sub",
+      "signature": "sub(int256,int256)",
+      "selector": "0xadefc37b",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "a - b. Reverts with Overflow on signed overflow.",
+      "domain": "any a, b",
+      "reverts": "Overflow() on signed overflow"
+    },
+    {
+      "name": "mul",
+      "signature": "mul(int256,int256)",
+      "selector": "0xbbe93d91",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "floor(a * b / 2^128), the 127.128 product.",
+      "domain": "any a, b",
+      "reverts": "Overflow() when a·b / 2^128 does not fit in int256"
+    },
+    {
+      "name": "div",
+      "signature": "div(int256,int256)",
+      "selector": "0x43509138",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "a / b in 127.128, truncated toward zero.",
+      "domain": "b != 0",
+      "reverts": "DivisionByZero() when b == 0; Overflow() when the quotient does not fit"
+    },
+    {
+      "name": "exp2",
+      "signature": "exp2(int256)",
+      "selector": "0xdbbb06d2",
+      "inputs": [
+        "x"
+      ],
+      "notice": "2^x.",
+      "domain": "x < 127; returns 0 below -128",
+      "reverts": "Overflow() for x >= 127"
+    },
+    {
+      "name": "exp",
+      "signature": "exp(int256)",
+      "selector": "0xe46751e3",
+      "inputs": [
+        "x"
+      ],
+      "notice": "e^x, computed as 2^(x * log2(e)).",
+      "domain": "x <= 88; returns 0 below -88",
+      "reverts": "Overflow() for x > 88"
+    },
+    {
+      "name": "exp10",
+      "signature": "exp10(int256)",
+      "selector": "0x4c0dafa2",
+      "inputs": [
+        "x"
+      ],
+      "notice": "10^x, computed as 2^(x * log2(10)).",
+      "domain": "x·log2(10) < 127",
+      "reverts": "Overflow() above that"
+    },
+    {
+      "name": "log2",
+      "signature": "log2(int256)",
+      "selector": "0xe0d68737",
+      "inputs": [
+        "x"
+      ],
+      "notice": "log2(x) for x > 0.",
+      "domain": "x > 0",
+      "reverts": "OutOfRange() for x <= 0"
+    },
+    {
+      "name": "ln",
+      "signature": "ln(int256)",
+      "selector": "0x8e6f2353",
+      "inputs": [
+        "x"
+      ],
+      "notice": "ln(x) = log2(x) * ln(2) for x > 0. Reverts with OutOfRange otherwise.",
+      "domain": "x > 0",
+      "reverts": "OutOfRange() for x <= 0"
+    },
+    {
+      "name": "log10",
+      "signature": "log10(int256)",
+      "selector": "0xb47ca3c7",
+      "inputs": [
+        "x"
+      ],
+      "notice": "log10(x) = log2(x) / log2(10) for x > 0. Reverts with OutOfRange otherwise.",
+      "domain": "x > 0",
+      "reverts": "OutOfRange() for x <= 0"
+    },
+    {
+      "name": "log2Up",
+      "signature": "log2Up(int256)",
+      "selector": "0xa1985bb6",
+      "inputs": [
+        "x"
+      ],
+      "notice": "ceil(log2(x)) for x > 0. Exact for powers of two.",
+      "domain": "x > 0",
+      "reverts": "OutOfRange() for x <= 0"
+    },
+    {
+      "name": "sqrt",
+      "signature": "sqrt(int256)",
+      "selector": "0x665df460",
+      "inputs": [
+        "x"
+      ],
+      "notice": "sqrt(x) for x >= 0.",
+      "domain": "x >= 0",
+      "reverts": "OutOfRange() for x < 0"
+    },
+    {
+      "name": "pow",
+      "signature": "pow(int256,int256)",
+      "selector": "0x92b0c5b2",
+      "inputs": [
+        "x",
+        "y"
+      ],
+      "notice": "x^y = 2^(y * log2(x)) for x >= 0.",
+      "domain": "x >= 0",
+      "reverts": "OutOfRange() for x < 0; Overflow() when the result does not fit"
+    },
+    {
+      "name": "cbrt",
+      "signature": "cbrt(int256)",
+      "selector": "0xd4b6188c",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Cube root, defined for all x: cbrt(-x) = -cbrt(x).",
+      "domain": "any x",
+      "reverts": "Overflow() only at -2^255"
+    },
+    {
+      "name": "gavg",
+      "signature": "gavg(int256,int256)",
+      "selector": "0xa13ed853",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "Geometric mean sqrt(a * b). Reverts with OutOfRange if a * b < 0.",
+      "domain": "a·b >= 0",
+      "reverts": "OutOfRange() if a·b < 0; Overflow() if a·b does not fit"
+    },
+    {
+      "name": "hypot",
+      "signature": "hypot(int256,int256)",
+      "selector": "0xc479210c",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "sqrt(a^2 + b^2), checked.",
+      "domain": "any a, b",
+      "reverts": "Overflow() if a^2 + b^2 does not fit"
+    },
+    {
+      "name": "inv",
+      "signature": "inv(int256)",
+      "selector": "0x3a02c983",
+      "inputs": [
+        "x"
+      ],
+      "notice": "1 / x. Reverts with DivisionByZero for x == 0.",
+      "domain": "x != 0",
+      "reverts": "DivisionByZero() for x == 0; Overflow() when 1/x does not fit"
+    },
+    {
+      "name": "abs",
+      "signature": "abs(int256)",
+      "selector": "0x1b5ac4b5",
+      "inputs": [
+        "x"
+      ],
+      "notice": "|x|. Reverts with Overflow for x == -2^255, which has no positive.",
+      "domain": "any x",
+      "reverts": "Overflow() at -2^255"
+    },
+    {
+      "name": "neg",
+      "signature": "neg(int256)",
+      "selector": "0x54a53dc1",
+      "inputs": [
+        "x"
+      ],
+      "notice": "-x. Reverts with Overflow for x == -2^255.",
+      "domain": "any x",
+      "reverts": "Overflow() at -2^255"
+    },
+    {
+      "name": "sign",
+      "signature": "sign(int256)",
+      "selector": "0xae610b48",
+      "inputs": [
+        "x"
+      ],
+      "notice": "-1, 0 or 1 in 127.128.",
+      "domain": "any x",
+      "reverts": "never"
+    },
+    {
+      "name": "min",
+      "signature": "min(int256,int256)",
+      "selector": "0x29aa9cbe",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "Signed minimum.",
+      "domain": "any a, b",
+      "reverts": "never"
+    },
+    {
+      "name": "max",
+      "signature": "max(int256,int256)",
+      "selector": "0x81fe5786",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "Signed maximum.",
+      "domain": "any a, b",
+      "reverts": "never"
+    },
+    {
+      "name": "clamp",
+      "signature": "clamp(int256,int256,int256)",
+      "selector": "0x7b8d0f0c",
+      "inputs": [
+        "x",
+        "lo",
+        "hi"
+      ],
+      "notice": "min(hi, max(lo, x)). If lo > hi the result is hi, as in the Huff.",
+      "domain": "any x, lo, hi",
+      "reverts": "never"
+    },
+    {
+      "name": "avg",
+      "signature": "avg(int256,int256)",
+      "selector": "0xebf274be",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "floor((a + b) / 2) without intermediate overflow.",
+      "domain": "any a, b",
+      "reverts": "never"
+    },
+    {
+      "name": "zeroFloorSub",
+      "signature": "zeroFloorSub(int256,int256)",
+      "selector": "0xff78cf2d",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "max(0, a - b), with the subtraction checked.",
+      "domain": "any a, b",
+      "reverts": "Overflow() if a - b does not fit"
+    },
+    {
+      "name": "dist",
+      "signature": "dist(int256,int256)",
+      "selector": "0x2110b689",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "|a - b|, checked.",
+      "domain": "any a, b",
+      "reverts": "Overflow() if a - b does not fit"
+    },
+    {
+      "name": "lerp",
+      "signature": "lerp(int256,int256,int256)",
+      "selector": "0x84e13b60",
+      "inputs": [
+        "a",
+        "b",
+        "t"
+      ],
+      "notice": "a + t * (b - a), checked. t is not clamped to [0, 1].",
+      "domain": "any a, b, t",
+      "reverts": "Overflow() on any intermediate that does not fit"
+    },
+    {
+      "name": "floor",
+      "signature": "floor(int256)",
+      "selector": "0xda3ff648",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Largest integer <= x. Clearing the fraction bits of a two's complement word is a floor for both signs.",
+      "domain": "any x",
+      "reverts": "never"
+    },
+    {
+      "name": "ceil",
+      "signature": "ceil(int256)",
+      "selector": "0x42fba7ae",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Smallest integer >= x, as -floor(-x). Reverts with Overflow when that integer is 2^127, which does not fit.",
+      "domain": "any x",
+      "reverts": "Overflow() when the result is 2^127"
+    },
+    {
+      "name": "frac",
+      "signature": "frac(int256)",
+      "selector": "0xae2785ac",
+      "inputs": [
+        "x"
+      ],
+      "notice": "x - floor(x), always in [0, 1).",
+      "domain": "any x",
+      "reverts": "never"
+    },
+    {
+      "name": "round",
+      "signature": "round(int256)",
+      "selector": "0x58b4370b",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Nearest integer, halves rounded up: floor(x + 1/2). Checked.",
+      "domain": "any x",
+      "reverts": "Overflow() when the result is 2^127"
+    },
+    {
+      "name": "gcd",
+      "signature": "gcd(int256,int256)",
+      "selector": "0x63b03896",
+      "inputs": [
+        "a",
+        "b"
+      ],
+      "notice": "gcd of the integer parts |floor(a)|, |floor(b)|, as a 127.128 integer.",
+      "domain": "any a, b",
+      "reverts": "never"
+    },
+    {
+      "name": "factorial",
+      "signature": "factorial(int256)",
+      "selector": "0x5ad78e8a",
+      "inputs": [
+        "n"
+      ],
+      "notice": "floor(n)! for 0 <= n < 34. 33! is the largest that fits.",
+      "domain": "0 <= n < 34",
+      "reverts": "OutOfRange() outside that"
+    },
+    {
+      "name": "lambertW0",
+      "signature": "lambertW0(int256)",
+      "selector": "0x6de23d34",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Principal branch of the Lambert W function, W(x) e^W(x) = x, for x >= -1/e.",
+      "domain": "x >= -1/e",
+      "reverts": "OutOfRange() below -1/e"
+    },
+    {
+      "name": "lambertWm1",
+      "signature": "lambertWm1(int256)",
+      "selector": "0xae94abc8",
+      "inputs": [
+        "x"
+      ],
+      "notice": "Secondary real branch of the Lambert W function, W(x) e^W(x) = x with W(x) <= -1, for -1/e <= x < 0.",
+      "domain": "-1/e <= x < 0",
+      "reverts": "OutOfRange() outside that"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
  "generated": "2026-10-06",
- "description": "Gas per op across an input ladder. First four forms are FP127; the first two and the third include the external call. Competitors are measured as internal library calls like FP127Lib. null = reverted or unsupported.",
+ "description": "Gas per op across an input ladder. First four forms are FP127; the first two and the third include the external call. Competitors are measured as internal library calls like FP127Lib. null = reverted or unsupported. summary holds min/median/max per form, null where there is no measurement.",
  "versions": {
-  "fp127": "aba9873",
+  "fp127": "b55b9e0",
   "huff": "sepolia:0xfae694D0c2c44181791F838c54Ed64C3151FfE30@11857616",
   "solady": "v0.1.26",
   "prb-math": "v4.2.0",
@@ -102,6 +102,35 @@
      542,
      616
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1419,
+     "median": 1421,
+     "max": 3918
+    },
+    "yul": {
+     "min": 701,
+     "median": 706,
+     "max": 3200
+    },
+    "caller": null,
+    "lib": {
+     "min": 608,
+     "median": 612,
+     "max": 617
+    },
+    "abdk": {
+     "min": 509,
+     "median": 526,
+     "max": 531
+    },
+    "solady": null,
+    "prb": {
+     "min": 542,
+     "median": 551,
+     "max": 616
+    }
    }
   },
   "add": {
@@ -170,6 +199,43 @@
      469,
      468
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 787,
+     "median": 789,
+     "max": 3286
+    },
+    "yul": {
+     "min": 1274,
+     "median": 1281,
+     "max": 3771
+    },
+    "caller": {
+     "min": 2602,
+     "median": 2605,
+     "max": 5095
+    },
+    "lib": {
+     "min": 276,
+     "median": 281,
+     "max": 289
+    },
+    "abdk": {
+     "min": 569,
+     "median": 575,
+     "max": 581
+    },
+    "solady": {
+     "min": 484,
+     "median": 490,
+     "max": 496
+    },
+    "prb": {
+     "min": 468,
+     "median": 473,
+     "max": 478
+    }
    }
   },
   "avg": {
@@ -238,6 +304,35 @@
      452,
      390
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1656,
+     "median": 1658,
+     "max": 1660
+    },
+    "yul": {
+     "min": 1604,
+     "median": 1610,
+     "max": 1617
+    },
+    "caller": null,
+    "lib": {
+     "min": 498,
+     "median": 501,
+     "max": 528
+    },
+    "abdk": {
+     "min": 430,
+     "median": 466,
+     "max": 492
+    },
+    "solady": null,
+    "prb": {
+     "min": 390,
+     "median": 426,
+     "max": 452
+    }
    }
   },
   "cbrt": {
@@ -314,6 +409,31 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 2043,
+     "median": 9946,
+     "max": 10883
+    },
+    "yul": {
+     "min": 1546,
+     "median": 5796,
+     "max": 8712
+    },
+    "caller": null,
+    "lib": {
+     "min": 745,
+     "median": 6289,
+     "max": 10187
+    },
+    "abdk": null,
+    "solady": {
+     "min": 829,
+     "median": 836,
+     "max": 1376
+    },
+    "prb": null
    }
   },
   "ceil": {
@@ -390,6 +510,31 @@
      602,
      657
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1922,
+     "median": 1924,
+     "max": 1926
+    },
+    "yul": {
+     "min": 854,
+     "median": 858,
+     "max": 864
+    },
+    "caller": null,
+    "lib": {
+     "min": 651,
+     "median": 658,
+     "max": 685
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": {
+     "min": 602,
+     "median": 613,
+     "max": 680
+    }
    }
   },
   "dist": {
@@ -458,6 +603,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1734,
+     "median": 1735,
+     "max": 1737
+    },
+    "yul": {
+     "min": 969,
+     "median": 976,
+     "max": 1007
+    },
+    "caller": null,
+    "lib": {
+     "min": 733,
+     "median": 736,
+     "max": 768
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "div": {
@@ -526,6 +692,43 @@
      735,
      710
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1363,
+     "median": 1365,
+     "max": 1367
+    },
+    "yul": {
+     "min": 1395,
+     "median": 1401,
+     "max": 1433
+    },
+    "caller": {
+     "min": 2720,
+     "median": 2727,
+     "max": 2734
+    },
+    "lib": {
+     "min": 916,
+     "median": 939,
+     "max": 940
+    },
+    "abdk": {
+     "min": 560,
+     "median": 578,
+     "max": 600
+    },
+    "solady": {
+     "min": 342,
+     "median": 361,
+     "max": 382
+    },
+    "prb": {
+     "min": 695,
+     "median": 715,
+     "max": 735
+    }
    }
   },
   "exp": {
@@ -602,6 +805,39 @@
      2919,
      2917
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 5910,
+     "median": 5912,
+     "max": 8445
+    },
+    "yul": {
+     "min": 4885,
+     "median": 4891,
+     "max": 7437
+    },
+    "caller": null,
+    "lib": {
+     "min": 4886,
+     "median": 4894,
+     "max": 4953
+    },
+    "abdk": {
+     "min": 289,
+     "median": 3512,
+     "max": 3560
+    },
+    "solady": {
+     "min": 189,
+     "median": 549,
+     "max": 555
+    },
+    "prb": {
+     "min": 264,
+     "median": 2898,
+     "max": 3043
+    }
    }
   },
   "exp10": {
@@ -678,6 +914,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 6561,
+     "median": 6562,
+     "max": 6598
+    },
+    "yul": {
+     "min": 4340,
+     "median": 4344,
+     "max": 4408
+    },
+    "caller": null,
+    "lib": {
+     "min": 4963,
+     "median": 4966,
+     "max": 5037
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "exp2": {
@@ -754,6 +1011,35 @@
      607,
      591
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1227,
+     "median": 5758,
+     "max": 5760
+    },
+    "yul": {
+     "min": 1592,
+     "median": 4744,
+     "max": 4752
+    },
+    "caller": null,
+    "lib": {
+     "min": 463,
+     "median": 4702,
+     "max": 4716
+    },
+    "abdk": {
+     "min": 293,
+     "median": 2922,
+     "max": 3370
+    },
+    "solady": null,
+    "prb": {
+     "min": 293,
+     "median": 609,
+     "max": 2816
+    }
    }
   },
   "factorial": {
@@ -830,6 +1116,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 2216,
+     "median": 2438,
+     "max": 2945
+    },
+    "yul": {
+     "min": 987,
+     "median": 1581,
+     "max": 3041
+    },
+    "caller": null,
+    "lib": {
+     "min": 807,
+     "median": 1290,
+     "max": 2530
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "floor": {
@@ -906,6 +1213,31 @@
      596,
      629
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1885,
+     "median": 1886,
+     "max": 1889
+    },
+    "yul": {
+     "min": 1371,
+     "median": 1379,
+     "max": 1398
+    },
+    "caller": null,
+    "lib": {
+     "min": 576,
+     "median": 583,
+     "max": 603
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": {
+     "min": 596,
+     "median": 620,
+     "max": 631
+    }
    }
   },
   "frac": {
@@ -982,6 +1314,31 @@
      533,
      565
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1909,
+     "median": 1912,
+     "max": 1914
+    },
+    "yul": {
+     "min": 1238,
+     "median": 1244,
+     "max": 1271
+    },
+    "caller": null,
+    "lib": {
+     "min": 597,
+     "median": 601,
+     "max": 635
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": {
+     "min": 533,
+     "median": 544,
+     "max": 570
+    }
    }
   },
   "fromFixed18": {
@@ -1058,6 +1415,31 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 889,
+     "median": 891,
+     "max": 892
+    },
+    "yul": {
+     "min": 1199,
+     "median": 1201,
+     "max": 1246
+    },
+    "caller": {
+     "min": 2416,
+     "median": 2419,
+     "max": 2463
+    },
+    "lib": {
+     "min": 753,
+     "median": 755,
+     "max": 806
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "gavg": {
@@ -1126,6 +1508,35 @@
      1263,
      428
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 5084,
+     "median": 5114,
+     "max": 5282
+    },
+    "yul": {
+     "min": 4077,
+     "median": 4136,
+     "max": 4229
+    },
+    "caller": null,
+    "lib": {
+     "min": 3803,
+     "median": 3837,
+     "max": 4031
+    },
+    "abdk": {
+     "min": 1275,
+     "median": 1289,
+     "max": 1342
+    },
+    "solady": null,
+    "prb": {
+     "min": 428,
+     "median": 1267,
+     "max": 1287
+    }
    }
   },
   "gcd": {
@@ -1194,6 +1605,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 2339,
+     "median": 2388,
+     "max": 2587
+    },
+    "yul": {
+     "min": 1170,
+     "median": 1209,
+     "max": 1364
+    },
+    "caller": null,
+    "lib": {
+     "min": 709,
+     "median": 753,
+     "max": 935
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "hypot": {
@@ -1262,6 +1694,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 5657,
+     "median": 5685,
+     "max": 5854
+    },
+    "yul": {
+     "min": 4614,
+     "median": 4663,
+     "max": 4767
+    },
+    "caller": null,
+    "lib": {
+     "min": 4134,
+     "median": 4167,
+     "max": 4360
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "inv": {
@@ -1338,6 +1791,39 @@
      461,
      459
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1975,
+     "median": 1977,
+     "max": 1980
+    },
+    "yul": {
+     "min": 1290,
+     "median": 1295,
+     "max": 1340
+    },
+    "caller": null,
+    "lib": {
+     "min": 1072,
+     "median": 1078,
+     "max": 1115
+    },
+    "abdk": {
+     "min": 467,
+     "median": 480,
+     "max": 519
+    },
+    "solady": {
+     "min": 307,
+     "median": 337,
+     "max": 396
+    },
+    "prb": {
+     "min": 459,
+     "median": 487,
+     "max": 511
+    }
    }
   },
   "lambertW0": {
@@ -1414,6 +1900,31 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 12958,
+     "median": 20936,
+     "max": 21129
+    },
+    "yul": {
+     "min": 32887,
+     "median": 33812,
+     "max": 34899
+    },
+    "caller": null,
+    "lib": {
+     "min": 38421,
+     "median": 42536,
+     "max": 43857
+    },
+    "abdk": null,
+    "solady": {
+     "min": 1851,
+     "median": 2937,
+     "max": 4121
+    },
+    "prb": null
    }
   },
   "lambertWm1": {
@@ -1490,6 +2001,23 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": null,
+    "yul": {
+     "min": 25434,
+     "median": 27107,
+     "max": 29729
+    },
+    "caller": null,
+    "lib": {
+     "min": 30612,
+     "median": 32907,
+     "max": 36533
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "ln": {
@@ -1566,6 +2094,39 @@
      1029,
      1035
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1182,
+     "median": 4177,
+     "max": 6586
+    },
+    "yul": {
+     "min": 1125,
+     "median": 1703,
+     "max": 4674
+    },
+    "caller": null,
+    "lib": {
+     "min": 448,
+     "median": 991,
+     "max": 4978
+    },
+    "abdk": {
+     "min": 7304,
+     "median": 7325,
+     "max": 7387
+    },
+    "solady": {
+     "min": 711,
+     "median": 720,
+     "max": 722
+    },
+    "prb": {
+     "min": 1029,
+     "median": 1052,
+     "max": 7346
+    }
    }
   },
   "log10": {
@@ -1642,6 +2203,31 @@
      2632,
      2649
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1898,
+     "median": 4694,
+     "max": 5694
+    },
+    "yul": {
+     "min": 1459,
+     "median": 1906,
+     "max": 4915
+    },
+    "caller": null,
+    "lib": {
+     "min": 631,
+     "median": 1009,
+     "max": 4977
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": {
+     "min": 835,
+     "median": 2640,
+     "max": 8645
+    }
    }
   },
   "log2": {
@@ -1718,6 +2304,35 @@
      722,
      732
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1160,
+     "median": 3956,
+     "max": 4956
+    },
+    "yul": {
+     "min": 1470,
+     "median": 1906,
+     "max": 4915
+    },
+    "caller": null,
+    "lib": {
+     "min": 399,
+     "median": 748,
+     "max": 4734
+    },
+    "abdk": {
+     "min": 7207,
+     "median": 7232,
+     "max": 7296
+    },
+    "solady": null,
+    "prb": {
+     "min": 722,
+     "median": 744,
+     "max": 7032
+    }
    }
   },
   "log2Up": {
@@ -1794,6 +2409,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 2435,
+     "median": 2508,
+     "max": 6100
+    },
+    "yul": {
+     "min": 1481,
+     "median": 1626,
+     "max": 4823
+    },
+    "caller": null,
+    "lib": {
+     "min": 707,
+     "median": 755,
+     "max": 4961
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "max": {
@@ -1862,6 +2498,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1621,
+     "median": 1627,
+     "max": 1629
+    },
+    "yul": {
+     "min": 1190,
+     "median": 1197,
+     "max": 1236
+    },
+    "caller": null,
+    "lib": {
+     "min": 473,
+     "median": 515,
+     "max": 516
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "min": {
@@ -1930,6 +2587,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1595,
+     "median": 1599,
+     "max": 1604
+    },
+    "yul": {
+     "min": 921,
+     "median": 925,
+     "max": 955
+    },
+    "caller": null,
+    "lib": {
+     "min": 452,
+     "median": 493,
+     "max": 494
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "mul": {
@@ -1998,6 +2676,43 @@
      644,
      641
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 997,
+     "median": 999,
+     "max": 1001
+    },
+    "yul": {
+     "min": 1540,
+     "median": 1547,
+     "max": 1554
+    },
+    "caller": {
+     "min": 2897,
+     "median": 2904,
+     "max": 2911
+    },
+    "lib": {
+     "min": 470,
+     "median": 472,
+     "max": 490
+    },
+    "abdk": {
+     "min": 469,
+     "median": 480,
+     "max": 488
+    },
+    "solady": {
+     "min": 335,
+     "median": 347,
+     "max": 354
+    },
+    "prb": {
+     "min": 641,
+     "median": 647,
+     "max": 658
+    }
    }
   },
   "neg": {
@@ -2074,6 +2789,31 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1425,
+     "median": 1427,
+     "max": 1429
+    },
+    "yul": {
+     "min": 861,
+     "median": 869,
+     "max": 878
+    },
+    "caller": null,
+    "lib": {
+     "min": 595,
+     "median": 604,
+     "max": 610
+    },
+    "abdk": {
+     "min": 480,
+     "median": 487,
+     "max": 499
+    },
+    "solady": null,
+    "prb": null
    }
   },
   "pow": {
@@ -2142,6 +2882,39 @@
      1793,
      10087
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 9043,
+     "median": 9573,
+     "max": 11696
+    },
+    "yul": {
+     "min": 1475,
+     "median": 5326,
+     "max": 10257
+    },
+    "caller": null,
+    "lib": {
+     "min": 808,
+     "median": 5774,
+     "max": 9526
+    },
+    "abdk": {
+     "min": 1697,
+     "median": 1892,
+     "max": 19426
+    },
+    "solady": {
+     "min": 1614,
+     "median": 1618,
+     "max": 1625
+    },
+    "prb": {
+     "min": 1774,
+     "median": 9980,
+     "max": 10240
+    }
    }
   },
   "round": {
@@ -2218,6 +2991,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 2149,
+     "median": 2150,
+     "max": 2151
+    },
+    "yul": {
+     "min": 978,
+     "median": 980,
+     "max": 1013
+    },
+    "caller": null,
+    "lib": {
+     "min": 756,
+     "median": 761,
+     "max": 796
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "sign": {
@@ -2294,6 +3088,31 @@
      564,
      666
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1846,
+     "median": 1848,
+     "max": 1850
+    },
+    "yul": {
+     "min": 1248,
+     "median": 1253,
+     "max": 1276
+    },
+    "caller": null,
+    "lib": {
+     "min": 568,
+     "median": 576,
+     "max": 589
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": {
+     "min": 564,
+     "median": 587,
+     "max": 666
+    }
    }
   },
   "sqrt": {
@@ -2370,6 +3189,39 @@
      1323,
      1376
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 4202,
+     "median": 4381,
+     "max": 6718
+    },
+    "yul": {
+     "min": 3608,
+     "median": 3739,
+     "max": 6139
+    },
+    "caller": null,
+    "lib": {
+     "min": 3497,
+     "median": 3564,
+     "max": 3783
+    },
+    "abdk": {
+     "min": 1093,
+     "median": 1111,
+     "max": 1200
+    },
+    "solady": {
+     "min": 615,
+     "median": 622,
+     "max": 626
+    },
+    "prb": {
+     "min": 670,
+     "median": 1333,
+     "max": 1376
+    }
    }
   },
   "sub": {
@@ -2438,6 +3290,43 @@
      493,
      477
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 817,
+     "median": 819,
+     "max": 822
+    },
+    "yul": {
+     "min": 1313,
+     "median": 1318,
+     "max": 1334
+    },
+    "caller": {
+     "min": 2656,
+     "median": 2663,
+     "max": 2670
+    },
+    "lib": {
+     "min": 308,
+     "median": 319,
+     "max": 329
+    },
+    "abdk": {
+     "min": 581,
+     "median": 587,
+     "max": 599
+    },
+    "solady": {
+     "min": 494,
+     "median": 500,
+     "max": 512
+    },
+    "prb": {
+     "min": 475,
+     "median": 482,
+     "max": 493
+    }
    }
   },
   "toFixed18": {
@@ -2514,6 +3403,31 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 934,
+     "median": 935,
+     "max": 937
+    },
+    "yul": {
+     "min": 1243,
+     "median": 1247,
+     "max": 1249
+    },
+    "caller": {
+     "min": 2416,
+     "median": 2418,
+     "max": 2465
+    },
+    "lib": {
+     "min": 763,
+     "median": 767,
+     "max": 812
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   },
   "zeroFloorSub": {
@@ -2582,6 +3496,27 @@
      null,
      null
     ]
+   },
+   "summary": {
+    "huff": {
+     "min": 1720,
+     "median": 1725,
+     "max": 1727
+    },
+    "yul": {
+     "min": 1724,
+     "median": 1729,
+     "max": 1739
+    },
+    "caller": null,
+    "lib": {
+     "min": 681,
+     "median": 683,
+     "max": 720
+    },
+    "abdk": null,
+    "solady": null,
+    "prb": null
    }
   }
  }

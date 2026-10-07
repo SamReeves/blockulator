@@ -1,0 +1,78 @@
++++
+title = "blockulator"
+description = "FP127: 38 decimal digits of fixed-point math for the EVM, measured against ABDK, Solady and PRBMath."
+template = "home.html"
+
+[extra]
+headline = "After a year of daily interest, WAD is right to 16 digits. FP127 is right to 36."
+sub = "FP127 is signed 127.128 fixed point for the EVM: one int256, 128 fractional bits, 37 operations, one Yul source that is both a deployed contract and an inlinable Solidity library. Every number on this site is a cell in a committed dataset you can re-run on Sepolia."
+cta_primary_text = "See the ladder"
+cta_primary_href = "/demo/"
+cta_secondary_text = "Use the library"
+cta_secondary_href = "/library/"
+steps_title = "What it is."
+tiles_title = "On this site."
+ask_title = "Three protocols to integrate it on testnet. One partner to fund the audit."
+ask_text = "FP127 is deployed on Sepolia and the inline library is a <code>forge install</code> away. Our engineering time for a testnet integration is at no charge."
+ask_primary_text = "Email us"
+ask_primary_href = "mailto:sam@securedataresearch.net?subject=FP127%20integration"
+ask_secondary_text = "Read the write-up"
+ask_secondary_href = "/writeup/"
+
+[[extra.steps]]
+label = "the word"
+title = "128 fractional bits."
+text = "WAD spends 60 bits of the word on the fraction and the rest on overflow headroom. FP127 spends 128 on the fraction, 127 on the integer, one on the sign."
+
+[[extra.steps]]
+label = "the ladder"
+title = "Measured over N steps."
+text = "Eight scenarios, four libraries, N from 1 to 10,000, every cell against 200-digit arithmetic. The slopes match; the intercept is twenty digits apart."
+
+[[extra.steps]]
+label = "two forms"
+title = "One source, agree by construction."
+text = "A deployed object at a CREATE2 address with a published salt, and a Solidity library with the same Yul in assembly blocks. Proven equal on the full int256 domain."
+
+[[extra.steps]]
+label = "trust"
+title = "No storage, no owner."
+text = "Nothing to freeze, nothing to upgrade. A change is a new salt and a new address, recorded in the repository. Verified on Sourcify as an exact match."
+
+[[extra.pages]]
+name = "Demo"
+tag = "the terminal-precision ladder, every cell checkable live"
+href = "/demo/"
+site = "/demo/"
+color = "emerald"
+
+[[extra.pages]]
+name = "Why"
+tag = "where WAD loses its bits, and why iteration is what breaks it"
+href = "/why/"
+site = "/why/"
+color = "gold"
+
+[[extra.pages]]
+name = "Library"
+tag = "address, ABI, encoding, the inline snippet, the op table"
+href = "/library/"
+site = "/library/"
+color = "sapphire"
+
+[[extra.pages]]
+name = "Compare"
+tag = "gas and single-op precision against ABDK, Solady, PRBMath"
+href = "/compare/"
+site = "/compare/"
+color = "red"
+
+[[extra.pages]]
+name = "Write-up"
+tag = "the whole story, in the first person, with sources"
+href = "/writeup/"
+site = "/writeup/"
+color = "emerald"
++++
+
+The dominant EVM math libraries hold a value to about 18 decimal places and are fine for one multiplication. A lending protocol does not do one multiplication. It accrues every block, and after N accruals the rounding has been applied N times. The [ladder](/demo/) runs that loop through ABDKMath64x64, Solady, PRBMath and FP127 against exact arithmetic and counts the digits that survive. FP127 keeps about twenty more at every N.

@@ -62,6 +62,8 @@ class Export:
     outputs: list[Param]
     yul_name: str
     doc: list[str] = field(default_factory=list)
+    domain: str = ""
+    reverts: str = ""
 
     @property
     def signature(self) -> str:
@@ -100,6 +102,7 @@ _FUNC_RE = re.compile(
 _EXPORT_RE = re.compile(
     r"@export\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(([^)]*)\)\s*returns\s*\(([^)]*)\)"
 )
+_TAG_RE = re.compile(r"///\s*@(domain|reverts)\s+(.*)$")
 _ERROR_RE = re.compile(r"///\s*@error\s+([A-Za-z_][A-Za-z0-9_]*\(\))\s+(0x[0-9a-fA-F]{8})")
 _CALL_RE = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(")
 
@@ -175,9 +178,19 @@ def parse(text: str) -> Source:
                         f"{name}: @export returns {[p.name for p in outs]} "
                         f"do not match Yul returns {rets}"
                     )
+                meta = {"domain": "", "reverts": ""}
+                kept = []
+                for d in doc_lines:
+                    tm = _TAG_RE.match(d)
+                    if tm:
+                        meta[tm.group(1)] = tm.group(2).strip()
+                    elif "@export" not in d:
+                        kept.append(d)
+                if not meta["domain"] or not meta["reverts"]:
+                    raise ValueError(f"{name}: @export needs both @domain and @reverts")
                 exports.append(
-                    Export(em.group(1), ins, outs, name,
-                           [d for d in doc_lines if "@export" not in d])
+                    Export(em.group(1), ins, outs, name, kept,
+                           meta["domain"], meta["reverts"])
                 )
         pos = end + 1
 
@@ -395,8 +408,38 @@ def emit_abi(src: Source) -> str:
     return json.dumps(abi, indent=2) + "\n"
 
 
+def emit_ops(src: Source) -> str:
+    """Machine-readable op table for the site: everything the source says
+    about each export. Precision and gas are joined at site build time from
+    docs/fp127/precision.json and docs/benchmarks/gas.json."""
+    ops = []
+    for e in src.exports:
+        # the notice runs until the first other tag
+        lines, grab = [], False
+        for d in e.doc:
+            if d.startswith("/// @notice"):
+                grab = True
+                lines.append(d[len("/// @notice"):].strip())
+            elif d.startswith("/// @"):
+                grab = False
+            elif grab:
+                lines.append(d[3:].strip())
+        notice = " ".join(lines)
+        ops.append({
+            "name": e.sol_name,
+            "signature": e.signature,
+            "selector": e.selector,
+            "inputs": [p.name for p in e.inputs],
+            "notice": notice,
+            "domain": e.domain,
+            "reverts": e.reverts,
+        })
+    return json.dumps({"errors": src.errors, "ops": ops}, indent=2, ensure_ascii=False) + "\n"
+
+
 def emit_all(src: Source) -> dict[str, str]:
     return {
+        "ops.json": emit_ops(src),
         f"{OBJECT_NAME}.yul": emit_object(src),
         f"{LIB_NAME}.sol": emit_library(src),
         f"{IFACE_NAME}.sol": emit_interface(src),

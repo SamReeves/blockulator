@@ -3,8 +3,8 @@ title = "Why WAD loses digits"
 description = "Where the bits go in an 18-decimal library, why iteration is what breaks it, and what 128 fractional bits buy."
 +++
 
-Every number on this page is a cell in [`ladder.json`](/docs/benchmarks/ladder.json)
-or [`gas.json`](/docs/benchmarks/gas.json), named in brackets so you can check it.
+Every number on this page is a cell in [`ladder.json`](/data/ladder.json)
+or [`gas.json`](/data/gas.json), named in brackets so you can check it.
 
 ## Where the bits go in WAD
 

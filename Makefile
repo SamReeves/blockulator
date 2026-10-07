@@ -1,4 +1,4 @@
-.PHONY: help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-params gen-params-check ladder ladder-check predict-ladder deploy-ladder-sepolia verify-ladder-sepolia
+.PHONY: site site-check help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-params gen-params-check ladder ladder-check predict-ladder deploy-ladder-sepolia verify-ladder-sepolia
 
 PY := uv run
 BASELINE_ADDR := 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
@@ -7,7 +7,7 @@ SEPOLIA_RPC ?= https://ethereum-sepolia-rpc.publicnode.com
 help:
 	@echo "Blockulator / FP127"
 	@echo ""
-	@echo "  make gen              - Generate FP127.yul, FP127Lib.sol, IFP127.sol, abi.json from FP127.yul.src"
+	@echo "  make gen              - generate FP127.yul, FP127Lib.sol, IFP127.sol, abi.json, ops.json from FP127.yul.src"
 	@echo "  make gen-check        - Fail if the generated files are stale"
 	@echo "  make vectors          - Regenerate test/fp127/vectors/*.json from the mpmath oracle"
 	@echo "  make vectors-check    - Fail if the vectors are stale"
@@ -21,6 +21,8 @@ help:
 	@echo "  make ladder           - Terminal-precision ladder: every scenario x library x N -> docs/benchmarks/ladder.json + ladder.md"
 	@echo "  make ladder-check     - Fail if ladder.json is stale"
 	@echo "  make predict-ladder   - CREATE2 addresses of the ladder adapters and runner"
+	@echo "  make site             - Build the Zola site into public/ (pinned Zola is downloaded if none is installed)"
+	@echo "  make site-check       - zola check, the symlinked data test, and npm test"
 	@echo "  make deploy-ladder-sepolia - Deploy them (reads DEPLOYER_KEY), then record"
 	@echo "  make verify-ladder-sepolia - Verify them on Sourcify (and Etherscan if ETHERSCAN_API_KEY is set)"
 	@echo "  make fetch-baseline   - Re-fetch the legacy Huff runtime bytecode from Sepolia"
@@ -131,3 +133,14 @@ verify-ladder-sepolia: build
 	echo "== LadderRunner $$A"; \
 	forge verify-contract --chain sepolia --verifier sourcify --watch --constructor-args $$ENC $$A contracts/src/ladder/LadderRunner.sol:LadderRunner || true; \
 	test -z "$$ETHERSCAN_API_KEY" || forge verify-contract --chain sepolia --verifier etherscan --watch --constructor-args $$ENC $$A contracts/src/ladder/LadderRunner.sol:LadderRunner || true
+
+# ---- site ------------------------------------------------------------------
+
+site:
+	@./build.sh
+
+site-check: site
+	@test -f public/data/ladder.json && test -f public/data/ops.json
+	@test -f public/contracts/build/abis/badge-factory-v2.json && test -f public/contracts/src/identity/badge.vy
+	@(test -x ./zola && ./zola check --skip-external-links) || zola check --skip-external-links
+	@npm test
