@@ -7,7 +7,7 @@
  * calculators, futures, identity, and other non-game contracts.
  * 
  * For calculator-specific UI configuration (input schemas, result formatting, method names),
- * see js/domain/calculators/calculator-registry.js, which references IDs from this file.
+ * see static/js/legacy/domain/calculators/calculator-registry.js, which references IDs from this file.
  */
 
 import { getCurrentNetwork } from './network.js';

@@ -8,3 +8,7 @@ generate_sitemap = true
 
 [markdown]
 external_links_target_blank = false
+
+[extra]
+# The repository.
+repo = "https://github.com/securedataresearch/blockulator"

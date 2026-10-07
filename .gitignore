@@ -1,79 +1,28 @@
-# Dependencies
-node_modules/
+# Python
+.venv/
+__pycache__/
+*.pyc
 
 # Environment files
 .env
 .env.local
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# OS files
+# OS and editors
 .DS_Store
 Thumbs.db
-
-# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.log
 
-# Docker
-*.tar
-
-# Build artifacts (compilation outputs)
-dist/
-_static/
-artifacts/
-contracts/build/bins/
-contracts/build/bytecode/
-contracts/build/vyper/*.hex
-contracts/build/vyper/*.bin
-
-# Foundry build artifacts
+# Foundry
 cache/
 out/
-
-# Foundry VM state
-contracts/src/.states/
-
-# Keep ABIs - they're interface definitions for deployed contracts
-!contracts/build/abis/
-
-# Deployment artifacts
-contracts/deployments/deployment-*.json
-contracts/deployments/active/deployment-*.json
-contracts/deployments/active/*-deployment.json
-contracts/deployments/*.log
-
-# Foundry lock
 foundry.lock
-
-# Foundry broadcast logs, except the public record of the Sepolia FP127 deployment
 broadcast/
-!broadcast/DeployFP127.s.sol/
-!broadcast/DeployFP127.s.sol/11155111/
-broadcast/DeployFP127.s.sol/11155111/*
-!broadcast/DeployFP127.s.sol/11155111/run-latest.json
 
-# Python bytecode
-__pycache__/
-*.pyc
-
-# Test outputs
-tests/*-local-*.json
-tests/*-output.txt
-tests/storage-*.json
-
-# Generated bench data
-scripts/generators/massive_bench_cases.sol.txt
-
-.venv/
-
-# Zola output
+# Zola output and the binary build.sh downloads
 public/
 zola
