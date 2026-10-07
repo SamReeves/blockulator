@@ -219,6 +219,8 @@ def strip_volatile(doc: dict) -> dict:
     """The part of the document that must be reproducible anywhere: the data.
     The date and the tool versions (forge build, FP127 commit) are not."""
     d = json.loads(json.dumps(doc))
+    for s in d.get("scenarios", {}).values():
+        s.pop("liveMaxN", None)  # written by livecap.py after deployment
     return {k: d.get(k) for k in ("ladder", "forms", "digitsCap", "scenarios")}
 
 
@@ -250,6 +252,13 @@ def main(argv: list[str]) -> int:
         print("first difference: " + first_difference(strip_volatile(committed), strip_volatile(doc)))
         return 1
     OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
+    if OUT_JSON.exists():  # keep the live-cap measurements until livecap.py rewrites them
+        old = json.loads(OUT_JSON.read_text())
+        if "liveRunner" in old:
+            doc["liveRunner"] = old["liveRunner"]
+        for sid, s in doc["scenarios"].items():
+            if "liveMaxN" in old.get("scenarios", {}).get(sid, {}):
+                s["liveMaxN"] = old["scenarios"][sid]["liveMaxN"]
     OUT_JSON.write_text(json.dumps(doc, indent=1) + "\n")
     OUT_MD.write_text(render_md(doc))
     print(f"wrote {OUT_JSON.relative_to(ROOT)} and {OUT_MD.relative_to(ROOT)}: {len(doc['scenarios'])} scenarios")

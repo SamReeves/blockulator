@@ -533,6 +533,13 @@
       "gas": 593
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 10000,
+    "fp127lib": 10000,
+    "abdk": 10000,
+    "solady": 10000,
+    "prb": 10000
    }
   },
   "compound-pow": {
@@ -1023,6 +1030,13 @@
       "gas": 1
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 10000,
+    "fp127lib": 10000,
+    "abdk": 10000,
+    "solady": 10000,
+    "prb": 10000
    }
   },
   "bonding-sqrt": {
@@ -1513,6 +1527,13 @@
       "gas": 1343
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 10000,
+    "fp127lib": 10000,
+    "abdk": 10000,
+    "solady": 10000,
+    "prb": 10000
    }
   },
   "roundtrip": {
@@ -2001,6 +2022,13 @@
       "gas": 9758
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 1000,
+    "fp127lib": 1000,
+    "abdk": 1000,
+    "solady": 10000,
+    "prb": 1000
    }
   },
   "amortise": {
@@ -2496,6 +2524,13 @@
       "gas": 756
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 10000,
+    "fp127lib": 10000,
+    "abdk": 10000,
+    "solady": 10000,
+    "prb": 10000
    }
   },
   "geo-mean": {
@@ -2980,6 +3015,13 @@
       "gas": 8188
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 1000,
+    "fp127lib": 10000,
+    "abdk": 1000,
+    "solady": 10000,
+    "prb": 1000
    }
   },
   "black-scholes-chain": {
@@ -3478,6 +3520,13 @@
       "gas": 10213
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 1000,
+    "fp127lib": 1000,
+    "abdk": 1000,
+    "solady": 1000,
+    "prb": 1000
    }
   },
   "cumulative-product": {
@@ -3966,6 +4015,13 @@
       "gas": 704
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 10000,
+    "fp127lib": 10000,
+    "abdk": 10000,
+    "solady": 10000,
+    "prb": 10000
    }
   },
   "compound-annual": {
@@ -4416,7 +4472,16 @@
       "gas": 82
      }
     }
+   },
+   "liveMaxN": {
+    "fp127": 10000,
+    "fp127lib": 10000,
+    "abdk": 10000,
+    "solady": 10000,
+    "prb": 10000
    }
   }
- }
+ },
+ "liveRunner": "0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4",
+ "liveNote": "liveMaxN is the largest N on the ladder that the public Sepolia RPC's eth_call completed for that cell. Above it the runner reports a bare revert because the adapter ran out of gas under the RPC's eth_call limits (measured: calls needing more than about 40M gas, or a few seconds of execution, fail); the demo page greys out verify above it."
 }

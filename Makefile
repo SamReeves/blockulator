@@ -1,4 +1,4 @@
-.PHONY: help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-params gen-params-check ladder ladder-check
+.PHONY: help gen gen-check vectors vectors-check build test bench precision-report fetch-baseline size predict deploy-sepolia verify-sepolia smoke-sepolia gen-params gen-params-check ladder ladder-check predict-ladder deploy-ladder-sepolia verify-ladder-sepolia
 
 PY := uv run
 BASELINE_ADDR := 0xfae694D0c2c44181791F838c54Ed64C3151FfE30
@@ -20,6 +20,9 @@ help:
 	@echo "  make gen-params-check - Fail if LadderParams.sol is stale"
 	@echo "  make ladder           - Terminal-precision ladder: every scenario x library x N -> docs/benchmarks/ladder.json + ladder.md"
 	@echo "  make ladder-check     - Fail if ladder.json is stale"
+	@echo "  make predict-ladder   - CREATE2 addresses of the ladder adapters and runner"
+	@echo "  make deploy-ladder-sepolia - Deploy them (reads DEPLOYER_KEY), then record"
+	@echo "  make verify-ladder-sepolia - Verify them on Sourcify (and Etherscan if ETHERSCAN_API_KEY is set)"
 	@echo "  make fetch-baseline   - Re-fetch the legacy Huff runtime bytecode from Sepolia"
 	@echo "  make predict          - Print the CREATE2 address of the current FP127 object"
 	@echo "  make deploy-sepolia   - Deploy via the CREATE2 proxy (reads DEPLOYER_KEY)"
@@ -106,3 +109,25 @@ verify-sepolia: build
 
 smoke-sepolia: build
 	@forge test --match-contract Deployed --fork-url $(SEPOLIA_RPC) -vv
+
+predict-ladder: build
+	@$(PY) scripts/ladder/deploy.py predict $(SEPOLIA_RPC)
+
+deploy-ladder-sepolia: build
+	@test -n "$$DEPLOYER_KEY" || (echo "DEPLOYER_KEY is not set" && exit 1)
+	@$(PY) scripts/ladder/deploy.py deploy $(SEPOLIA_RPC)
+	@$(PY) scripts/ladder/deploy.py record $(SEPOLIA_RPC)
+
+verify-ladder-sepolia: build
+	@set -e; for c in LadderFP127 LadderFP127Lib LadderABDK LadderSolady LadderPRB; do \
+		A=$$($(PY) python -c "import json;print(json.load(open('contracts/deployments/Ladder.json'))['contracts']['$$c']['address'])"); \
+		echo "== $$c $$A"; \
+		forge verify-contract --chain sepolia --verifier sourcify --watch $$A contracts/src/ladder/$$c.sol:$$c || true; \
+		test -z "$$ETHERSCAN_API_KEY" || forge verify-contract --chain sepolia --verifier etherscan --watch $$A contracts/src/ladder/$$c.sol:$$c || true; \
+	done; \
+	A=$$($(PY) python -c "import json;print(json.load(open('contracts/deployments/Ladder.json'))['contracts']['LadderRunner']['address'])"); \
+	ARGS=$$($(PY) python -c "import json;d=json.load(open('contracts/deployments/Ladder.json'))['contracts']['LadderRunner']['constructorArgs'];print(' '.join(d))"); \
+	ENC=$$(cast abi-encode "f(address,address,address,address,address)" $$ARGS); \
+	echo "== LadderRunner $$A"; \
+	forge verify-contract --chain sepolia --verifier sourcify --watch --constructor-args $$ENC $$A contracts/src/ladder/LadderRunner.sol:LadderRunner || true; \
+	test -z "$$ETHERSCAN_API_KEY" || forge verify-contract --chain sepolia --verifier etherscan --watch --constructor-args $$ENC $$A contracts/src/ladder/LadderRunner.sol:LadderRunner || true
