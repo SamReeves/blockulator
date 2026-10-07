@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -29,14 +30,20 @@ SIG = "run(uint8,uint8,uint32,int256[])(bool,int256,bytes4,uint256,uint256)"
 SELECTOR = "0x281dbbfe"
 
 
-def call(rpc: str, runner: str, s: int, f: int, n: int, p: list[str]):
+def call(rpc: str, runner: str, s: int, f: int, n: int, p: list[str], tries: int = 4):
+    """One eth_call. Transient RPC failures (timeouts, gateway errors) are retried;
+    only a clean answer or a persistent refusal comes back."""
     arr = "[" + ",".join(p) + "]"
-    r = subprocess.run(["cast", "call", runner, SIG, str(s), str(f), str(n), arr,
-                        "--gas-limit", "1000000000", "--rpc-url", rpc], capture_output=True, text=True)
-    if r.returncode != 0:
-        return None, r.stderr.strip().splitlines()[-1][:120] if r.stderr.strip() else "call failed"
-    ok, raw, reason, gps, gt = [x.strip() for x in r.stdout.strip().splitlines()[:5]]
-    return {"ok": ok == "true", "raw": int(raw.split()[0]), "reason": reason, "gas": int(gt.split()[0])}, None
+    err = "call failed"
+    for attempt in range(tries):
+        r = subprocess.run(["cast", "call", runner, SIG, str(s), str(f), str(n), arr,
+                            "--gas-limit", "1000000000", "--rpc-url", rpc], capture_output=True, text=True)
+        if r.returncode == 0:
+            ok, raw, reason, gps, gt = [x.strip() for x in r.stdout.strip().splitlines()[:5]]
+            return {"ok": ok == "true", "raw": int(raw.split()[0]), "reason": reason, "gas": int(gt.split()[0])}, None
+        err = r.stderr.strip().splitlines()[-1][:120] if r.stderr.strip() else "call failed"
+        time.sleep(2 * (attempt + 1))
+    return None, err
 
 
 def walk(rpc: str, runner: str, scn: dict, inp: dict, fi: int, form: str, p: list[str], ladder: list[int]):

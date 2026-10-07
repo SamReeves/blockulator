@@ -2,96 +2,76 @@
  "chainId": 11155111,
  "network": "sepolia",
  "proxy": "0x4e59b44847b379578588920cA78FbF26c0B4956C",
- "salt": "0x4650313237206c61646465722076310000000000000000000000000000000000",
- "saltAscii": "FP127 ladder v1",
+ "salt": "0x4650313237206c61646465722076320000000000000000000000000000000000",
+ "saltAscii": "FP127 ladder v2",
  "fp127": "0xA7Fb462A3733f24785a9AE8d7FbD4F87D8BC4c28",
  "contracts": {
   "LadderFP127": {
-   "address": "0x3a2cF1ce83e6eBCc51DBCDEA66f452378D42017E",
-   "initCodeHash": "0x20480bcd6a7342150f06bfda9df0333893e829826c59064aa70e8fe5a5359849",
+   "address": "0x7D7fe7F94C1eD74a86929253c793e6E1B402245D",
+   "initCodeHash": "0xd5ec7a08aa7bf7a75926130656ce1350d39bb5c981f70fa6cbeeead54259f213",
    "constructorArgs": [],
-   "runtimeKeccak": "0xf5b5941933f946d0abf58ea8f2aee25d18c775d83fccb5cadb64668028ff8189",
+   "runtimeKeccak": "0x62bc0183e1287d26558125a53260a3a5662abc8b9cf9f3b5d2641bd3f65b5eba",
    "deployed": true,
-   "txHash": "0x9b0ce2f477d32114a8b4c75b12b8011c81421f4b5c7fc253f0c7f42f22d074c3",
-   "block": 11859498,
-   "gasUsed": 4259232,
-   "sourcify": "https://repo.sourcify.dev/11155111/0x3a2cF1ce83e6eBCc51DBCDEA66f452378D42017E",
-   "sourcifyMatch": "exact_match"
+   "txHash": "0x306b8dbc2367bdb2a23767cd2b4ca1e75be546d0274f39450b7ec2d13f5d38cb",
+   "block": 11860435,
+   "gasUsed": 4103006
   },
   "LadderFP127Lib": {
-   "address": "0x9d40f7431CCAfbcE8E78Eae4CC30d89171A8d835",
-   "initCodeHash": "0x58cee15c5805b0477037f3acc519f88762fcd9be4c41269d58f0ad77be09cf39",
+   "address": "0xeD61E01B4096ebA5D0795ef8Dd3a7037035827A9",
+   "initCodeHash": "0xa8e6d27842782e53cf8e2ca5e01529e3e124933582d917d42d0fb701bf5b2708",
    "constructorArgs": [],
-   "runtimeKeccak": "0x646927da84177df83b09b51ef116bd9632354969b91c7ea6af3ecd8092025f47",
+   "runtimeKeccak": "0x747c3626182636625d12c3d888528b2874115026843f07e370ec465f4c6c308b",
    "deployed": true,
-   "txHash": "0xb1776d21c6dcc71563c52cd4fad6619e188c79200b743e183fd6565626951fc4",
-   "block": 11859499,
-   "gasUsed": 8348902,
-   "sourcify": "https://repo.sourcify.dev/11155111/0x9d40f7431CCAfbcE8E78Eae4CC30d89171A8d835",
-   "sourcifyMatch": "exact_match"
+   "txHash": "0x01cc72b1277f0376fe6487ddd06e095c829e6c221ec8263ab6446607f3d9055a",
+   "block": 11860436,
+   "gasUsed": 8192686
   },
   "LadderABDK": {
-   "address": "0x3B70Ad30E629E9350A7F5Fddc3B146F0445b51b6",
-   "initCodeHash": "0x9792f16d874ce357b7517cdd6348e1a485be1f1cbd6f91eb4b8ad1330ebb043c",
+   "address": "0x7709b29Fb84b03e9E74E3c843256d4Ed9a57b980",
+   "initCodeHash": "0xe9ee7070c1a6f1296e94a187104347fea6ea7cf865ee3ccd846efe6c9507bc16",
    "constructorArgs": [],
-   "runtimeKeccak": "0x652c04aacd0353b6e425ff934dc0c57b1888408572d2499e5956d4514e121d88",
+   "runtimeKeccak": "0x137c0fc73d918ce8c9eb86190323e06de6bd1a1bd0a8e12206e00468da0a8392",
    "deployed": true,
-   "txHash": "0x62d733bc67d9074a20cb86137c027880b5705131dca015c2eb401c8741a9be74",
-   "block": 11859500,
-   "gasUsed": 9166076,
-   "sourcify": "https://repo.sourcify.dev/11155111/0x3B70Ad30E629E9350A7F5Fddc3B146F0445b51b6",
-   "sourcifyMatch": "exact_match"
+   "txHash": "0x63032f2ccd96a158205af6d84b480d08ded7324a8ce5aec2d0df9379ba558d28",
+   "block": 11860437,
+   "gasUsed": 9120028
   },
   "LadderSolady": {
-   "address": "0xdE7e3579f96b0967399922484535C599EbAB7D94",
-   "initCodeHash": "0x553a2685b83cf14a5a0c14e6a2d45ca2267363fcf2317bfceb87fa504ddfb9de",
+   "address": "0xC75E4DEcBC9bBf13e6F2f9Dd674Ac1FFA738d17C",
+   "initCodeHash": "0xa0f08671be7e255d65afa9bb3746796216fea737cb4a9a05b37934bd621a5278",
    "constructorArgs": [],
-   "runtimeKeccak": "0xb373853e8a99d7d4e492abae9a5b09dd2168f1706d2fd81c8e2781cfe31df350",
+   "runtimeKeccak": "0x1f32a5bce0d5d602fff617ee9c0dede4b2bc7e0ea33714793de6e5c432c59e6e",
    "deployed": true,
-   "txHash": "0xdd032e4acf2de54454ab31c6c8ae05fd379b732a36e9343b53c6798b57eaf2bd",
-   "block": 11859501,
-   "gasUsed": 6049768,
-   "sourcify": "https://repo.sourcify.dev/11155111/0xdE7e3579f96b0967399922484535C599EbAB7D94",
-   "sourcifyMatch": "exact_match"
+   "txHash": "0x79f7bd82470f92fbcc01ccaa88a1fe9b85964adbcf2a751c535e35922ed12850",
+   "block": 11860438,
+   "gasUsed": 5935658
   },
   "LadderPRB": {
-   "address": "0x539eA6147E7d28D3D8f155AB7C592Db269155FEe",
-   "initCodeHash": "0x676c519b7407b8bb4cdc6fa69712afff0ca7f9bf5ea91f6ad85c8aa5c2f7aed5",
+   "address": "0xdD3407E027459cB1ec05947f1Fa5Ab9857312453",
+   "initCodeHash": "0x560f36743f407ae3e266409e3100a0bbebd102e5b56b725b39130270458081f9",
    "constructorArgs": [],
-   "runtimeKeccak": "0x350482959ca74198cccab2a9e37d43d953af3aabfefa3386e95c501a71099b7c",
+   "runtimeKeccak": "0x49be69ecb12d69f54247b048156e90ec3a726cea365da03c61fc1bfc6a39a0f3",
    "deployed": true,
-   "txHash": "0x7e4aca0a3e315918a6b4febaf82469590fbef56f2812c5fde967fa6d7bb494c0",
-   "block": 11859502,
-   "gasUsed": 9955333,
-   "sourcify": "https://repo.sourcify.dev/11155111/0x539eA6147E7d28D3D8f155AB7C592Db269155FEe",
-   "sourcifyMatch": "exact_match"
+   "txHash": "0x5660386d91521eda60cd263257134f51eefa7834406ba8bc4457bbc68a54c47f",
+   "block": 11860439,
+   "gasUsed": 9844315
   },
   "LadderRunner": {
-   "address": "0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4",
-   "initCodeHash": "0x65e5b9caf32f8ad7509365a7d879ad2296d5871a1f4237895ada79cb70ed5d35",
+   "address": "0x2d741eC5d66D7559857da1c398AE384A389DdE17",
+   "initCodeHash": "0x4f0ec4be471da5fd3054983cee0b65e25db4074f70abad624e72307971356bbd",
    "constructorArgs": [
-    "0x3a2cF1ce83e6eBCc51DBCDEA66f452378D42017E",
-    "0x9d40f7431CCAfbcE8E78Eae4CC30d89171A8d835",
-    "0x3B70Ad30E629E9350A7F5Fddc3B146F0445b51b6",
-    "0xdE7e3579f96b0967399922484535C599EbAB7D94",
-    "0x539eA6147E7d28D3D8f155AB7C592Db269155FEe"
+    "0x7D7fe7F94C1eD74a86929253c793e6E1B402245D",
+    "0xeD61E01B4096ebA5D0795ef8Dd3a7037035827A9",
+    "0x7709b29Fb84b03e9E74E3c843256d4Ed9a57b980",
+    "0xC75E4DEcBC9bBf13e6F2f9Dd674Ac1FFA738d17C",
+    "0xdD3407E027459cB1ec05947f1Fa5Ab9857312453"
    ],
-   "runtimeKeccak": "0x8231c8e285ff22d22ec5f5f50705ef2cdd552c3e915229f2e798e786494551c8",
+   "runtimeKeccak": "0x8caf5913113e91343ff0f56253f4b8b4b52a1a49ccc014939510b608e565021e",
    "deployed": true,
-   "txHash": "0x35cfe9ef2ef62217b987910d59291224488b464e538df08b1d542d1dc4c8f5b4",
-   "block": 11859503,
-   "gasUsed": 2400251,
-   "sourcify": "https://repo.sourcify.dev/11155111/0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4",
-   "sourcifyMatch": "exact_match"
+   "txHash": "0x407e758766ef7b1aa64875ae24607fcbf8cd8ddf435cb21bf2362119f71ca607",
+   "block": 11860440,
+   "gasUsed": 2644656
   }
  },
- "deployedBy": "0xe6306669b2f188d616bfb518e7b9255d001d731d",
- "date": "2026-10-07",
- "sourceCommit": "pr43",
- "compiler": {
-  "solc": "0.8.24+commit.e11b9ed9",
-  "optimizer": true,
-  "runs": 200,
-  "evmVersion": "shanghai"
- }
+ "date": "2026-10-07"
 }

@@ -14,18 +14,16 @@ Version 2 (parameters in calldata, gas measured inside the adapter, 64 inputs)
 is deployed with CREATE2 through the proxy
 `0x4e59b44847b379578588920cA78FbF26c0B4956C` with salt `"FP127 ladder v2"`
 (`0x4650313237206c61646465722076320000000000000000000000000000000000`).
-Machine-readable copy: `Ladder.json`. Predicted addresses from
-`make predict-ladder`; the tx, block and gas columns are filled by
-`make deploy-ladder-sepolia` (`deploy.py record`).
+Machine-readable copy: `Ladder.json`. Deployed 2026-10-07 by `make deploy-ladder-sepolia`.
 
 | contract | address | tx | block | gas |
 |---|---|---|---:|---:|
-| `LadderFP127` | `0x7D7fe7F94C1eD74a86929253c793e6E1B402245D` | pending | | |
-| `LadderFP127Lib` | `0xeD61E01B4096ebA5D0795ef8Dd3a7037035827A9` | pending | | |
-| `LadderABDK` | `0x7709b29Fb84b03e9E74E3c843256d4Ed9a57b980` | pending | | |
-| `LadderSolady` | `0xC75E4DEcBC9bBf13e6F2f9Dd674Ac1FFA738d17C` | pending | | |
-| `LadderPRB` | `0xdD3407E027459cB1ec05947f1Fa5Ab9857312453` | pending | | |
-| `LadderRunner` | `0x2d741eC5d66D7559857da1c398AE384A389DdE17` | pending | | |
+| `LadderFP127` | `0x7D7fe7F94C1eD74a86929253c793e6E1B402245D` | [`0x306b8dbc…`](https://sepolia.etherscan.io/tx/0x306b8dbc2367bdb2a23767cd2b4ca1e75be546d0274f39450b7ec2d13f5d38cb) | 11,860,435 | 4,103,006 |
+| `LadderFP127Lib` | `0xeD61E01B4096ebA5D0795ef8Dd3a7037035827A9` | [`0x01cc72b1…`](https://sepolia.etherscan.io/tx/0x01cc72b1277f0376fe6487ddd06e095c829e6c221ec8263ab6446607f3d9055a) | 11,860,436 | 8,192,686 |
+| `LadderABDK` | `0x7709b29Fb84b03e9E74E3c843256d4Ed9a57b980` | [`0x63032f2c…`](https://sepolia.etherscan.io/tx/0x63032f2ccd96a158205af6d84b480d08ded7324a8ce5aec2d0df9379ba558d28) | 11,860,437 | 9,120,028 |
+| `LadderSolady` | `0xC75E4DEcBC9bBf13e6F2f9Dd674Ac1FFA738d17C` | [`0x79f7bd82…`](https://sepolia.etherscan.io/tx/0x79f7bd82470f92fbcc01ccaa88a1fe9b85964adbcf2a751c535e35922ed12850) | 11,860,438 | 5,935,658 |
+| `LadderPRB` | `0xdD3407E027459cB1ec05947f1Fa5Ab9857312453` | [`0x5660386d…`](https://sepolia.etherscan.io/tx/0x5660386d91521eda60cd263257134f51eefa7834406ba8bc4457bbc68a54c47f) | 11,860,439 | 9,844,315 |
+| `LadderRunner` | `0x2d741eC5d66D7559857da1c398AE384A389DdE17` | [`0x407e7587…`](https://sepolia.etherscan.io/tx/0x407e758766ef7b1aa64875ae24607fcbf8cd8ddf435cb21bf2362119f71ca607) | 11,860,440 | 2,644,656 |
 
 `LadderRunner` is constructed with the five adapter addresses in that
 order; `LadderFP127` staticcalls the FP127 object at
