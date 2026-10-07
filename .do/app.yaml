@@ -18,7 +18,10 @@ domains:
 alerts:
   - rule: DEPLOYMENT_FAILED
   - rule: DOMAIN_FAILED
-enhanced_threat_control_enabled: true
+# enhanced_threat_control is off on purpose: it fronts the site with a Cloudflare
+# challenge that returns 403 to any non-browser client, and agents must be able to
+# read /llms.txt, /.well-known/agent.json and the data files with plain HTTP.
+enhanced_threat_control_enabled: false
 features:
   - buildpack-stack=ubuntu-22
 static_sites:
