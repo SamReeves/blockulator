@@ -10,9 +10,12 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(__dirname, '..');
 
+// Colour literals live in exactly three files: the stylesheet synced from
+// securedataresearch.net, and the two legacy token bridges the archived apps use.
 const SKIP = new Set([
-    path.join(REPO_ROOT, 'css', 'tokens.css'),
-    path.join(REPO_ROOT, 'js', 'theme', 'sdr-palette.js'),
+    path.join(REPO_ROOT, 'static', 'css', 'site.css'),
+    path.join(REPO_ROOT, 'static', 'css', 'legacy', 'tokens.css'),
+    path.join(REPO_ROOT, 'static', 'js', 'legacy', 'theme', 'sdr-palette.js'),
 ]);
 
 const reHex = /#[0-9a-fA-F]{3,8}\b/;
@@ -22,7 +25,7 @@ const reRgba = /\brgba\s*\(/;
 function walkDir(dir, acc = []) {
     if (!fs.existsSync(dir)) return acc;
     for (const name of fs.readdirSync(dir)) {
-        if (name === 'node_modules' || name === 'dist' || name === '.git' || name === 'vendor') continue;
+        if (name === 'node_modules' || name === '.git' || name === 'contracts' || name === 'data') continue;
         const full = path.join(dir, name);
         const st = fs.statSync(full);
         if (st.isDirectory()) walkDir(full, acc);
@@ -52,8 +55,9 @@ function checkFile(file) {
 }
 
 const targets = [
-    ...walkDir(path.join(REPO_ROOT, 'js')).filter((f) => f.endsWith('.js')),
-    ...walkDir(path.join(REPO_ROOT, 'css')).filter((f) => f.endsWith('.css')),
+    ...walkDir(path.join(REPO_ROOT, 'static', 'js')).filter((f) => f.endsWith('.js')),
+    ...walkDir(path.join(REPO_ROOT, 'static', 'css')).filter((f) => f.endsWith('.css')),
+    ...walkDir(path.join(REPO_ROOT, 'templates')).filter((f) => f.endsWith('.html')),
 ];
 
 const all = targets.flatMap(checkFile);

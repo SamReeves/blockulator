@@ -4,15 +4,15 @@
  * Specifically checks that TransactionHandler is properly available
  */
 
-import { KingOfTheHill } from '../js/domain/games/king-of-the-hill.js';
-import { LastCall } from '../js/domain/games/last-call.js';
-import { PissingContest } from '../js/domain/games/pissing-contest.js';
-import { MessageBoard } from '../js/domain/games/message-board.js';
-import { PayItForward } from '../js/domain/games/pay-it-forward.js';
-import { PayItBackward } from '../js/domain/games/pay-it-backward.js';
-import { DiceGods } from '../js/domain/games/dice-gods.js';
-import { TimeToMakeTheDonuts } from '../js/domain/games/time-to-make-the-donuts.js';
-import { SatanMolochBaal } from '../js/domain/games/satan-moloch-baal.js';
+import { KingOfTheHill } from '../static/js/legacy/domain/games/king-of-the-hill.js';
+import { LastCall } from '../static/js/legacy/domain/games/last-call.js';
+import { PissingContest } from '../static/js/legacy/domain/games/pissing-contest.js';
+import { MessageBoard } from '../static/js/legacy/domain/games/message-board.js';
+import { PayItForward } from '../static/js/legacy/domain/games/pay-it-forward.js';
+import { PayItBackward } from '../static/js/legacy/domain/games/pay-it-backward.js';
+import { DiceGods } from '../static/js/legacy/domain/games/dice-gods.js';
+import { TimeToMakeTheDonuts } from '../static/js/legacy/domain/games/time-to-make-the-donuts.js';
+import { SatanMolochBaal } from '../static/js/legacy/domain/games/satan-moloch-baal.js';
 
 console.log('✅ All game modules imported successfully!');
 console.log('');

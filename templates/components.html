@@ -79,3 +79,43 @@
 </div>
 <p class="note">Relative correct bits of the 127.128 result, msb(|truth|) − msb(|truth − got|), against mpmath at 200 decimal places over the committed vectors in <code>test/fp127/vectors/</code>. "exact" is bit-identical, or within 2 ULP for an approximated op. Reverts counts vectors where the oracle and the Yul both reject the input with the same error. Source: <a href="/data/precision.json">precision.json</a>.</p>
 {%- endcomponent %}
+
+{#- One ladder cell: the digits that agree with the truth, then the rest in the error colour.
+    Same rule as static/js/islands/digits.js (tests/test-digits.js). -#}
+{% component cell(value: string, digits: integer) -%}
+{%- set_global pre = 0 -%}
+{%- for ch in value | split(pat="") %}{% if ch != "0" and ch != "." and ch != "-" and ch != "" %}{% set_global pre = loop.index0 - 1 %}{% break %}{% endif %}{% endfor -%}
+{%- set t = value[pre:] -%}
+{%- set intlen = t | split(pat=".") | first | length -%}
+{%- if digits <= intlen %}{% set k = pre + digits %}{% else %}{% set k = pre + digits + 1 %}{% endif -%}
+{%- if k >= value | length %}<span class="ok">{{ value }}</span>{% else %}<span class="ok">{{ value[:k] }}</span><span class="wrong">{{ value[k:] }}</span>{% endif -%}
+{%- endcomponent %}
+
+{#- Correct digits against N, one line per library, log x axis. Inline SVG, site tokens only. -#}
+{% component ladderchart(sc: map, ladder: array, forms: map) -%}
+{%- set xs = {"1": 0, "2": 0.30103, "5": 0.69897, "10": 1, "20": 1.30103, "50": 1.69897, "100": 2, "365": 2.56229, "1000": 3, "10000": 4} -%}
+{%- set series = ["fp127", "solady", "abdk", "prb"] -%}
+{%- set labels = {"fp127": "FP127", "solady": "Solady", "abdk": "ABDK", "prb": "PRBMath"} -%}
+{%- set dy = {"fp127": 0, "solady": -11, "abdk": 0, "prb": 11} -%}
+{%- set W = 640 %}{% set H = 300 %}{% set L = 44 %}{% set R = 86 %}{% set T = 16 %}{% set B = 40 -%}
+{%- set pw = W - L - R %}{% set ph = H - T - B -%}
+<figure class="figure chart" role="img" aria-label="Correct significant digits against N for {{ sc.title }}. FP127 stays near its starting count; the WAD libraries sit about twenty digits lower at every N.">
+<svg viewBox="0 0 {{ W }} {{ H }}" width="100%" style="max-width:{{ W }}px;display:block">
+{%- for g in [0, 10, 20, 30, 40] %}{% set y = T + ph - ph * g / 40 %}
+<line class="grid" x1="{{ L }}" x2="{{ L + pw }}" y1="{{ y }}" y2="{{ y }}"/><text class="tick" x="{{ L - 8 }}" y="{{ y + 4 }}" text-anchor="end">{{ g }}</text>
+{%- endfor %}
+{%- for n in [1, 10, 100, 1000, 10000] %}{% set x = L + pw * xs[n | str] / 4 %}
+<text class="tick" x="{{ x }}" y="{{ H - 14 }}" text-anchor="middle">{{ n }}</text>
+{%- endfor %}
+<text class="tick" x="{{ L + pw / 2 }}" y="{{ H - 1 }}" text-anchor="middle">N steps</text>
+<text class="tick" transform="translate(11 {{ T + ph / 2 }}) rotate(-90)" text-anchor="middle">correct digits</text>
+{%- for f in series %}{% set_global pts = "" %}{% set_global lastx = 0 %}{% set_global lasty = 0 %}
+{%- for n in ladder %}{% set c = sc.libraries[f][n | str] %}{% if c.digits is defined %}{% set d = c.digits %}{% if d > 40 %}{% set d = 40 %}{% endif %}{% set x = L + pw * xs[n | str] / 4 %}{% set y = T + ph - ph * d / 40 %}{% set_global pts = pts ~ x ~ "," ~ y ~ " " %}{% set_global lastx = x %}{% set_global lasty = y %}{% endif %}{% endfor %}
+<polyline class="s-{{ f }}" points="{{ pts }}"/>
+{%- for n in ladder %}{% set c = sc.libraries[f][n | str] %}{% if c.digits is defined %}{% set d = c.digits %}{% if d > 40 %}{% set d = 40 %}{% endif %}<circle class="s-{{ f }}" cx="{{ L + pw * xs[n | str] / 4 }}" cy="{{ T + ph - ph * d / 40 }}" r="3.5"/>{% endif %}{% endfor %}
+<text class="s-{{ f }} lbl" x="{{ lastx + 8 }}" y="{{ lasty + 4 + dy[f] }}">{{ labels[f] }}</text>
+{%- endfor %}
+</svg>
+<figcaption>Correct significant digits of the result after N steps, capped at 40 on the axis (a WAD cell that happens to be exactly representable records 60). FP127Lib coincides with FP127 and is not drawn. A missing point is a revert. Series: FP127 emerald, Solady gold, ABDK sapphire, PRBMath red, also labelled at the line end.</figcaption>
+</figure>
+{%- endcomponent %}

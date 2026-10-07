@@ -1,6 +1,7 @@
 +++
 title = "Terminal precision"
-description = "Every scenario, every library, N from 1 to 10,000, each cell checkable against Sepolia."
+description = "Nine scenarios, four libraries, N from 1 to 10,000, every cell against 200-digit arithmetic and checkable on Sepolia."
+template = "demo.html"
 +++
 
-The ladder page lands with the next pull request. The data it renders is already committed: [`ladder.json`](/data/ladder.json), 450 cells, every one re-run through the live `LadderRunner` at `0x3FD3461EE53F9C6f2322CbB3fF97A3EdA522d4a4` with zero mismatches. The mechanism is on the [why](/why/) page.
+Each scenario is N identical steps run through each library in its native representation, against the same loop in exact arithmetic. The table is the argument: read down a column and watch the green prefix shrink. The chart is the summary. Every cell has a button that runs it again on Sepolia through the deployed [`LadderRunner`](/contracts/deployments/Ladder.md) and compares the raw word with the committed one.

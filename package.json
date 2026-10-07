@@ -1,9 +1,0 @@
-{
-  "scripts": {
-    "test": "node scripts/check-sdr-colors.mjs && node tests/test-module-imports.js",
-    "test:server": "cd tests && ./test-server.sh"
-  },
-  "dependencies": {
-    "ethers": "^5.8.0"
-  }
-}
